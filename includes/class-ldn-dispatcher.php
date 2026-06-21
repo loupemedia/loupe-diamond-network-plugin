@@ -152,6 +152,8 @@ final class LDN_Dispatcher {
         $this->context = $ctx;
         $this->primary_data = $data;
 
+        LDN_Assets::register_enqueue($ctx, $this->config);
+
         // Registered here (template_include) so it fires when the template later
         // calls get_header() → wp_head; emitting from the body would be too late.
         add_action('wp_head', array($this, 'render_head'), 5);

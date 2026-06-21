@@ -1,0 +1,231 @@
+/**
+ * Loupe Diamond Network — shared page chrome (CP53).
+ *
+ * Structural layout only: spacing, sections, charts, FAQ, tables. All dimensions
+ * come from page_chrome in content profiles → CSS vars via LDN_Renderer::theme_style_block().
+ * Brand colours come from brand_tokens. Heading presentation variants use
+ * .ldn-chrome--{heading_style} (see assets/css/families/*.css).
+ */
+
+.ldn-page-shell {
+	width: 100%;
+	min-height: 100vh;
+	background-color: var(--ldn-background, transparent);
+}
+
+.ldn-price-page {
+	--ldn-table-border: #ddd;
+	--ldn-table-header-bg: #f2f2f2;
+	--ldn-table-row-alt: #f3f3f3;
+	--ldn-title-size: 1.75rem;
+	--ldn-title-size-mobile: 1.25rem;
+
+	box-sizing: border-box;
+	max-width: var(--ldn-max-width, 1000px);
+	width: 100%;
+	margin: 0 auto;
+	padding: var(--ldn-padding, 1.25rem);
+	color: var(--ldn-text, #333);
+	background-color: var(--ldn-background, transparent);
+	font-family: var(--ldn-font-body, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+	font-size: 1rem;
+	line-height: 1.6;
+}
+
+.ldn-price-page *,
+.ldn-price-page *::before,
+.ldn-price-page *::after {
+	box-sizing: border-box;
+}
+
+/* ----- Heading variants (structure shared; skin from page_chrome + brand_tokens) ----- */
+
+.ldn-price-page > h1.ldn-page-title {
+	margin: 0 0 1.5rem;
+	font-family: var(--ldn-font-title, var(--ldn-font-body));
+	font-size: var(--ldn-title-size);
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+.ldn-chrome--minimal > h1.ldn-page-title {
+	padding-bottom: 0.5rem;
+	border-bottom: 3px solid var(--ldn-primary, #333);
+}
+
+/* ----- Sections ----- */
+
+.ldn-section {
+	margin: var(--ldn-section-spacing, 2rem) 0;
+}
+
+.ldn-section:first-of-type {
+	margin-top: 1.25rem;
+}
+
+.ldn-section h2 {
+	margin: 0 0 1rem;
+	font-size: 1.35rem;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.ldn-section h3 {
+	margin: 1.25rem 0 0.5rem;
+	font-size: 1.125rem;
+	font-weight: 600;
+}
+
+.ldn-section p {
+	margin: 0 0 1rem;
+}
+
+.ldn-section p:last-child {
+	margin-bottom: 0;
+}
+
+.ldn-section a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.ldn-intro-dynamic {
+	font-size: 1.05rem;
+}
+
+/* ----- Stats ----- */
+
+.ldn-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+	gap: 0.75rem 1.5rem;
+	margin: 0;
+	padding: 1rem 1.25rem;
+	background: rgba(0, 0, 0, 0.03);
+	border-radius: 4px;
+}
+
+.ldn-stats dt {
+	margin: 0;
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ldn-secondary-text, #475569);
+}
+
+.ldn-stats dd {
+	margin: 0.15rem 0 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+}
+
+/* ----- Charts ----- */
+
+.ldn-chart {
+	margin: 1.5rem 0;
+	padding: 0;
+	border: 0;
+}
+
+.ldn-chart figcaption {
+	margin: 0 0 0.5rem;
+	font-size: 0.9rem;
+	font-style: italic;
+	color: var(--ldn-secondary-text, #475569);
+}
+
+.ldn-chart-target {
+	width: 100%;
+	min-height: 380px;
+	overflow: hidden;
+}
+
+.ldn-chart .gtitle {
+	display: none !important;
+}
+
+/* ----- FAQ ----- */
+
+.ldn-faq dl {
+	margin: 0;
+}
+
+.ldn-faq dt {
+	margin: 1.25rem 0 0.35rem;
+	font-weight: 600;
+}
+
+.ldn-faq dt:first-child {
+	margin-top: 0;
+}
+
+.ldn-faq dd {
+	margin: 0 0 0.75rem;
+	color: var(--ldn-text, #333);
+}
+
+/* ----- Tables ----- */
+
+.ldn-price-page table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1rem 0;
+	font-size: 0.95rem;
+}
+
+.ldn-price-page th,
+.ldn-price-page td {
+	border: 1px solid var(--ldn-table-border);
+	padding: 0.65rem 0.85rem;
+	text-align: center;
+}
+
+.ldn-price-page thead th,
+.ldn-price-page thead tr {
+	background-color: var(--ldn-table-header-bg);
+}
+
+.ldn-price-page tbody tr:nth-of-type(even) {
+	background-color: var(--ldn-table-row-alt);
+}
+
+/* ----- Placeholder / debug ----- */
+
+.ldn-placeholder-note {
+	margin: 0 0 1rem;
+	font-size: 0.85rem;
+	color: var(--ldn-secondary-text, #475569);
+}
+
+.ldn-debug-payload {
+	background: #0d1117;
+	color: #c9d1d9;
+	padding: 1rem;
+	overflow: auto;
+	border-radius: 6px;
+	font-size: 0.8rem;
+}
+
+/* ----- Responsive ----- */
+
+@media screen and (max-width: 768px) {
+	.ldn-price-page {
+		padding: calc(var(--ldn-padding, 1.25rem) * 0.75);
+	}
+
+	.ldn-price-page > h1.ldn-page-title {
+		font-size: var(--ldn-title-size-mobile);
+	}
+
+	.ldn-stats {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+@media screen and (max-width: 480px) {
+	.ldn-stats {
+		grid-template-columns: 1fr;
+	}
+}

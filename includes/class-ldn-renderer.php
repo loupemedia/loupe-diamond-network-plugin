@@ -133,8 +133,13 @@ final class LDN_Renderer {
         $bag = $this->prefetch($ctx);
         $currency = $this->config->get_currency($ctx->site_id, $ctx->country_code);
 
-        $out = '<main class="ldn-price-page ldn-' . esc_attr($ctx->page_level) . '-page">';
-        $out .= '<h1>' . esc_html($this->headline($ctx)) . '</h1>';
+        $profile = $this->profile($ctx);
+
+        $out = '<div class="ldn-page-shell">';
+        $out .= '<main class="ldn-price-page ldn-' . esc_attr($ctx->page_level) . '-page '
+            . esc_attr($this->chrome_heading_class($profile)) . '">';
+        $out .= $this->theme_style_block($profile);
+        $out .= '<h1 class="ldn-page-title">' . esc_html($this->headline($ctx)) . '</h1>';
         $out .= $this->render_hero($layout['hero_component'], $ctx, $bag);
 
         foreach ($layout['sections'] as $section_id) {
@@ -148,8 +153,262 @@ final class LDN_Renderer {
             $currency
         );
         $out .= '</main>';
+        $out .= '</div>';
 
         return $out;
+    }
+
+    /**
+     * Network-wide page chrome defaults when a profile omits page_chrome keys.
+     *
+     * @var array<string, string>
+     */
+    private static $PAGE_CHROME_DEFAULTS = array(
+        'max_width'         => '1000px',
+        'content_padding'   => '1.25rem',
+        'section_spacing'   => '2rem',
+        'heading_style'     => 'minimal',
+    );
+
+    /**
+     * Allowed heading_style values → BEM modifier on .ldn-price-page.
+     *
+     * @var array<string, bool>
+     */
+    private static $VALID_HEADING_STYLES = array(
+        'minimal'        => true,
+        'loupe_classic'  => true,
+    );
+
+    /**
+     * CP53: inject brand_tokens + page_chrome as scoped CSS custom properties.
+     *
+     * @param array $profile Resolved content profile.
+     * @return string <style> block, or '' when nothing to emit.
+     */
+    public function theme_style_block(array $profile) {
+        $decls = $this->brand_token_declarations($profile);
+        $decls .= $this->page_chrome_declarations($profile);
+
+        if ($decls === '') {
+            return '';
+        }
+
+        return '<style>.ldn-page-shell,.ldn-price-page{' . $decls . '}</style>';
+    }
+
+    /**
+     * Back-compat alias for theme_style_block (brand-only callers).
+     *
+     * @param array $profile
+     * @return string
+     */
+    public function brand_css_vars(array $profile) {
+        return $this->theme_style_block($profile);
+    }
+
+    /**
+     * BEM modifier class from page_chrome.heading_style (default minimal).
+     *
+     * @param array $profile
+     * @return string e.g. ldn-chrome--loupe-classic
+     */
+    public function chrome_heading_class(array $profile) {
+        $chrome = $this->resolved_page_chrome($profile);
+        $style = isset($chrome['heading_style']) ? (string) $chrome['heading_style'] : 'minimal';
+        $style = $this->sanitize_heading_style($style);
+        return 'ldn-chrome--' . $style;
+    }
+
+    /**
+     * Merge network defaults with profile page_chrome.
+     *
+     * @param array $profile
+     * @return array<string, string>
+     */
+    private function resolved_page_chrome(array $profile) {
+        $chrome = (isset($profile['page_chrome']) && is_array($profile['page_chrome']))
+            ? $profile['page_chrome']
+            : array();
+
+        $merged = self::$PAGE_CHROME_DEFAULTS;
+        foreach ($chrome as $key => $value) {
+            if (is_string($value) && $value !== '') {
+                $merged[$key] = $value;
+            }
+        }
+        return $merged;
+    }
+
+    /**
+     * @param array $profile
+     * @return string CSS declarations (no wrapper).
+     */
+    private function brand_token_declarations(array $profile) {
+        $map = array(
+            'primary'        => '--ldn-primary',
+            'secondary'      => '--ldn-secondary',
+            'accent'         => '--ldn-accent',
+            'background'     => '--ldn-background',
+            'text'           => '--ldn-text',
+            'secondary_text' => '--ldn-secondary-text',
+        );
+
+        $tokens = (isset($profile['brand_tokens']) && is_array($profile['brand_tokens']))
+            ? $profile['brand_tokens']
+            : array();
+
+        if (empty($tokens['primary'])) {
+            $fallback = $this->dig_first($profile, array(
+                array('distribution_style', 'color_scheme', 'primary'),
+                array('graph_style', 'color_scheme', 'primary'),
+            ));
+            if (is_string($fallback) && $fallback !== '') {
+                $tokens['primary'] = $fallback;
+            }
+        }
+
+        $decls = '';
+        foreach ($map as $key => $var) {
+            if (!empty($tokens[$key]) && is_string($tokens[$key])) {
+                $value = $this->sanitize_css_color($tokens[$key]);
+                if ($value !== '') {
+                    $decls .= $var . ':' . $value . ';';
+                }
+            }
+        }
+        return $decls;
+    }
+
+    /**
+     * @param array $profile
+     * @return string CSS declarations (no wrapper).
+     */
+    private function page_chrome_declarations(array $profile) {
+        $chrome = $this->resolved_page_chrome($profile);
+
+        $length_map = array(
+            'max_width'       => '--ldn-max-width',
+            'content_padding' => '--ldn-padding',
+            'section_spacing' => '--ldn-section-spacing',
+            'title_size'      => '--ldn-title-size',
+            'title_size_mobile' => '--ldn-title-size-mobile',
+        );
+
+        $font_map = array(
+            'title_font' => '--ldn-font-title',
+            'body_font'  => '--ldn-font-body',
+        );
+
+        $shadow_map = array(
+            'h1_shadow'        => '--ldn-h1-shadow',
+            'h1_shadow_mobile' => '--ldn-h1-shadow-mobile',
+        );
+
+        $decls = '';
+        foreach ($length_map as $key => $var) {
+            if (!empty($chrome[$key])) {
+                $value = $this->sanitize_css_length($chrome[$key]);
+                if ($value !== '') {
+                    $decls .= $var . ':' . $value . ';';
+                }
+            }
+        }
+        foreach ($font_map as $key => $var) {
+            if (!empty($chrome[$key])) {
+                $value = $this->sanitize_font_stack($chrome[$key]);
+                if ($value !== '') {
+                    $decls .= $var . ':' . $value . ';';
+                }
+            }
+        }
+        foreach ($shadow_map as $key => $var) {
+            if (!empty($chrome[$key])) {
+                $value = $this->sanitize_box_shadow($chrome[$key]);
+                if ($value !== '') {
+                    $decls .= $var . ':' . $value . ';';
+                }
+            }
+        }
+        return $decls;
+    }
+
+    /**
+     * @param string $style
+     * @return string Sanitised style slug.
+     */
+    private function sanitize_heading_style($style) {
+        $style = preg_replace('/[^a-z0-9_]/', '', strtolower($style));
+        if ($style === '' || !isset(self::$VALID_HEADING_STYLES[$style])) {
+            return 'minimal';
+        }
+        return $style;
+    }
+
+    /**
+     * Allow only hex (#rgb..#rrggbbaa) and rgb()/rgba() colour values so config
+     * data cannot inject arbitrary CSS into the page. Returns '' otherwise.
+     *
+     * @param string $value
+     * @return string
+     */
+    private function sanitize_css_color($value) {
+        $value = trim($value);
+        if (preg_match('/^#[0-9a-fA-F]{3,8}$/', $value)) {
+            return $value;
+        }
+        if (preg_match('/^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\)$/', $value)) {
+            return $value;
+        }
+        return '';
+    }
+
+    /**
+     * Allow px/rem/em/%/vw/vh/ch lengths only.
+     *
+     * @param string $value
+     * @return string
+     */
+    private function sanitize_css_length($value) {
+        $value = trim($value);
+        if (preg_match('/^-?\d+(\.\d+)?(px|rem|em|%|vw|vh|ch)$/', $value)) {
+            return $value;
+        }
+        return '';
+    }
+
+    /**
+     * Allow a conservative font-family stack from config.
+     *
+     * @param string $value
+     * @return string
+     */
+    private function sanitize_font_stack($value) {
+        $value = trim($value);
+        if (strlen($value) > 200) {
+            return '';
+        }
+        if (!preg_match('/^[\w\s,"\'\-]+$/', $value)) {
+            return '';
+        }
+        return $value;
+    }
+
+    /**
+     * Allow simple box-shadow values (offset blur spread colour).
+     *
+     * @param string $value
+     * @return string
+     */
+    private function sanitize_box_shadow($value) {
+        $value = trim($value);
+        if (strlen($value) > 120) {
+            return '';
+        }
+        if (!preg_match('/^[\dpx#\s,rgba().%-]+$/', $value)) {
+            return '';
+        }
+        return $value;
     }
 
     /**
@@ -228,11 +487,18 @@ final class LDN_Renderer {
         if ($section_id === 'faq_static') {
             return $this->faq_html($this->section_value($section_id, $ctx, $bag));
         }
+        if ($section_id === 'intro_dynamic') {
+            return $this->intro_html(
+                $ctx,
+                is_array($bag['summary']) ? $bag['summary'] : array(),
+                $currency
+            );
+        }
         if (substr($section_id, -7) === '_static') {
             return $this->text_block($section_id, $this->section_value($section_id, $ctx, $bag));
         }
         if (substr($section_id, -8) === '_dynamic') {
-            // intro_dynamic etc.: the crawlable headline stats block.
+            // overview_dynamic, type_overview_dynamic, etc.: headline stats block.
             return $this->stats_html(is_array($bag['summary']) ? $bag['summary'] : array(), $currency);
         }
 
@@ -309,6 +575,117 @@ final class LDN_Renderer {
      * @param string|null $currency ISO code for price formatting.
      * @return string
      */
+    /**
+     * Daily-updating intro paragraph from summary-data.json (price, sample size,
+     * 7-day change, price range). Mirrors the legacy L7.1 intro_text template
+     * until CP19 dynamic templates ship in C1.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $summary
+     * @param string|null      $currency ISO code for price formatting.
+     * @return string
+     */
+    public function intro_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
+        $current_price = $this->dig_first($summary, array(
+            array('time_series', 'current_price'),
+            array('current_price'),
+        ));
+        if ($current_price === null || !is_numeric($current_price)) {
+            return '';
+        }
+
+        $sample_size = $this->dig_first($summary, array(
+            array('distribution', 'sample_size'),
+            array('num_diamonds'),
+            array('sample_size'),
+        ));
+        $sample_size = is_numeric($sample_size) ? (int) $sample_size : 0;
+
+        $change_7d = $this->dig_first($summary, array(
+            array('time_series', 'change_7_days'),
+            array('change_7d'),
+        ));
+        $change_7d = is_numeric($change_7d) ? (float) $change_7d : null;
+
+        $min_price = $this->dig_first($summary, array(
+            array('distribution', 'price_range', 'min'),
+            array('min_price'),
+            array('price_low'),
+        ));
+        $max_price = $this->dig_first($summary, array(
+            array('distribution', 'price_range', 'max'),
+            array('max_price'),
+            array('price_high'),
+        ));
+
+        $symbol = $this->currency_symbol($currency);
+        $country_name = $this->country_full_name($ctx);
+        $color_word = strtolower($ctx->country_code) === 'us' ? 'color' : 'colour';
+        $carat_label = $this->format_carat_label($ctx->carat);
+        $shape_label = $ctx->shape !== null
+            ? ucwords(str_replace('-', ' ', $ctx->shape))
+            : '';
+        $type_label = $ctx->diamond_type !== null && isset(self::$TYPE_LABELS[$ctx->diamond_type])
+            ? self::$TYPE_LABELS[$ctx->diamond_type]
+            : ($ctx->diamond_type !== null ? ucwords(str_replace('-', ' ', $ctx->diamond_type)) : '');
+
+        $subject = trim(implode(' ', array_filter(array(
+            $carat_label !== '' ? $carat_label . ' carat' : '',
+            $shape_label,
+            $type_label,
+        ))));
+        if ($subject === '') {
+            $subject = 'diamond';
+        }
+
+        $price_text = $symbol . number_format((float) $current_price, 2);
+        $diamond_word = $sample_size === 1 ? 'diamond' : 'diamonds';
+        $sample_text = number_format($sample_size);
+
+        $paragraph = sprintf(
+            'The current price for a %s diamond in %s is %s, calculated from %s %s that match this carat weight and shape in our database',
+            esc_html($subject),
+            esc_html($country_name),
+            esc_html($price_text),
+            esc_html($sample_text),
+            esc_html($diamond_word)
+        );
+
+        if ($change_7d === null) {
+            $paragraph .= '.';
+        } elseif ($change_7d == 0.0) {
+            $paragraph .= ', and has remained stable over the last 7 days.';
+        } else {
+            $direction = $change_7d > 0 ? 'increased' : 'decreased';
+            $paragraph .= sprintf(
+                ', and has %s by %s over the last 7 days.',
+                esc_html($direction),
+                esc_html(sprintf('%.2f%%', abs($change_7d)))
+            );
+        }
+
+        $range_paragraph = '';
+        if (is_numeric($min_price) && is_numeric($max_price) && (float) $max_price > 0) {
+            $range_paragraph = sprintf(
+                'When comparing to %s carat %s diamond prices, prices for these diamonds range from %s to %s, depending on factors such as %s and clarity.',
+                esc_html($carat_label !== '' ? $carat_label : 'this'),
+                esc_html(strtolower($type_label !== '' ? $type_label : 'diamond')),
+                esc_html($symbol . number_format((float) $min_price, 2)),
+                esc_html($symbol . number_format((float) $max_price, 2)),
+                esc_html($color_word)
+            );
+        }
+
+        $body = $paragraph;
+        if ($range_paragraph !== '') {
+            $body .= "\n\n" . $range_paragraph;
+        }
+
+        return '<section class="ldn-section ldn-intro-dynamic">'
+            . wp_kses_post(wpautop($body))
+            . '</section>';
+    }
+
     public function stats_html(array $summary, $currency = null) {
         $rows = '';
         foreach (self::stat_specs() as $spec) {
@@ -565,6 +942,44 @@ final class LDN_Renderer {
             $ctx->diamond_type,
         ), 'strlen');
         return $parts ? implode(' ', $parts) : 'diamond';
+    }
+
+    /**
+     * Human country name from the site config countries list.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    private function country_full_name(LDN_Page_Context $ctx) {
+        $site = $this->config->get_site($ctx->site_id);
+        if (!is_array($site) || empty($site['countries']) || !is_array($site['countries'])) {
+            return strtoupper($ctx->country_code);
+        }
+        foreach ($site['countries'] as $entry) {
+            if (is_array($entry) && isset($entry['code']) && $entry['code'] === $ctx->country_code) {
+                return isset($entry['full_name'])
+                    ? (string) $entry['full_name']
+                    : strtoupper($ctx->country_code);
+            }
+        }
+        return strtoupper($ctx->country_code);
+    }
+
+    /**
+     * Display carat label (drops trailing zeros for whole weights).
+     *
+     * @param string|null $carat
+     * @return string
+     */
+    private function format_carat_label($carat) {
+        if ($carat === null || $carat === '') {
+            return '';
+        }
+        $value = (float) $carat;
+        if ($value === (float) (int) $value) {
+            return (string) (int) $value;
+        }
+        return rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.');
     }
 
     /**

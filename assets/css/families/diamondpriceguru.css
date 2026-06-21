@@ -1,0 +1,27 @@
+/**
+ * Diamond Price Guru — dark page shell (template_folder: diamondpriceguru).
+ *
+ * Bleeds the navy background to the viewport edges inside the WP content column.
+ * Outer margins (header, sidebar, theme canvas) still need WP theme tweaks if
+ * you want those areas dark too.
+ */
+
+.ldn-page-shell {
+	width: 100vw;
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+}
+
+.ldn-price-page {
+	--ldn-table-border: #2a3548;
+	--ldn-table-header-bg: #1a2438;
+	--ldn-table-row-alt: #151e30;
+}
+
+.ldn-price-page .ldn-stats {
+	background: rgba(255, 255, 255, 0.06);
+}
+
+.ldn-price-page .ldn-section a {
+	color: var(--ldn-primary, #19b39a);
+}

@@ -35,13 +35,13 @@ if ($ctx instanceof LDN_Page_Context) {
             $ctx->shape,
         ), 'strlen');
         ?>
-        <main class="ldn-price-page" style="max-width:840px;margin:2rem auto;padding:0 1rem;">
-            <h1><?php echo esc_html(implode(' · ', $bits)); ?> diamond prices</h1>
-            <p style="color:#888;font-size:.85rem;">
+        <main class="ldn-price-page ldn-placeholder-page">
+            <h1 class="ldn-page-title"><?php echo esc_html(implode(' · ', $bits)); ?> diamond prices</h1>
+            <p class="ldn-placeholder-note">
                 <?php echo esc_html('Loupe Diamond Network — placeholder template. Site: ' . $ctx->site_id); ?>
             </p>
             <?php // Placeholder: dump the primary payload so the path is verifiable. ?>
-            <pre style="background:#0d1117;color:#c9d1d9;padding:1rem;overflow:auto;border-radius:6px;"><?php
+            <pre class="ldn-debug-payload"><?php
                 echo esc_html(wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
             ?></pre>
         </main>

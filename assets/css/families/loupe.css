@@ -1,0 +1,59 @@
+/**
+ * Loupe media network — loupe_classic heading variant (CP53).
+ *
+ * Activated when page_chrome.heading_style is loupe_classic (Loupe family).
+ * Layout dimensions still come from page_chrome CSS variables; this file only
+ * adds the legacy gold-bar H1 and skewed H2 treatment.
+ */
+
+.ldn-chrome--loupe-classic > h1.ldn-page-title {
+	font-family: var(--ldn-font-title, Georgia, serif);
+	font-size: var(--ldn-title-size, 2rem);
+	background-color: var(--ldn-primary, #d6ad60);
+	color: #fff;
+	padding: 1.25rem;
+	box-shadow: var(--ldn-h1-shadow, 15px 15px 0 #000);
+	border-bottom: none;
+	max-width: 100%;
+}
+
+.ldn-chrome--loupe-classic .ldn-section h2 {
+	position: relative;
+	display: inline-block;
+	color: #fff;
+	font-size: 1.5rem;
+	margin: 1.75rem 0 1rem;
+	padding: 0.75rem 2.25rem 0.75rem 1rem;
+	z-index: 1;
+}
+
+.ldn-chrome--loupe-classic .ldn-section h2::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #000;
+	transform: skew(-20deg);
+	transform-origin: top left;
+	z-index: -1;
+	border-bottom: 5px solid var(--ldn-primary, #d6ad60);
+}
+
+.ldn-chrome--loupe-classic .ldn-section h3 {
+	font-size: 1.25rem;
+}
+
+.ldn-chrome--loupe-classic .ldn-stats {
+	border-left: 4px solid var(--ldn-primary, #d6ad60);
+}
+
+@media screen and (max-width: 768px) {
+	.ldn-chrome--loupe-classic > h1.ldn-page-title {
+		font-size: var(--ldn-title-size-mobile, 1.125rem);
+		padding: 0.9rem;
+		box-shadow: var(--ldn-h1-shadow-mobile, 10px 10px 0 #000);
+		margin-right: 0.5rem;
+	}
+}

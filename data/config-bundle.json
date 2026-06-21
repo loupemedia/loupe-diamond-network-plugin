@@ -1,6 +1,6 @@
 {
-  "version": "32bd1d1",
-  "generated_at": "2026-06-20T06:41:44.683620+00:00",
+  "version": "6d1425c",
+  "generated_at": "2026-06-21T11:55:42.319079+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -5872,6 +5872,24 @@
       "site_id": "betterdiamondinitiative",
       "domain": "betterdiamondinitiative.org",
       "brand_name": "Better Diamond Initiative",
+      "brand_tokens": {
+        "primary": "#5F735C",
+        "accent": "#E6B8B7",
+        "density_fill": "rgba(95, 115, 92, 0.2)",
+        "background": "#F7F5F2",
+        "natural_comparison": "#9E9E9E"
+      },
+      "page_chrome": {
+        "max_width": "1000px",
+        "content_padding": "1.25rem",
+        "section_spacing": "2rem",
+        "title_font": "\"Nunito Sans\", \"Helvetica Neue\", sans-serif",
+        "body_font": "\"Nunito Sans\", \"Helvetica Neue\", sans-serif",
+        "webfont_families": [
+          "Nunito Sans"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "Making conscious diamond choices",
       "tagline": "Beautiful diamonds, better choices",
       "target_audience": {
@@ -6045,12 +6063,6 @@
         "meta_description_format": "Lab-grown {carat} carat {shape} diamond price in {country} — how much buyers pay across {sample_size} stones. Updated {analysis_date}.",
         "width": 710,
         "height": 405,
-        "color_scheme": {
-          "primary": "#2E7D32",
-          "secondary": "#43A047",
-          "accent": "#81C784",
-          "natural_comparison": "#9E9E9E"
-        },
         "time_periods": [
           "1_month",
           "3_months",
@@ -6165,6 +6177,25 @@
         "10caratdiamondring.com",
         "12caratdiamondring.com"
       ],
+      "brand_tokens": {
+        "primary": "#58a2a7",
+        "secondary": "#468589",
+        "accent": "#7abfc3",
+        "histogram_fill": "rgba(88, 162, 167, 0.3)",
+        "text": "#0F172A",
+        "secondary_text": "#475569"
+      },
+      "page_chrome": {
+        "max_width": "1000px",
+        "content_padding": "1.25rem",
+        "section_spacing": "2rem",
+        "title_font": "\"Source Sans Pro\", \"Helvetica Neue\", sans-serif",
+        "body_font": "\"Source Sans Pro\", \"Helvetica Neue\", sans-serif",
+        "webfont_families": [
+          "Source Sans Pro"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "Your complete guide to {carat} carat diamond rings",
       "tagline": "What a {carat} carat diamond ring costs, looks like, and how to choose one",
       "target_audience": {
@@ -6273,11 +6304,6 @@
         "meta_description_format": "What does a {carat} carat {shape} {type} diamond ring cost? Price distribution and ring budget context — chart {analysis_date}.",
         "width": 760,
         "height": 410,
-        "color_scheme": {
-          "primary": "#58a2a7",
-          "secondary": "#468589",
-          "accent": "#7abfc3"
-        },
         "time_periods": [
           "1_month",
           "3_months",
@@ -6504,6 +6530,25 @@
         "prezzodiamantiit",
         "preciodiamantees"
       ],
+      "brand_tokens": {
+        "primary": "#4F6D8A",
+        "secondary": "#223046",
+        "accent": "#2F7D6B",
+        "histogram_fill": "rgba(79, 109, 138, 0.25)",
+        "text": "#1A1A2E",
+        "secondary_text": "#4A4A5A"
+      },
+      "page_chrome": {
+        "max_width": "960px",
+        "content_padding": "1.25rem",
+        "section_spacing": "1.75rem",
+        "title_font": "\"Roboto\", \"Arial\", sans-serif",
+        "body_font": "\"Roboto\", \"Arial\", sans-serif",
+        "webfont_families": [
+          "Roboto"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "The definitive local diamond pricing reference",
       "tagline": "Real-time diamond prices in your currency",
       "target_audience": {
@@ -6652,11 +6697,6 @@
         "meta_description_format": "{country} {carat} carat {shape} {type} diamond price today — live distribution from {sample_size} stones ({analysis_date}).",
         "width": 720,
         "height": 400,
-        "color_scheme": {
-          "primary": "#4F6D8A",
-          "secondary": "#223046",
-          "accent": "#2F7D6B"
-        },
         "time_periods": [
           "1_month",
           "3_months",
@@ -6820,6 +6860,27 @@
       "site_id": "diamondadvisors",
       "domain": "diamondadvisors.com",
       "brand_name": "Diamond Advisors",
+      "brand_tokens": {
+        "primary": "#F1C1B2",
+        "secondary": "#D4908A",
+        "accent": "#E8A99A",
+        "background": "#FEFEFE",
+        "box_fill": "rgba(241, 193, 178, 0.35)",
+        "text": "#1A1A2E",
+        "secondary_text": "#4A4A5A"
+      },
+      "page_chrome": {
+        "max_width": "900px",
+        "content_padding": "1.25rem",
+        "section_spacing": "2rem",
+        "title_font": "\"Playfair Display\", \"Georgia\", serif",
+        "body_font": "\"Source Sans Pro\", \"Helvetica Neue\", sans-serif",
+        "webfont_families": [
+          "Playfair Display",
+          "Source Sans Pro"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "Your trusted diamond advisor",
       "tagline": "Expert guidance for discerning buyers",
       "target_audience": {
@@ -7002,12 +7063,6 @@
         "meta_description_format": "What does a {carat} carat {shape} {type} diamond cost in {country}? Expert pricing across {sample_size} stones — chart updated {analysis_date}.",
         "width": 800,
         "height": 420,
-        "color_scheme": {
-          "primary": "#F1C1B2",
-          "secondary": "#D4908A",
-          "accent": "#E8A99A",
-          "background": "#FEFEFE"
-        },
         "time_periods": [
           "3_months",
           "6_months",
@@ -7115,6 +7170,26 @@
       "site_id": "diamondhuntuk",
       "domain": "diamondhunt.co.uk",
       "brand_name": "Diamond Hunt UK",
+      "brand_tokens": {
+        "primary": "#689793",
+        "secondary": "#507a77",
+        "accent": "#c85237",
+        "iqr_fill": "rgba(104, 151, 147, 0.25)",
+        "background": "#F5F5F5",
+        "text": "#1A1A2E",
+        "secondary_text": "#4A4A5A"
+      },
+      "page_chrome": {
+        "max_width": "800px",
+        "content_padding": "1.25rem",
+        "section_spacing": "1.75rem",
+        "title_font": "\"Merriweather Sans\", \"Gill Sans\", sans-serif",
+        "body_font": "\"Merriweather Sans\", \"Gill Sans\", sans-serif",
+        "webfont_families": [
+          "Merriweather Sans"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "Your UK diamond price guide",
       "tagline": "Diamond prices for British buyers",
       "target_audience": {
@@ -7287,11 +7362,6 @@
         "meta_description_format": "How much does a {carat} carat {shape} {type} diamond cost in the UK? Prices across {sample_size} stones — updated {analysis_date}.",
         "width": 730,
         "height": 395,
-        "color_scheme": {
-          "primary": "#689793",
-          "secondary": "#507a77",
-          "accent": "#c85237"
-        },
         "time_periods": [
           "1_month",
           "3_months",
@@ -7385,6 +7455,24 @@
       "site_type": "calculator_tool",
       "domain": "diamondpricecalc.com",
       "brand_name": "Diamond Price Calculator",
+      "brand_tokens": {
+        "primary": "#0F766E",
+        "secondary": "#115E59",
+        "accent": "#2DD4BF",
+        "text": "#1A1A2E",
+        "secondary_text": "#4A4A5A"
+      },
+      "page_chrome": {
+        "max_width": "960px",
+        "content_padding": "1.25rem",
+        "section_spacing": "1.5rem",
+        "title_font": "\"Inter\", \"Helvetica Neue\", sans-serif",
+        "body_font": "\"Inter\", \"Helvetica Neue\", sans-serif",
+        "webfont_families": [
+          "Inter"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "The definitive diamond pricing reference",
       "tagline": "Real-time diamond prices in your currency",
       "target_audience": {
@@ -7549,12 +7637,6 @@
         "type": "interactive_line",
         "width": 720,
         "height": 400,
-        "color_scheme": {
-          "primary": "#0F766E",
-          "secondary": "#115E59",
-          "accent": "#2DD4BF",
-          "background": "rgba(0,0,0,0)"
-        },
         "time_periods": [
           "30_days",
           "90_days",
@@ -7606,6 +7688,26 @@
       "site_id": "diamondpriceguru",
       "domain": "diamondpriceguru.com",
       "brand_name": "Diamond Price Guru",
+      "brand_tokens": {
+        "primary": "#19B39A",
+        "secondary": "#A8CBB8",
+        "accent": "#D4AF6A",
+        "negative": "#E16D5A",
+        "background": "#111A2B",
+        "text": "#F2F4F7",
+        "secondary_text": "#A8CBB8"
+      },
+      "page_chrome": {
+        "max_width": "1000px",
+        "content_padding": "1.25rem",
+        "section_spacing": "1.75rem",
+        "title_font": "\"Inter\", \"Helvetica Neue\", sans-serif",
+        "body_font": "\"Inter\", \"Helvetica Neue\", sans-serif",
+        "webfont_families": [
+          "Inter"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "Data-driven value hunting",
       "tagline": "Find the most beautiful diamond at the best price",
       "target_audience": {
@@ -7780,12 +7882,6 @@
         "meta_description_format": "How much is a {carat} carat {shape} {type} diamond worth in {country}? Value and price analysis across {sample_size} listings — chart updated {analysis_date}.",
         "width": 700,
         "height": 380,
-        "color_scheme": {
-          "primary": "#19B39A",
-          "secondary": "#A8CBB8",
-          "negative": "#E16D5A",
-          "accent": "#D4AF6A"
-        },
         "time_periods": [
           "7_days",
           "30_days",
@@ -7903,6 +7999,28 @@
         "jewellerynz.co.nz",
         "jewellerysouthafrica.co.za"
       ],
+      "brand_tokens": {
+        "primary": "#d6ad60",
+        "secondary": "#b8942e",
+        "accent": "#e8c97a",
+        "iqr_fill": "rgba(214, 173, 96, 0.2)"
+      },
+      "page_chrome": {
+        "max_width": "1000px",
+        "content_padding": "1.25rem",
+        "section_spacing": "2rem",
+        "title_font": "\"Cormorant Garamond\", Georgia, \"Times New Roman\", serif",
+        "body_font": "\"Lato\", \"Segoe UI\", sans-serif",
+        "webfont_families": [
+          "Cormorant Garamond",
+          "Lato"
+        ],
+        "title_size": "2rem",
+        "title_size_mobile": "1.125rem",
+        "heading_style": "loupe_classic",
+        "h1_shadow": "15px 15px 0 #000",
+        "h1_shadow_mobile": "10px 10px 0 #000"
+      },
       "brand_positioning": "Your local jewellery price guide",
       "tagline": "Diamond prices in your country",
       "target_audience": {
@@ -8008,11 +8126,6 @@
         "meta_description_format": "Current {carat} carat {shape} {type} diamond prices in {country} — distribution across {sample_size} diamonds. Price chart {analysis_date}.",
         "width": 740,
         "height": 390,
-        "color_scheme": {
-          "primary": "#d6ad60",
-          "secondary": "#b8942e",
-          "accent": "#e8c97a"
-        },
         "time_periods": [
           "1_month",
           "3_months",
@@ -8218,6 +8331,23 @@
       "site_id": "ringspo",
       "domain": "ringspo.com",
       "brand_name": "Ringspo",
+      "brand_tokens": {
+        "primary": "#706cc8",
+        "secondary": "#5249a3",
+        "accent": "#9590e8",
+        "iqr_fill": "rgba(112, 108, 200, 0.3)"
+      },
+      "page_chrome": {
+        "max_width": "840px",
+        "content_padding": "1.25rem",
+        "section_spacing": "1.75rem",
+        "title_font": "\"Open Sans\", sans-serif",
+        "body_font": "\"Open Sans\", sans-serif",
+        "webfont_families": [
+          "Open Sans"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "Independent diamond guidance from someone who knows the market and talks plainly",
       "tagline": "Expert advice without the jewellery-store sales pitch",
       "target_audience": {
@@ -8433,11 +8563,6 @@
         "meta_description_format": "Independent market analysis of {carat} carat {shape} {type} diamond prices in {country} — what buyers pay across {sample_size} diamonds. Price chart and distribution updated {analysis_date}.",
         "width": 750,
         "height": 400,
-        "color_scheme": {
-          "primary": "#706cc8",
-          "secondary": "#5249a3",
-          "accent": "#9590e8"
-        },
         "time_periods": [
           "1_month",
           "3_months",
@@ -8592,6 +8717,29 @@
       "site_id": "sparklescore",
       "domain": "sparklescore.net",
       "brand_name": "Sparkle Score",
+      "brand_tokens": {
+        "primary": "#1976D2",
+        "secondary": "#0D47A1",
+        "accent": "#42A5F5",
+        "text": "#1A1A2E",
+        "secondary_text": "#4A4A5A",
+        "score_gradient": {
+          "low": "#F44336",
+          "medium": "#FFC107",
+          "high": "#4CAF50"
+        }
+      },
+      "page_chrome": {
+        "max_width": "880px",
+        "content_padding": "1.25rem",
+        "section_spacing": "1.75rem",
+        "title_font": "\"Roboto\", \"Helvetica Neue\", sans-serif",
+        "body_font": "\"Roboto\", \"Helvetica Neue\", sans-serif",
+        "webfont_families": [
+          "Roboto"
+        ],
+        "heading_style": "minimal"
+      },
       "brand_positioning": "The diamond scoring authority",
       "tagline": "Objective diamond quality scoring",
       "target_audience": {
@@ -8783,16 +8931,6 @@
         "meta_description_format": "SparkleScore value for {carat} carat {shape} {type} diamonds in {country} — how {sample_size} stones score on price, cut, and worth. Updated {analysis_date}.",
         "width": 680,
         "height": 380,
-        "color_scheme": {
-          "primary": "#1976D2",
-          "secondary": "#0D47A1",
-          "accent": "#42A5F5",
-          "score_gradient": {
-            "low": "#F44336",
-            "medium": "#FFC107",
-            "high": "#4CAF50"
-          }
-        },
         "default_view": "score_distribution",
         "show_score_gauge": true,
         "show_histogram": true
