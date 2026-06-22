@@ -57,3 +57,8 @@
 		margin-right: 0.5rem;
 	}
 }
+
+/* Inline charts: figcaption carries the title; ensure plot area has room. */
+.ldn-chrome--loupe-classic .ldn-chart-target {
+	min-height: 440px;
+}

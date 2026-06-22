@@ -1,6 +1,6 @@
 {
-  "version": "6d1425c",
-  "generated_at": "2026-06-21T11:55:42.319079+00:00",
+  "version": "ead3972",
+  "generated_at": "2026-06-22T11:55:40.324850+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8006,7 +8006,7 @@
         "iqr_fill": "rgba(214, 173, 96, 0.2)"
       },
       "page_chrome": {
-        "max_width": "1000px",
+        "max_width": "75%",
         "content_padding": "1.25rem",
         "section_spacing": "2rem",
         "title_font": "\"Cormorant Garamond\", Georgia, \"Times New Roman\", serif",
@@ -8166,15 +8166,43 @@
         "Focus on the buying journey: what to look for first, what to compare, and when to stop upgrading quality grades.",
         "Focus on how local pricing for this shape compares to the global average — whether local buyers get better or worse value and why."
       ],
+      "section_prompts_by_page_type": {
+        "all_shapes": {
+          "shape_breakdown_static": {
+            "json_key": "shape_breakdown",
+            "instruction": "Write as a knowledgeable local jewellery guide. Compare diamond shapes at {carat} carats for {diamond_type} diamonds for engagement ring buyers: face-up size on the hand, sparkle character, durability in daily wear, and typical trade-offs at this weight. Ground every point in practical ring-shopping context — not abstract gemology. No specific prices or market movements. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
+            "length": "4-5 sentences"
+          }
+        },
+        "diamond_type": {
+          "natural_vs_lab_analysis": {
+            "json_key": "natural_vs_lab_analysis",
+            "instruction": "Write for buyers on a {diamond_type} diamond prices page. Explain how natural and lab-grown stones compare on grading, value perceptions, and when each type suits an engagement ring — warm, local-jeweller tone. No today's prices or market moves. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
+            "length": "4-5 sentences"
+          }
+        },
+        "top_level": {
+          "type_comparison": {
+            "json_key": "type_comparison",
+            "instruction": "Orient first-time visitors to natural versus lab-grown diamond prices on this site. Explain what each section of the hub shows and how to choose which type to explore first for an engagement ring — practical, non-salesy. No price figures or dates. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
+            "length": "3-4 sentences"
+          },
+          "shape_preview": {
+            "json_key": "shape_preview",
+            "instruction": "Explain how diamond shape changes the look of a stone at the same carat weight and why buyers compare shapes before locking a budget. Encourage drilling into shape and carat pages from this hub. No specific prices or market commentary. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
+            "length": "3-4 sentences"
+          }
+        }
+      },
       "section_prompts": {
         "trend_analysis_static": {
           "json_key": "trend_analysis",
-          "instruction": "Write as a knowledgeable local jewellery guide — professional, helpful, and grounded. Explain the structural pricing factors for {carat}-carat {shape} diamonds: what drives prices at this weight and shape combination, why certain quality grades carry premiums, and where the market typically settles for stones in this range. This is durable context that helps the reader understand the price graph above — not commentary on today's prices. Frame every factor as useful knowledge for a confident purchase. Do not quote specific prices or market movements — the graph handles that.\n",
+          "instruction": "Write as a knowledgeable local jewellery guide — professional, helpful, and grounded. Explain the structural pricing factors for {carat}-carat {shape} diamonds: what drives prices at this weight and shape combination, why certain quality grades carry premiums, and where the market typically settles for stones in this range. This is durable context that helps the reader understand the price graph above — not commentary on today's prices. Frame every factor as useful knowledge for a confident purchase. Do not quote specific prices or market movements — the graph handles that. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
           "length": "3-4 sentences"
         },
         "buying_guidance_static": {
           "json_key": "buying_guidance",
-          "instruction": "Write as a knowledgeable local jewellery guide — professional, helpful, neutral. Give practical guidance for buying a {carat}-carat {shape} diamond: which quality factors to prioritise at this size (cut, colour, clarity), where a buyer can be selective without sacrificing visible quality, and what to watch for that is specific to this shape at {carat} carats. Every watch-out must be paired with a concrete positive action. Lead with the most impactful recommendation for this particular combination. Do not second-guess the reader's shape choice.\n",
+          "instruction": "Write as a knowledgeable local jewellery guide — professional, helpful, neutral. Give practical guidance for buying a {carat}-carat {shape} diamond: which quality factors to prioritise at this size (cut, colour, clarity), where a buyer can be selective without sacrificing visible quality, and what to watch for that is specific to this shape at {carat} carats. Every watch-out must be paired with a concrete positive action. Lead with the most impactful recommendation for this particular combination. Do not second-guess the reader's shape choice. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
           "length": "4-5 sentences"
         },
         "faq_static": {
@@ -8694,6 +8722,16 @@
             "json_key": "quality_overview",
             "instruction": "Summarise how to think about diamond quality (cut, colour, clarity) when browsing prices across shapes and carat weights. Educational, trust-building tone — not a sales pitch.\n",
             "length": "3-4 sentences"
+          },
+          "type_comparison": {
+            "json_key": "type_comparison",
+            "instruction": "Orient first-time visitors to the difference between browsing natural versus lab-grown diamond prices on this site. Explain what each hub shows and how to choose which type to explore first — practical, non-salesy. No price figures or dates.\n",
+            "length": "3-4 sentences"
+          },
+          "shape_preview": {
+            "json_key": "shape_preview",
+            "instruction": "Explain how diamond shape changes the look of a stone at the same carat weight and why buyers compare shapes before locking a budget. Encourage using the linked shape and carat pages from this hub. No specific prices or market commentary.\n",
+            "length": "3-4 sentences"
           }
         }
       }
@@ -8701,6 +8739,9 @@
     "sentence_templates_base": {
       "sentence_templates": {
         "all_shapes": {
+          "intro_text": "The current price for a {carat} carat {type_label} diamond in {country_name} is {currency_symbol}{current_price:,.2f}, calculated from {num_diamonds:,} diamonds that match this carat weight and type in our database, and has {change_direction_7d} by {change_pct_7d} over the last 7 days.\nPrices for these diamonds range from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f}, depending on factors such as the diamond shape, color, and clarity.\n",
+          "analysis": "Overall, the price trend for {carat} carat {type_label} diamonds over the past three weeks shows {overall_trend}.\nThe 7-day change is a {adjective_7d} {direction_7d} of {change_7d:.2f}%, the 14-day change is a {adjective_14d} {direction_14d} of {change_14d:.2f}%, and the 21-day change is a {adjective_21d} {direction_21d} of {change_21d:.2f}%.\n{market_implication}\n",
+          "shape_analysis": "The most expensive shape for {carat} carat {type_label} diamonds is currently {most_expensive_shape}, priced at {currency_symbol}{most_expensive_price:,.2f}.\nThe least expensive shape for {carat} carat {type_label} diamonds is currently {least_expensive_shape}, priced at {currency_symbol}{least_expensive_price:,.2f}.\nThis is a difference of {currency_symbol}{price_difference:,.2f}, meaning that {most_expensive_shape} diamonds are {price_difference_pct:.2f}% more expensive than {least_expensive_shape} diamonds at the same carat weight.\n",
           "intro": "Across all shapes, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, while the least expensive is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
           "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes. The weighted median across shapes is {currency_symbol}{weighted_median_price:,.0f}.\n"
         },
@@ -9798,6 +9839,7 @@
               "market_index_bins_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "summary_data_json",
               "comparison_data_json",
               "color_clarity_json",
@@ -10164,6 +10206,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10171,7 +10214,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10179,7 +10222,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10190,7 +10235,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10199,7 +10245,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10221,6 +10268,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10228,7 +10276,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10236,7 +10284,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10247,7 +10297,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10256,7 +10307,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10278,6 +10330,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10285,7 +10338,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10293,7 +10346,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10304,7 +10359,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10313,7 +10369,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10335,6 +10392,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10342,7 +10400,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10350,7 +10408,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10361,7 +10421,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10370,7 +10431,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10392,6 +10454,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10399,7 +10462,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10407,7 +10470,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10418,7 +10483,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10427,7 +10493,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10449,6 +10516,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10456,7 +10524,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10464,7 +10532,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10475,7 +10545,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10484,7 +10555,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10506,6 +10578,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10513,7 +10586,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10521,7 +10594,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10532,7 +10607,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10541,7 +10617,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10563,6 +10640,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10570,7 +10648,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10578,7 +10656,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10589,7 +10669,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10598,7 +10679,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10620,6 +10702,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10627,7 +10710,7 @@
               "distribution_chart": true,
               "time_series_chart": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "placeholder"
               }
             }
           },
@@ -10635,7 +10718,9 @@
             "pipeline_artefacts": [
               "shapes_at_carat_chart",
               "shapes_ranking_json",
-              "all_shapes_summary_json"
+              "all_shapes_summary_json",
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "shapes_at_carat": {
@@ -10646,7 +10731,8 @@
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {
               "nat_lab_toggle": true
@@ -10655,7 +10741,8 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "templated_copy_json"
+              "templated_copy_json",
+              "static_content_json"
             ],
             "wp_widgets": {}
           }
@@ -10678,6 +10765,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10692,7 +10780,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -10741,6 +10829,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10755,7 +10844,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -10804,6 +10893,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10818,7 +10908,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -10867,6 +10957,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10881,7 +10972,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -10930,6 +11021,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10944,7 +11036,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -10993,6 +11085,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11007,7 +11100,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -11056,6 +11149,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11070,7 +11164,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -11119,6 +11213,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11133,7 +11228,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -11182,6 +11277,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11196,7 +11292,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -11245,6 +11341,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11259,7 +11356,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -11308,6 +11405,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11322,7 +11420,7 @@
               "retailer_cta": true,
               "size_comparison_visual": true,
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               },
               "header_ad": true,
               "mid_content_ad": true
@@ -11370,6 +11468,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11381,7 +11480,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -11427,6 +11526,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11438,7 +11538,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -11484,6 +11584,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11495,7 +11596,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -11541,6 +11642,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11552,7 +11654,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -11598,6 +11700,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11609,7 +11712,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -11655,6 +11758,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11666,7 +11770,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -11712,6 +11816,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11723,7 +11828,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -11769,6 +11874,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11780,7 +11886,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -11826,6 +11932,7 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
+              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11837,7 +11944,7 @@
                 "presentation": "full_heatmap"
               },
               "cross_site_comparison": {
-                "presentation": "disabled"
+                "presentation": "live_cards"
               }
             }
           },
@@ -12025,9 +12132,24 @@
           "time_series_chart"
         ],
         "related_artefacts": [
-          "price_graph_html"
+          "price_graph_html",
+          "og_preview_png"
         ],
         "runtime_note": "Also requires >= 7 historical slim rows (MIN_TS_ROWS) at run time."
+      },
+      "og_preview_png": {
+        "page_level": "shape",
+        "producing_script": "C5_market_index_graphs",
+        "gate": "market_index_pipeline",
+        "status": "live",
+        "filename": "og-preview.png",
+        "description": "1200×630 PNG chart preview for Open Graph / social sharing (hero distribution or time-series chart).",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "distribution_json",
+          "price_graph_json"
+        ],
+        "runtime_note": "Written when distribution or time-series chart is generated; requires kaleido at build time."
       },
       "summary_data_json": {
         "page_level": "shape",

@@ -59,6 +59,14 @@ final class LDN_Assets {
 			$version
 		);
 
+		wp_enqueue_script(
+			'ldn-chart-errors',
+			$base_url . 'assets/js/chart-errors.js',
+			array(),
+			$version,
+			true
+		);
+
 		$deps = array('ldn-shared');
 		$webfont_url = self::google_fonts_url_for_site($ctx->site_id, $config);
 		if ($webfont_url !== null && apply_filters('ldn_enqueue_webfonts', true, $ctx)) {

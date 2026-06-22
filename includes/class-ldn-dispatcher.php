@@ -173,7 +173,7 @@ final class LDN_Dispatcher {
     }
 
     /**
-     * Echo the page's <head> tags (canonical + Open Graph) on wp_head.
+     * Echo the page's <head> tags (meta, canonical, OG, JSON-LD, hreflang) on wp_head.
      *
      * @return void
      */
@@ -181,7 +181,7 @@ final class LDN_Dispatcher {
         if (!($this->context instanceof LDN_Page_Context)) {
             return;
         }
-        echo LDN_Plugin::instance()->renderer()->head_tags($this->context); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped within renderer
+        echo LDN_Plugin::instance()->renderer()->render_head_content($this->context); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped within renderer
     }
 
     /**

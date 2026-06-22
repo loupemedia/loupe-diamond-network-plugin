@@ -131,6 +131,7 @@ final class LDN_Plugin {
         if ($this->is_network_site()) {
             $this->router()->register();
             $this->dispatcher()->register();
+            (new LDN_Llms_Txt($this->site_id(), $this->config()))->register();
         }
 
         if (is_admin()) {

@@ -218,6 +218,17 @@ final class LDN_Data_Fetcher {
     // =========================================================================
 
     /**
+     * Resolve the public HTTPS URL for an entitled artefact, or null.
+     *
+     * @param string           $artefact_id
+     * @param LDN_Page_Context $ctx
+     * @return string|null
+     */
+    public function resolve_artefact_url($artefact_id, LDN_Page_Context $ctx) {
+        return $this->gated_url($artefact_id, $ctx);
+    }
+
+    /**
      * Entitlement gate + key resolution → URL, or null when either blocks.
      *
      * @param string           $artefact_id
