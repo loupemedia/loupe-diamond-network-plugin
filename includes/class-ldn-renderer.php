@@ -50,6 +50,37 @@ final class LDN_Renderer {
     const SUPPRESSED_SECTIONS = array('cross_site_comparison');
 
     /**
+     * Editorial sections that carry static C1 copy but do NOT use the `_static`
+     * suffix in `page_structure`. They are rendered as text blocks like any
+     * `_static` section. Mirrors EDITORIAL_STATIC_SECTION_IDS in
+     * shared/content/section_prompts.py — keep the two in sync so every section
+     * C1 generates is also rendered (otherwise upper-level pages silently drop
+     * their generated editorial).
+     *
+     * @var string[]
+     */
+    const EDITORIAL_STATIC_SECTIONS = array(
+        'type_comparison',
+        'shape_preview',
+        'natural_vs_lab_analysis',
+        'buying_considerations',
+        'expert_recommendations',
+    );
+
+    /**
+     * Display headings for static editorial sections whose auto-generated
+     * title (from the section id) would read poorly. Falls back to the
+     * title-cased section id when a key is absent.
+     *
+     * @var array<string, string>
+     */
+    private static $SECTION_HEADINGS = array(
+        'type_comparison'         => 'Natural vs Lab-Grown',
+        'shape_preview'           => 'Comparing Diamond Shapes',
+        'natural_vs_lab_analysis' => 'Natural vs Lab-Grown Diamonds',
+    );
+
+    /**
      * Dynamic section id → copy.json section keys per page level.
      *
      * @var array<string, array<string, string[]>>
@@ -156,7 +187,9 @@ final class LDN_Renderer {
         $out .= '<main class="ldn-price-page ldn-' . esc_attr($ctx->page_level) . '-page '
             . esc_attr($this->chrome_heading_class($profile)) . '">';
         $out .= $this->theme_style_block($profile);
-        $out .= '<h1 class="ldn-page-title">' . esc_html($this->headline($ctx)) . '</h1>';
+        $out .= '<h1 class="ldn-page-title">'
+            . esc_html($this->headline($ctx, $this->country_in_content_flag($profile, 'h1_headings')))
+            . '</h1>';
         $out .= $this->data_summary_html(
             $ctx,
             is_array($bag['summary']) ? $bag['summary'] : array(),
@@ -302,7 +335,10 @@ final class LDN_Renderer {
         $chrome = $this->resolved_page_chrome($profile);
         $style = isset($chrome['heading_style']) ? (string) $chrome['heading_style'] : 'minimal';
         $style = $this->sanitize_heading_style($style);
-        return 'ldn-chrome--' . $style;
+        // The validity key uses underscores (e.g. loupe_classic) but the BEM
+        // modifier in the family stylesheets is hyphenated
+        // (.ldn-chrome--loupe-classic), so normalise the separator here.
+        return 'ldn-chrome--' . str_replace('_', '-', $style);
     }
 
     /**
@@ -515,7 +551,7 @@ final class LDN_Renderer {
         if ($canonical_url === null) {
             $canonical_url = $this->current_url();
         }
-        $title = $this->headline($ctx);
+        $title = $this->headline($ctx, $this->country_in_content_flag($this->profile($ctx), 'page_titles'));
         $schema = new LDN_Schema();
         $desc = $schema->dataset_description($ctx, $summary, $currency);
 
@@ -618,12 +654,15 @@ final class LDN_Renderer {
     /**
      * Render a single section by id, or '' when unmapped / not entitled / empty.
      *
+     * Public so the section-routing contract (which ids render vs are skipped)
+     * is directly unit-testable.
+     *
      * @param string           $section_id
      * @param LDN_Page_Context $ctx
      * @param array            $bag
      * @return string
      */
-    private function render_section($section_id, LDN_Page_Context $ctx, array $bag, $currency = null) {
+    public function render_section($section_id, LDN_Page_Context $ctx, array $bag, $currency = null) {
         if (in_array($section_id, self::SUPPRESSED_SECTIONS, true)) {
             return '';
         }
@@ -650,7 +689,9 @@ final class LDN_Renderer {
             }
             return $this->stats_html(is_array($bag['summary']) ? $bag['summary'] : array(), $currency);
         }
-        if (substr($section_id, -7) === '_static') {
+        if (substr($section_id, -7) === '_static'
+            || in_array($section_id, self::EDITORIAL_STATIC_SECTIONS, true)
+        ) {
             return $this->text_block($section_id, $this->section_value($section_id, $ctx, $bag));
         }
 
@@ -700,7 +741,7 @@ final class LDN_Renderer {
      * @param LDN_Page_Context $ctx
      * @return string
      */
-    public function headline(LDN_Page_Context $ctx) {
+    public function headline(LDN_Page_Context $ctx, $include_country = true) {
         $parts = array();
         if ($ctx->carat !== null) {
             $parts[] = $ctx->carat . ' Carat';
@@ -714,10 +755,28 @@ final class LDN_Renderer {
                 : ucwords(str_replace('-', ' ', $ctx->diamond_type));
         }
         $subject = trim(implode(' ', $parts));
+        $suffix = $include_country ? sprintf(' (%s)', strtoupper($ctx->country_code)) : '';
         if ($subject === '') {
-            return sprintf('Diamond Prices (%s)', strtoupper($ctx->country_code));
+            return 'Diamond Prices' . $suffix;
         }
-        return sprintf('%s Diamond Prices (%s)', $subject, strtoupper($ctx->country_code));
+        return sprintf('%s Diamond Prices%s', $subject, $suffix);
+    }
+
+    /**
+     * Resolve a `country_in_content` boolean flag from the profile, defaulting
+     * to true (country included) when the profile is silent. Country-specific
+     * Loupe domains set these false so the country is not repeated in headings.
+     *
+     * @param array  $profile
+     * @param string $key     e.g. 'h1_headings', 'page_titles'
+     * @param bool   $default
+     * @return bool
+     */
+    private function country_in_content_flag(array $profile, $key, $default = true) {
+        $cic = isset($profile['country_in_content']) && is_array($profile['country_in_content'])
+            ? $profile['country_in_content']
+            : array();
+        return array_key_exists($key, $cic) ? (bool) $cic[$key] : $default;
     }
 
     /**
@@ -1167,7 +1226,9 @@ final class LDN_Renderer {
             return '';
         }
         $base = preg_replace('/_(static|dynamic)$/', '', $section_id);
-        $heading = ucwords(str_replace('_', ' ', $base));
+        $heading = isset(self::$SECTION_HEADINGS[$base])
+            ? self::$SECTION_HEADINGS[$base]
+            : ucwords(str_replace('_', ' ', $base));
         $class = 'ldn-' . str_replace('_', '-', $section_id);
 
         return '<section class="ldn-section ' . esc_attr($class) . '">'
