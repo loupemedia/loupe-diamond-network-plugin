@@ -91,10 +91,12 @@ final class LDN_Renderer {
             // Legacy single block — kept for profiles that still list overview_dynamic.
             'overview_dynamic' => array('intro_text', 'analysis', 'shape_analysis'),
             'overview_intro_dynamic' => array('intro_text'),
-            'overview_detail_dynamic' => array('analysis', 'shape_analysis'),
+            'overview_analysis_dynamic' => array('analysis'),
+            'overview_detail_dynamic' => array('shape_analysis'),
         ),
         'diamond-type' => array(
             'type_overview_dynamic' => array('intro'),
+            'type_buyer_context_dynamic' => array('buyer_context'),
         ),
         'top-level' => array(
             'market_overview_dynamic' => array('intro', 'market_size'),
@@ -1650,33 +1652,6 @@ final class LDN_Renderer {
         $currency = $this->currency_symbol(
             isset($overview['currency']) ? $overview['currency'] : $this->config->get_currency($ctx->site_id, $ctx->country_code)
         );
-        $rows = '';
-        foreach (array('natural' => 'Natural', 'lab_grown' => 'Lab-Grown') as $key => $label) {
-            if (!isset($overview[$key]) || !is_array($overview[$key])) {
-                continue;
-            }
-            $block = $overview[$key];
-            $avg = isset($block['weighted_avg_price']) ? $block['weighted_avg_price'] : null;
-            $combos = isset($block['combo_count']) ? (int) $block['combo_count'] : 0;
-            $canonical_type = $key === 'lab_grown' ? 'lab-grown' : 'natural';
-            $url = $this->build_price_page_url($ctx, 'diamond-type', array('type' => $canonical_type));
-            $price_cell = is_numeric($avg) ? esc_html($currency . number_format((float) $avg, 0)) : '—';
-            $name_cell = $url !== ''
-                ? '<a href="' . esc_url($url) . '">' . esc_html($label) . '</a>'
-                : esc_html($label);
-            $rows .= '<tr><td>' . $name_cell . '</td><td>' . $price_cell . '</td><td>'
-                . esc_html(number_format($combos)) . '</td></tr>';
-        }
-        $overview_html = '';
-        if ($rows !== '') {
-            $overview_html = '<section class="ldn-section ldn-market-overview-table">'
-                . '<h2>' . esc_html__('Market overview', 'loupe-diamond-network') . '</h2>'
-                . '<table class="ldn-data-table"><thead><tr>'
-                . '<th>' . esc_html__('Diamond type', 'loupe-diamond-network') . '</th>'
-                . '<th>' . esc_html__('Weighted average', 'loupe-diamond-network') . '</th>'
-                . '<th>' . esc_html__('Combinations tracked', 'loupe-diamond-network') . '</th>'
-                . '</tr></thead><tbody>' . $rows . '</tbody></table></section>';
-        }
 
         $discount_chart = $this->chart_html(
             isset($bag['market_discount_chart']) && is_array($bag['market_discount_chart'])
@@ -1686,7 +1661,15 @@ final class LDN_Renderer {
             __('Lab-grown discount vs natural', 'loupe-diamond-network')
         );
 
-        return $discount_chart . $overview_html . $this->carat_price_table_html($ctx, $overview, $currency);
+        $trend_chart = $this->chart_html(
+            isset($bag['market_trend_chart']) && is_array($bag['market_trend_chart'])
+                ? $bag['market_trend_chart']
+                : array(),
+            'ldn-market-trend-chart',
+            __('Natural vs lab-grown price change (%)', 'loupe-diamond-network')
+        );
+
+        return $trend_chart . $discount_chart . $this->carat_price_table_html($ctx, $overview, $currency);
     }
 
     /**
@@ -1909,6 +1892,7 @@ final class LDN_Renderer {
             case 'top-level':
                 $bag['market_overview'] = $this->fetcher->fetch_artefact('market_overview_json', $ctx);
                 $bag['market_discount_chart'] = $this->fetcher->fetch_artefact('market_discount_chart', $ctx);
+                $bag['market_trend_chart'] = $this->fetcher->fetch_artefact('market_trend_chart', $ctx);
                 if (!is_array($bag['summary']) || empty($bag['summary'])) {
                     $bag['summary'] = is_array($bag['market_overview']) ? $bag['market_overview'] : array();
                 }

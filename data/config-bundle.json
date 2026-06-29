@@ -1,6 +1,6 @@
 {
-  "version": "a2d08a0",
-  "generated_at": "2026-06-29T03:14:13.156728+00:00",
+  "version": "93462d7",
+  "generated_at": "2026-06-29T05:37:52.091103+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8192,6 +8192,7 @@
             "trend_analysis_static",
             "carat_ladder",
             "buying_guidance_static",
+            "faq_static",
             "cross_site_comparison"
           ],
           "ad_slots": [
@@ -8203,9 +8204,11 @@
           "hero_component": "table_chart",
           "sections": [
             "overview_intro_dynamic",
+            "overview_analysis_dynamic",
             "hero",
             "overview_detail_dynamic",
             "shape_breakdown_static",
+            "faq_static",
             "cross_site_comparison"
           ],
           "ad_slots": [
@@ -8218,7 +8221,8 @@
           "sections": [
             "type_overview_dynamic",
             "hero",
-            "natural_vs_lab_analysis",
+            "type_buyer_context_dynamic",
+            "faq_static",
             "partner_spotlight",
             "cross_site_comparison"
           ],
@@ -8235,6 +8239,7 @@
             "type_comparison",
             "shape_preview",
             "price_factors_static",
+            "faq_static",
             "partner_spotlight",
             "cross_site_comparison"
           ],
@@ -8286,10 +8291,15 @@
         "all_shapes": {
           "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently sits at {currency_symbol}{current_price:,.0f}, based on the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nAcross the shapes, prices run from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} — what you pay comes down mostly to shape, {color_word}, and clarity once the stone is set in a ring.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "At {carat} carats, {most_expensive_shape} leads on price at {currency_symbol}{most_expensive_price:,.0f} while {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes at this weight; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "At {carat} carats, {most_expensive_shape} leads on price at {currency_symbol}{most_expensive_price:,.0f} while {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\n"
         },
         "diamond_type": {
-          "intro": "{type_title} diamond prices in {country_name} cover {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most searched weight, where the weighted median is {currency_symbol}{weighted_median_price:,.0f}, based on {total_sample_size:,} stones tracked across every shape in the index.\n"
+          "intro": "{type_title} diamond prices in {country_name} cover {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most searched weight, where the weighted median is {currency_symbol}{weighted_median_price:,.0f}, based on {total_sample_size:,} stones tracked across every shape in the index.\n",
+          "buyer_context": "This page shows how {type_title_lower} diamond prices scale by carat weight in {country_name}. Each figure is a weighted median across every shape in our index — use it to set a budget before you compare round, oval, and other shapes at the weight you have in mind.\n{lab_comparison_clause}\n"
+        },
+        "top_level": {
+          "intro": "Our index tracks {total_diamonds_tracked:,} diamonds in {country_name} — {natural_sample_size:,} natural stones and {lab_sample_size:,} lab-grown across every shape and carat weight we monitor.\nAt 1 carat, the typical natural diamond sits at {currency_symbol}{one_carat_natural:,.0f} versus {currency_symbol}{one_carat_lab:,.0f} for lab-grown — a {one_carat_discount:.0f}% price gap that generally widens at larger weights.\n",
+          "market_size": "Use the chart and table below to see how natural and lab-grown prices have moved recently and to jump to any carat weight. {trend_clause}\n"
         }
       },
       "file_naming": {
@@ -8322,9 +8332,21 @@
             "json_key": "shape_breakdown",
             "instruction": "Write as a knowledgeable local jewellery guide. Compare diamond shapes at {carat} carats for {diamond_type} diamonds for engagement ring buyers: face-up size on the hand, sparkle character, durability in daily wear, and typical trade-offs at this weight. Ground every point in practical ring-shopping context — not abstract gemology. No specific prices or market movements. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
             "length": "4-5 sentences"
+          },
+          "faq_static": {
+            "json_key": "faq",
+            "output_type": "array",
+            "instruction": "Write as a knowledgeable local jewellery guide — professional, clear, and helpful. Generate questions a buyer comparing shapes at {carat} carats for {diamond_type} engagement rings would realistically ask: face-up size on the hand, which shapes offer the best value at this weight, durability in daily wear, and where to start once they have chosen a carat. Answers must be concise and practical — no hedging, no live prices or market commentary.\n",
+            "length": "3 pairs"
           }
         },
         "diamond_type": {
+          "faq_static": {
+            "json_key": "faq",
+            "output_type": "array",
+            "instruction": "Write for buyers on a {diamond_type} diamond prices page. Questions should help them use the carat ladder, set a budget before comparing shapes, and understand when natural versus lab-grown matters for their ring — warm local-jeweller tone, engagement-ring focus. No today's prices, percentages, or market moves.\n",
+            "length": "3 pairs"
+          },
           "natural_vs_lab_analysis": {
             "json_key": "natural_vs_lab_analysis",
             "instruction": "Write for buyers on a {diamond_type} diamond prices page. Explain how natural and lab-grown stones compare on grading, value perceptions, and when each type suits an engagement ring — warm, local-jeweller tone. No today's prices or market moves. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
@@ -8332,6 +8354,12 @@
           }
         },
         "top_level": {
+          "faq_static": {
+            "json_key": "faq",
+            "output_type": "array",
+            "instruction": "Write for visitors landing on the diamond price hub. Questions should orient first-time buyers: natural versus lab-grown, how to read the charts and carat table, where to go next for a specific carat or shape, and what to decide before visiting a jeweller — practical engagement-ring guidance in a warm local-jeweller voice. No price figures, percentages, or dates.\n",
+            "length": "4 pairs"
+          },
           "type_comparison": {
             "json_key": "type_comparison",
             "instruction": "Orient first-time visitors to natural versus lab-grown diamond prices on this site. Explain what each section of the hub shows and how to choose which type to explore first for an engagement ring — practical, non-salesy. No price figures or dates. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
@@ -10426,6 +10454,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10493,6 +10522,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10560,6 +10590,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10627,6 +10658,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10694,6 +10726,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10761,6 +10794,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10828,6 +10862,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10895,6 +10930,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10962,6 +10998,7 @@
             "pipeline_artefacts": [
               "market_overview_json",
               "market_discount_chart",
+              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -12523,7 +12560,8 @@
         "description": "Country- or market-level overview stats — top-level pricing landing page headline data.",
         "wp_widgets": [],
         "related_artefacts": [
-          "market_discount_chart"
+          "market_discount_chart",
+          "market_trend_chart"
         ]
       },
       "market_discount_chart": {
@@ -12538,6 +12576,19 @@
           "market_overview_json"
         ],
         "runtime_note": "Uses lab_grown_discount_pct from market-overview.json carat_price_table."
+      },
+      "market_trend_chart": {
+        "page_level": "top-level",
+        "producing_script": "C5.3_top_level_aggregate",
+        "gate": "site_entitlement",
+        "status": "live",
+        "filename": "market-trend-chart.html (+ .json)",
+        "description": "Line chart of natural vs lab-grown % price change over 7/14/21 days on the top-level hub.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "market_overview_json"
+        ],
+        "runtime_note": "Percent change from period start; sample-weighted type averages from market index daily history."
       },
       "templated_copy_json": {
         "page_level": "all",

@@ -258,7 +258,11 @@ $market_bag = array(
 $market_html = $renderer->market_overview_table_html($top_ctx, $market_bag);
 check(
     strpos($market_html, 'ldn-market-discount-chart') !== false,
-    'top-level hero renders discount chart before overview tables when entitled'
+    'top-level hero renders discount chart when entitled'
+);
+check(
+    strpos($market_html, 'Market overview') === false,
+    'top-level hero omits the redundant weighted-average overview table'
 );
 
 // --- 7. shapes_ranking_table_html links shape drill-down (all-shapes) -------
@@ -516,15 +520,14 @@ check(
 );
 
 // --- 15. all-shapes overview copy split (CP2) ----------------------------
-// Test intent: intro_text renders alone before the hero; analysis + consolidated
-// shape_analysis render after; legacy intro/ranking_summary keys are ignored.
-// Would fail if: overview_dynamic still concatenated all five keys, or legacy
-// duplicate paragraphs leaked through overview_detail_dynamic.
+// Test intent: intro_text renders alone before the hero; trend analysis renders
+// before the chart; shape_analysis after; legacy keys are ignored.
+// Would fail if: analysis still rendered after the hero, or legacy duplicates leaked.
 $copy_bag = array(
     'copy' => array('sections' => array(
         'intro_text'      => 'Opening paragraph about prices.',
         'analysis'        => 'Trend paragraph here.',
-        'shape_analysis'  => 'Oval leads; Round trails. We track 58,316 stones.',
+        'shape_analysis'  => 'Oval leads; Round trails.',
         'intro'           => 'Legacy duplicate — must not render.',
         'ranking_summary' => 'Legacy duplicate — must not render either.',
     )),
@@ -537,11 +540,17 @@ check(
         && strpos($intro_only, 'Trend paragraph') === false,
     'overview_intro_dynamic renders intro_text only (before hero)'
 );
+$analysis_before = $renderer->copy_dynamic_html('overview_analysis_dynamic', $all_shapes_ctx, $copy_bag);
+check(
+    strpos($analysis_before, 'Trend paragraph') !== false
+        && strpos($analysis_before, 'Oval leads') === false,
+    'overview_analysis_dynamic renders trend analysis before the hero chart'
+);
 $detail_copy = $renderer->copy_dynamic_html('overview_detail_dynamic', $all_shapes_ctx, $copy_bag);
 check(
-    strpos($detail_copy, 'Trend paragraph') !== false
+    strpos($detail_copy, 'Trend paragraph') === false
         && strpos($detail_copy, 'Oval leads') !== false,
-    'overview_detail_dynamic renders analysis + shape_analysis after hero'
+    'overview_detail_dynamic renders shape_analysis only after hero'
 );
 check(
     strpos($detail_copy, 'Legacy duplicate') === false,

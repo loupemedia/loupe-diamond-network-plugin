@@ -49,6 +49,7 @@ final class LDN_S3_Key_Resolver {
         'type_summary_json'      => 'type-summary.json',
         'market_overview_json'   => 'market-overview.json',
         'market_discount_chart'  => 'market-discount-chart.json',
+        'market_trend_chart'     => 'market-trend-chart.json',
         'shapes_at_carat_chart'  => 'shapes-ranking-chart.json',
         'all_shapes_summary_json' => 'summary-data.json',
         'all_shapes_content_json' => 'all-shapes-content.json',

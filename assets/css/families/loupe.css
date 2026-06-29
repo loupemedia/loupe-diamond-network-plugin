@@ -62,3 +62,12 @@
 .ldn-chrome--loupe-classic .ldn-chart-target {
 	min-height: 440px;
 }
+
+/* Editorial intros: clearer breathing room between paragraphs. */
+.ldn-chrome--loupe-classic .ldn-intro-dynamic p,
+.ldn-chrome--loupe-classic .ldn-copy-intro_text p,
+.ldn-chrome--loupe-classic .ldn-copy-intro p,
+.ldn-chrome--loupe-classic .ldn-copy-market_size p {
+	line-height: 1.65;
+	margin-bottom: 1.25rem;
+}
