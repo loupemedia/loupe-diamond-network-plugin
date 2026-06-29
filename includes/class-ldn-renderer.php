@@ -88,7 +88,10 @@ final class LDN_Renderer {
      */
     const DYNAMIC_COPY_KEYS = array(
         'all-shapes' => array(
-            'overview_dynamic' => array('intro_text', 'analysis', 'shape_analysis', 'intro', 'ranking_summary'),
+            // Legacy single block — kept for profiles that still list overview_dynamic.
+            'overview_dynamic' => array('intro_text', 'analysis', 'shape_analysis'),
+            'overview_intro_dynamic' => array('intro_text'),
+            'overview_detail_dynamic' => array('analysis', 'shape_analysis'),
         ),
         'diamond-type' => array(
             'type_overview_dynamic' => array('intro'),
@@ -189,14 +192,23 @@ final class LDN_Renderer {
         $out .= '<h1 class="ldn-page-title">'
             . esc_html($this->headline($ctx, $this->country_in_content_flag($profile, 'h1_headings')))
             . '</h1>';
-        $out .= $this->data_summary_html(
-            $ctx,
-            is_array($bag['summary']) ? $bag['summary'] : array(),
-            $currency
-        );
-        $out .= $this->render_hero($layout['hero_component'], $ctx, $bag);
+        // The editorial intro now leads the page; the structured data summary still
+        // feeds the meta description + JSON-LD via render_head_content().
+        $hero_html = $this->render_hero($layout['hero_component'], $ctx, $bag);
+        $sections = is_array($layout['sections']) ? $layout['sections'] : array();
 
-        foreach ($layout['sections'] as $section_id) {
+        // A profile can position the hero inline by listing a `hero` token in its
+        // sections; otherwise the hero renders first (back-compatible default).
+        $hero_inline = in_array('hero', $sections, true);
+        if (!$hero_inline) {
+            $out .= $hero_html;
+        }
+
+        foreach ($sections as $section_id) {
+            if ((string) $section_id === 'hero') {
+                $out .= $hero_html;
+                continue;
+            }
             $out .= $this->render_section((string) $section_id, $ctx, $bag, $currency);
         }
 
@@ -688,6 +700,9 @@ final class LDN_Renderer {
                 if ($dynamic !== '') {
                     return $dynamic;
                 }
+                if ($section_id === 'type_overview_dynamic') {
+                    return $this->type_intro_html($ctx, $bag, $currency);
+                }
             }
             return $this->stats_html($ctx, is_array($bag['summary']) ? $bag['summary'] : array(), $currency);
         }
@@ -870,7 +885,7 @@ final class LDN_Renderer {
             $subject = 'diamond';
         }
 
-        $price_text = $symbol . number_format((float) $current_price, 2);
+        $price_text = $symbol . number_format((float) $current_price, 0);
         $diamond_word = $sample_size === 1 ? 'diamond' : 'diamonds';
         $sample_text = number_format($sample_size);
 
@@ -913,11 +928,9 @@ final class LDN_Renderer {
         $range_paragraph = '';
         if (is_numeric($min_price) && is_numeric($max_price) && (float) $max_price > 0) {
             $range_paragraph = sprintf(
-                'When comparing to %s carat %s diamond prices, prices for these diamonds range from %s to %s, depending on factors such as %s and clarity.',
-                esc_html($carat_label !== '' ? $carat_label : 'this'),
-                esc_html(strtolower($type_label !== '' ? $type_label : 'diamond')),
-                esc_html($symbol . number_format((float) $min_price, 2)),
-                esc_html($symbol . number_format((float) $max_price, 2)),
+                'Individual stones range from %s to %s, with the difference driven by cut, %s, and clarity.',
+                esc_html($symbol . number_format((float) $min_price, 0)),
+                esc_html($symbol . number_format((float) $max_price, 0)),
                 esc_html($color_word)
             );
         }
@@ -928,6 +941,68 @@ final class LDN_Renderer {
         }
 
         return '<section class="ldn-section ldn-intro-dynamic">'
+            . wp_kses_post(wpautop($body))
+            . '</section>';
+    }
+
+    /**
+     * Diamond-type intro from type-summary.json when copy.json is absent or stale.
+     *
+     * Mirrors the Loupe C5.8 ``diamond_type.intro`` template so the page leads with
+     * useful context before the carat-tier table even when templated copy has not
+     * been regenerated yet.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @param string|null      $currency ISO code for price formatting.
+     * @return string
+     */
+    public function type_intro_html(LDN_Page_Context $ctx, array $bag, $currency = null) {
+        $payload = is_array($bag['type_summary']) ? $bag['type_summary'] : array();
+        $aggregate = isset($payload['aggregate']) && is_array($payload['aggregate'])
+            ? $payload['aggregate']
+            : array();
+        if (empty($aggregate)) {
+            return '';
+        }
+
+        $carat_count = isset($aggregate['carat_count']) ? (int) $aggregate['carat_count'] : 0;
+        $popular = isset($aggregate['most_popular_carat']) ? (string) $aggregate['most_popular_carat'] : '';
+        $median = isset($aggregate['weighted_median_price']) ? $aggregate['weighted_median_price'] : null;
+        $samples = isset($aggregate['total_sample_size']) ? (int) $aggregate['total_sample_size'] : 0;
+        if ($carat_count <= 0 || !is_numeric($median)) {
+            return '';
+        }
+
+        $symbol = $this->currency_symbol($currency);
+        $country_name = $this->country_full_name($ctx);
+        $type_label = $ctx->diamond_type !== null && isset(self::$TYPE_LABELS[$ctx->diamond_type])
+            ? self::$TYPE_LABELS[$ctx->diamond_type]
+            : ($ctx->diamond_type !== null ? ucwords(str_replace('-', ' ', $ctx->diamond_type)) : 'Diamond');
+        $popular_label = $this->format_carat_label($popular);
+
+        $lead = sprintf(
+            '%s diamond prices in %s cover %d carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.',
+            esc_html($type_label),
+            esc_html($country_name),
+            $carat_count
+        );
+        $detail = '';
+        if ($popular_label !== '' && $samples > 0) {
+            $detail = sprintf(
+                '%s carat is the most searched weight, where the weighted median is %s, based on %s stones tracked across every shape in the index.',
+                esc_html($popular_label),
+                esc_html($symbol . number_format((float) $median, 0)),
+                esc_html(number_format($samples))
+            );
+        }
+
+        $body = $lead;
+        if ($detail !== '') {
+            $body .= "\n\n" . $detail;
+        }
+
+        return '<section class="ldn-section ldn-intro-dynamic ldn-type-intro">'
             . wp_kses_post(wpautop($body))
             . '</section>';
     }
@@ -1379,7 +1454,7 @@ final class LDN_Renderer {
             if ($url === '') {
                 continue;
             }
-            $price_cell = is_numeric($price) ? esc_html($currency . number_format((float) $price, 2)) : '—';
+            $price_cell = is_numeric($price) ? esc_html($currency . number_format((float) $price, 0)) : '—';
             $row_html = '<tr><td><a href="' . esc_url($url) . '">' . esc_html($shape) . '</a></td>'
                 . '<td>' . $price_cell . '</td>';
             if ($show_change_col) {
@@ -1472,6 +1547,29 @@ final class LDN_Renderer {
                 ) . '</a></p>'
             : '';
 
+        $intro_line = '<p>' . esc_html(
+            sprintf(
+                /* translators: %s: diamond shape name */
+                __(
+                    'How the median price of a %s diamond scales across carat weights — a useful way to weigh size against budget. Select a weight to see its full breakdown.',
+                    'loupe-diamond-network'
+                ),
+                strtolower($shape_label)
+            )
+        ) . '</p>';
+
+        $chart_html = $this->chart_html(
+            isset($bag['carat_ladder_chart']) && is_array($bag['carat_ladder_chart'])
+                ? $bag['carat_ladder_chart']
+                : array(),
+            'ldn-carat-ladder-chart',
+            sprintf(
+                /* translators: %s: diamond shape name */
+                __('%s prices by carat weight', 'loupe-diamond-network'),
+                $shape_label
+            )
+        );
+
         return '<section class="ldn-section ldn-carat-ladder">'
             . '<h2>' . esc_html(
                 sprintf(
@@ -1480,7 +1578,9 @@ final class LDN_Renderer {
                     $shape_label
                 )
             ) . '</h2>'
+            . $intro_line
             . $compare_link
+            . $chart_html
             . '<table class="ldn-data-table"><thead><tr>'
             . '<th>' . esc_html__('Carat', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Median price', 'loupe-diamond-network') . '</th>'
@@ -1578,7 +1678,15 @@ final class LDN_Renderer {
                 . '</tr></thead><tbody>' . $rows . '</tbody></table></section>';
         }
 
-        return $overview_html . $this->carat_price_table_html($ctx, $overview, $currency);
+        $discount_chart = $this->chart_html(
+            isset($bag['market_discount_chart']) && is_array($bag['market_discount_chart'])
+                ? $bag['market_discount_chart']
+                : array(),
+            'ldn-market-discount-chart',
+            __('Lab-grown discount vs natural', 'loupe-diamond-network')
+        );
+
+        return $discount_chart . $overview_html . $this->carat_price_table_html($ctx, $overview, $currency);
     }
 
     /**
@@ -1785,6 +1893,7 @@ final class LDN_Renderer {
                 $bag['dist'] = $this->fetcher->fetch_artefact('distribution_json', $ctx);
                 $bag['individual'] = $this->fetcher->fetch_artefact('individual_content_json', $ctx);
                 $bag['carat_ladder'] = $this->fetcher->fetch_artefact('carat_ladder_json', $ctx);
+                $bag['carat_ladder_chart'] = $this->fetcher->fetch_artefact('carat_ladder_chart', $ctx);
                 break;
             case 'all-shapes':
                 $bag['ranking'] = $this->fetcher->fetch_artefact('shapes_ranking_json', $ctx);
@@ -1799,6 +1908,7 @@ final class LDN_Renderer {
                 break;
             case 'top-level':
                 $bag['market_overview'] = $this->fetcher->fetch_artefact('market_overview_json', $ctx);
+                $bag['market_discount_chart'] = $this->fetcher->fetch_artefact('market_discount_chart', $ctx);
                 if (!is_array($bag['summary']) || empty($bag['summary'])) {
                     $bag['summary'] = is_array($bag['market_overview']) ? $bag['market_overview'] : array();
                 }

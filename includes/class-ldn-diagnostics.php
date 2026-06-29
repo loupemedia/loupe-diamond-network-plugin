@@ -77,11 +77,11 @@ final class LDN_Diagnostics {
             case 'shape':
                 return $common;
             case 'all-shapes':
-                return array('shapes_ranking_json', 'static_content_json');
+                return array('shapes_ranking_json', 'templated_copy_json', 'static_content_json');
             case 'diamond-type':
-                return array('type_summary_json', 'static_content_json');
+                return array('type_summary_json', 'templated_copy_json', 'static_content_json');
             case 'top-level':
-                return array('market_overview_json', 'static_content_json');
+                return array('market_overview_json', 'templated_copy_json', 'static_content_json');
             default:
                 return $common;
         }

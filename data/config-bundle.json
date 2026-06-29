@@ -1,6 +1,6 @@
 {
-  "version": "188efd4",
-  "generated_at": "2026-06-28T13:32:28.547537+00:00",
+  "version": "a2d08a0",
+  "generated_at": "2026-06-29T03:14:13.156728+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -6093,11 +6093,9 @@
       },
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently averages {currency_symbol}{current_price:,.2f} across the {num_diamonds:,} lab-grown stones we track at this weight{intro_change_clause}.\nPrices range from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f}, shaped mainly by cut, {color_word}, clarity, and the certification behind each stone — the details worth understanding before you buy.\n",
+          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently averages {currency_symbol}{current_price:,.0f} across the {num_diamonds:,} lab-grown stones we track at this weight{intro_change_clause}.\nPrices range from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f}, shaped mainly by cut, {color_word}, clarity, and the certification behind each stone — the details worth understanding before you buy.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "At {carat} carats, the {most_expensive_shape} carries the highest price here at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} is the most economical at {currency_symbol}{least_expensive_price:,.2f}.\nThe {currency_symbol}{price_difference:,.2f} difference — about {price_difference_pct:.1f}% — reflects how cutting demand and yield differ by shape, not a difference in quality or ethics between the stones.\n",
-          "intro": "Among all shapes, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the most economical is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
-          "ranking_summary": "We track {total_sample_size:,} lab-grown {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "At {carat} carats, the {most_expensive_shape} carries the highest price here at {currency_symbol}{most_expensive_price:,.0f}, while the {least_expensive_shape} is the most economical at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%) that reflects cutting demand and yield, not quality or ethics.\nWe track {total_sample_size:,} lab-grown {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -6357,11 +6355,9 @@
       },
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently costs about {currency_symbol}{current_price:,.2f} for the centre stone, based on the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nDepending on shape, {color_word}, and clarity, the stone alone ranges from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} — worth pinning down before you add the setting to build your full ring budget.\n",
+          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently costs about {currency_symbol}{current_price:,.0f} for the centre stone, based on the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nDepending on shape, {color_word}, and clarity, the stone alone ranges from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} — worth pinning down before you add the setting to build your full ring budget.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "For a {carat} carat ring, the {most_expensive_shape} is the most expensive centre stone at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} is the most budget-friendly at {currency_symbol}{least_expensive_price:,.2f}.\nChoosing the {least_expensive_shape} over the {most_expensive_shape} frees up around {currency_symbol}{price_difference:,.2f} ({price_difference_pct:.1f}%) — money that could go toward a better setting or a higher cut grade.\n",
-          "intro": "Across the shapes, the most expensive {carat} carat {type} centre stone in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the most affordable is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
-          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median centre-stone price of {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "For a {carat} carat ring, the {most_expensive_shape} is the most expensive centre stone at {currency_symbol}{most_expensive_price:,.0f}, while the {least_expensive_shape} is the most budget-friendly at {currency_symbol}{least_expensive_price:,.0f} — about {currency_symbol}{price_difference:,.0f} ({price_difference_pct:.1f}%) that could go toward a better setting or a higher cut grade.\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median centre-stone price is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -6774,11 +6770,9 @@
       },
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "Today, a {carat} carat {type_label} diamond in {country_name} costs {currency_symbol}{current_price:,.2f} — the median across {num_diamonds:,} stones currently listed at this weight{intro_change_clause}.\nPrices span {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f}, determined by shape, {color_word}, and clarity. Use the figure above as your benchmark for what you should pay.\n",
+          "intro_text": "Today, a {carat} carat {type_label} diamond in {country_name} costs {currency_symbol}{current_price:,.0f} — the median across {num_diamonds:,} stones currently listed at this weight{intro_change_clause}.\nPrices span {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f}, determined by shape, {color_word}, and clarity. Use the figure above as your benchmark for what you should pay.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "At {carat} carats, the {most_expensive_shape} is the most expensive shape at {currency_symbol}{most_expensive_price:,.2f}; the {least_expensive_shape} is the least expensive at {currency_symbol}{least_expensive_price:,.2f}.\nThe difference is {currency_symbol}{price_difference:,.2f}, or {price_difference_pct:.1f}% — a precise measure of the shape premium at this carat weight.\n",
-          "intro": "Across all shapes, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the least expensive is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
-          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes. The weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "At {carat} carats, the {most_expensive_shape} is the most expensive shape at {currency_symbol}{most_expensive_price:,.0f}; the {least_expensive_shape} is the least expensive at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%) at this carat weight.\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -7164,10 +7158,8 @@
       },
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "We currently see a market price of {currency_symbol}{current_price:,.2f} for a {carat} carat {type_label} diamond {in_country}, drawn from the {num_diamonds:,} stones we assess at this weight.\nQuality drives the range — from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} — with shape, {color_word}, and clarity the factors that most influence where a given stone sits.\n",
-          "shape_analysis": "At this carat weight, we find the {most_expensive_shape} commands the highest price at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} represents the most accessible choice at {currency_symbol}{least_expensive_price:,.2f}.\nThe {currency_symbol}{price_difference:,.2f} difference — some {price_difference_pct:.1f}% — reflects genuine variation in cutting demand and yield, and is well worth weighing against your priorities for the finished ring.\n",
-          "intro": "Across the shapes, the most premium {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, while the {least_expensive_shape} offers the most accessible entry at {currency_symbol}{least_expensive_price:,.0f}.\n",
-          "ranking_summary": "We assess {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "intro_text": "We currently see a market price of {currency_symbol}{current_price:,.0f} for a {carat} carat {type_label} diamond {in_country}, drawn from the {num_diamonds:,} stones we assess at this weight.\nQuality drives the range — from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} — with shape, {color_word}, and clarity the factors that most influence where a given stone sits.\n",
+          "shape_analysis": "At this carat weight, the {most_expensive_shape} commands the highest price at {currency_symbol}{most_expensive_price:,.0f}, while the {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%) worth weighing against your ring priorities.\nWe assess {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -7483,11 +7475,9 @@
       },
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "A {carat} carat {type_label} diamond in the UK is currently going for {currency_symbol}{current_price:,.2f} — the median across the {num_diamonds:,} stones I'm tracking at this weight{intro_change_clause}.\nYou'll find them anywhere from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} depending on shape, {color_word}, and clarity, so it pays to know the going rate before you start hunting.\n",
+          "intro_text": "A {carat} carat {type_label} diamond in the UK is currently going for {currency_symbol}{current_price:,.0f} — the median across the {num_diamonds:,} stones I'm tracking at this weight{intro_change_clause}.\nYou'll find them anywhere from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} depending on shape, {color_word}, and clarity, so it pays to know the going rate before you start hunting.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "At {carat} carats, the {most_expensive_shape} is the dearest shape at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} is the best value at {currency_symbol}{least_expensive_price:,.2f}.\nThat's about {currency_symbol}{price_difference:,.2f} ({price_difference_pct:.1f}%) between them — a tidy saving if you're happy to switch shape.\n",
-          "intro": "Across the shapes, the dearest {carat} carat {type} diamond in the UK is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the best value is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
-          "ranking_summary": "I track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "At {carat} carats, the {most_expensive_shape} is the dearest shape at {currency_symbol}{most_expensive_price:,.0f}, while the {least_expensive_shape} is the best value at {currency_symbol}{least_expensive_price:,.0f} — about {currency_symbol}{price_difference:,.0f} ({price_difference_pct:.1f}%) between them.\nI track {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -8025,10 +8015,8 @@
       },
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "Right now, a {carat} carat {type_label} diamond {in_country} is going for about {currency_symbol}{current_price:,.2f}, based on the {num_diamonds:,} stones we're tracking at this weight.\nThey run from {currency_symbol}{min_price:,.2f} all the way up to {currency_symbol}{max_price:,.2f}, so where you land depends on shape, {color_word}, and clarity — and that's exactly where the value is hiding.\n",
-          "shape_analysis": "The best-value shape here is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.2f}, while the {most_expensive_shape} is the priciest at {currency_symbol}{most_expensive_price:,.2f}.\nSwitching to the {least_expensive_shape} saves you around {currency_symbol}{price_difference:,.2f} — that's {price_difference_pct:.1f}% off for a stone most people can't tell apart on the finger.\n",
-          "intro": "Across the shapes, the smart-money pick for a {carat} carat {type} diamond in {country_name} is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}, while the {most_expensive_shape} tops the range at {currency_symbol}{most_expensive_price:,.0f}.\n",
-          "ranking_summary": "We're tracking {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a typical price around {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "intro_text": "Right now, a {carat} carat {type_label} diamond {in_country} is going for about {currency_symbol}{current_price:,.0f}, based on the {num_diamonds:,} stones we're tracking at this weight.\nThey run from {currency_symbol}{min_price:,.0f} all the way up to {currency_symbol}{max_price:,.0f}, so where you land depends on shape, {color_word}, and clarity — and that's exactly where the value is hiding.\n",
+          "shape_analysis": "The best-value shape here is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}, while the {most_expensive_shape} is the priciest at {currency_symbol}{most_expensive_price:,.0f} — switching saves about {currency_symbol}{price_difference:,.0f} ({price_difference_pct:.1f}%).\nWe're tracking {total_sample_size:,} {type} stones across {shape_count} shapes; the typical price is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -8200,8 +8188,9 @@
           "hero_component": "price_graph",
           "sections": [
             "intro_dynamic",
-            "carat_ladder",
+            "hero",
             "trend_analysis_static",
+            "carat_ladder",
             "buying_guidance_static",
             "cross_site_comparison"
           ],
@@ -8213,7 +8202,9 @@
         "all_shapes": {
           "hero_component": "table_chart",
           "sections": [
-            "overview_dynamic",
+            "overview_intro_dynamic",
+            "hero",
+            "overview_detail_dynamic",
             "shape_breakdown_static",
             "cross_site_comparison"
           ],
@@ -8226,6 +8217,7 @@
           "hero_component": "comparison_chart",
           "sections": [
             "type_overview_dynamic",
+            "hero",
             "natural_vs_lab_analysis",
             "partner_spotlight",
             "cross_site_comparison"
@@ -8239,6 +8231,7 @@
           "hero_component": "summary_table",
           "sections": [
             "market_overview_dynamic",
+            "hero",
             "type_comparison",
             "shape_preview",
             "price_factors_static",
@@ -8291,11 +8284,12 @@
       },
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently sits at {currency_symbol}{current_price:,.2f}, based on the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nAcross the shapes, prices run from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} — what you pay comes down mostly to shape, {color_word}, and clarity once the stone is set in a ring.\n",
+          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently sits at {currency_symbol}{current_price:,.0f}, based on the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nAcross the shapes, prices run from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} — what you pay comes down mostly to shape, {color_word}, and clarity once the stone is set in a ring.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "At {carat} carats, the {most_expensive_shape} is the priciest choice here at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.2f}.\nThat gap of {currency_symbol}{price_difference:,.2f} means a {most_expensive_shape} runs about {price_difference_pct:.1f}% more than a {least_expensive_shape} at the same carat weight — useful to know if you are still weighing up shapes.\n",
-          "intro": "Across every shape, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the most affordable is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
-          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "At {carat} carats, {most_expensive_shape} leads on price at {currency_symbol}{most_expensive_price:,.0f} while {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes at this weight; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
+        },
+        "diamond_type": {
+          "intro": "{type_title} diamond prices in {country_name} cover {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most searched weight, where the weighted median is {currency_symbol}{weighted_median_price:,.0f}, based on {total_sample_size:,} stones tracked across every shape in the index.\n"
         }
       },
       "file_naming": {
@@ -8787,11 +8781,9 @@
       },
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "Right now a {carat} carat {type_label} diamond {in_country} runs {currency_symbol}{current_price:,.2f} — that's the median across the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nExpect anywhere from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} depending on shape, {color_word}, and clarity. The spread is wide, which means there's real room to shop smart.\n",
+          "intro_text": "Right now a {carat} carat {type_label} diamond {in_country} runs {currency_symbol}{current_price:,.0f} — that's the median across the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nExpect anywhere from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} depending on shape, {color_word}, and clarity. The spread is wide, which means there's real room to shop smart.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "The {most_expensive_shape} is the most expensive cut at this weight ({currency_symbol}{most_expensive_price:,.2f}); the {least_expensive_shape} is the cheapest ({currency_symbol}{least_expensive_price:,.2f}).\nThat's roughly a {price_difference_pct:.1f}% premium for the {most_expensive_shape} — about {currency_symbol}{price_difference:,.2f} more. If you're flexible on shape, that's money better spent on a higher cut grade.\n",
-          "intro": "Of all the shapes, the {most_expensive_shape} commands the highest price for a {carat} carat {type} diamond in {country_name} at {currency_symbol}{most_expensive_price:,.0f}, while the {least_expensive_shape} is the value pick at {currency_symbol}{least_expensive_price:,.0f}.\n",
-          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes. The weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "The {most_expensive_shape} is the most expensive cut at this weight ({currency_symbol}{most_expensive_price:,.0f}); the {least_expensive_shape} is the cheapest ({currency_symbol}{least_expensive_price:,.0f}) — roughly a {price_difference_pct:.1f}% premium ({currency_symbol}{price_difference:,.0f}).\nIf you're flexible on shape, that's money better spent on a higher cut grade. We track {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -8924,14 +8916,12 @@
     "sentence_templates_base": {
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "The current price for a {carat} carat {type_label} diamond in {country_name} is {currency_symbol}{current_price:,.2f}, calculated from {num_diamonds:,} diamonds that match this carat weight and type in our database{intro_change_clause}.\nPrices for these diamonds range from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f}, depending on factors such as the diamond shape, color, and clarity.\n",
+          "intro_text": "The current price for a {carat} carat {type_label} diamond in {country_name} is {currency_symbol}{current_price:,.0f}, calculated from {num_diamonds:,} diamonds that match this carat weight and type in our database{intro_change_clause}.\nPrices for these diamonds range from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f}, depending on factors such as the diamond shape, color, and clarity.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "The most expensive shape for {carat} carat {type_label} diamonds is currently {most_expensive_shape}, priced at {currency_symbol}{most_expensive_price:,.2f}.\nThe least expensive shape for {carat} carat {type_label} diamonds is currently {least_expensive_shape}, priced at {currency_symbol}{least_expensive_price:,.2f}.\nThis is a difference of {currency_symbol}{price_difference:,.2f}, meaning that {most_expensive_shape} diamonds are {price_difference_pct:.2f}% more expensive than {least_expensive_shape} diamonds at the same carat weight.\n",
-          "intro": "Across all shapes, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, while the least expensive is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
-          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes. The weighted median across shapes is {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "The most expensive shape for {carat} carat {type_label} diamonds is {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}; the least expensive is {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes at this weight; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         },
         "diamond_type": {
-          "intro": "{type_title} diamond prices in {country_name} span {carat_count} carat weights in our index. The most popular carat is {most_popular_carat} with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "intro": "{type_title} diamond prices in {country_name} span {carat_count} carat weights in our index. The most searched weight is {most_popular_carat} carat, with a weighted median of {currency_symbol}{weighted_median_price:,.0f} across {total_sample_size:,} tracked stones.\n"
         },
         "top_level": {
           "intro": "Diamond prices in {country_name} reflect broad market activity across natural and lab-grown stones. Natural diamonds average {currency_symbol}{natural_weighted_avg:,.0f} while lab-grown average {currency_symbol}{lab_weighted_avg:,.0f} in our latest snapshot.\n",
@@ -10190,7 +10180,8 @@
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10393,7 +10384,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10433,6 +10425,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10458,7 +10451,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10498,6 +10492,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10523,7 +10518,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10563,6 +10559,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10588,7 +10585,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10628,6 +10626,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10653,7 +10652,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10693,6 +10693,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10718,7 +10719,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10758,6 +10760,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10783,7 +10786,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10823,6 +10827,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10848,7 +10853,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10888,6 +10894,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10913,7 +10920,8 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json"
+              "carat_ladder_json",
+              "carat_ladder_chart"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10953,6 +10961,7 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -12410,8 +12419,25 @@
         "wp_widgets": [
           "carat_ladder"
         ],
-        "related_artefacts": [],
+        "related_artefacts": [
+          "carat_ladder_chart"
+        ],
         "runtime_note": "Same shape across carat weights; highlight page carat; optional % weight/price columns."
+      },
+      "carat_ladder_chart": {
+        "page_level": "shape",
+        "producing_script": "C5.4_carat_ladder",
+        "gate": "site_entitlement",
+        "status": "live",
+        "filename": "carat-ladder-chart.html (+ .json)",
+        "description": "Bar chart of median price by carat weight for the same shape; page carat highlighted.",
+        "wp_widgets": [
+          "carat_ladder"
+        ],
+        "related_artefacts": [
+          "carat_ladder_json"
+        ],
+        "runtime_note": "Rendered above the carat ladder table on shape pages when entitled."
       },
       "shapes_at_carat_chart": {
         "page_level": "all",
@@ -12496,7 +12522,22 @@
         "filename": "market-overview.json",
         "description": "Country- or market-level overview stats — top-level pricing landing page headline data.",
         "wp_widgets": [],
-        "related_artefacts": []
+        "related_artefacts": [
+          "market_discount_chart"
+        ]
+      },
+      "market_discount_chart": {
+        "page_level": "top-level",
+        "producing_script": "C5.3_top_level_aggregate",
+        "gate": "site_entitlement",
+        "status": "live",
+        "filename": "market-discount-chart.html (+ .json)",
+        "description": "Bar chart of lab-grown discount % vs natural by carat weight on the top-level hub.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "market_overview_json"
+        ],
+        "runtime_note": "Uses lab_grown_discount_pct from market-overview.json carat_price_table."
       },
       "templated_copy_json": {
         "page_level": "all",
@@ -12607,7 +12648,8 @@
       "carat_ladder": {
         "description": "Table of the same shape across carat weights with the current page highlighted.",
         "reads_artefacts": [
-          "carat_ladder_json"
+          "carat_ladder_json",
+          "carat_ladder_chart"
         ],
         "page_levels": [
           "shape"

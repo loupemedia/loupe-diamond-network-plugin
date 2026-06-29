@@ -49,6 +49,11 @@ if (!function_exists('wp_kses_post')) {
 if (!function_exists('esc_url')) {
     function esc_url($s) { return (string) $s; }
 }
+if (!function_exists('wp_json_encode')) {
+    function wp_json_encode($data, $options = 0, $depth = 512) {
+        return json_encode($data, $options | JSON_HEX_TAG | JSON_HEX_AMP);
+    }
+}
 if (!function_exists('home_url')) {
     function home_url($p = '') { return 'https://example.com/' . ltrim((string) $p, '/'); }
 }
@@ -238,6 +243,24 @@ check(
     'carat table renders empty when carat_price_table is absent (stale S3 safe)'
 );
 
+$market_bag = array(
+    'market_overview' => array(
+        'currency' => 'USD',
+        'natural' => array('weighted_avg_price' => 5000, 'combo_count' => 10),
+        'lab_grown' => array('weighted_avg_price' => 2500, 'combo_count' => 8),
+        'carat_price_table' => $carat_overview['carat_price_table'],
+    ),
+    'market_discount_chart' => array(
+        'data' => array(array('x' => array('1 ct'), 'y' => array(50.0), 'type' => 'bar')),
+        'layout' => array('margin' => array('t' => 150)),
+    ),
+);
+$market_html = $renderer->market_overview_table_html($top_ctx, $market_bag);
+check(
+    strpos($market_html, 'ldn-market-discount-chart') !== false,
+    'top-level hero renders discount chart before overview tables when entitled'
+);
+
 // --- 7. shapes_ranking_table_html links shape drill-down (all-shapes) -------
 $all_shapes_ctx = new LDN_Page_Context('modernjeweler', 'all-shapes', 'us', 'natural', '1');
 $ranking_bag = array(
@@ -281,6 +304,16 @@ check(
 check(
     strpos($ladder_html, 'ldn-row-current') !== false,
     'carat ladder highlights the current page carat row'
+);
+$ladder_chart_bag = $ladder_bag;
+$ladder_chart_bag['carat_ladder_chart'] = array(
+    'data' => array(array('x' => array('1 ct', '2 ct'), 'y' => array(6000, 12000), 'type' => 'bar')),
+    'layout' => array('margin' => array('t' => 150)),
+);
+$ladder_with_chart = $renderer->carat_ladder_html($shape_ctx, $ladder_chart_bag, 'USD');
+check(
+    strpos($ladder_with_chart, 'ldn-carat-ladder-chart') !== false,
+    'carat ladder section renders inline chart when chart payload present'
 );
 
 // --- 9. intro_html price-change period is policy-driven ---------------------
@@ -439,6 +472,112 @@ $snapshot_stats = $snapshot_renderer->stats_html($all_shapes_ctx, $stats_summary
 check(
     strpos($snapshot_stats, 'change</dt>') === false,
     'stats_html omits the change row for snapshot families (show_change:false)'
+);
+
+// --- 12. intro_html range wording + whole numbers (CP1) ---------------------
+// Test intent: the intro range sentence describes the spread of this page's
+// stones (no same-to-same "comparing to X carat X" phrasing) and all dollar
+// figures are whole numbers (no cents).
+// Would fail if: the old "When comparing to %s carat %s diamond prices" wording
+// returned, or number_format kept 2 decimals on prices.
+$range_summary = array(
+    'current_price' => 3610,
+    'num_diamonds'  => 33576,
+    'distribution'  => array('price_range' => array('min' => 980, 'max' => 24730)),
+);
+$range_intro = $renderer->intro_html($shape_ctx, $range_summary, 'USD');
+check(
+    strpos($range_intro, 'Individual stones range from $980 to $24,730') !== false,
+    'intro range sentence states the stone spread in whole dollars'
+);
+check(
+    strpos($range_intro, 'When comparing to') === false,
+    'intro range sentence drops the same-to-same comparison wording'
+);
+check(
+    strpos($range_intro, '.00') === false,
+    'intro prices use whole numbers (no cents)'
+);
+
+// --- 13. carat ladder has an explanatory intro line (CP1) -------------------
+// Test intent: the carat ladder explains it compares this shape across carat
+// weights. Would fail if the table rendered with no lead-in context.
+$ladder_intro_html = $renderer->carat_ladder_html($shape_ctx, $ladder_bag, 'USD');
+check(
+    strpos($ladder_intro_html, 'scales across carat weights') !== false,
+    'carat ladder includes an intro line framing the shape-vs-carat comparison'
+);
+
+// --- 14. shapes ranking prices are whole numbers (CP1) ----------------------
+$ranking_whole_html = $renderer->shapes_ranking_table_html($all_shapes_ctx, $ranking_12m_bag);
+check(
+    strpos($ranking_whole_html, '$6,000') !== false && strpos($ranking_whole_html, '$6,000.00') === false,
+    'ranking table prices render as whole numbers (no cents)'
+);
+
+// --- 15. all-shapes overview copy split (CP2) ----------------------------
+// Test intent: intro_text renders alone before the hero; analysis + consolidated
+// shape_analysis render after; legacy intro/ranking_summary keys are ignored.
+// Would fail if: overview_dynamic still concatenated all five keys, or legacy
+// duplicate paragraphs leaked through overview_detail_dynamic.
+$copy_bag = array(
+    'copy' => array('sections' => array(
+        'intro_text'      => 'Opening paragraph about prices.',
+        'analysis'        => 'Trend paragraph here.',
+        'shape_analysis'  => 'Oval leads; Round trails. We track 58,316 stones.',
+        'intro'           => 'Legacy duplicate — must not render.',
+        'ranking_summary' => 'Legacy duplicate — must not render either.',
+    )),
+    'static' => null,
+    'summary' => array(),
+);
+$intro_only = $renderer->copy_dynamic_html('overview_intro_dynamic', $all_shapes_ctx, $copy_bag);
+check(
+    strpos($intro_only, 'Opening paragraph') !== false
+        && strpos($intro_only, 'Trend paragraph') === false,
+    'overview_intro_dynamic renders intro_text only (before hero)'
+);
+$detail_copy = $renderer->copy_dynamic_html('overview_detail_dynamic', $all_shapes_ctx, $copy_bag);
+check(
+    strpos($detail_copy, 'Trend paragraph') !== false
+        && strpos($detail_copy, 'Oval leads') !== false,
+    'overview_detail_dynamic renders analysis + shape_analysis after hero'
+);
+check(
+    strpos($detail_copy, 'Legacy duplicate') === false,
+    'overview_detail_dynamic ignores legacy intro/ranking_summary keys'
+);
+
+// --- 16. diamond-type intro from type_summary fallback (CP3) -----------------
+// Test intent: type_overview_dynamic leads with useful copy from type-summary.json
+// when copy.json is absent; C5.8 Loupe template is the long-term source of truth.
+// Would fail if: type_overview fell through to empty stats_html with no intro.
+$type_summary_bag = array(
+    'type_summary' => array(
+        'aggregate' => array(
+            'carat_count'           => 19,
+            'most_popular_carat'    => '1',
+            'weighted_median_price' => 3873,
+            'total_sample_size'     => 510000,
+        ),
+    ),
+    'copy'    => null,
+    'static'  => null,
+    'summary' => array(),
+);
+$type_intro = $renderer->type_intro_html($type_ctx, $type_summary_bag, 'USD');
+check(
+    strpos($type_intro, '19 carat weights') !== false,
+    'type_intro_html cites carat breadth from type-summary aggregate'
+);
+check(
+    strpos($type_intro, 'most searched weight') !== false && strpos($type_intro, '$3,873') !== false,
+    'type_intro_html cites popular carat median in whole dollars'
+);
+$type_overview = $renderer->render_section('type_overview_dynamic', $type_ctx, $type_summary_bag, 'USD');
+check(
+    strpos($type_overview, '19 carat weights') !== false,
+    'type_overview_dynamic falls back to type_intro_html when copy.json is absent'
 );
 
 // --- Report -----------------------------------------------------------------
