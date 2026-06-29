@@ -116,6 +116,18 @@ check($dataset !== null, 'market_data must emit a Dataset node');
 check(node_of($g, 'Article') === null, 'market_data must NOT emit an Article node');
 check(node_of($g, 'Organization') !== null, 'graph must include the publisher Organization node');
 
+// === Rule 1b: top-level description must not double "diamond" ==============
+$top_ctx = new LDN_Page_Context('modernjeweler', 'top-level', 'us');
+$top_desc = $schema->dataset_description($top_ctx, $summary_nested, 'USD');
+check(
+    strpos($top_desc, 'diamond diamonds') === false,
+    'top-level dataset description must not read "diamond diamonds"'
+);
+check(
+    strpos($top_desc, 'Market pricing data for diamonds.') === 0,
+    'top-level dataset description uses bare "diamonds" when no shape/type context'
+);
+
 // === Rule 4: Dataset enrichment ============================================
 check(isset($dataset['dateModified']) && $dataset['dateModified'] === '2026-06-22',
     'Dataset.dateModified must be the analysis date (freshness signal)');

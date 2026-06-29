@@ -78,6 +78,7 @@ final class LDN_Renderer {
         'type_comparison'         => 'Natural vs Lab-Grown',
         'shape_preview'           => 'Comparing Diamond Shapes',
         'natural_vs_lab_analysis' => 'Natural vs Lab-Grown Diamonds',
+        'price_factors'           => 'What Affects Diamond Prices',
     );
 
     /**
@@ -139,8 +140,6 @@ final class LDN_Renderer {
                 'paths' => array(array('distribution', 'price_range', 'max'), array('max_price'), array('price_high'))),
             array('label' => 'Diamonds analysed', 'format' => 'integer', 'schema' => true,
                 'paths' => array(array('distribution', 'sample_size'), array('num_diamonds'), array('sample_size'))),
-            array('label' => '7-day change', 'format' => 'percent', 'schema' => false,
-                'paths' => array(array('time_series', 'change_7_days'), array('change_7d'))),
         );
     }
 
@@ -680,6 +679,9 @@ final class LDN_Renderer {
                 $currency
             );
         }
+        if ($section_id === 'carat_ladder') {
+            return $this->carat_ladder_html($ctx, $bag, $currency);
+        }
         if (substr($section_id, -8) === '_dynamic') {
             if ($ctx->page_level !== 'shape') {
                 $dynamic = $this->copy_dynamic_html($section_id, $ctx, $bag);
@@ -687,7 +689,7 @@ final class LDN_Renderer {
                     return $dynamic;
                 }
             }
-            return $this->stats_html(is_array($bag['summary']) ? $bag['summary'] : array(), $currency);
+            return $this->stats_html($ctx, is_array($bag['summary']) ? $bag['summary'] : array(), $currency);
         }
         if (substr($section_id, -7) === '_static'
             || in_array($section_id, self::EDITORIAL_STATIC_SECTIONS, true)
@@ -790,8 +792,9 @@ final class LDN_Renderer {
      */
     /**
      * Daily-updating intro paragraph from summary-data.json (price, sample size,
-     * 7-day change, price range). Mirrors the legacy L7.1 intro_text template
-     * until CP19 dynamic templates ship in C1.
+     * price change, price range). The price-change period is driven by the site's
+     * templated_copy.individual_shape policy (e.g. Loupe = 12 months); snapshot
+     * families omit the change clause entirely.
      *
      * @param LDN_Page_Context $ctx
      * @param array            $summary
@@ -814,11 +817,27 @@ final class LDN_Renderer {
         ));
         $sample_size = is_numeric($sample_size) ? (int) $sample_size : 0;
 
-        $change_7d = $this->dig_first($summary, array(
-            array('time_series', 'change_7_days'),
-            array('change_7d'),
-        ));
-        $change_7d = is_numeric($change_7d) ? (float) $change_7d : null;
+        // Resolve the price-change period from the site's templated_copy policy
+        // (individual_shape level). Falls back to legacy 7-day behaviour when no
+        // policy is present. Snapshot families (show_change: false) omit the clause.
+        $shape_policy = $this->shape_change_policy($ctx);
+        $change_period = $shape_policy['period'];
+        $show_change = $shape_policy['show_change'];
+
+        if ($change_period !== null) {
+            $change_key = 'change_' . $change_period;
+            $change_value = $this->dig_first($summary, array(
+                array('time_series', $change_key),
+                array($change_key),
+            ));
+        } else {
+            $change_value = $this->dig_first($summary, array(
+                array('time_series', 'change_7_days'),
+                array('change_7d'),
+            ));
+        }
+        $change_value = is_numeric($change_value) ? (float) $change_value : null;
+        $change_phrase = $this->change_period_phrase($change_period);
 
         $min_price = $this->dig_first($summary, array(
             array('distribution', 'price_range', 'min'),
@@ -855,25 +874,39 @@ final class LDN_Renderer {
         $diamond_word = $sample_size === 1 ? 'diamond' : 'diamonds';
         $sample_text = number_format($sample_size);
 
-        $paragraph = sprintf(
-            'The current price for a %s diamond in %s is %s, calculated from %s %s that match this carat weight and shape in our database',
-            esc_html($subject),
-            esc_html($country_name),
-            esc_html($price_text),
-            esc_html($sample_text),
-            esc_html($diamond_word)
-        );
-
-        if ($change_7d === null) {
-            $paragraph .= '.';
-        } elseif ($change_7d == 0.0) {
-            $paragraph .= ', and has remained stable over the last 7 days.';
+        if ($subject === 'diamond') {
+            $paragraph = sprintf(
+                'The current price for a diamond in %s is %s, calculated from %s %s that match this carat weight and shape in our database',
+                esc_html($country_name),
+                esc_html($price_text),
+                esc_html($sample_text),
+                esc_html($diamond_word)
+            );
         } else {
-            $direction = $change_7d > 0 ? 'increased' : 'decreased';
+            $paragraph = sprintf(
+                'The current price for a %s diamond in %s is %s, calculated from %s %s that match this carat weight and shape in our database',
+                esc_html($subject),
+                esc_html($country_name),
+                esc_html($price_text),
+                esc_html($sample_text),
+                esc_html($diamond_word)
+            );
+        }
+
+        if (!$show_change || $change_value === null) {
+            $paragraph .= '.';
+        } elseif ($change_value == 0.0) {
             $paragraph .= sprintf(
-                ', and has %s by %s over the last 7 days.',
+                ', and has remained stable %s.',
+                esc_html($change_phrase)
+            );
+        } else {
+            $direction = $change_value > 0 ? 'increased' : 'decreased';
+            $paragraph .= sprintf(
+                ', and has %s by %s %s.',
                 esc_html($direction),
-                esc_html(sprintf('%.2f%%', abs($change_7d)))
+                esc_html(sprintf('%.2f%%', abs($change_value))),
+                esc_html($change_phrase)
             );
         }
 
@@ -899,7 +932,7 @@ final class LDN_Renderer {
             . '</section>';
     }
 
-    public function stats_html(array $summary, $currency = null) {
+    public function stats_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
         $rows = '';
         foreach (self::stat_specs() as $spec) {
             $value = $this->dig_first($summary, $spec['paths']);
@@ -909,6 +942,24 @@ final class LDN_Renderer {
             $rows .= '<dt>' . esc_html($spec['label']) . '</dt><dd>'
                 . esc_html($this->format_stat($value, $spec['format'], $currency)) . '</dd>';
         }
+
+        // Price-change stat tracks the aggregate intro period (Loupe = 12 months);
+        // snapshot families (show_change:false) omit it.
+        $policy = $this->change_policy($ctx, 'all_shapes');
+        if ($policy['show_change']) {
+            $period = $policy['period'] !== null ? $policy['period'] : '7_days';
+            $change_key = 'change_' . $period;
+            $change_value = $this->dig_first($summary, array(
+                array('time_series', $change_key),
+                array($change_key),
+            ));
+            if ($change_value !== null && is_scalar($change_value) && !is_bool($change_value)) {
+                $label = ucfirst($this->change_period_short_label($period)) . ' change';
+                $rows .= '<dt>' . esc_html($label) . '</dt><dd>'
+                    . esc_html($this->format_stat($change_value, 'percent', $currency)) . '</dd>';
+            }
+        }
+
         if ($rows === '') {
             return '';
         }
@@ -1302,6 +1353,18 @@ final class LDN_Renderer {
         $carat_label = $this->format_carat_label($ctx->carat);
         $country_name = $this->country_full_name($ctx);
 
+        // The change column tracks the same period as the intro (C5.1 writes the
+        // resolved label to `change_period`). An explicit null means the family
+        // suppresses price-change, so the column is dropped; a missing key falls
+        // back to the legacy 7-day column.
+        if (array_key_exists('change_period', $payload)) {
+            $change_period = is_string($payload['change_period']) ? $payload['change_period'] : null;
+            $show_change_col = $change_period !== null;
+        } else {
+            $change_period = '7_days';
+            $show_change_col = true;
+        }
+
         $body = '';
         foreach ($rows as $row) {
             if (!is_array($row) || empty($row['shape'])) {
@@ -1317,9 +1380,13 @@ final class LDN_Renderer {
                 continue;
             }
             $price_cell = is_numeric($price) ? esc_html($currency . number_format((float) $price, 2)) : '—';
-            $change_cell = is_numeric($change) ? esc_html(number_format((float) $change, 2) . '%') : '—';
-            $body .= '<tr><td><a href="' . esc_url($url) . '">' . esc_html($shape) . '</a></td>'
-                . '<td>' . $price_cell . '</td><td>' . $change_cell . '</td></tr>';
+            $row_html = '<tr><td><a href="' . esc_url($url) . '">' . esc_html($shape) . '</a></td>'
+                . '<td>' . $price_cell . '</td>';
+            if ($show_change_col) {
+                $change_cell = is_numeric($change) ? esc_html(number_format((float) $change, 2) . '%') : '—';
+                $row_html .= '<td>' . $change_cell . '</td>';
+            }
+            $body .= $row_html . '</tr>';
         }
         if ($body === '') {
             return '';
@@ -1332,13 +1399,91 @@ final class LDN_Renderer {
             $country_name
         );
 
+        $change_header = '';
+        if ($show_change_col) {
+            $change_header = '<th>'
+                . esc_html(sprintf(
+                    /* translators: %s: change period adjective, e.g. "12-month" */
+                    __('%s %% change', 'loupe-diamond-network'),
+                    $this->change_period_short_label($change_period)
+                ))
+                . '</th>';
+        }
+
         return '<section class="ldn-section ldn-shapes-ranking-table">'
             . '<h2>' . esc_html($heading) . '</h2>'
             . '<p>' . esc_html__('Click on any diamond shape to see more detailed pricing information.', 'loupe-diamond-network') . '</p>'
             . '<table class="ldn-data-table"><thead><tr>'
             . '<th>' . esc_html__('Shape', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Current price', 'loupe-diamond-network') . '</th>'
-            . '<th>' . esc_html__('7-day % change', 'loupe-diamond-network') . '</th>'
+            . $change_header
+            . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
+    }
+
+    /**
+     * Same-shape carat ladder with links to sibling carat pages.
+     *
+     * Reads C5.4 `carat-ladder.json`; highlights the page carat row.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @param string|null      $currency
+     * @return string
+     */
+    public function carat_ladder_html(LDN_Page_Context $ctx, array $bag, $currency = null) {
+        $payload = is_array($bag['carat_ladder']) ? $bag['carat_ladder'] : array();
+        $rows = isset($payload['rows']) && is_array($payload['rows']) ? $payload['rows'] : array();
+        if (empty($rows) || $ctx->shape === null) {
+            return '';
+        }
+
+        $symbol = isset($payload['currency_symbol'])
+            ? (string) $payload['currency_symbol']
+            : $this->currency_symbol($currency);
+        $shape_label = ucwords(str_replace('-', ' ', $ctx->shape));
+        $body = '';
+        foreach ($rows as $row) {
+            if (!is_array($row) || empty($row['carat_weight'])) {
+                continue;
+            }
+            $carat = (string) $row['carat_weight'];
+            $price = isset($row['median_price']) ? $row['median_price'] : null;
+            $is_page = !empty($row['is_page_carat']);
+            $url = $is_page
+                ? ''
+                : $this->build_price_page_url($ctx, 'shape', array('carat' => $carat));
+            $price_cell = is_numeric($price) ? esc_html($symbol . number_format((float) $price, 0)) : '—';
+            $carat_cell = $url !== ''
+                ? '<a href="' . esc_url($url) . '">' . esc_html($this->format_carat_label($carat) . ' ct') . '</a>'
+                : esc_html($this->format_carat_label($carat) . ' ct');
+            $row_class = $is_page ? ' class="ldn-row-current"' : '';
+            $body .= '<tr' . $row_class . '><td>' . $carat_cell . '</td><td>' . $price_cell . '</td></tr>';
+        }
+        if ($body === '') {
+            return '';
+        }
+
+        $all_shapes_url = $this->build_price_page_url($ctx, 'all-shapes');
+        $compare_link = $all_shapes_url !== ''
+            ? '<p><a href="' . esc_url($all_shapes_url) . '">'
+                . esc_html__(
+                    'Compare all shapes at this carat weight',
+                    'loupe-diamond-network'
+                ) . '</a></p>'
+            : '';
+
+        return '<section class="ldn-section ldn-carat-ladder">'
+            . '<h2>' . esc_html(
+                sprintf(
+                    /* translators: %s: diamond shape name */
+                    __('%s prices by carat weight', 'loupe-diamond-network'),
+                    $shape_label
+                )
+            ) . '</h2>'
+            . $compare_link
+            . '<table class="ldn-data-table"><thead><tr>'
+            . '<th>' . esc_html__('Carat', 'loupe-diamond-network') . '</th>'
+            . '<th>' . esc_html__('Median price', 'loupe-diamond-network') . '</th>'
             . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
     }
 
@@ -1399,7 +1544,7 @@ final class LDN_Renderer {
     public function market_overview_table_html(LDN_Page_Context $ctx, array $bag) {
         $overview = is_array($bag['market_overview']) ? $bag['market_overview'] : array();
         if (empty($overview)) {
-            return $this->stats_html(is_array($bag['summary']) ? $bag['summary'] : array(), null);
+            return $this->stats_html($ctx, is_array($bag['summary']) ? $bag['summary'] : array(), null);
         }
 
         $currency = $this->currency_symbol(
@@ -1422,17 +1567,100 @@ final class LDN_Renderer {
             $rows .= '<tr><td>' . $name_cell . '</td><td>' . $price_cell . '</td><td>'
                 . esc_html(number_format($combos)) . '</td></tr>';
         }
-        if ($rows === '') {
+        $overview_html = '';
+        if ($rows !== '') {
+            $overview_html = '<section class="ldn-section ldn-market-overview-table">'
+                . '<h2>' . esc_html__('Market overview', 'loupe-diamond-network') . '</h2>'
+                . '<table class="ldn-data-table"><thead><tr>'
+                . '<th>' . esc_html__('Diamond type', 'loupe-diamond-network') . '</th>'
+                . '<th>' . esc_html__('Weighted average', 'loupe-diamond-network') . '</th>'
+                . '<th>' . esc_html__('Combinations tracked', 'loupe-diamond-network') . '</th>'
+                . '</tr></thead><tbody>' . $rows . '</tbody></table></section>';
+        }
+
+        return $overview_html . $this->carat_price_table_html($ctx, $overview, $currency);
+    }
+
+    /**
+     * Per-carat natural vs lab-grown navigation table for top-level pages.
+     *
+     * Reads the C5.3 `carat_price_table` from market-overview.json; each price
+     * links down to that type+carat all-shapes page so the hub is navigable.
+     * Returns '' when the artefact predates the table (graceful on stale S3).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $overview market-overview payload
+     * @param string           $currency resolved currency symbol
+     * @return string
+     */
+    public function carat_price_table_html(LDN_Page_Context $ctx, array $overview, $currency) {
+        $rows = isset($overview['carat_price_table']) && is_array($overview['carat_price_table'])
+            ? $overview['carat_price_table']
+            : array();
+        if (empty($rows)) {
             return '';
         }
 
-        return '<section class="ldn-section ldn-market-overview-table">'
-            . '<h2>' . esc_html__('Market overview', 'loupe-diamond-network') . '</h2>'
+        $body = '';
+        foreach ($rows as $row) {
+            if (!is_array($row) || !isset($row['carat_weight']) || (string) $row['carat_weight'] === '') {
+                continue;
+            }
+            $carat = (string) $row['carat_weight'];
+            $carat_label = $this->format_carat_label($carat);
+            $nat = isset($row['natural_median_price']) ? $row['natural_median_price'] : null;
+            $lab = isset($row['lab_grown_median_price']) ? $row['lab_grown_median_price'] : null;
+            $discount = isset($row['lab_grown_discount_pct']) ? $row['lab_grown_discount_pct'] : null;
+
+            $nat_cell = $this->carat_price_cell($ctx, 'natural', $carat, $nat, $currency);
+            $lab_cell = $this->carat_price_cell($ctx, 'lab-grown', $carat, $lab, $currency);
+            $discount_cell = is_numeric($discount) ? esc_html(number_format((float) $discount, 1) . '%') : '—';
+
+            $body .= '<tr><td>' . esc_html($carat_label . ' ct') . '</td><td>' . $nat_cell
+                . '</td><td>' . $lab_cell . '</td><td>' . $discount_cell . '</td></tr>';
+        }
+        if ($body === '') {
+            return '';
+        }
+
+        $heading = sprintf(
+            /* translators: %s: country name */
+            __('Natural vs lab-grown diamond prices in %s by carat weight', 'loupe-diamond-network'),
+            $this->country_full_name($ctx)
+        );
+
+        return '<section class="ldn-section ldn-carat-price-table">'
+            . '<h2>' . esc_html($heading) . '</h2>'
+            . '<p>' . esc_html__('Select any price to explore that carat weight in more detail.', 'loupe-diamond-network') . '</p>'
             . '<table class="ldn-data-table"><thead><tr>'
-            . '<th>' . esc_html__('Diamond type', 'loupe-diamond-network') . '</th>'
-            . '<th>' . esc_html__('Weighted average', 'loupe-diamond-network') . '</th>'
-            . '<th>' . esc_html__('Combinations tracked', 'loupe-diamond-network') . '</th>'
-            . '</tr></thead><tbody>' . $rows . '</tbody></table></section>';
+            . '<th>' . esc_html__('Carat weight', 'loupe-diamond-network') . '</th>'
+            . '<th>' . esc_html__('Natural', 'loupe-diamond-network') . '</th>'
+            . '<th>' . esc_html__('Lab-grown', 'loupe-diamond-network') . '</th>'
+            . '<th>' . esc_html__('Lab-grown discount', 'loupe-diamond-network') . '</th>'
+            . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
+    }
+
+    /**
+     * One price cell for the carat price table — linked to the type+carat
+     * all-shapes page when resolvable, else the bare price.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param string           $type  natural|lab-grown
+     * @param string           $carat numeric carat label
+     * @param mixed            $price median price (numeric or null)
+     * @param string           $currency currency symbol
+     * @return string
+     */
+    private function carat_price_cell(LDN_Page_Context $ctx, $type, $carat, $price, $currency) {
+        if (!is_numeric($price)) {
+            return '—';
+        }
+        $formatted = esc_html($currency . number_format((float) $price, 0));
+        $url = $this->build_price_page_url($ctx, 'all-shapes', array('type' => $type, 'carat' => $carat));
+        if ($url === '') {
+            return $formatted;
+        }
+        return '<a href="' . esc_url($url) . '">' . $formatted . '</a>';
     }
 
     /**
@@ -1556,10 +1784,15 @@ final class LDN_Renderer {
                 $bag['price'] = $this->fetcher->fetch_artefact('price_graph_json', $ctx);
                 $bag['dist'] = $this->fetcher->fetch_artefact('distribution_json', $ctx);
                 $bag['individual'] = $this->fetcher->fetch_artefact('individual_content_json', $ctx);
+                $bag['carat_ladder'] = $this->fetcher->fetch_artefact('carat_ladder_json', $ctx);
                 break;
             case 'all-shapes':
                 $bag['ranking'] = $this->fetcher->fetch_artefact('shapes_ranking_json', $ctx);
                 $bag['ranking_chart'] = $this->fetcher->fetch_artefact('shapes_at_carat_chart', $ctx);
+                $all_shapes_summary = $this->fetcher->fetch_artefact('all_shapes_summary_json', $ctx);
+                if (is_array($all_shapes_summary) && !empty($all_shapes_summary)) {
+                    $bag['summary'] = $all_shapes_summary;
+                }
                 break;
             case 'diamond-type':
                 $bag['type_summary'] = $this->fetcher->fetch_artefact('type_summary_json', $ctx);
@@ -1584,6 +1817,102 @@ final class LDN_Renderer {
     private function profile(LDN_Page_Context $ctx) {
         $profile = $this->config->get_content_profile($ctx->site_id);
         return is_array($profile) ? $profile : array();
+    }
+
+    /**
+     * Resolve a price-change policy from the content profile's templated_copy
+     * block for a given page level (e.g. "individual_shape", "all_shapes").
+     *
+     * @param LDN_Page_Context $ctx
+     * @param string           $level_key templated_copy sub-key.
+     * @return array{period: string|null, show_change: bool}
+     */
+    private function change_policy(LDN_Page_Context $ctx, $level_key) {
+        $profile = $this->profile($ctx);
+        $policy = isset($profile['templated_copy'][$level_key])
+            && is_array($profile['templated_copy'][$level_key])
+            ? $profile['templated_copy'][$level_key]
+            : null;
+
+        if ($policy === null) {
+            // No policy: preserve legacy 7-day behaviour.
+            return array('period' => '7_days', 'show_change' => true);
+        }
+
+        $period = (isset($policy['intro_change_period']) && is_string($policy['intro_change_period']))
+            ? $policy['intro_change_period']
+            : null;
+
+        if (array_key_exists('show_change', $policy)) {
+            $show_change = (bool) $policy['show_change'];
+        } else {
+            $show_change = $period !== null;
+        }
+
+        return array('period' => $period, 'show_change' => $show_change);
+    }
+
+    /**
+     * Shape-page price-change policy (templated_copy.individual_shape).
+     *
+     * @param LDN_Page_Context $ctx
+     * @return array{period: string|null, show_change: bool}
+     */
+    private function shape_change_policy(LDN_Page_Context $ctx) {
+        return $this->change_policy($ctx, 'individual_shape');
+    }
+
+    /**
+     * Human phrasing for a price-change period label, e.g. "over the last 12 months".
+     *
+     * @param string|null $period Period label (e.g. "12_months").
+     * @return string
+     */
+    private function change_period_phrase($period) {
+        $map = array(
+            '7_days'    => 'over the last 7 days',
+            '14_days'   => 'over the last 14 days',
+            '21_days'   => 'over the last 21 days',
+            '30_days'   => 'over the last 30 days',
+            '90_days'   => 'over the last 90 days',
+            '365_days'  => 'over the last year',
+            '1_month'   => 'over the last month',
+            '3_months'  => 'over the last 3 months',
+            '6_months'  => 'over the last 6 months',
+            '12_months' => 'over the last 12 months',
+            '24_months' => 'over the last 2 years',
+        );
+        if ($period !== null && isset($map[$period])) {
+            return $map[$period];
+        }
+        return 'over the last 7 days';
+    }
+
+    /**
+     * Short adjective for a price-change period label, e.g. "12-month" — used in
+     * table column headers.
+     *
+     * @param string|null $period Period label (e.g. "12_months").
+     * @return string
+     */
+    private function change_period_short_label($period) {
+        $map = array(
+            '7_days'    => '7-day',
+            '14_days'   => '14-day',
+            '21_days'   => '21-day',
+            '30_days'   => '30-day',
+            '90_days'   => '90-day',
+            '365_days'  => '12-month',
+            '1_month'   => '1-month',
+            '3_months'  => '3-month',
+            '6_months'  => '6-month',
+            '12_months' => '12-month',
+            '24_months' => '24-month',
+        );
+        if ($period !== null && isset($map[$period])) {
+            return $map[$period];
+        }
+        return '7-day';
     }
 
     /**

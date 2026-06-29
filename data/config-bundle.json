@@ -1,6 +1,6 @@
 {
-  "version": "ead3972",
-  "generated_at": "2026-06-22T11:55:40.324850+00:00",
+  "version": "188efd4",
+  "generated_at": "2026-06-28T13:32:28.547537+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -6064,8 +6064,6 @@
         "width": 710,
         "height": 405,
         "time_periods": [
-          "1_month",
-          "3_months",
           "12_months"
         ],
         "default_view": "price",
@@ -6078,6 +6076,28 @@
           "axis_line_width": 1,
           "tick_font_size": 12,
           "line_width": 2
+        }
+      },
+      "templated_copy": {
+        "all_shapes": {
+          "intro_change_period": "12_months",
+          "analysis_periods": [
+            "12_months"
+          ],
+          "show_change": true
+        },
+        "individual_shape": {
+          "intro_change_period": "12_months",
+          "show_change": true
+        }
+      },
+      "sentence_templates": {
+        "all_shapes": {
+          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently averages {currency_symbol}{current_price:,.2f} across the {num_diamonds:,} lab-grown stones we track at this weight{intro_change_clause}.\nPrices range from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f}, shaped mainly by cut, {color_word}, clarity, and the certification behind each stone — the details worth understanding before you buy.\n",
+          "analysis": "{trend_analysis}\n",
+          "shape_analysis": "At {carat} carats, the {most_expensive_shape} carries the highest price here at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} is the most economical at {currency_symbol}{least_expensive_price:,.2f}.\nThe {currency_symbol}{price_difference:,.2f} difference — about {price_difference_pct:.1f}% — reflects how cutting demand and yield differ by shape, not a difference in quality or ethics between the stones.\n",
+          "intro": "Among all shapes, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the most economical is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
+          "ranking_summary": "We track {total_sample_size:,} lab-grown {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -6305,8 +6325,8 @@
         "width": 760,
         "height": 410,
         "time_periods": [
-          "1_month",
           "3_months",
+          "6_months",
           "12_months"
         ],
         "default_view": "price",
@@ -6318,6 +6338,30 @@
           "axis_line_width": 1,
           "tick_font_size": 12,
           "line_width": 2.5
+        }
+      },
+      "templated_copy": {
+        "all_shapes": {
+          "intro_change_period": "6_months",
+          "analysis_periods": [
+            "3_months",
+            "6_months",
+            "12_months"
+          ],
+          "show_change": true
+        },
+        "individual_shape": {
+          "intro_change_period": "6_months",
+          "show_change": true
+        }
+      },
+      "sentence_templates": {
+        "all_shapes": {
+          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently costs about {currency_symbol}{current_price:,.2f} for the centre stone, based on the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nDepending on shape, {color_word}, and clarity, the stone alone ranges from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} — worth pinning down before you add the setting to build your full ring budget.\n",
+          "analysis": "{trend_analysis}\n",
+          "shape_analysis": "For a {carat} carat ring, the {most_expensive_shape} is the most expensive centre stone at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} is the most budget-friendly at {currency_symbol}{least_expensive_price:,.2f}.\nChoosing the {least_expensive_shape} over the {most_expensive_shape} frees up around {currency_symbol}{price_difference:,.2f} ({price_difference_pct:.1f}%) — money that could go toward a better setting or a higher cut grade.\n",
+          "intro": "Across the shapes, the most expensive {carat} carat {type} centre stone in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the most affordable is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
+          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median centre-stone price of {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -6699,7 +6743,7 @@
         "height": 400,
         "time_periods": [
           "1_month",
-          "3_months",
+          "6_months",
           "12_months"
         ],
         "default_view": "price_range",
@@ -6711,6 +6755,30 @@
           "axis_line_width": 2,
           "tick_font_size": 11,
           "line_width": 2
+        }
+      },
+      "templated_copy": {
+        "all_shapes": {
+          "intro_change_period": "12_months",
+          "analysis_periods": [
+            "1_month",
+            "6_months",
+            "12_months"
+          ],
+          "show_change": true
+        },
+        "individual_shape": {
+          "intro_change_period": "12_months",
+          "show_change": true
+        }
+      },
+      "sentence_templates": {
+        "all_shapes": {
+          "intro_text": "Today, a {carat} carat {type_label} diamond in {country_name} costs {currency_symbol}{current_price:,.2f} — the median across {num_diamonds:,} stones currently listed at this weight{intro_change_clause}.\nPrices span {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f}, determined by shape, {color_word}, and clarity. Use the figure above as your benchmark for what you should pay.\n",
+          "analysis": "{trend_analysis}\n",
+          "shape_analysis": "At {carat} carats, the {most_expensive_shape} is the most expensive shape at {currency_symbol}{most_expensive_price:,.2f}; the {least_expensive_shape} is the least expensive at {currency_symbol}{least_expensive_price:,.2f}.\nThe difference is {currency_symbol}{price_difference:,.2f}, or {price_difference_pct:.1f}% — a precise measure of the shape premium at this carat weight.\n",
+          "intro": "Across all shapes, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the least expensive is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
+          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes. The weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -7083,6 +7151,25 @@
           "line_width": 1.5
         }
       },
+      "templated_copy": {
+        "all_shapes": {
+          "intro_change_period": null,
+          "analysis_periods": [],
+          "show_change": false
+        },
+        "individual_shape": {
+          "intro_change_period": null,
+          "show_change": false
+        }
+      },
+      "sentence_templates": {
+        "all_shapes": {
+          "intro_text": "We currently see a market price of {currency_symbol}{current_price:,.2f} for a {carat} carat {type_label} diamond {in_country}, drawn from the {num_diamonds:,} stones we assess at this weight.\nQuality drives the range — from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} — with shape, {color_word}, and clarity the factors that most influence where a given stone sits.\n",
+          "shape_analysis": "At this carat weight, we find the {most_expensive_shape} commands the highest price at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} represents the most accessible choice at {currency_symbol}{least_expensive_price:,.2f}.\nThe {currency_symbol}{price_difference:,.2f} difference — some {price_difference_pct:.1f}% — reflects genuine variation in cutting demand and yield, and is well worth weighing against your priorities for the finished ring.\n",
+          "intro": "Across the shapes, the most premium {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, while the {least_expensive_shape} offers the most accessible entry at {currency_symbol}{least_expensive_price:,.0f}.\n",
+          "ranking_summary": "We assess {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
+        }
+      },
       "file_naming": {
         "price_graph": "pricing-chart.html",
         "summary_data": "market-data.json",
@@ -7363,9 +7450,9 @@
         "width": 730,
         "height": 395,
         "time_periods": [
+          "7_days",
           "1_month",
-          "3_months",
-          "12_months"
+          "3_months"
         ],
         "default_view": "price",
         "currency_display": "£",
@@ -7377,6 +7464,30 @@
           "axis_line_width": 1,
           "tick_font_size": 12,
           "line_width": 2.5
+        }
+      },
+      "templated_copy": {
+        "all_shapes": {
+          "intro_change_period": "7_days",
+          "analysis_periods": [
+            "7_days",
+            "1_month",
+            "3_months"
+          ],
+          "show_change": true
+        },
+        "individual_shape": {
+          "intro_change_period": "7_days",
+          "show_change": true
+        }
+      },
+      "sentence_templates": {
+        "all_shapes": {
+          "intro_text": "A {carat} carat {type_label} diamond in the UK is currently going for {currency_symbol}{current_price:,.2f} — the median across the {num_diamonds:,} stones I'm tracking at this weight{intro_change_clause}.\nYou'll find them anywhere from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} depending on shape, {color_word}, and clarity, so it pays to know the going rate before you start hunting.\n",
+          "analysis": "{trend_analysis}\n",
+          "shape_analysis": "At {carat} carats, the {most_expensive_shape} is the dearest shape at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} is the best value at {currency_symbol}{least_expensive_price:,.2f}.\nThat's about {currency_symbol}{price_difference:,.2f} ({price_difference_pct:.1f}%) between them — a tidy saving if you're happy to switch shape.\n",
+          "intro": "Across the shapes, the dearest {carat} carat {type} diamond in the UK is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the best value is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
+          "ranking_summary": "I track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -7901,6 +8012,25 @@
           "line_width": 2
         }
       },
+      "templated_copy": {
+        "all_shapes": {
+          "intro_change_period": null,
+          "analysis_periods": [],
+          "show_change": false
+        },
+        "individual_shape": {
+          "intro_change_period": null,
+          "show_change": false
+        }
+      },
+      "sentence_templates": {
+        "all_shapes": {
+          "intro_text": "Right now, a {carat} carat {type_label} diamond {in_country} is going for about {currency_symbol}{current_price:,.2f}, based on the {num_diamonds:,} stones we're tracking at this weight.\nThey run from {currency_symbol}{min_price:,.2f} all the way up to {currency_symbol}{max_price:,.2f}, so where you land depends on shape, {color_word}, and clarity — and that's exactly where the value is hiding.\n",
+          "shape_analysis": "The best-value shape here is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.2f}, while the {most_expensive_shape} is the priciest at {currency_symbol}{most_expensive_price:,.2f}.\nSwitching to the {least_expensive_shape} saves you around {currency_symbol}{price_difference:,.2f} — that's {price_difference_pct:.1f}% off for a stone most people can't tell apart on the finger.\n",
+          "intro": "Across the shapes, the smart-money pick for a {carat} carat {type} diamond in {country_name} is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}, while the {most_expensive_shape} tops the range at {currency_symbol}{most_expensive_price:,.0f}.\n",
+          "ranking_summary": "We're tracking {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a typical price around {currency_symbol}{weighted_median_price:,.0f}.\n"
+        }
+      },
       "file_naming": {
         "price_graph": "diamond-prices.html",
         "summary_data": "price-data.json",
@@ -8006,7 +8136,7 @@
         "iqr_fill": "rgba(214, 173, 96, 0.2)"
       },
       "page_chrome": {
-        "max_width": "75%",
+        "max_width": "800px",
         "content_padding": "1.25rem",
         "section_spacing": "2rem",
         "title_font": "\"Cormorant Garamond\", Georgia, \"Times New Roman\", serif",
@@ -8070,6 +8200,7 @@
           "hero_component": "price_graph",
           "sections": [
             "intro_dynamic",
+            "carat_ladder",
             "trend_analysis_static",
             "buying_guidance_static",
             "cross_site_comparison"
@@ -8110,6 +8241,7 @@
             "market_overview_dynamic",
             "type_comparison",
             "shape_preview",
+            "price_factors_static",
             "partner_spotlight",
             "cross_site_comparison"
           ],
@@ -8140,6 +8272,30 @@
           "axis_line_width": 1,
           "tick_font_size": 12,
           "line_width": 2
+        }
+      },
+      "templated_copy": {
+        "all_shapes": {
+          "intro_change_period": "12_months",
+          "analysis_periods": [
+            "1_month",
+            "3_months",
+            "12_months"
+          ],
+          "show_change": true
+        },
+        "individual_shape": {
+          "intro_change_period": "12_months",
+          "show_change": true
+        }
+      },
+      "sentence_templates": {
+        "all_shapes": {
+          "intro_text": "A {carat} carat {type_label} diamond in {country_name} currently sits at {currency_symbol}{current_price:,.2f}, based on the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nAcross the shapes, prices run from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} — what you pay comes down mostly to shape, {color_word}, and clarity once the stone is set in a ring.\n",
+          "analysis": "{trend_analysis}\n",
+          "shape_analysis": "At {carat} carats, the {most_expensive_shape} is the priciest choice here at {currency_symbol}{most_expensive_price:,.2f}, while the {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.2f}.\nThat gap of {currency_symbol}{price_difference:,.2f} means a {most_expensive_shape} runs about {price_difference_pct:.1f}% more than a {least_expensive_shape} at the same carat weight — useful to know if you are still weighing up shapes.\n",
+          "intro": "Across every shape, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, and the most affordable is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
+          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes, with a weighted median of {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -8191,6 +8347,11 @@
             "json_key": "shape_preview",
             "instruction": "Explain how diamond shape changes the look of a stone at the same carat weight and why buyers compare shapes before locking a budget. Encourage drilling into shape and carat pages from this hub. No specific prices or market commentary. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
             "length": "3-4 sentences"
+          },
+          "price_factors_static": {
+            "json_key": "price_factors",
+            "instruction": "Write a substantial, genuinely useful explainer on what drives diamond prices for an engagement-ring buyer in {country}. Cover the structural factors: the 4Cs (cut, colour, clarity, carat) and how each moves price, natural versus lab-grown supply and demand, and the role of certification. Then bring it local — explain how factors specific to {country} (import duties or taxes, currency, retail margins, and what buyers there tend to prioritise) shape what shoppers actually pay, so the advice is rooted in the {country} buying experience rather than generic global commentary. Keep the warm, knowledgeable local-jeweller voice. No specific prices, figures, or dates — the live data on this hub handles current numbers. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
+            "length": "two short paragraphs (6-8 sentences total)"
           }
         }
       },
@@ -8592,8 +8753,8 @@
         "width": 750,
         "height": 400,
         "time_periods": [
+          "7_days",
           "1_month",
-          "3_months",
           "12_months"
         ],
         "default_view": "price",
@@ -8607,6 +8768,30 @@
           "axis_line_width": 1,
           "tick_font_size": 12,
           "line_width": 2
+        }
+      },
+      "templated_copy": {
+        "all_shapes": {
+          "intro_change_period": "1_month",
+          "analysis_periods": [
+            "7_days",
+            "1_month",
+            "12_months"
+          ],
+          "show_change": true
+        },
+        "individual_shape": {
+          "intro_change_period": "1_month",
+          "show_change": true
+        }
+      },
+      "sentence_templates": {
+        "all_shapes": {
+          "intro_text": "Right now a {carat} carat {type_label} diamond {in_country} runs {currency_symbol}{current_price:,.2f} — that's the median across the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nExpect anywhere from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f} depending on shape, {color_word}, and clarity. The spread is wide, which means there's real room to shop smart.\n",
+          "analysis": "{trend_analysis}\n",
+          "shape_analysis": "The {most_expensive_shape} is the most expensive cut at this weight ({currency_symbol}{most_expensive_price:,.2f}); the {least_expensive_shape} is the cheapest ({currency_symbol}{least_expensive_price:,.2f}).\nThat's roughly a {price_difference_pct:.1f}% premium for the {most_expensive_shape} — about {currency_symbol}{price_difference:,.2f} more. If you're flexible on shape, that's money better spent on a higher cut grade.\n",
+          "intro": "Of all the shapes, the {most_expensive_shape} commands the highest price for a {carat} carat {type} diamond in {country_name} at {currency_symbol}{most_expensive_price:,.0f}, while the {least_expensive_shape} is the value pick at {currency_symbol}{least_expensive_price:,.0f}.\n",
+          "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes. The weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -8739,8 +8924,8 @@
     "sentence_templates_base": {
       "sentence_templates": {
         "all_shapes": {
-          "intro_text": "The current price for a {carat} carat {type_label} diamond in {country_name} is {currency_symbol}{current_price:,.2f}, calculated from {num_diamonds:,} diamonds that match this carat weight and type in our database, and has {change_direction_7d} by {change_pct_7d} over the last 7 days.\nPrices for these diamonds range from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f}, depending on factors such as the diamond shape, color, and clarity.\n",
-          "analysis": "Overall, the price trend for {carat} carat {type_label} diamonds over the past three weeks shows {overall_trend}.\nThe 7-day change is a {adjective_7d} {direction_7d} of {change_7d:.2f}%, the 14-day change is a {adjective_14d} {direction_14d} of {change_14d:.2f}%, and the 21-day change is a {adjective_21d} {direction_21d} of {change_21d:.2f}%.\n{market_implication}\n",
+          "intro_text": "The current price for a {carat} carat {type_label} diamond in {country_name} is {currency_symbol}{current_price:,.2f}, calculated from {num_diamonds:,} diamonds that match this carat weight and type in our database{intro_change_clause}.\nPrices for these diamonds range from {currency_symbol}{min_price:,.2f} to {currency_symbol}{max_price:,.2f}, depending on factors such as the diamond shape, color, and clarity.\n",
+          "analysis": "{trend_analysis}\n",
           "shape_analysis": "The most expensive shape for {carat} carat {type_label} diamonds is currently {most_expensive_shape}, priced at {currency_symbol}{most_expensive_price:,.2f}.\nThe least expensive shape for {carat} carat {type_label} diamonds is currently {least_expensive_shape}, priced at {currency_symbol}{least_expensive_price:,.2f}.\nThis is a difference of {currency_symbol}{price_difference:,.2f}, meaning that {most_expensive_shape} diamonds are {price_difference_pct:.2f}% more expensive than {least_expensive_shape} diamonds at the same carat weight.\n",
           "intro": "Across all shapes, the most expensive {carat} carat {type} diamond in {country_name} is the {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}, while the least expensive is the {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f}.\n",
           "ranking_summary": "We track {total_sample_size:,} {type} diamonds at {carat} carats across {shape_count} shapes. The weighted median across shapes is {currency_symbol}{weighted_median_price:,.0f}.\n"
@@ -10206,13 +10391,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10268,13 +10456,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10330,13 +10521,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10392,13 +10586,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10454,13 +10651,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10516,13 +10716,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10578,13 +10781,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10640,13 +10846,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10702,13 +10911,16 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
-              "static_content_json"
+              "static_content_json",
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
               "time_series_chart": true,
+              "carat_ladder": {
+                "presentation": "table_pct"
+              },
               "cross_site_comparison": {
                 "presentation": "placeholder"
               }
@@ -10765,7 +10977,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10829,7 +11040,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10893,7 +11103,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -10957,7 +11166,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11021,7 +11229,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11085,7 +11292,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11149,7 +11355,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11213,7 +11418,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11277,7 +11481,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11341,7 +11544,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11405,7 +11607,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "static_content_json"
             ],
@@ -11468,7 +11669,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11526,7 +11726,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11584,7 +11783,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11642,7 +11840,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11700,7 +11897,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11758,7 +11954,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11816,7 +12011,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11874,7 +12068,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -11932,7 +12125,6 @@
               "summary_data_json",
               "price_graph_html",
               "price_graph_json",
-              "og_preview_png",
               "comparison_data_json",
               "color_clarity_json",
               "static_content_json"
@@ -12652,6 +12844,10 @@
       }
     ],
     "max_countries_per_site": 2,
+    "c2_test_country_codes": [
+      "au",
+      "fr"
+    ],
     "preset_rollout_groups": [
       "loupe"
     ],

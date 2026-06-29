@@ -34,6 +34,9 @@ if (!function_exists('__')) {
 if (!function_exists('esc_html')) {
     function esc_html($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 }
+if (!function_exists('esc_html__')) {
+    function esc_html__($s, $d = null) { return htmlspecialchars((string) $s, ENT_QUOTES); }
+}
 if (!function_exists('esc_attr')) {
     function esc_attr($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 }
@@ -42,6 +45,18 @@ if (!function_exists('wpautop')) {
 }
 if (!function_exists('wp_kses_post')) {
     function wp_kses_post($s) { return (string) $s; }
+}
+if (!function_exists('esc_url')) {
+    function esc_url($s) { return (string) $s; }
+}
+if (!function_exists('home_url')) {
+    function home_url($p = '') { return 'https://example.com/' . ltrim((string) $p, '/'); }
+}
+if (!function_exists('user_trailingslashit')) {
+    function user_trailingslashit($p) { return rtrim((string) $p, '/') . '/'; }
+}
+if (!function_exists('sanitize_title')) {
+    function sanitize_title($s) { return strtolower(preg_replace('/[^A-Za-z0-9]+/', '-', (string) $s)); }
 }
 
 require_once __DIR__ . '/../includes/class-ldn-page-context.php';
@@ -54,6 +69,18 @@ if (!class_exists('LDN_Config')) {
     class LDN_Config {
         public function get_content_profile($site_id) { return array(); }
         public function get_currency($site_id, $country) { return 'USD'; }
+        public function get_url_structure($site_id) {
+            return array(
+                'level_3'      => 'diamond-prices/{type}/{carat}',
+                'level_4'      => 'diamond-prices/{type}/{carat}/{shape}',
+                'carat_format' => '{value}-carat',
+                'type_natural' => 'natural',
+                'type_lab'     => 'lab-grown',
+            );
+        }
+        public function get_site($site_id) {
+            return array('countries' => array(array('code' => 'us', 'full_name' => 'United States')));
+        }
     }
 }
 
@@ -162,6 +189,256 @@ check(
     $renderer->chrome_heading_class(array('page_chrome' => array('heading_style' => 'bogus<style>')))
         === 'ldn-chrome--minimal',
     'invalid heading_style falls back to minimal'
+);
+
+// --- 6. carat_price_table_html navigation table (top-level nav) -------------
+// Rule: emits one row per carat with a lab-grown discount, and links each price
+// down to that type+carat all-shapes page; returns '' when the C5.3
+// carat_price_table is absent (graceful on stale market-overview.json).
+$carat_overview = array(
+    'currency' => 'USD',
+    'carat_price_table' => array(
+        array(
+            'carat_weight'           => '1',
+            'natural_median_price'   => 6000,
+            'lab_grown_median_price' => 3000,
+            'lab_grown_discount_pct' => 50.0,
+        ),
+        array(
+            'carat_weight'           => '2',
+            'natural_median_price'   => 12000,
+            'lab_grown_median_price' => null,
+            'lab_grown_discount_pct' => null,
+        ),
+    ),
+);
+$carat_html = $renderer->carat_price_table_html($top_ctx, $carat_overview, '$');
+check(
+    strpos($carat_html, 'https://example.com/diamond-prices/natural/1-carat/') !== false,
+    'carat table links natural price down to the type+carat all-shapes page'
+);
+check(
+    strpos($carat_html, 'https://example.com/diamond-prices/lab-grown/1-carat/') !== false,
+    'carat table links lab-grown price down to the type+carat all-shapes page'
+);
+check(
+    strpos($carat_html, '50.0%') !== false,
+    'carat table renders the lab-grown discount percentage'
+);
+check(
+    substr_count($carat_html, '<tr>') === 3, // header + 2 carat rows
+    'carat table renders one row per carat weight'
+);
+check(
+    strpos($carat_html, '—') !== false,
+    'missing lab price renders an em dash instead of a broken link'
+);
+check(
+    $renderer->carat_price_table_html($top_ctx, array('currency' => 'USD'), '$') === '',
+    'carat table renders empty when carat_price_table is absent (stale S3 safe)'
+);
+
+// --- 7. shapes_ranking_table_html links shape drill-down (all-shapes) -------
+$all_shapes_ctx = new LDN_Page_Context('modernjeweler', 'all-shapes', 'us', 'natural', '1');
+$ranking_bag = array(
+    'ranking' => array(
+        'currency_symbol' => '$',
+        'shapes' => array(
+            array('shape' => 'Round', 'median_price' => 6000, 'price_change' => 1.2),
+            array('shape' => 'Oval', 'median_price' => 5200, 'price_change' => -0.5),
+        ),
+    ),
+);
+$ranking_html = $renderer->shapes_ranking_table_html($all_shapes_ctx, $ranking_bag);
+check(
+    strpos($ranking_html, 'https://example.com/diamond-prices/natural/1-carat/round/') !== false,
+    'shapes ranking table links each shape down to its shape page'
+);
+check(
+    strpos($ranking_html, 'https://example.com/diamond-prices/natural/1-carat/oval/') !== false,
+    'shapes ranking table links oval shape page'
+);
+
+// --- 8. carat_ladder_html links sibling carat weights (shape pages) ----------
+$ladder_bag = array(
+    'carat_ladder' => array(
+        'currency_symbol' => '$',
+        'rows' => array(
+            array('carat_weight' => '1', 'median_price' => 6000, 'is_page_carat' => true),
+            array('carat_weight' => '2', 'median_price' => 12000, 'is_page_carat' => false),
+        ),
+    ),
+);
+$ladder_html = $renderer->carat_ladder_html($shape_ctx, $ladder_bag, 'USD');
+check(
+    strpos($ladder_html, 'https://example.com/diamond-prices/natural/2-carat/round/') !== false,
+    'carat ladder links non-page carat rows to sibling shape pages'
+);
+check(
+    strpos($ladder_html, 'https://example.com/diamond-prices/natural/1-carat/') !== false,
+    'carat ladder includes link up to the all-shapes hub page'
+);
+check(
+    strpos($ladder_html, 'ldn-row-current') !== false,
+    'carat ladder highlights the current page carat row'
+);
+
+// --- 9. intro_html price-change period is policy-driven ---------------------
+// Test intent: the shape-page intro change clause uses the period from the
+// profile's templated_copy.individual_shape policy (Loupe = 12 months), snapshot
+// families (show_change:false) omit it, and a profile with no policy falls back
+// to the legacy 7-day clause.
+// Would fail if: intro_html hardcoded "over the last 7 days" / read change_7d
+// regardless of policy (the bug this section guards).
+class LDN_Config_Loupe_Policy extends LDN_Config {
+    public function get_content_profile($site_id) {
+        return array('templated_copy' => array(
+            'individual_shape' => array(
+                'intro_change_period' => '12_months',
+                'show_change'         => true,
+            ),
+            'all_shapes' => array(
+                'intro_change_period' => '12_months',
+                'show_change'         => true,
+            ),
+        ));
+    }
+}
+class LDN_Config_Snapshot_Policy extends LDN_Config {
+    public function get_content_profile($site_id) {
+        return array('templated_copy' => array(
+            'individual_shape' => array(
+                'intro_change_period' => null,
+                'show_change'         => false,
+            ),
+            'all_shapes' => array(
+                'intro_change_period' => null,
+                'show_change'         => false,
+            ),
+        ));
+    }
+}
+
+$intro_summary = array(
+    'current_price' => 5000,
+    'num_diamonds'  => 100,
+    'time_series'   => array(
+        'change_12_months' => 8.5,
+        'change_7_days'    => 1.1,
+    ),
+);
+
+$loupe_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Loupe_Policy());
+$loupe_intro = $loupe_renderer->intro_html($shape_ctx, $intro_summary, 'USD');
+check(
+    strpos($loupe_intro, 'over the last 12 months') !== false,
+    'intro_html uses the 12-month period from the Loupe individual_shape policy'
+);
+check(
+    strpos($loupe_intro, 'over the last 7 days') === false,
+    'intro_html no longer hardcodes the 7-day period'
+);
+check(
+    strpos($loupe_intro, 'increased by 8.50%') !== false,
+    'intro_html reports the 12-month change value (not the 7-day value)'
+);
+
+$snapshot_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Snapshot_Policy());
+$snapshot_intro = $snapshot_renderer->intro_html($shape_ctx, $intro_summary, 'USD');
+check(
+    strpos($snapshot_intro, 'over the last') === false
+        && strpos($snapshot_intro, 'increased') === false,
+    'intro_html omits the change clause for snapshot families (show_change:false)'
+);
+
+$legacy_intro = $renderer->intro_html($shape_ctx, $intro_summary, 'USD');
+check(
+    strpos($legacy_intro, 'over the last 7 days') !== false,
+    'intro_html falls back to the legacy 7-day clause when no policy is present'
+);
+
+// --- 10. shapes ranking table change column tracks the policy period --------
+// Test intent: the ranking change column label + visibility follow C5.1's
+// `change_period` field (Loupe = 12 months); an explicit null drops the column;
+// a missing key falls back to the legacy 7-day label.
+// Would fail if: the header hardcoded "7-day % change" or always rendered the
+// change column regardless of the family policy.
+$ranking_12m_bag = array(
+    'ranking' => array(
+        'currency_symbol' => '$',
+        'change_period'   => '12_months',
+        'shapes' => array(
+            array('shape' => 'Round', 'median_price' => 6000, 'price_change' => 1.2),
+            array('shape' => 'Oval', 'median_price' => 5200, 'price_change' => -0.5),
+        ),
+    ),
+);
+$ranking_12m_html = $renderer->shapes_ranking_table_html($all_shapes_ctx, $ranking_12m_bag);
+check(
+    strpos($ranking_12m_html, '12-month % change') !== false,
+    'ranking table labels the change column with the policy period (12-month)'
+);
+check(
+    strpos($ranking_12m_html, '7-day % change') === false,
+    'ranking table no longer hardcodes the 7-day change label'
+);
+
+$ranking_snapshot_bag = array(
+    'ranking' => array(
+        'currency_symbol' => '$',
+        'change_period'   => null,
+        'shapes' => array(
+            array('shape' => 'Round', 'median_price' => 6000, 'price_change' => 1.2),
+        ),
+    ),
+);
+$ranking_snapshot_html = $renderer->shapes_ranking_table_html($all_shapes_ctx, $ranking_snapshot_bag);
+check(
+    strpos($ranking_snapshot_html, '% change') === false
+        && substr_count($ranking_snapshot_html, '<th>') === 2,
+    'ranking table drops the change column for snapshot families (change_period null)'
+);
+
+$ranking_legacy_bag = array(
+    'ranking' => array(
+        'currency_symbol' => '$',
+        'shapes' => array(
+            array('shape' => 'Round', 'median_price' => 6000, 'price_change' => 1.2),
+        ),
+    ),
+);
+$ranking_legacy_html = $renderer->shapes_ranking_table_html($all_shapes_ctx, $ranking_legacy_bag);
+check(
+    strpos($ranking_legacy_html, '7-day % change') !== false,
+    'ranking table falls back to the 7-day label when change_period is absent (legacy payload)'
+);
+
+// --- 11. stats_html change row tracks the all_shapes policy period -----------
+// Test intent: the headline stats change row uses the aggregate intro period
+// (Loupe = 12 months) and is omitted for snapshot families.
+// Would fail if: stat_specs kept its hardcoded "7-day change" row.
+$stats_summary = array(
+    'current_price' => 5000,
+    'num_diamonds'  => 100,
+    'time_series'   => array(
+        'change_12_months' => 8.5,
+        'change_7_days'    => 1.1,
+    ),
+);
+$loupe_stats = $loupe_renderer->stats_html($all_shapes_ctx, $stats_summary, '$');
+check(
+    strpos($loupe_stats, '12-month change') !== false,
+    'stats_html renders a 12-month change row from the all_shapes policy'
+);
+check(
+    strpos($loupe_stats, '7-day change') === false,
+    'stats_html no longer renders the hardcoded 7-day change row'
+);
+
+$snapshot_stats = $snapshot_renderer->stats_html($all_shapes_ctx, $stats_summary, '$');
+check(
+    strpos($snapshot_stats, 'change</dt>') === false,
+    'stats_html omits the change row for snapshot families (show_change:false)'
 );
 
 // --- Report -----------------------------------------------------------------

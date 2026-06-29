@@ -485,7 +485,11 @@ final class LDN_Schema {
      */
     public function dataset_description(LDN_Page_Context $ctx, array $summary, $currency = null) {
         $subject = $this->plain_subject($ctx);
-        $base = sprintf('Market pricing data for %s diamonds.', $subject);
+        if ($subject === 'diamond') {
+            $base = 'Market pricing data for diamonds.';
+        } else {
+            $base = sprintf('Market pricing data for %s diamonds.', $subject);
+        }
 
         $median = $this->dig_first($summary, array(
             array('distribution', 'median_price'), array('median_price'),
