@@ -54,6 +54,12 @@ final class LDN_S3_Key_Resolver {
         'all_shapes_summary_json' => 'summary-data.json',
         'all_shapes_content_json' => 'all-shapes-content.json',
         'og_preview_png'         => 'og-preview.png',
+        'size_summary_json'      => 'size-summary.json',
+        'size_distribution_json' => 'size-distribution.json',
+        'size_distribution_html' => 'size-distribution.html',
+        'size_chart_html'        => 'size-chart.html',
+        'size_copy_json'         => 'size-copy.json',
+        'shape_outline_svg'      => 'shape-outline.svg',
     );
 
     /**
@@ -129,6 +135,10 @@ final class LDN_S3_Key_Resolver {
      * @return string|null
      */
     private function folder_prefix(LDN_Page_Context $ctx) {
+        if ($ctx->module === 'size') {
+            return $this->size_folder_prefix($ctx);
+        }
+
         $country = $ctx->country_code;
         $type = $ctx->diamond_type;
 
@@ -183,6 +193,43 @@ final class LDN_S3_Key_Resolver {
         );
 
         return strtr((string) $site['s3']['graph_prefix'], $replacements);
+    }
+
+    /**
+     * Size-module folder prefix (country-agnostic; uses size_prefix from site config).
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string|null
+     */
+    private function size_folder_prefix(LDN_Page_Context $ctx) {
+        $site = $this->config->get_site($ctx->site_id);
+        if ($site === null) {
+            return null;
+        }
+        $s3 = isset($site['s3']) && is_array($site['s3']) ? $site['s3'] : array();
+        $root = isset($s3['size_prefix']) ? trim((string) $s3['size_prefix'], '/') : 'size';
+        if ($root === '') {
+            $root = 'size';
+        }
+
+        switch ($ctx->page_level) {
+            case 'size-mega-hub':
+                return $root . '/';
+            case 'size-shape-hub':
+                if ($ctx->shape === null) {
+                    return null;
+                }
+                return $root . '/' . $this->config->shape_to_s3_slug($ctx->shape) . '/';
+            case 'size-individual':
+                if ($ctx->shape === null || $ctx->carat === null) {
+                    return null;
+                }
+                return $root . '/'
+                    . $this->config->shape_to_s3_slug($ctx->shape) . '/'
+                    . $ctx->carat . '-carat/';
+            default:
+                return null;
+        }
     }
 
     // =========================================================================

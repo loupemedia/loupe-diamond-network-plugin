@@ -140,12 +140,8 @@ $top_bag = array(
 
 $type_comparison_html = $renderer->render_section('type_comparison', $top_ctx, $top_bag, 'USD');
 check(
-    strpos($type_comparison_html, 'Natural and lab-grown stones differ') !== false,
-    'render_section renders type_comparison editorial copy (was silently dropped)'
-);
-check(
-    strpos($type_comparison_html, '<h2>Natural vs Lab-Grown</h2>') !== false,
-    'type_comparison uses the friendly heading override'
+    $type_comparison_html === '',
+    'type_comparison is inlined under the carat table — standalone section suppressed'
 );
 
 $shape_preview_html = $renderer->render_section('shape_preview', $top_ctx, $top_bag, 'USD');
@@ -254,6 +250,9 @@ $market_bag = array(
         'data' => array(array('x' => array('1 ct'), 'y' => array(50.0), 'type' => 'bar')),
         'layout' => array('margin' => array('t' => 150)),
     ),
+    'static' => array('sections' => array(
+        'type_comparison' => 'Natural and lab-grown stones differ in price and perception.',
+    )),
 );
 $market_html = $renderer->market_overview_table_html($top_ctx, $market_bag);
 check(
@@ -263,6 +262,16 @@ check(
 check(
     strpos($market_html, 'Market overview') === false,
     'top-level hero omits the redundant weighted-average overview table'
+);
+check(
+    strpos($market_html, 'Natural and lab-grown stones differ') !== false,
+    'type_comparison copy renders directly under the carat price table heading'
+);
+$table_pos = strpos($market_html, 'ldn-carat-price-table');
+$discount_pos = strpos($market_html, 'ldn-market-discount-chart');
+check(
+    $table_pos !== false && $discount_pos !== false && $table_pos < $discount_pos,
+    'carat price table appears above the lab-grown discount chart'
 );
 
 // --- 7. shapes_ranking_table_html links shape drill-down (all-shapes) -------
@@ -450,32 +459,31 @@ check(
     'ranking table falls back to the 7-day label when change_period is absent (legacy payload)'
 );
 
-// --- 11. stats_html change row tracks the all_shapes policy period -----------
-// Test intent: the headline stats change row uses the aggregate intro period
-// (Loupe = 12 months) and is omitted for snapshot families.
-// Would fail if: stat_specs kept its hardcoded "7-day change" row.
+// --- 11. stats_html uses a two-row price summary grid -----------------------
+// Test intent: headline stats show current + sample size on top, low/high below.
+// Would fail if: the old dl grid kept lowest price beside current price.
 $stats_summary = array(
     'current_price' => 5000,
+    'min_price'     => 980,
+    'max_price'     => 24730,
     'num_diamonds'  => 100,
-    'time_series'   => array(
-        'change_12_months' => 8.5,
-        'change_7_days'    => 1.1,
-    ),
 );
-$loupe_stats = $loupe_renderer->stats_html($all_shapes_ctx, $stats_summary, '$');
+$loupe_stats = $loupe_renderer->stats_html($all_shapes_ctx, $stats_summary, 'USD');
 check(
-    strpos($loupe_stats, '12-month change') !== false,
-    'stats_html renders a 12-month change row from the all_shapes policy'
+    strpos($loupe_stats, 'ldn-stats-row') !== false,
+    'stats_html renders the new two-row stats grid'
 );
 check(
-    strpos($loupe_stats, '7-day change') === false,
-    'stats_html no longer renders the hardcoded 7-day change row'
+    strpos($loupe_stats, '$5,000') !== false && strpos($loupe_stats, '100') !== false,
+    'stats_html top row shows current price and diamonds analysed'
 );
-
-$snapshot_stats = $snapshot_renderer->stats_html($all_shapes_ctx, $stats_summary, '$');
 check(
-    strpos($snapshot_stats, 'change</dt>') === false,
-    'stats_html omits the change row for snapshot families (show_change:false)'
+    strpos($loupe_stats, '$980') !== false && strpos($loupe_stats, '$24,730') !== false,
+    'stats_html bottom row shows lowest and highest prices'
+);
+check(
+    strpos($loupe_stats, '12-month change') === false,
+    'stats_html no longer renders a separate change row (trend lives in copy/chart)'
 );
 
 // --- 12. intro_html range wording + whole numbers (CP1) ---------------------
@@ -583,10 +591,68 @@ check(
     strpos($type_intro, 'most searched weight') !== false && strpos($type_intro, '$3,873') !== false,
     'type_intro_html cites popular carat median in whole dollars'
 );
+check(
+    strpos($type_intro, '510,000') === false,
+    'type_intro_html no longer cites the all-weights sample size beside the 1ct median'
+);
 $type_overview = $renderer->render_section('type_overview_dynamic', $type_ctx, $type_summary_bag, 'USD');
 check(
     strpos($type_overview, '19 carat weights') !== false,
     'type_overview_dynamic falls back to type_intro_html when copy.json is absent'
+);
+
+// --- 11. color_clarity_table_html heatmap grid (shape pages) ----------------
+// Test intent: the colour x clarity grid renders one cell per (colour, clarity)
+// from C5.7 color-clarity.json (`price_table[color][clarity] = {price,count}`),
+// orders grades best -> worst regardless of JSON key order, shades cells by
+// price relative to the grid min/max, and returns '' when the artefact is
+// absent. Would fail if the section fell through render_section's "unknown ->
+// skip" branch (the gap this change closes) or if the cell schema reader
+// expected the legacy currency-nested shape.
+$cc_payload = array(
+    'currency' => 'USD',
+    'price_table' => array(
+        // Deliberately out of canonical order to prove the renderer re-sorts.
+        'H' => array(
+            'VS1' => array('price' => 4200, 'count' => 30),
+            'IF'  => array('price' => 5200, 'count' => 12),
+        ),
+        'D' => array(
+            'IF'  => array('price' => 9800, 'count' => 8),
+            'VS1' => array('price' => 7600, 'count' => 20),
+        ),
+    ),
+);
+$cc_html = $renderer->color_clarity_table_html($shape_ctx, $cc_payload, 'USD');
+check(
+    strpos($cc_html, 'ldn-color-clarity') !== false && strpos($cc_html, '$9,800') !== false,
+    'color_clarity grid renders the section with formatted cell prices'
+);
+check(
+    strpos($cc_html, '<th scope="col">D</th>') < strpos($cc_html, '<th scope="col">H</th>'),
+    'colour columns are ordered best (D) before worse (H) regardless of JSON order'
+);
+check(
+    strpos($cc_html, '>IF<') < strpos($cc_html, '>VS1<'),
+    'clarity rows are ordered best (IF) before worse (VS1)'
+);
+check(
+    strpos($cc_html, 'color-mix(in srgb, var(--ldn-primary)') !== false,
+    'cells are tinted by price via the brand --ldn-primary heatmap colour'
+);
+check(
+    $renderer->color_clarity_table_html($shape_ctx, array(), 'USD') === '',
+    'color_clarity grid renders empty when the artefact is absent (stale S3 safe)'
+);
+$cc_via_section = $renderer->render_section(
+    'color_clarity',
+    $shape_ctx,
+    array('color_clarity' => $cc_payload),
+    'USD'
+);
+check(
+    strpos($cc_via_section, 'ldn-color-clarity') !== false,
+    'render_section dispatches the color_clarity id to the heatmap builder (gap closed)'
 );
 
 // --- Report -----------------------------------------------------------------

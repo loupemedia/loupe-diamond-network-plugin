@@ -87,6 +87,7 @@ register_deactivation_hook(__FILE__, 'ldn_deactivate');
  */
 function ldn_bootstrap() {
     if (class_exists('LDN_Plugin')) {
+        require_once LDN_INCLUDES_DIR . 'class-ldn-size-module.php';
         LDN_Plugin::instance()->init();
     }
 }

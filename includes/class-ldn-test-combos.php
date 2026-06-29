@@ -124,6 +124,67 @@ final class LDN_Test_Combos {
     }
 
     /**
+     * Whether a size-module context is allowed by the staging test combo list.
+     *
+     * Size pages have no diamond_type — match on shape + carat only.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $combos From normalise_list().
+     * @return bool
+     */
+    public static function allows_size_context(LDN_Page_Context $ctx, array $combos) {
+        if ($combos === array()) {
+            return true;
+        }
+        if ($ctx->module !== 'size') {
+            return false;
+        }
+        if ($ctx->page_level === 'size-mega-hub') {
+            return false;
+        }
+        if ($ctx->page_level === 'size-shape-hub') {
+            if ($ctx->shape === null) {
+                return false;
+            }
+            foreach ($combos as $combo) {
+                $shape = isset($combo['shape']) ? strtolower((string) $combo['shape']) : '';
+                if ($shape !== '' && strtolower($ctx->shape) === $shape) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if ($ctx->page_level === 'size-individual') {
+            foreach ($combos as $combo) {
+                if (self::size_combo_matches($ctx, $combo)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * Match size individual page on shape + carat (ignores diamond_type).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $combo
+     * @return bool
+     */
+    public static function size_combo_matches(LDN_Page_Context $ctx, array $combo) {
+        $carat = isset($combo['carat']) ? self::normalise_carat($combo['carat']) : '';
+        $shape = isset($combo['shape']) ? strtolower((string) $combo['shape']) : '';
+        if ($ctx->shape === null || strtolower($ctx->shape) !== $shape) {
+            return false;
+        }
+        if ($ctx->carat === null || self::normalise_carat($ctx->carat) !== $carat) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @param LDN_Page_Context $ctx
      * @param array            $combo
      * @return bool

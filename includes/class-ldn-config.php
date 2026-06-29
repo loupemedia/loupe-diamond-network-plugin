@@ -506,6 +506,65 @@ final class LDN_Config {
         return str_replace(' ', '-', $key);
     }
 
+    /**
+     * Resolve a URL shape slug back to the canonical KB shape name for a site.
+     *
+     * @param string $slug    URL segment (e.g. 'round', 'oval').
+     * @param string $site_id
+     * @return string|null
+     */
+    public function slug_to_shape($slug, $site_id) {
+        $slug = strtolower(trim((string) $slug));
+        if ($slug === '') {
+            return null;
+        }
+        $bundle = $this->get_bundle();
+        $mappings = isset($bundle['url_structures']['shape_slug_mappings'])
+            && is_array($bundle['url_structures']['shape_slug_mappings'])
+            ? $bundle['url_structures']['shape_slug_mappings']
+            : array();
+        foreach ($mappings as $shape => $per_site) {
+            if (!is_array($per_site)) {
+                continue;
+            }
+            if (isset($per_site[$site_id]) && strtolower((string) $per_site[$site_id]) === $slug) {
+                return (string) $shape;
+            }
+        }
+        return str_replace('-', ' ', $slug);
+    }
+
+    /**
+     * Country code that gates the size module in rollout (US-only at launch).
+     *
+     * @param string $site_id
+     * @return string
+     */
+    public function size_rollout_country($site_id) {
+        $site = $this->get_site($site_id);
+        if (is_array($site)
+            && isset($site['size_module']['rollout_country'])
+            && is_string($site['size_module']['rollout_country'])
+        ) {
+            return strtolower(trim($site['size_module']['rollout_country']));
+        }
+        return 'us';
+    }
+
+    /**
+     * Whether US pricing pages should link to the size tree (Decision 5).
+     *
+     * @param string $site_id
+     * @return bool
+     */
+    public function size_price_internal_links($site_id) {
+        $site = $this->get_site($site_id);
+        if (!is_array($site) || !isset($site['size_module']) || !is_array($site['size_module'])) {
+            return false;
+        }
+        return !empty($site['size_module']['price_internal_links']);
+    }
+
     // =========================================================================
     // Internal
     // =========================================================================

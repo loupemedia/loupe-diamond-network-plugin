@@ -47,7 +47,7 @@ final class LDN_Renderer {
      *
      * @var string[]
      */
-    const SUPPRESSED_SECTIONS = array('cross_site_comparison');
+    const SUPPRESSED_SECTIONS = array('cross_site_comparison', 'type_comparison');
 
     /**
      * Editorial sections that carry static C1 copy but do NOT use the `_static`
@@ -214,6 +214,8 @@ final class LDN_Renderer {
             $out .= $this->render_section((string) $section_id, $ctx, $bag, $currency);
         }
 
+        $out .= $this->size_price_link_html($ctx);
+
         $out .= '</main>';
         $out .= '</div>';
 
@@ -325,7 +327,7 @@ final class LDN_Renderer {
             return '';
         }
 
-        return '<style>.ldn-page-shell,.ldn-price-page{' . $decls . '}</style>';
+        return '<style>.ldn-page-shell,.ldn-price-page,.ldn-size-page{' . $decls . '}</style>';
     }
 
     /**
@@ -656,7 +658,18 @@ final class LDN_Renderer {
             case 'table_chart':
                 return $this->shapes_at_carat_hero_html($ctx, $bag);
             case 'comparison_chart':
-                return $this->carat_tiers_table_html($ctx, $bag, __('Prices by carat weight', 'loupe-diamond-network'));
+                $type_label = isset(self::$TYPE_LABELS[$ctx->diamond_type])
+                    ? self::$TYPE_LABELS[$ctx->diamond_type]
+                    : ucfirst(str_replace('-', ' ', $ctx->diamond_type));
+                return $this->carat_tiers_table_html(
+                    $ctx,
+                    $bag,
+                    sprintf(
+                        /* translators: %s: diamond type label (Natural / Lab-Grown) */
+                        __('%s diamond prices by carat weight', 'loupe-diamond-network'),
+                        $type_label
+                    )
+                );
             case 'summary_table':
                 return $this->market_overview_table_html($ctx, $bag);
             default:
@@ -696,10 +709,24 @@ final class LDN_Renderer {
         if ($section_id === 'carat_ladder') {
             return $this->carat_ladder_html($ctx, $bag, $currency);
         }
+        if ($section_id === 'color_clarity') {
+            return $this->color_clarity_table_html(
+                $ctx,
+                isset($bag['color_clarity']) ? $bag['color_clarity'] : array(),
+                $currency
+            );
+        }
         if (substr($section_id, -8) === '_dynamic') {
             if ($ctx->page_level !== 'shape') {
                 $dynamic = $this->copy_dynamic_html($section_id, $ctx, $bag);
                 if ($dynamic !== '') {
+                    if ($section_id === 'overview_intro_dynamic' && $ctx->page_level === 'all-shapes') {
+                        $dynamic .= $this->stats_html(
+                            $ctx,
+                            is_array($bag['summary']) ? $bag['summary'] : array(),
+                            $currency
+                        );
+                    }
                     return $dynamic;
                 }
                 if ($section_id === 'type_overview_dynamic') {
@@ -984,18 +1011,17 @@ final class LDN_Renderer {
         $popular_label = $this->format_carat_label($popular);
 
         $lead = sprintf(
-            '%s diamond prices in %s cover %d carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.',
+            '%s diamond prices in %s span %d carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.',
             esc_html($type_label),
             esc_html($country_name),
             $carat_count
         );
         $detail = '';
-        if ($popular_label !== '' && $samples > 0) {
+        if ($popular_label !== '' && is_numeric($median)) {
             $detail = sprintf(
-                '%s carat is the most searched weight, where the weighted median is %s, based on %s stones tracked across every shape in the index.',
+                '%s carat is the most searched weight, with a median of %s across every shape at that weight.',
                 esc_html($popular_label),
-                esc_html($symbol . number_format((float) $median, 0)),
-                esc_html(number_format($samples))
+                esc_html($symbol . number_format((float) $median, 0))
             );
         }
 
@@ -1010,37 +1036,74 @@ final class LDN_Renderer {
     }
 
     public function stats_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
-        $rows = '';
-        foreach (self::stat_specs() as $spec) {
-            $value = $this->dig_first($summary, $spec['paths']);
-            if ($value === null || !is_scalar($value) || is_bool($value)) {
-                continue;
-            }
-            $rows .= '<dt>' . esc_html($spec['label']) . '</dt><dd>'
-                . esc_html($this->format_stat($value, $spec['format'], $currency)) . '</dd>';
+        $current = $this->dig_first($summary, array(
+            array('time_series', 'current_price'),
+            array('current_price'),
+        ));
+        $low = $this->dig_first($summary, array(
+            array('distribution', 'price_range', 'min'),
+            array('min_price'),
+            array('price_low'),
+        ));
+        $high = $this->dig_first($summary, array(
+            array('distribution', 'price_range', 'max'),
+            array('max_price'),
+            array('price_high'),
+        ));
+        $samples = $this->dig_first($summary, array(
+            array('distribution', 'sample_size'),
+            array('num_diamonds'),
+            array('sample_size'),
+        ));
+
+        $cells = array();
+        if ($current !== null && is_scalar($current) && !is_bool($current)) {
+            $cells[] = array(
+                'label' => __('Current price', 'loupe-diamond-network'),
+                'value' => $this->format_stat($current, 'currency', $currency),
+            );
+        }
+        if ($samples !== null && is_scalar($samples) && !is_bool($samples)) {
+            $cells[] = array(
+                'label' => __('Diamonds analysed', 'loupe-diamond-network'),
+                'value' => $this->format_stat($samples, 'integer', $currency),
+            );
+        }
+        if ($low !== null && is_scalar($low) && !is_bool($low)) {
+            $cells[] = array(
+                'label' => __('Lowest price', 'loupe-diamond-network'),
+                'value' => $this->format_stat($low, 'currency', $currency),
+            );
+        }
+        if ($high !== null && is_scalar($high) && !is_bool($high)) {
+            $cells[] = array(
+                'label' => __('Highest price', 'loupe-diamond-network'),
+                'value' => $this->format_stat($high, 'currency', $currency),
+            );
         }
 
-        // Price-change stat tracks the aggregate intro period (Loupe = 12 months);
-        // snapshot families (show_change:false) omit it.
-        $policy = $this->change_policy($ctx, 'all_shapes');
-        if ($policy['show_change']) {
-            $period = $policy['period'] !== null ? $policy['period'] : '7_days';
-            $change_key = 'change_' . $period;
-            $change_value = $this->dig_first($summary, array(
-                array('time_series', $change_key),
-                array($change_key),
-            ));
-            if ($change_value !== null && is_scalar($change_value) && !is_bool($change_value)) {
-                $label = ucfirst($this->change_period_short_label($period)) . ' change';
-                $rows .= '<dt>' . esc_html($label) . '</dt><dd>'
-                    . esc_html($this->format_stat($change_value, 'percent', $currency)) . '</dd>';
-            }
-        }
-
-        if ($rows === '') {
+        if (empty($cells)) {
             return '';
         }
-        return '<dl class="ldn-stats">' . $rows . '</dl>';
+
+        $top = array_slice($cells, 0, 2);
+        $bottom = array_slice($cells, 2, 2);
+        $html = '<div class="ldn-stats">';
+        foreach (array($top, $bottom) as $row) {
+            if (empty($row)) {
+                continue;
+            }
+            $html .= '<div class="ldn-stats-row">';
+            foreach ($row as $cell) {
+                $html .= '<div class="ldn-stat"><span class="ldn-stat-label">'
+                    . esc_html($cell['label']) . '</span><span class="ldn-stat-value">'
+                    . esc_html($cell['value']) . '</span></div>';
+            }
+            $html .= '</div>';
+        }
+        $html .= '</div>';
+
+        return $html;
     }
 
     /**
@@ -1188,6 +1251,10 @@ final class LDN_Renderer {
         $text = trim((string) $text);
         if ($text === '') {
             return '';
+        }
+        $text = str_replace(array("\r\n", "\r"), "\n", $text);
+        if (strpos($text, "\n\n") !== false) {
+            return wp_kses_post(wpautop($text));
         }
         if (strpos($text, "\n") !== false) {
             return wp_kses_post(wpautop($text));
@@ -1590,6 +1657,161 @@ final class LDN_Renderer {
     }
 
     /**
+     * Colour x clarity price grid (heatmap table) for shape pages.
+     *
+     * Reads C5.7 `color-clarity.json`
+     * (`price_table[color][clarity] = {price, count}`). Columns are colour grades
+     * (D best -> worst), rows are clarity grades (FL/IF best -> worst); each cell
+     * shows the average price for this shape + carat and is tinted by price
+     * relative to the grid min/max via the site's `--ldn-primary` brand colour
+     * (the `full_heatmap` presentation). Returns '' when the payload is absent or
+     * empty, so non-entitled sites (the LDN_Data_Fetcher `color_clarity` gate
+     * yields nothing) and stale folders drop the section cleanly.
+     *
+     * Canonical grade order is fixed here so the matrix always reads best ->
+     * worst regardless of the JSON key order; grades not present in the data are
+     * omitted, and any unrecognised colour grade is appended so no data is hidden.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param mixed            $payload  Decoded color-clarity.json (array) or null.
+     * @param string|null      $currency Fallback currency code when payload omits it.
+     * @return string
+     */
+    public function color_clarity_table_html(LDN_Page_Context $ctx, $payload, $currency = null) {
+        if ($ctx->shape === null) {
+            return '';
+        }
+        $payload = is_array($payload) ? $payload : array();
+        $table = isset($payload['price_table']) && is_array($payload['price_table'])
+            ? $payload['price_table']
+            : array();
+        if (empty($table)) {
+            return '';
+        }
+
+        $color_order = array('D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M');
+        $clarity_order = array('FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'I1', 'I2', 'I3');
+
+        $colors = array();
+        foreach ($color_order as $color) {
+            if (isset($table[$color]) && is_array($table[$color])) {
+                $colors[] = $color;
+            }
+        }
+        foreach (array_keys($table) as $color) {
+            if (!in_array((string) $color, $colors, true) && is_array($table[$color])) {
+                $colors[] = (string) $color;
+            }
+        }
+
+        $clarities = array();
+        foreach ($clarity_order as $clarity) {
+            foreach ($colors as $color) {
+                if (isset($table[$color][$clarity])) {
+                    $clarities[] = $clarity;
+                    break;
+                }
+            }
+        }
+        if (empty($colors) || empty($clarities)) {
+            return '';
+        }
+
+        $min = null;
+        $max = null;
+        foreach ($colors as $color) {
+            foreach ($clarities as $clarity) {
+                $price = $this->color_clarity_cell_price($table, $color, $clarity);
+                if ($price === null) {
+                    continue;
+                }
+                if ($min === null || $price < $min) {
+                    $min = $price;
+                }
+                if ($max === null || $price > $max) {
+                    $max = $price;
+                }
+            }
+        }
+
+        $currency_code = isset($payload['currency']) ? (string) $payload['currency'] : (string) $currency;
+        $symbol = $this->currency_symbol($currency_code !== '' ? $currency_code : $currency);
+
+        $head = '<th scope="col">' . esc_html__('Clarity \\ Colour', 'loupe-diamond-network') . '</th>';
+        foreach ($colors as $color) {
+            $head .= '<th scope="col">' . esc_html(strtoupper($color)) . '</th>';
+        }
+
+        $body = '';
+        foreach ($clarities as $clarity) {
+            $body .= '<tr><th scope="row">' . esc_html(strtoupper($clarity)) . '</th>';
+            foreach ($colors as $color) {
+                $price = $this->color_clarity_cell_price($table, $color, $clarity);
+                if ($price === null) {
+                    $body .= '<td class="ldn-cc-empty">—</td>';
+                    continue;
+                }
+                $style = $this->color_clarity_cell_style($price, $min, $max);
+                $body .= '<td' . $style . '>' . esc_html($symbol . number_format($price, 0)) . '</td>';
+            }
+            $body .= '</tr>';
+        }
+
+        return '<section class="ldn-section ldn-color-clarity">'
+            . '<h2>' . esc_html__('Price by colour and clarity', 'loupe-diamond-network') . '</h2>'
+            . '<p>' . esc_html__(
+                'Average price for this shape and carat weight across the colour (D is the highest grade) and clarity grades we track. Darker cells cost more.',
+                'loupe-diamond-network'
+            ) . '</p>'
+            . '<div class="ldn-cc-scroll"><table class="ldn-data-table ldn-cc-table">'
+            . '<thead><tr>' . $head . '</tr></thead>'
+            . '<tbody>' . $body . '</tbody></table></div></section>';
+    }
+
+    /**
+     * Read a single colour/clarity cell price from the C5.7 grid. Handles the
+     * `{price, count}` cell contract and a bare-numeric fallback; returns null
+     * when the cell is missing or non-numeric so the caller renders a dash.
+     *
+     * @param array  $table
+     * @param string $color
+     * @param string $clarity
+     * @return float|null
+     */
+    private function color_clarity_cell_price(array $table, $color, $clarity) {
+        if (!isset($table[$color][$clarity])) {
+            return null;
+        }
+        $cell = $table[$color][$clarity];
+        if (is_array($cell)) {
+            return isset($cell['price']) && is_numeric($cell['price']) ? (float) $cell['price'] : null;
+        }
+        return is_numeric($cell) ? (float) $cell : null;
+    }
+
+    /**
+     * Inline background style tinting a heatmap cell by price relative to the
+     * grid min/max. Uses `color-mix()` over `--ldn-primary` so the heat colour
+     * follows the site brand and degrades to no background (price text still
+     * visible) on browsers without color-mix. Returns '' when the grid has no
+     * spread (single price), so a flat grid is not falsely shaded.
+     *
+     * @param float      $price
+     * @param float|null $min
+     * @param float|null $max
+     * @return string
+     */
+    private function color_clarity_cell_style($price, $min, $max) {
+        if ($min === null || $max === null || $max <= $min) {
+            return '';
+        }
+        $t = ($price - $min) / ($max - $min);
+        $t = max(0.0, min(1.0, $t));
+        $pct = (int) round(8 + ($t * 55));
+        return ' style="background-color:color-mix(in srgb, var(--ldn-primary) ' . $pct . '%, transparent)"';
+    }
+
+    /**
      * Carat-tier comparison table for diamond-type pages.
      *
      * @param LDN_Page_Context $ctx
@@ -1653,14 +1875,6 @@ final class LDN_Renderer {
             isset($overview['currency']) ? $overview['currency'] : $this->config->get_currency($ctx->site_id, $ctx->country_code)
         );
 
-        $discount_chart = $this->chart_html(
-            isset($bag['market_discount_chart']) && is_array($bag['market_discount_chart'])
-                ? $bag['market_discount_chart']
-                : array(),
-            'ldn-market-discount-chart',
-            __('Lab-grown discount vs natural', 'loupe-diamond-network')
-        );
-
         $trend_chart = $this->chart_html(
             isset($bag['market_trend_chart']) && is_array($bag['market_trend_chart'])
                 ? $bag['market_trend_chart']
@@ -1669,7 +1883,38 @@ final class LDN_Renderer {
             __('Natural vs lab-grown price change (%)', 'loupe-diamond-network')
         );
 
-        return $trend_chart . $discount_chart . $this->carat_price_table_html($ctx, $overview, $currency);
+        $type_comparison = $this->section_value('type_comparison', $ctx, $bag);
+        $table_intro = is_string($type_comparison) && trim($type_comparison) !== ''
+            ? $this->format_prose_html($type_comparison)
+            : '';
+
+        $table_html = $this->carat_price_table_html($ctx, $overview, $currency, $table_intro);
+
+        $discount_intro = sprintf(
+            /* translators: %s: country name */
+            __(
+                'Lab-grown diamonds typically cost less than natural at every carat weight. '
+                . 'This chart shows how wide that gap is across sizes in %s.',
+                'loupe-diamond-network'
+            ),
+            $this->country_full_name($ctx)
+        );
+        $discount_chart = $this->chart_html(
+            isset($bag['market_discount_chart']) && is_array($bag['market_discount_chart'])
+                ? $bag['market_discount_chart']
+                : array(),
+            'ldn-market-discount-chart',
+            __('Lab-grown discount vs natural', 'loupe-diamond-network')
+        );
+        $discount_block = '';
+        if ($discount_chart !== '') {
+            $discount_block = '<section class="ldn-section ldn-discount-chart">'
+                . '<p class="ldn-discount-chart-intro">' . esc_html($discount_intro) . '</p>'
+                . $discount_chart
+                . '</section>';
+        }
+
+        return $trend_chart . $table_html . $discount_block;
     }
 
     /**
@@ -1684,7 +1929,7 @@ final class LDN_Renderer {
      * @param string           $currency resolved currency symbol
      * @return string
      */
-    public function carat_price_table_html(LDN_Page_Context $ctx, array $overview, $currency) {
+    public function carat_price_table_html(LDN_Page_Context $ctx, array $overview, $currency, $intro_html = '') {
         $rows = isset($overview['carat_price_table']) && is_array($overview['carat_price_table'])
             ? $overview['carat_price_table']
             : array();
@@ -1722,7 +1967,8 @@ final class LDN_Renderer {
 
         return '<section class="ldn-section ldn-carat-price-table">'
             . '<h2>' . esc_html($heading) . '</h2>'
-            . '<p>' . esc_html__('Select any price to explore that carat weight in more detail.', 'loupe-diamond-network') . '</p>'
+            . ($intro_html !== '' ? '<div class="ldn-carat-price-table-intro">' . $intro_html . '</div>' : '')
+            . '<p class="ldn-carat-price-table-hint">' . esc_html__('Select any price to explore that carat weight in more detail.', 'loupe-diamond-network') . '</p>'
             . '<table class="ldn-data-table"><thead><tr>'
             . '<th>' . esc_html__('Carat weight', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Natural', 'loupe-diamond-network') . '</th>'
@@ -1752,6 +1998,45 @@ final class LDN_Renderer {
             return $formatted;
         }
         return '<a href="' . esc_url($url) . '">' . $formatted . '</a>';
+    }
+
+    /**
+     * US-only link from a pricing shape page to the matching size page (Decision 5).
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    public function size_price_link_html(LDN_Page_Context $ctx) {
+        if ($ctx->module !== 'price' || $ctx->page_level !== 'shape') {
+            return '';
+        }
+        if (!$this->config->size_price_internal_links($ctx->site_id)) {
+            return '';
+        }
+        $rollout_country = $this->config->size_rollout_country($ctx->site_id);
+        if (strtolower($ctx->country_code) !== strtolower($rollout_country)) {
+            return '';
+        }
+        if ($ctx->shape === null || $ctx->carat === null) {
+            return '';
+        }
+
+        $size_renderer = new LDN_Size_Renderer($this->fetcher, $this->config);
+        $url = $size_renderer->build_size_individual_url($ctx->site_id, $ctx->shape, $ctx->carat);
+        if ($url === '') {
+            return '';
+        }
+
+        $shape_label = ucwords(str_replace('-', ' ', $ctx->shape));
+        $text = sprintf(
+            /* translators: 1: carat weight, 2: diamond shape */
+            __('View %1$s carat %2$s diamond size (mm dimensions)', 'loupe-diamond-network'),
+            $this->format_carat_label($ctx->carat),
+            $shape_label
+        );
+
+        return '<section class="ldn-section ldn-price-size-link"><p><a href="'
+            . esc_url($url) . '">' . esc_html($text) . '</a></p></section>';
     }
 
     /**
@@ -1877,6 +2162,7 @@ final class LDN_Renderer {
                 $bag['individual'] = $this->fetcher->fetch_artefact('individual_content_json', $ctx);
                 $bag['carat_ladder'] = $this->fetcher->fetch_artefact('carat_ladder_json', $ctx);
                 $bag['carat_ladder_chart'] = $this->fetcher->fetch_artefact('carat_ladder_chart', $ctx);
+                $bag['color_clarity'] = $this->fetcher->fetch_artefact('color_clarity_json', $ctx);
                 break;
             case 'all-shapes':
                 $bag['ranking'] = $this->fetcher->fetch_artefact('shapes_ranking_json', $ctx);

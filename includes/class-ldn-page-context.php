@@ -46,6 +46,9 @@ final class LDN_Page_Context {
     /** @var string|null */
     public $shape;
 
+    /** @var string */
+    public $module;
+
     /**
      * @param string      $site_id
      * @param string      $page_level
@@ -53,6 +56,7 @@ final class LDN_Page_Context {
      * @param string|null $diamond_type
      * @param string|null $carat
      * @param string|null $shape
+     * @param string      $module       'price' | 'size'
      */
     public function __construct(
         $site_id,
@@ -60,7 +64,8 @@ final class LDN_Page_Context {
         $country_code,
         $diamond_type = null,
         $carat = null,
-        $shape = null
+        $shape = null,
+        $module = 'price'
     ) {
         $this->site_id = (string) $site_id;
         $this->page_level = (string) $page_level;
@@ -68,5 +73,6 @@ final class LDN_Page_Context {
         $this->diamond_type = $diamond_type !== null ? (string) $diamond_type : null;
         $this->carat = $carat !== null ? (string) $carat : null;
         $this->shape = $shape !== null ? (string) $shape : null;
+        $this->module = (string) $module;
     }
 }

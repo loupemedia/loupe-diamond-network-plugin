@@ -1,6 +1,6 @@
 {
-  "version": "93462d7",
-  "generated_at": "2026-06-29T05:37:52.091103+00:00",
+  "version": "79e9bc6",
+  "generated_at": "2026-06-29T21:58:11.977546+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -5607,6 +5607,10 @@
           "diamondprice.guru"
         ]
       },
+      "size_module": {
+        "rollout_country": "us",
+        "price_internal_links": true
+      },
       "s3": {
         "bucket": "ringspo",
         "graph_prefix": "{country}/{diamond_type}/{carat}-carat/{shape}/",
@@ -8294,12 +8298,12 @@
           "shape_analysis": "At {carat} carats, {most_expensive_shape} leads on price at {currency_symbol}{most_expensive_price:,.0f} while {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\n"
         },
         "diamond_type": {
-          "intro": "{type_title} diamond prices in {country_name} cover {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most searched weight, where the weighted median is {currency_symbol}{weighted_median_price:,.0f}, based on {total_sample_size:,} stones tracked across every shape in the index.\n",
-          "buyer_context": "This page shows how {type_title_lower} diamond prices scale by carat weight in {country_name}. Each figure is a weighted median across every shape in our index — use it to set a budget before you compare round, oval, and other shapes at the weight you have in mind.\n{lab_comparison_clause}\n"
+          "intro": "{type_title} diamond prices in {country_name} span {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most searched weight, with a median of {currency_symbol}{weighted_median_price:,.0f} across every shape at that weight.\n",
+          "buyer_context": "This page shows how {type_title_lower} diamond prices scale by carat weight in {country_name}. Each figure is a weighted median across every shape in our index — use it to set a budget before you compare round, oval, and other shapes at the weight you have in mind.\n"
         },
         "top_level": {
           "intro": "Our index tracks {total_diamonds_tracked:,} diamonds in {country_name} — {natural_sample_size:,} natural stones and {lab_sample_size:,} lab-grown across every shape and carat weight we monitor.\nAt 1 carat, the typical natural diamond sits at {currency_symbol}{one_carat_natural:,.0f} versus {currency_symbol}{one_carat_lab:,.0f} for lab-grown — a {one_carat_discount:.0f}% price gap that generally widens at larger weights.\n",
-          "market_size": "Use the chart and table below to see how natural and lab-grown prices have moved recently and to jump to any carat weight. {trend_clause}\n"
+          "market_size": "Use the charts and table below to compare natural and lab-grown prices by carat weight and explore any size in more detail. {trend_clause}\n"
         }
       },
       "file_naming": {
@@ -8716,6 +8720,7 @@
             "expert_take_static",
             "price_graph",
             "pricing_context_static",
+            "color_clarity",
             "buying_guidance_static",
             "faq_static",
             "cross_site_comparison"
@@ -9241,7 +9246,10 @@
           "level_4": "/us/diamond-prices/natural/1-carat/round",
           "level_5": "/us/diamond-prices/natural/1-carat/round/gia/2527938255",
           "level_5_lab": "/uk/diamond-prices/lab-grown/2-carat/princess/igi/LG12345678"
-        }
+        },
+        "size_level_1": "/diamond-size",
+        "size_level_2": "/diamond-size/{shape}",
+        "size_level_3": "/diamond-size/{shape}/{carat}"
       },
       "diamondpriceguru": {
         "site_id": "diamondpriceguru",
@@ -12969,6 +12977,12 @@
           "diamondhuntuk"
         ]
       },
+      "ringspo": {
+        "label": "Ringspo",
+        "site_ids": [
+          "ringspo"
+        ]
+      },
       "dpe": {
         "label": "Diamond Price Exact family",
         "site_ids": [
@@ -13033,6 +13047,21 @@
         ],
         "modules": [
           "price"
+        ],
+        "countries": "primary",
+        "test_only": true,
+        "test_combos": true
+      },
+      {
+        "id": "ringspo_staging_qa_price_size",
+        "label": "Ringspo — staging QA (price + size US)",
+        "environment": "staging",
+        "groups": [
+          "ringspo"
+        ],
+        "modules": [
+          "price",
+          "size"
         ],
         "countries": "primary",
         "test_only": true,

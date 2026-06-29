@@ -301,6 +301,18 @@ final class LDN_Plugin {
     }
 
     /**
+     * Size-module dispatcher for the resolved site, or null when off-network.
+     *
+     * @return LDN_Size_Dispatcher|null
+     */
+    public function size_dispatcher() {
+        if (!class_exists('LDN_Size_Module')) {
+            return null;
+        }
+        return LDN_Size_Module::dispatcher();
+    }
+
+    /**
      * Clear memoised site_id and site-dependent services (after admin site change).
      *
      * @return void
