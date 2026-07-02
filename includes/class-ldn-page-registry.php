@@ -65,7 +65,7 @@ final class LDN_Page_Registry {
     private function query_sitemap_rows($site_id, array $country_codes, $max_level) {
         $conn = LDN_Db::connection();
         if ($conn === null) {
-            error_log('LDN_Page_Registry: no database connection');
+            LDN_Plugin::debug_log('Page_Registry', 'no database connection');
             return array();
         }
 
@@ -92,7 +92,7 @@ final class LDN_Page_Registry {
 
         $result = @pg_query_params($conn, $sql, $params);
         if ($result === false) {
-            error_log('LDN_Page_Registry: query failed — ' . pg_last_error($conn));
+            LDN_Plugin::debug_log('Page_Registry', 'query failed — ' . pg_last_error($conn));
             return array();
         }
 

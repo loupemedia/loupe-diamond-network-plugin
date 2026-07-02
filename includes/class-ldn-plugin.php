@@ -167,6 +167,24 @@ final class LDN_Plugin {
         return defined('LDN_VERSION') ? LDN_VERSION : '0.0.0';
     }
 
+    /**
+     * Write a debug log line prefixed with plugin version (WP_DEBUG_LOG only).
+     *
+     * @param string $component Short class or area label.
+     * @param string $message   Log message.
+     * @return void
+     */
+    public static function debug_log($component, $message) {
+        if (!defined('WP_DEBUG') || !WP_DEBUG) {
+            return;
+        }
+        if (!defined('WP_DEBUG_LOG') || !WP_DEBUG_LOG) {
+            return;
+        }
+        $version = defined('LDN_VERSION') ? LDN_VERSION : '?';
+        error_log(sprintf('[LDN %s] [%s] %s', $version, $component, $message));
+    }
+
     // =========================================================================
     // Per-request services (lazy — built only when first needed)
     // =========================================================================

@@ -168,20 +168,20 @@ final class LDN_Dashboard {
         ));
 
         if (is_wp_error($response)) {
-            error_log('LDN_Dashboard: fetch failed — ' . $response->get_error_message());
+            LDN_Plugin::debug_log('Dashboard', 'fetch failed — ' . $response->get_error_message());
             return $this->last_good();
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);
         if ($code !== 200) {
-            error_log('LDN_Dashboard: HTTP ' . $code . ' from ' . $url);
+            LDN_Plugin::debug_log('Dashboard', 'HTTP ' . $code . ' from ' . $url);
             return $this->last_good();
         }
 
         $body = wp_remote_retrieve_body($response);
         $decoded = json_decode($body, true);
         if (!is_array($decoded)) {
-            error_log('LDN_Dashboard: invalid JSON from ops config');
+            LDN_Plugin::debug_log('Dashboard', 'invalid JSON from ops config');
             return $this->last_good();
         }
 

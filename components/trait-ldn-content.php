@@ -10,42 +10,10 @@ if (!defined('ABSPATH')) {
 }
 
 trait LDN_Trait_Content {
-    /**
-     * Plotly.js CDN (pinned). Never bundle (~4.5 MB) — Principle 10 / chart rules.
-     */
-    const PLOTLY_CDN = 'https://cdn.plot.ly/plotly-2.35.2.min.js';
-
-    /**
-     * JSON flags for embedding payloads inside <script> safely (escapes </script>).
-     */
-    const JSON_SCRIPT_FLAGS = JSON_HEX_TAG | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
-
-    /**
-     * Sections that must never render regardless of config presence.
-     * cross_site_comparison is ON HOLD per site_content_entitlements.yaml
-     * (2026-06-14, network-graph / price-contradiction risk).
-     *
-     * @var string[]
-     */
-    const SUPPRESSED_SECTIONS = array('cross_site_comparison', 'type_comparison');
-
-    /**
-     * Editorial sections that carry static C1 copy but do NOT use the `_static`
-     * suffix in `page_structure`. They are rendered as text blocks like any
-     * `_static` section. Mirrors EDITORIAL_STATIC_SECTION_IDS in
-     * shared/content/section_prompts.py — keep the two in sync so every section
-     * C1 generates is also rendered (otherwise upper-level pages silently drop
-     * their generated editorial).
-     *
-     * @var string[]
-     */
-    const EDITORIAL_STATIC_SECTIONS = array(
-        'type_comparison',
-        'shape_preview',
-        'natural_vs_lab_analysis',
-        'buying_considerations',
-        'expert_recommendations',
-    );
+    // PLOTLY_CDN, JSON_SCRIPT_FLAGS, SUPPRESSED_SECTIONS, EDITORIAL_STATIC_SECTIONS,
+    // DYNAMIC_COPY_KEYS, and CURRENCY_SYMBOLS live on LDN_Renderer (not here): trait
+    // constants require PHP 8.2+; Kinsta staging runs 8.1. self:: in trait methods
+    // resolves to the composing class.
 
     /**
      * Display headings for static editorial sections whose auto-generated
@@ -62,48 +30,11 @@ trait LDN_Trait_Content {
     );
 
     /**
-     * Dynamic section id → copy.json section keys per page level.
-     *
-     * @var array<string, array<string, string[]>>
-     */
-    const DYNAMIC_COPY_KEYS = array(
-        'all-shapes' => array(
-            // Legacy single block — kept for profiles that still list overview_dynamic.
-            'overview_dynamic' => array('intro_text', 'analysis', 'shape_analysis'),
-            'overview_intro_dynamic' => array('intro_text'),
-            'overview_analysis_dynamic' => array('analysis'),
-            'overview_detail_dynamic' => array('shape_analysis'),
-        ),
-        'diamond-type' => array(
-            'type_overview_dynamic' => array('intro'),
-            'type_buyer_context_dynamic' => array('buyer_context'),
-        ),
-        'top-level' => array(
-            'market_overview_dynamic' => array('intro', 'market_size'),
-            'ring_overview_dynamic'   => array('intro', 'market_size'),
-        ),
-    );
-
-    /**
      * Human shape/type casing.
      */
     private static $TYPE_LABELS = array(
         'natural'   => 'Natural',
         'lab-grown' => 'Lab-Grown',
-    );
-
-    /**
-     * ISO currency code → display symbol/prefix. Codes not listed fall back to
-     * "{CODE} " so a price is never rendered unlabelled.
-     *
-     * @var array<string, string>
-     */
-    const CURRENCY_SYMBOLS = array(
-        'USD' => '$', 'AUD' => 'A$', 'CAD' => 'C$', 'NZD' => 'NZ$', 'SGD' => 'S$',
-        'HKD' => 'HK$', 'GBP' => '£', 'EUR' => '€', 'JPY' => '¥', 'INR' => '₹',
-        'ZAR' => 'R', 'BRL' => 'R$', 'MXN' => 'MX$', 'TRY' => '₺', 'ILS' => '₪',
-        'KRW' => '₩', 'AED' => 'AED ', 'SAR' => 'SAR ', 'CHF' => 'CHF ',
-        'DKK' => 'kr ', 'SEK' => 'kr ', 'NOK' => 'kr ',
     );
 
     /**

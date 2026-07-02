@@ -242,8 +242,6 @@ final class LDN_Site_Resolver {
      * @return void
      */
     private function log($message) {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('[LDN_Site_Resolver] ' . $message);
-        }
+        LDN_Plugin::debug_log('Site_Resolver', $message);
     }
 }

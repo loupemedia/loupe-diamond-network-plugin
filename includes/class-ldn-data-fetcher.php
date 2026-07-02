@@ -276,8 +276,6 @@ final class LDN_Data_Fetcher {
      * @return void
      */
     private function log($message) {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('[LDN_Data_Fetcher] ' . $message);
-        }
+        LDN_Plugin::debug_log('Data_Fetcher', $message);
     }
 }

@@ -81,7 +81,7 @@ final class LDN_Db {
 
         $conn = @pg_connect(self::connection_string());
         if ($conn === false) {
-            error_log('LDN_Db: PostgreSQL connection failed');
+            LDN_Plugin::debug_log('Db', 'PostgreSQL connection failed');
             return null;
         }
         self::$connection = $conn;

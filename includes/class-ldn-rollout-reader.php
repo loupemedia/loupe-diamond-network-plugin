@@ -536,8 +536,6 @@ final class LDN_Rollout_Reader {
      * @return void
      */
     private function log($message) {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('[LDN_Rollout_Reader] ' . $message);
-        }
+        LDN_Plugin::debug_log('Rollout_Reader', $message);
     }
 }

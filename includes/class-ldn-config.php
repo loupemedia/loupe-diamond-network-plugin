@@ -635,8 +635,6 @@ final class LDN_Config {
      * @return void
      */
     private function log($message) {
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('[LDN_Config] ' . $message);
-        }
+        LDN_Plugin::debug_log('Config', $message);
     }
 }

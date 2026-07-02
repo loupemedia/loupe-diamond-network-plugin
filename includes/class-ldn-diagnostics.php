@@ -110,6 +110,7 @@ final class LDN_Diagnostics {
         $html = '<aside class="ldn-staging-diagnostics" style="margin:2rem 0;padding:1rem;border:2px dashed #d63638;background:#fff8f0;font:13px/1.5 monospace;">';
         $html .= '<p style="margin:0 0 .75rem;font:bold 14px sans-serif;">LDN staging diagnostics</p>';
         $html .= '<p style="margin:0 0 .5rem;">Environment: <strong>' . esc_html(LDN_Environment::current()) . '</strong>';
+        $html .= ' · Plugin v' . esc_html(LDN_Plugin::instance()->version());
         if ($rollout instanceof LDN_Rollout_Reader) {
             $html .= ' · Rollout v' . esc_html((string) $rollout->current_version());
             if ($rollout->is_test_only($ctx->country_code, 'price')) {

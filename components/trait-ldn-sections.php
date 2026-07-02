@@ -151,7 +151,8 @@ trait LDN_Trait_Sections {
         // Copy payloads come in two shapes: flat ({json_key: ...}) or nested
         // under a `sections` wrapper (the live C1 static-content.json contract).
         foreach (array('static', 'individual') as $src) {
-            $payload = is_array($bag[$src]) ? $bag[$src] : array();
+            $raw = isset($bag[$src]) ? $bag[$src] : null;
+            $payload = is_array($raw) ? $raw : array();
             if (isset($payload[$json_key])) {
                 return $payload[$json_key];
             }

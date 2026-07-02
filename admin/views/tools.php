@@ -3,6 +3,7 @@
  * Admin tools view.
  *
  * @var string|null $version
+ * @var string      $plugin_version
  * @var string      $environment
  * @var string|null $site_id
  * @var string      $saved_site_id
@@ -68,6 +69,7 @@ if (!defined('ABSPATH')) {
         <tbody>
             <tr><th><?php esc_html_e('Effective site ID', 'loupe-diamond-network'); ?></th><td><code><?php echo esc_html($site_id !== null ? $site_id : '—'); ?></code></td></tr>
             <tr><th><?php esc_html_e('Environment', 'loupe-diamond-network'); ?></th><td><code><?php echo esc_html($environment); ?></code></td></tr>
+            <tr><th><?php esc_html_e('Plugin version', 'loupe-diamond-network'); ?></th><td><code><?php echo esc_html($plugin_version); ?></code></td></tr>
             <tr><th><?php esc_html_e('Cached rollout version', 'loupe-diamond-network'); ?></th><td><?php echo esc_html($version !== null ? (string) $version : '—'); ?></td></tr>
         </tbody>
     </table>

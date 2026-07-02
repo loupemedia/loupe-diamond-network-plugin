@@ -111,9 +111,10 @@ trait LDN_Trait_Data {
      */
     private function prefetch(LDN_Page_Context $ctx) {
         $bag = array(
-            'summary' => $this->fetcher->fetch_artefact('summary_data_json', $ctx),
-            'static'  => $this->fetcher->fetch_artefact('static_content_json', $ctx),
-            'copy'    => $this->fetcher->fetch_artefact('templated_copy_json', $ctx),
+            'summary'    => $this->fetcher->fetch_artefact('summary_data_json', $ctx),
+            'static'     => $this->fetcher->fetch_artefact('static_content_json', $ctx),
+            'copy'       => $this->fetcher->fetch_artefact('templated_copy_json', $ctx),
+            'individual' => null,
         );
 
         switch ($ctx->page_level) {
