@@ -141,5 +141,8 @@ final class LDN_Admin {
         }
         $plugin->data_fetcher()->flush_caches();
         $plugin->config()->flush();
+        $plugin->dashboard()->flush();
+        $registry = new LDN_Page_Registry();
+        $registry->flush_cache($plugin->site_id());
     }
 }

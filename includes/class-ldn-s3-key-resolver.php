@@ -48,6 +48,7 @@ final class LDN_S3_Key_Resolver {
         'shapes_ranking_json'    => 'shapes-ranking.json',
         'type_summary_json'      => 'type-summary.json',
         'market_overview_json'   => 'market-overview.json',
+        'top_tables_json'        => 'top-tables.json',
         'market_discount_chart'  => 'market-discount-chart.json',
         'market_trend_chart'     => 'market-trend-chart.json',
         'shapes_at_carat_chart'  => 'shapes-ranking-chart.json',
@@ -60,6 +61,7 @@ final class LDN_S3_Key_Resolver {
         'size_chart_html'        => 'size-chart.html',
         'size_copy_json'         => 'size-copy.json',
         'shape_outline_svg'      => 'shape-outline.svg',
+        'size_sitemap_xml'       => 'sitemap.xml',
     );
 
     /**
@@ -215,6 +217,8 @@ final class LDN_S3_Key_Resolver {
         switch ($ctx->page_level) {
             case 'size-mega-hub':
                 return $root . '/';
+            case 'size-sitemap':
+                return $root . '/';
             case 'size-shape-hub':
                 if ($ctx->shape === null) {
                     return null;
@@ -227,6 +231,11 @@ final class LDN_S3_Key_Resolver {
                 return $root . '/'
                     . $this->config->shape_to_s3_slug($ctx->shape) . '/'
                     . $ctx->carat . '-carat/';
+            case 'size-comparison':
+                if ($ctx->compare_slug === null || $ctx->compare_slug === '') {
+                    return null;
+                }
+                return $root . '/compare/' . $ctx->compare_slug . '/';
             default:
                 return null;
         }

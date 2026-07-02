@@ -22,6 +22,7 @@ final class LDN_Size_Router {
         'ldn_size_level',
         'ldn_shape',
         'ldn_carat',
+        'ldn_compare_slug',
     );
 
     /** @var string */
@@ -114,12 +115,17 @@ final class LDN_Size_Router {
         $level1 = is_array($structure) && !empty($structure['size_level_1'])
             ? (string) $structure['size_level_1']
             : '/diamond-size';
+        $compare = is_array($structure) && !empty($structure['size_level_compare'])
+            ? (string) $structure['size_level_compare']
+            : '/diamond-size/compare/{compare}';
 
         $individual = $this->pattern_to_regex($level3);
         $shape_hub = $this->pattern_to_regex($level2);
         $mega = $this->pattern_to_regex($level1);
+        $comparison = $this->pattern_to_regex($compare);
 
         return array(
+            $comparison => 'index.php?ldn_route=size&ldn_size_level=compare&ldn_compare_slug=$matches[1]',
             $individual => 'index.php?ldn_route=size&ldn_size_level=individual&ldn_shape=$matches[1]&ldn_carat=$matches[2]',
             $shape_hub => 'index.php?ldn_route=size&ldn_size_level=shape&ldn_shape=$matches[1]',
             $mega => 'index.php?ldn_route=size&ldn_size_level=mega',
@@ -146,6 +152,11 @@ final class LDN_Size_Router {
             }
             if ($part === '{carat}') {
                 $regex_parts[] = '([0-9]+(?:\\.[0-9]+)?)-carat';
+                ++$match_index;
+                continue;
+            }
+            if ($part === '{compare}') {
+                $regex_parts[] = '([^/]+)';
                 ++$match_index;
                 continue;
             }

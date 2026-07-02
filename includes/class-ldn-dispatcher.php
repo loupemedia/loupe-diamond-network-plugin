@@ -159,8 +159,27 @@ final class LDN_Dispatcher {
         add_action('wp_head', array($this, 'render_head'), 5);
         add_action('wp_footer', array(__CLASS__, 'render_staging_footer'), 99);
 
-        $custom = LDN_PLUGIN_DIR . 'templates/price-page.php';
+        $custom = LDN_PLUGIN_DIR . 'templates/' . $this->template_for_level($ctx->page_level);
+        if (!is_readable($custom)) {
+            $custom = LDN_PLUGIN_DIR . 'templates/price-page.php';
+        }
         return is_readable($custom) ? $custom : $template;
+    }
+
+    /**
+     * Map page level to PRD-005 level template file.
+     *
+     * @param string $page_level
+     * @return string Basename under templates/
+     */
+    private function template_for_level($page_level) {
+        $map = array(
+            'top-level'    => 'level-1-landing.php',
+            'diamond-type' => 'level-2-type.php',
+            'all-shapes'   => 'level-3-carat.php',
+            'shape'        => 'level-4-shape.php',
+        );
+        return isset($map[$page_level]) ? $map[$page_level] : 'price-page.php';
     }
 
     /**

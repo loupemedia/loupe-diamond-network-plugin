@@ -295,6 +295,65 @@ final class LDN_Config {
         return $url;
     }
 
+    /**
+     * network_consumer.yaml slice from the bundle.
+     *
+     * @return array
+     */
+    public function network_consumer() {
+        $bundle = $this->get_bundle();
+        return isset($bundle['network_consumer']) && is_array($bundle['network_consumer'])
+            ? $bundle['network_consumer']
+            : array();
+    }
+
+    /**
+     * Combined sitemap index path (price + size child sitemaps).
+     *
+     * @return string
+     */
+    public function network_sitemap_index_path() {
+        $consumer = $this->network_consumer();
+        $path = isset($consumer['network_sitemap_index'])
+            ? trim((string) $consumer['network_sitemap_index'])
+            : '/sitemaps/network.xml';
+        return $path !== '' ? $path : '/sitemaps/network.xml';
+    }
+
+    /**
+     * Price-module XML sitemap path for a site (from url_structures or derived).
+     *
+     * @param string $site_id
+     * @return string|null
+     */
+    public function price_sitemap_path($site_id) {
+        $structure = $this->get_url_structure($site_id);
+        if (!is_array($structure)) {
+            return null;
+        }
+        if (!empty($structure['price_level_sitemap'])) {
+            return (string) $structure['price_level_sitemap'];
+        }
+        if (!empty($structure['level_1'])) {
+            return rtrim((string) $structure['level_1'], '/') . '/sitemap.xml';
+        }
+        return '/diamond-prices/sitemap.xml';
+    }
+
+    /**
+     * Size-module XML sitemap path for a site.
+     *
+     * @param string $site_id
+     * @return string|null
+     */
+    public function size_sitemap_path($site_id) {
+        $structure = $this->get_url_structure($site_id);
+        if (!is_array($structure) || empty($structure['size_level_sitemap'])) {
+            return null;
+        }
+        return (string) $structure['size_level_sitemap'];
+    }
+
     // =========================================================================
     // Content profile resolution (mirrors shared.config.profiles.resolve_content_profile)
     // =========================================================================

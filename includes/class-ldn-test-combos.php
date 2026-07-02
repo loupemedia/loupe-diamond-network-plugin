@@ -3,8 +3,9 @@
  * Staging test-page filter (shape-level combos).
  *
  * When rollout has ``test_only`` for a (site × country × module) and the
- * environment carries a ``test_combos`` list, only those shape URLs are served;
- * all other shape requests 404. Non-shape levels 404 while test_only is on.
+ * environment carries a ``test_combos`` list, hub levels (top-level, diamond-type,
+ * all-shapes) are always allowed; only shape-level URLs are filtered to the
+ * combo list. All other shape requests 404.
  *
  * @package LoupeDiamondNetwork
  */
@@ -21,7 +22,7 @@ final class LDN_Test_Combos {
      * @param LDN_Config|null $config
      * @return array<int, array{diamond_type: string, carat: string, shape: string}>
      */
-    public static function defaults(LDN_Config $config = null) {
+    public static function defaults(?LDN_Config $config = null) {
         if ($config === null) {
             $config = new LDN_Config();
         }
@@ -102,7 +103,17 @@ final class LDN_Test_Combos {
     }
 
     /**
-     * Whether a shape-level context is allowed by the test combo list.
+     * Hub page levels that bypass the shape combo filter under test_only.
+     *
+     * @var string[]
+     */
+    const HUB_PAGE_LEVELS = array('top-level', 'diamond-type', 'all-shapes');
+
+    /**
+     * Whether a price-module context is allowed by the test combo list.
+     *
+     * Hub levels are always allowed when combos are present (S3 primary-artefact
+     * probe still 404s missing data). Shape pages must match a combo entry.
      *
      * @param LDN_Page_Context $ctx
      * @param array            $combos From normalise_list().
@@ -110,6 +121,9 @@ final class LDN_Test_Combos {
      */
     public static function allows_context(LDN_Page_Context $ctx, array $combos) {
         if ($combos === array()) {
+            return true;
+        }
+        if (in_array($ctx->page_level, self::HUB_PAGE_LEVELS, true)) {
             return true;
         }
         if ($ctx->page_level !== 'shape') {
@@ -142,6 +156,9 @@ final class LDN_Test_Combos {
         if ($ctx->page_level === 'size-mega-hub') {
             return false;
         }
+        if ($ctx->page_level === 'size-sitemap') {
+            return true;
+        }
         if ($ctx->page_level === 'size-shape-hub') {
             if ($ctx->shape === null) {
                 return false;
@@ -158,6 +175,32 @@ final class LDN_Test_Combos {
             foreach ($combos as $combo) {
                 if (self::size_combo_matches($ctx, $combo)) {
                     return true;
+                }
+            }
+            return false;
+        }
+        if ($ctx->page_level === 'size-comparison') {
+            if ($ctx->compare_slug === null) {
+                return false;
+            }
+            $sides = self::parse_compare_slug_sides($ctx->compare_slug);
+            if ($sides === null) {
+                return false;
+            }
+            foreach ($combos as $combo) {
+                foreach (array('a', 'b') as $key) {
+                    $probe = new LDN_Page_Context(
+                        $ctx->site_id,
+                        'size-individual',
+                        $ctx->country_code,
+                        null,
+                        $sides[$key]['carat'],
+                        $sides[$key]['shape'],
+                        'size'
+                    );
+                    if (self::size_combo_matches($probe, $combo)) {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -219,5 +262,36 @@ final class LDN_Test_Combos {
             return (string) (int) round($value);
         }
         return rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.');
+    }
+
+    /**
+     * Minimal compare-slug parser for staging test_combos gating (shape slug may be approximate).
+     *
+     * @param string $slug
+     * @return array{a:array{shape:string,carat:string},b:array{shape:string,carat:string}}|null
+     */
+    public static function parse_compare_slug_sides($slug) {
+        if (!is_string($slug) || strpos($slug, '-vs-') === false) {
+            return null;
+        }
+        $parts = explode('-vs-', $slug, 2);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        $parse = static function ($token) {
+            if (!preg_match('/^(.+)-([\d.]+)-carat$/', $token, $m)) {
+                return null;
+            }
+            return array(
+                'shape' => str_replace('-', ' ', strtolower($m[1])),
+                'carat' => self::normalise_carat($m[2]),
+            );
+        };
+        $a = $parse($parts[0]);
+        $b = $parse($parts[1]);
+        if ($a === null || $b === null) {
+            return null;
+        }
+        return array('a' => $a, 'b' => $b);
     }
 }

@@ -539,6 +539,16 @@ final class LDN_Schema {
     }
 
     /**
+     * First ISO date string (YYYY-MM-DD) found in the summary payload, or ''.
+     *
+     * @param array $summary
+     * @return string
+     */
+    public function analysis_date(array $summary) {
+        return $this->dataset_date($summary);
+    }
+
+    /**
      * First ISO date string found in the summary payload, or ''.
      *
      * @param array $summary

@@ -53,6 +53,72 @@
 	border-bottom: 3px solid var(--ldn-primary, #333);
 }
 
+.ldn-homepage-tagline {
+	margin: -0.75rem 0 1.5rem;
+	max-width: 42rem;
+	font-size: 1.125rem;
+	line-height: 1.5;
+	color: var(--ldn-secondary-text, var(--ldn-text, #333));
+}
+
+.ldn-type-nav-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 1rem;
+}
+
+.ldn-type-nav-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 1rem 1.15rem;
+	border: 1px solid var(--ldn-table-border, #ddd);
+	border-radius: 4px;
+	text-decoration: none;
+	color: var(--ldn-text, #333);
+	background: var(--ldn-background, transparent);
+	transition: border-color 0.15s ease;
+}
+
+.ldn-type-nav-card:hover,
+.ldn-type-nav-card:focus-visible {
+	border-color: var(--ldn-primary, #333);
+}
+
+.ldn-type-nav-card__title {
+	font-weight: 600;
+	color: var(--ldn-primary, #333);
+}
+
+.ldn-type-nav-card__desc {
+	font-size: 0.9375rem;
+	line-height: 1.45;
+	color: var(--ldn-secondary-text, var(--ldn-text, #333));
+}
+
+.ldn-popular-shapes-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 0.5rem 1.25rem;
+}
+
+.ldn-popular-shapes-list a {
+	color: var(--ldn-primary, #333);
+	text-decoration: none;
+}
+
+.ldn-popular-shapes-list a:hover {
+	text-decoration: underline;
+}
+
+.ldn-popular-shape-price {
+	color: var(--ldn-secondary-text, inherit);
+	font-size: 0.9em;
+}
+
 /* ----- Sections ----- */
 
 .ldn-section {
@@ -144,6 +210,40 @@
 
 .ldn-chart .gtitle {
 	display: none !important;
+}
+
+/* ----- Breadcrumbs ----- */
+
+.ldn-breadcrumbs {
+	font-size: 0.875rem;
+	margin: 0 0 1rem;
+	color: var(--ldn-secondary-text, #475569);
+}
+
+.ldn-breadcrumbs a {
+	color: var(--ldn-primary, #333);
+	text-decoration: none;
+}
+
+.ldn-breadcrumbs a:hover {
+	text-decoration: underline;
+}
+
+.ldn-breadcrumbs__sep {
+	margin: 0 0.35rem;
+}
+
+/* ----- Freshness ----- */
+
+.ldn-freshness {
+	font-size: 0.9rem;
+	margin: 0 0 1.25rem;
+	color: var(--ldn-secondary-text, #475569);
+}
+
+.ldn-freshness time {
+	font-weight: 600;
+	color: var(--ldn-text, #333);
 }
 
 /* ----- FAQ ----- */
@@ -306,6 +406,79 @@
 	height: auto;
 }
 
+.ldn-size-outline--scale svg {
+	max-width: 420px;
+	margin: 0 auto;
+}
+
+.ldn-size-outline--spread svg {
+	max-width: 100%;
+	margin: 0 auto;
+}
+
+.ldn-size-spread__lead,
+.ldn-size-chart__lead {
+	margin: 0 0 1rem;
+	color: var(--ldn-text-muted, #4b5563);
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+.ldn-size-spread {
+	margin-top: 0.5rem;
+}
+
+.ldn-size-ideal-real {
+	padding: 1rem 1.25rem;
+	background: var(--ldn-surface-muted, #f8f7fc);
+	border-left: 4px solid var(--ldn-primary, #706cc8);
+	border-radius: 4px;
+}
+
+.ldn-size-ideal-real p {
+	margin: 0;
+	line-height: 1.55;
+}
+
+.ldn-size-internal-links ul {
+	margin: 0;
+	padding-left: 1.25rem;
+}
+
+.ldn-size-internal-links li {
+	margin: 0.35rem 0;
+}
+
+.ldn-size-internal-links a,
+.ldn-size-copy-notes p {
+	color: var(--ldn-text, #1f2937);
+	line-height: 1.55;
+}
+
+.ldn-size-internal-links a {
+	color: var(--ldn-primary, #706cc8);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.ldn-size-internal-links a:hover {
+	text-decoration: underline;
+}
+
+.ldn-size-methodology {
+	font-size: 0.95rem;
+	color: var(--ldn-text-muted, #4b5563);
+}
+
+.ldn-size-proportions p {
+	margin: 0 0 0.75rem;
+	line-height: 1.55;
+}
+
+.ldn-size-proportions p:last-child {
+	margin-bottom: 0;
+}
+
 .ldn-size-outline svg [fill] {
 	fill: var(--ldn-primary, #706cc8);
 }
@@ -338,6 +511,51 @@
 .ldn-size-hub-table a:hover,
 .ldn-size-price-links a:hover {
 	text-decoration: underline;
+}
+
+.ldn-size-shape-selector {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0 0 1.5rem;
+}
+
+.ldn-size-shape-tile {
+	display: inline-block;
+	padding: 0.45rem 0.85rem;
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 4px;
+	color: var(--ldn-primary, #706cc8);
+	font-weight: 600;
+	text-decoration: none;
+	background: var(--ldn-surface, #fff);
+}
+
+.ldn-size-shape-tile:hover {
+	border-color: var(--ldn-primary, #706cc8);
+	text-decoration: none;
+}
+
+.ldn-size-hub-scale {
+	margin-bottom: 1.5rem;
+}
+
+.ldn-size-muted {
+	color: var(--ldn-text-muted, #6b7280);
+	font-weight: 400;
+	font-size: 0.9em;
+}
+
+.ldn-size-hub-table .ldn-size-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.ldn-size-comparison-visual,
+.ldn-size-comparison-table,
+.ldn-size-comparison-delta,
+.ldn-size-comparison-links {
+	margin-bottom: 1.5rem;
 }
 
 .ldn-size-price-links a {

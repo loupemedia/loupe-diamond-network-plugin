@@ -1,6 +1,6 @@
 <?php
 /**
- * Price page template — backward-compatible alias for level templates.
+ * Level 4 — individual shape page (primary content page).
  *
  * @package LoupeDiamondNetwork
  */

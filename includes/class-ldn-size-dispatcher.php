@@ -18,6 +18,7 @@ final class LDN_Size_Dispatcher {
         'size-individual'  => 'size_summary_json',
         'size-shape-hub'   => 'size_summary_json',
         'size-mega-hub'    => 'size_summary_json',
+        'size-comparison'  => 'size_summary_json',
     );
 
     /** @var string */
@@ -34,6 +35,9 @@ final class LDN_Size_Dispatcher {
 
     /** @var array|null */
     private $primary_data = null;
+
+    /** @var bool Curated comparison (indexable); false = long-tail composed on the fly. */
+    private $comparison_indexable = true;
 
     /**
      * @param string           $site_id
@@ -63,9 +67,10 @@ final class LDN_Size_Dispatcher {
         }
 
         $ctx = $this->build_context(array(
-            'ldn_size_level' => get_query_var('ldn_size_level'),
-            'ldn_shape'      => get_query_var('ldn_shape'),
-            'ldn_carat'      => get_query_var('ldn_carat'),
+            'ldn_size_level'   => get_query_var('ldn_size_level'),
+            'ldn_shape'        => get_query_var('ldn_shape'),
+            'ldn_carat'        => get_query_var('ldn_carat'),
+            'ldn_compare_slug' => get_query_var('ldn_compare_slug'),
         ));
         if ($ctx === null) {
             return $template;
@@ -89,7 +94,14 @@ final class LDN_Size_Dispatcher {
         $primary = isset(self::PRIMARY_ARTEFACT[$ctx->page_level])
             ? self::PRIMARY_ARTEFACT[$ctx->page_level]
             : null;
-        $data = $primary !== null ? $this->fetcher->fetch_artefact($primary, $ctx) : null;
+        $data = null;
+        $this->comparison_indexable = true;
+
+        if ($ctx->page_level === 'size-comparison') {
+            $data = $this->load_comparison_data($ctx, $primary);
+        } elseif ($primary !== null) {
+            $data = $this->fetcher->fetch_artefact($primary, $ctx);
+        }
 
         if ($data === null) {
             LDN_Diagnostics::note(
@@ -122,7 +134,11 @@ final class LDN_Size_Dispatcher {
             return;
         }
         $renderer = new LDN_Size_Renderer($this->fetcher, $this->config);
-        echo $renderer->render_head_content($this->context, $this->primary_data); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo $renderer->render_head_content(
+            $this->context,
+            $this->primary_data,
+            $this->comparison_indexable
+        ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
     }
 
     /**
@@ -140,6 +156,13 @@ final class LDN_Size_Dispatcher {
     }
 
     /**
+     * @return bool
+     */
+    public function comparison_indexable() {
+        return $this->comparison_indexable;
+    }
+
+    /**
      * @param array<string, mixed> $vars
      * @return LDN_Page_Context|null
      */
@@ -151,6 +174,11 @@ final class LDN_Size_Dispatcher {
 
         $page_level = $this->page_level_from_size_level($level_raw);
         if ($page_level === null) {
+            return null;
+        }
+
+        $compare_slug = $this->str_or_null($vars, 'ldn_compare_slug');
+        if ($page_level === 'size-comparison' && $compare_slug === null) {
             return null;
         }
 
@@ -168,12 +196,66 @@ final class LDN_Size_Dispatcher {
             null,
             $carat,
             $shape,
-            'size'
+            'size',
+            $compare_slug
         );
     }
 
     /**
-     * @param string $raw mega|shape|individual
+     * Curated comparison artefact on S3, or compose from two individual summaries.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param string|null      $primary
+     * @return array|null
+     */
+    private function load_comparison_data(LDN_Page_Context $ctx, $primary) {
+        if ($primary === null) {
+            return null;
+        }
+
+        $curated = $this->fetcher->fetch_artefact($primary, $ctx);
+        if (is_array($curated) && isset($curated['type']) && $curated['type'] === 'comparison') {
+            $this->comparison_indexable = true;
+            return $curated;
+        }
+
+        $renderer = new LDN_Size_Renderer($this->fetcher, $this->config);
+        $sides = $renderer->parse_compare_slug($ctx->compare_slug, $this->site_id);
+        if ($sides === null) {
+            return null;
+        }
+
+        $country = $ctx->country_code;
+        $ctx_a = new LDN_Page_Context(
+            $this->site_id,
+            'size-individual',
+            $country,
+            null,
+            $sides['a']['carat'],
+            $sides['a']['shape'],
+            'size'
+        );
+        $ctx_b = new LDN_Page_Context(
+            $this->site_id,
+            'size-individual',
+            $country,
+            null,
+            $sides['b']['carat'],
+            $sides['b']['shape'],
+            'size'
+        );
+        $summary_a = $this->fetcher->fetch_artefact('size_summary_json', $ctx_a);
+        $summary_b = $this->fetcher->fetch_artefact('size_summary_json', $ctx_b);
+        if (!is_array($summary_a) || !is_array($summary_b)) {
+            return null;
+        }
+
+        $this->comparison_indexable = false;
+        return $renderer->build_comparison_summary($summary_a, $summary_b);
+    }
+
+    /**
+     * @param string $raw mega|shape|individual|compare
      * @return string|null
      */
     public function page_level_from_size_level($raw) {
@@ -184,6 +266,10 @@ final class LDN_Size_Dispatcher {
                 return 'size-shape-hub';
             case 'individual':
                 return 'size-individual';
+            case 'compare':
+                return 'size-comparison';
+            case 'sitemap':
+                return 'size-sitemap';
             default:
                 return null;
         }

@@ -46,6 +46,9 @@ final class LDN_Page_Context {
     /** @var string|null */
     public $shape;
 
+    /** @var string|null Full compare slug, e.g. round-1-carat-vs-princess-1-carat. */
+    public $compare_slug;
+
     /** @var string */
     public $module;
 
@@ -57,6 +60,7 @@ final class LDN_Page_Context {
      * @param string|null $carat
      * @param string|null $shape
      * @param string      $module       'price' | 'size'
+     * @param string|null $compare_slug
      */
     public function __construct(
         $site_id,
@@ -65,7 +69,8 @@ final class LDN_Page_Context {
         $diamond_type = null,
         $carat = null,
         $shape = null,
-        $module = 'price'
+        $module = 'price',
+        $compare_slug = null
     ) {
         $this->site_id = (string) $site_id;
         $this->page_level = (string) $page_level;
@@ -74,5 +79,6 @@ final class LDN_Page_Context {
         $this->carat = $carat !== null ? (string) $carat : null;
         $this->shape = $shape !== null ? (string) $shape : null;
         $this->module = (string) $module;
+        $this->compare_slug = $compare_slug !== null ? (string) $compare_slug : null;
     }
 }

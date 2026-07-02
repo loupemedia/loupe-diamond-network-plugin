@@ -1,6 +1,6 @@
 {
-  "version": "79e9bc6",
-  "generated_at": "2026-06-29T21:58:11.977546+00:00",
+  "version": "4a1c28e",
+  "generated_at": "2026-07-02T11:01:08.997115+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -5330,6 +5330,7 @@
       "site_id": "ringspo",
       "domain": "ringspo.com",
       "brand_name": "Ringspo",
+      "template_folder": "ringspo",
       "site_type": "multisite",
       "path_structure": "/{country}",
       "content_profile": "config/content_profiles/ringspo.yaml",
@@ -5592,7 +5593,7 @@
       "features": {
         "show_sparkle_teaser": false,
         "show_full_score_requires_login": false,
-        "price_history_enabled": true,
+        "price_history_enabled": false,
         "color_clarity_calc": true
       },
       "ads": {
@@ -6220,6 +6221,9 @@
       },
       "brand_positioning": "Your complete guide to {carat} carat diamond rings",
       "tagline": "What a {carat} carat diamond ring costs, looks like, and how to choose one",
+      "homepage": {
+        "h1": "{carat} Carat Diamond Ring Price"
+      },
       "target_audience": {
         "primary": "Buyers shopping for a {carat} carat diamond ring",
         "secondary": "Those researching {carat} carat diamonds before buying a ring",
@@ -6304,15 +6308,15 @@
           ]
         },
         "top_level": {
-          "hero_component": "carat_showcase",
+          "hero_component": "table_chart",
           "sections": [
+            "hub_stats",
+            "type_nav_links",
             "ring_overview_dynamic",
-            "shape_options_dynamic",
+            "hero",
             "type_comparison_dynamic",
             "setting_styles_static",
-            "buying_checklist_static",
-            "partner_spotlight",
-            "cross_site_comparison"
+            "buying_checklist_static"
           ],
           "ad_slots": [
             "triple_horizontal"
@@ -6595,6 +6599,9 @@
       },
       "brand_positioning": "The definitive local diamond pricing reference",
       "tagline": "Real-time diamond prices in your currency",
+      "homepage": {
+        "h1": "Diamond Price"
+      },
       "target_audience": {
         "primary": "Diamond buyers who want to know what they should pay",
         "secondary": "Researchers, appraisers, and professionals needing current market pricing",
@@ -6667,6 +6674,16 @@
           "output_type": "array",
           "instruction": "Write as a neutral pricing reference. Generate questions that someone checking diamond prices would ask — questions about what drives the price, how prices differ by spec, and what to expect at this carat weight and shape. Answers should be factual and grounded in general market patterns — state what the data shows, do not advise. Use neutral price/cost/how much phrasing. No calendar years or today in static copy.\n",
           "length": "3 pairs"
+        },
+        "shape_preview": {
+          "json_key": "shape_preview",
+          "instruction": "Factual overview of how diamond shape affects price in {country_name}. Name the shapes buyers search most often at common carat weights and note typical price ordering (e.g. round vs fancy shapes) without recommending a purchase. Neutral reference tone — the reader is comparing options before drilling into a specific carat or shape page.\n",
+          "length": "3-4 sentences"
+        },
+        "price_factors_static": {
+          "json_key": "price_factors",
+          "instruction": "Explain what drives diamond prices in {country_name}: carat weight, cut, colour, clarity, shape, and natural vs lab-grown. State how the site's index is built (multiple online retailers, daily refresh, median prices from listed inventory). Do not recommend grades — present methodology so the reader trusts the numbers on this page.\n",
+          "length": "4-5 sentences"
         }
       },
       "seo_optimization": {
@@ -6720,13 +6737,13 @@
           ]
         },
         "top_level": {
-          "hero_component": "market_overview",
           "sections": [
-            "market_overview_dynamic",
-            "popular_searches",
+            "hub_stats",
+            "type_nav_links",
             "price_trends_snapshot",
-            "partner_spotlight",
-            "cross_site_comparison"
+            "popular_searches",
+            "shape_preview",
+            "price_factors_static"
           ],
           "ad_slots": [
             "triple_horizontal"
@@ -8542,6 +8559,217 @@
         }
       }
     },
+    "market_intelligence": {
+      "profile_id": "market_intelligence",
+      "product_name": "Loupe Market Intelligence",
+      "domain": "loupemedianetwork.com",
+      "brand_name": "Loupe Market Intelligence",
+      "brand_tokens": {
+        "primary": "#1A2B4A",
+        "secondary": "#2C4A7C",
+        "accent": "#B8963E",
+        "text": "#1C1C1E",
+        "secondary_text": "#5C5C66",
+        "background": "#FFFFFF",
+        "surface": "#F4F5F7",
+        "positive": "#2E7D4F",
+        "negative": "#B33A3A",
+        "neutral": "#6B7280",
+        "chart_grid": "rgba(26, 43, 74, 0.08)"
+      },
+      "page_chrome": {
+        "max_width": "720px",
+        "content_padding": "1.5rem",
+        "section_spacing": "2rem",
+        "title_font": "\"Source Serif 4\", Georgia, serif",
+        "body_font": "\"Inter\", \"Helvetica Neue\", sans-serif",
+        "webfont_families": [
+          "Inter",
+          "Source Serif 4"
+        ],
+        "heading_style": "report"
+      },
+      "pdf_layout": {
+        "orientation": "landscape",
+        "page_size": "A4",
+        "margin_top": "18mm",
+        "margin_bottom": "20mm",
+        "margin_left": "16mm",
+        "margin_right": "16mm",
+        "body_columns": 2,
+        "chart_placement": "inline_wide"
+      },
+      "cover": {
+        "layout": "full_bleed_image",
+        "image_source": "asset_pool",
+        "image_pool": [
+          "cover-rough-diamonds.jpg",
+          "cover-polished-stones.jpg",
+          "cover-jewellery-macro.jpg"
+        ],
+        "selection": "month_hash",
+        "overlay": {
+          "gradient": "linear-gradient(135deg, rgba(26,43,74,0.88) 0%, rgba(26,43,74,0.55) 100%)"
+        },
+        "typography": {
+          "title_size": "2.4rem",
+          "subtitle_size": "1rem",
+          "align": "left"
+        },
+        "include_on_html": true,
+        "include_on_pdf": true
+      },
+      "brand_positioning": "Automated retail diamond market intelligence for upstream industry",
+      "tagline": "What moved the market — and why",
+      "target_audience": {
+        "primary": "Wholesalers, manufacturers, and industry analysts",
+        "secondary": "Funds, insurers, and trade bodies with diamond exposure",
+        "knowledge_level": "Professional — expects data, not education"
+      },
+      "graph_style": {
+        "chart_style": {
+          "font_family": "\"Inter\", sans-serif",
+          "font_size": 11,
+          "title_font_size": 13,
+          "tick_font_size": 10,
+          "gridline_opacity": 0.12,
+          "axis_line_width": 1
+        },
+        "report_chart_width": 900,
+        "report_chart_height": 380,
+        "report_chart_dpi": 150
+      },
+      "distribution_style": {
+        "color_scheme": {
+          "primary": "#1A2B4A",
+          "secondary": "#2C4A7C",
+          "accent": "#B8963E",
+          "histogram_fill": "#2C4A7C",
+          "iqr_fill": "rgba(44, 74, 124, 0.15)",
+          "median_line": "#B8963E",
+          "grid": "rgba(26, 43, 74, 0.08)"
+        }
+      },
+      "report_charts": [
+        {
+          "id": "stress_index_monthly",
+          "title": "Market Stress Index — {month_label}",
+          "type": "time_series"
+        },
+        {
+          "id": "top_signal_sparklines",
+          "title": "Top signal persistence — {month_label}",
+          "type": "multi_sparkline"
+        },
+        {
+          "id": "lab_natural_gap",
+          "title": "Lab vs natural price gap by carat band",
+          "type": "grouped_bar",
+          "requires_version": "v2"
+        },
+        {
+          "id": "yoy_price_change",
+          "title": "Year-over-year median price change",
+          "type": "heatmap",
+          "requires_version": "v2"
+        }
+      ],
+      "report_structure": {
+        "sections": [
+          {
+            "id": "cover",
+            "title": "{month_label} Market Intelligence Report",
+            "include": [
+              "product_name",
+              "tagline",
+              "report_date"
+            ]
+          },
+          {
+            "id": "executive_summary",
+            "title": "Executive Summary",
+            "max_paragraphs": 3,
+            "word_target": 250
+          },
+          {
+            "id": "standing_conditions",
+            "title": "Standing Market Conditions",
+            "description": "Ongoing factors (sanctions, tariffs, policy) carried from prior months",
+            "max_items": 5
+          },
+          {
+            "id": "key_insights",
+            "title": "Key Market Insights",
+            "max_items": 8,
+            "chart_per_item": "optional"
+          },
+          {
+            "id": "macro_context",
+            "title": "Macroeconomic Context",
+            "max_paragraphs": 2,
+            "requires_version": "v4"
+          },
+          {
+            "id": "industry_context",
+            "title": "Industry Context",
+            "description": "How this month's signals align with or contrast published industry outlooks (De Beers, Bain, etc.)",
+            "max_paragraphs": 2,
+            "max_citations": 3
+          },
+          {
+            "id": "methodology",
+            "title": "Methodology & Data Sources",
+            "static": true
+          },
+          {
+            "id": "disclaimer",
+            "title": "Disclaimer",
+            "static": true
+          }
+        ]
+      },
+      "editorial_rules": [
+        "Correlation language only — never 'caused by' or 'due to' for macro links",
+        "Every figure must appear in the Analyst findings JSON",
+        "Month label in the cover headline and executive summary opening",
+        "Self-contained paragraphs — no 'see chart above' or 'click to explore'",
+        "Standing conditions use present tense while lifecycle is ongoing",
+        "Chart captions state the takeaway in one sentence",
+        "Industry context cites named sources only from industry_reference catalogue — paraphrase themes, never reproduce copyrighted report text",
+        "Industry alignment language: 'consistent with', 'contrasts with', 'extends' — not 'proves' or 'confirms'"
+      ],
+      "industry_reference_policy": {
+        "usage": "paraphrase_and_attribute",
+        "max_age_months": 18,
+        "preferred_sources": [
+          {
+            "id": "debeers_insight",
+            "publisher": "De Beers Group",
+            "title": "Diamond Insight Report",
+            "cadence": "annual",
+            "url": null
+          },
+          {
+            "id": "bain_global_diamond",
+            "publisher": "Bain & Company",
+            "title": "Global Diamond Industry Report",
+            "cadence": "annual"
+          },
+          {
+            "id": "awdc_trade_watch",
+            "publisher": "Antwerp World Diamond Centre",
+            "title": "AWDC Diamond Trade Watch",
+            "cadence": "quarterly"
+          },
+          {
+            "id": "paul_zimnisky",
+            "publisher": "Paul Zimnisky",
+            "title": "State of the Diamond Market",
+            "cadence": "periodic"
+          }
+        ]
+      }
+    },
     "ringspo": {
       "site_id": "ringspo",
       "domain": "ringspo.com",
@@ -8556,12 +8784,12 @@
         "max_width": "840px",
         "content_padding": "1.25rem",
         "section_spacing": "1.75rem",
-        "title_font": "\"Open Sans\", sans-serif",
-        "body_font": "\"Open Sans\", sans-serif",
+        "title_font": "\"Palatino Linotype\", Palatino, \"Book Antiqua\", Georgia, serif",
+        "body_font": "\"Open Sans\", system-ui, -apple-system, sans-serif",
         "webfont_families": [
           "Open Sans"
         ],
-        "heading_style": "minimal"
+        "heading_style": "ringspo_classic"
       },
       "brand_positioning": "Independent diamond guidance from someone who knows the market and talks plainly",
       "tagline": "Expert advice without the jewellery-store sales pitch",
@@ -8678,7 +8906,7 @@
         "faq_static": {
           "json_key": "faq",
           "output_type": "array",
-          "instruction": "Write in the Ringspo voice: direct, no-nonsense, buyer-protective. Generate questions that a real person shopping for a {carat}-carat {shape} diamond would actually type into Google or ask a knowledgeable friend — not generic diamond questions, but doubts, trade-offs, and money questions specific to this shape and carat weight. Examples of the right register: \"Do I really need VVS for a {carat}-carat {shape}?\", \"Why does a {shape} cost what it does at {carat} carats?\", \"Is H colour good enough for a {carat}-carat {shape}?\". Answers must be short, direct, and opinionated — no hedging, no preamble. Sound like a knowledgeable friend giving the honest answer, not a retailer trying to upsell. At least one question must address a common money mistake specific to this shape at {carat} carats. Use varied Ahrefs-style question forms across the three FAQs: at least one with \"how much\" or \"worth\", one with \"price\" or \"cost\", and one about the {carat}-carat {shape} in a ring or on the hand. Never include calendar years or words like today or currently.\n",
+          "instruction": "Write in the Ringspo voice: direct, no-nonsense, buyer-protective. Generate questions that a real person shopping for a {carat}-carat {shape} diamond would actually type into Google or ask a knowledgeable friend — not generic diamond questions, but doubts, trade-offs, and money questions specific to this shape and carat weight. Examples of the right register: \"Do I really need VVS for a {carat}-carat {shape}?\", \"Why does a {shape} cost what it does at {carat} carats?\", \"Is H colour good enough for a {carat}-carat {shape}?\". Answers must be short, direct, and opinionated — no hedging, no preamble. Sound like a knowledgeable friend giving the honest answer, not a retailer trying to upsell. At least one question must address a common money mistake specific to this shape at {carat} carats. Use varied Ahrefs-style question forms across the three FAQs: at least one with \"how much\" or \"worth\", one with \"price\" or \"cost\", and one about the {carat}-carat {shape} in a ring or on the hand. Never ask which website or retailer to buy from — that is retailer-guide copy, not Ringspo. Never ask generic \"compare to other shapes\" questions Loupe-style; stay on this shape and carat. Never include calendar years or words like today or currently.\n",
           "length": "3 pairs"
         }
       },
@@ -8718,7 +8946,6 @@
           "sections": [
             "intro_dynamic",
             "expert_take_static",
-            "price_graph",
             "pricing_context_static",
             "color_clarity",
             "buying_guidance_static",
@@ -8769,6 +8996,23 @@
           "ad_slots": [
             "triple_horizontal"
           ]
+        },
+        "size_individual": {
+          "hero_component": "shape_outline",
+          "sections": [
+            "factual_lead",
+            "copy_notes",
+            "hero_dimensions",
+            "size_spread",
+            "distribution_chart",
+            "faceup_and_proportions",
+            "ideal_vs_real",
+            "methodology",
+            "internal_links",
+            "price_links",
+            "faq"
+          ],
+          "ad_slots": []
         }
       },
       "graph_style": {
@@ -9231,6 +9475,7 @@
         "level_3": "/{country}/diamond-prices/{type}/{carat}",
         "level_4": "/{country}/diamond-prices/{type}/{carat}/{shape}",
         "level_5": "/{country}/diamond-prices/{type}/{carat}/{shape}/{lab}/{cert}",
+        "price_level_sitemap": "/{country}/diamond-prices/sitemap.xml",
         "type_natural": "natural",
         "type_lab": "lab-grown",
         "carat_format": "{value}-carat",
@@ -9249,7 +9494,9 @@
         },
         "size_level_1": "/diamond-size",
         "size_level_2": "/diamond-size/{shape}",
-        "size_level_3": "/diamond-size/{shape}/{carat}"
+        "size_level_3": "/diamond-size/{shape}/{carat}",
+        "size_level_compare": "/diamond-size/compare/{compare}",
+        "size_level_sitemap": "/diamond-size/sitemap.xml"
       },
       "diamondpriceguru": {
         "site_id": "diamondpriceguru",
@@ -9598,6 +9845,7 @@
         "level_2": "/diamond-prices/{type}",
         "level_3": "/diamond-prices/{type}/{carat}",
         "level_4": "/diamond-prices/{type}/{carat}/{shape}",
+        "price_level_sitemap": "/diamond-prices/sitemap.xml",
         "type_natural": "natural",
         "type_lab": "lab-grown",
         "carat_format": "{value}-carat",
@@ -10040,7 +10288,7 @@
         },
         "review_status": "approved",
         "family": "ringspo",
-        "differentiation": "Flagship: full time-series history, live cross-site comparison, color/clarity grid; shape hub = linked cards on all-shapes pages; no carat ladder on shape pages.\n",
+        "differentiation": "Flagship expert guide: distribution snapshot (no time-series chart — Loupe owns history), color/clarity grid, buyer-side editorial; shape hub = linked cards on all-shapes pages; no carat ladder on shape pages.\n",
         "pages": {
           "shape": {
             "pipeline_artefacts": [
@@ -10048,8 +10296,6 @@
               "distribution_json",
               "market_index_stats_json",
               "market_index_bins_json",
-              "price_graph_html",
-              "price_graph_json",
               "og_preview_png",
               "summary_data_json",
               "comparison_data_json",
@@ -10058,7 +10304,7 @@
             ],
             "wp_widgets": {
               "distribution_chart": true,
-              "time_series_chart": true,
+              "time_series_chart": false,
               "color_clarity_grid": {
                 "presentation": "full_heatmap"
               },
@@ -10420,8 +10666,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10461,8 +10706,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10488,8 +10731,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10529,8 +10771,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10556,8 +10796,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10597,8 +10836,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10624,8 +10861,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10665,8 +10901,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10692,8 +10926,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10733,8 +10966,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10760,8 +10991,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10801,8 +11031,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10828,8 +11056,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10869,8 +11096,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10896,8 +11121,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -10937,8 +11161,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10964,8 +11186,7 @@
               "price_graph_json",
               "comparison_data_json",
               "static_content_json",
-              "carat_ladder_json",
-              "carat_ladder_chart"
+              "carat_ladder_json"
             ],
             "wp_widgets": {
               "distribution_chart": true,
@@ -11005,8 +11226,6 @@
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
-              "market_discount_chart",
-              "market_trend_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -11758,7 +11977,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -11815,7 +12038,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -11872,7 +12099,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -11929,7 +12160,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -11986,7 +12221,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -12043,7 +12282,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -12100,7 +12343,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -12157,7 +12404,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -12214,7 +12465,11 @@
           },
           "top-level": {
             "pipeline_artefacts": [
-              "market_overview_json"
+              "market_overview_json",
+              "top_tables_json",
+              "templated_copy_json",
+              "static_content_json",
+              "market_trend_chart"
             ],
             "wp_widgets": {}
           }
@@ -12597,6 +12852,19 @@
           "market_overview_json"
         ],
         "runtime_note": "Percent change from period start; sample-weighted type averages from market index daily history."
+      },
+      "top_tables_json": {
+        "page_level": "top-level",
+        "producing_script": "C5.3_top_level_aggregate",
+        "gate": "site_entitlement",
+        "status": "live",
+        "filename": "top-tables.json",
+        "description": "Top shape/carat combos by sample size — popular links on standalone pricing homepages.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "market_overview_json"
+        ],
+        "runtime_note": "Uploaded alongside market-overview.json; not gated separately in C5.3."
       },
       "templated_copy_json": {
         "page_level": "all",
@@ -13142,6 +13410,10 @@
   "network_consumer": {
     "rollout": {
       "url": "https://d2koztl50p0h8w.cloudfront.net/ops/network-rollout.json"
-    }
+    },
+    "pipeline_config": {
+      "url": "https://d2koztl50p0h8w.cloudfront.net/pipeline-config/pipeline-config.json"
+    },
+    "network_sitemap_index": "/sitemaps/network.xml"
   }
 }

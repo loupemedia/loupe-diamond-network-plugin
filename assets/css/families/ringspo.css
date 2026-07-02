@@ -1,0 +1,126 @@
+/**
+ * Ringspo — ringspo_classic heading variant (CP53).
+ *
+ * Serif headings, alternating coloured section bands, and full-bleed layout
+ * inside the WP content column. Activated when page_chrome.heading_style is
+ * ringspo_classic (Ringspo family).
+ */
+
+.ldn-page-shell {
+	width: 100vw;
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+}
+
+.ldn-chrome--ringspo-classic > h1.ldn-page-title {
+	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
+	font-size: var(--ldn-title-size, 2rem);
+	font-weight: 700;
+	line-height: 1.25;
+	color: #1a1a2e;
+	background-color: #fde8dc;
+	padding: 1.5rem 1.25rem;
+	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
+	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));
+	margin-bottom: 0;
+	border-bottom: none;
+	max-width: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-breadcrumbs {
+	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
+	font-size: 0.875rem;
+	margin: 0 calc(-1 * var(--ldn-padding, 1.25rem)) 0;
+	padding: 0.65rem var(--ldn-padding, 1.25rem);
+	background-color: #fde8dc;
+	color: #4a4a68;
+}
+
+.ldn-chrome--ringspo-classic .ldn-breadcrumbs a {
+	color: var(--ldn-primary, #706cc8);
+	text-decoration: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-breadcrumbs a:hover {
+	text-decoration: underline;
+}
+
+.ldn-chrome--ringspo-classic .ldn-breadcrumbs__sep {
+	margin: 0 0.35rem;
+	color: #8a8aa0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-freshness {
+	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
+	font-size: 0.9rem;
+	color: #4a4a68;
+	margin: 0.75rem 0 1.25rem;
+	padding: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-freshness time {
+	font-weight: 600;
+	color: #1a1a2e;
+}
+
+.ldn-chrome--ringspo-classic .ldn-chart {
+	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
+	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));
+	padding: 1.25rem var(--ldn-padding, 1.25rem);
+	background-color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section {
+	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
+	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));
+	padding: 1.75rem var(--ldn-padding, 1.25rem);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(3n + 1) {
+	background-color: rgba(112, 108, 200, 0.12);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(3n + 2) {
+	background-color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(3n) {
+	background-color: rgba(25, 179, 154, 0.1);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section h2 {
+	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: #1a1a2e;
+	margin-top: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section h3 {
+	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section p,
+.ldn-chrome--ringspo-classic .ldn-intro-dynamic p {
+	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
+	line-height: 1.65;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section a {
+	color: var(--ldn-primary, #706cc8);
+}
+
+.ldn-chrome--ringspo-classic .ldn-faq dt {
+	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
+}
+
+@media screen and (max-width: 768px) {
+	.ldn-chrome--ringspo-classic > h1.ldn-page-title {
+		font-size: var(--ldn-title-size-mobile, 1.35rem);
+		padding: 1.1rem 1rem;
+	}
+
+	.ldn-chrome--ringspo-classic .ldn-section h2 {
+		font-size: 1.25rem;
+	}
+}

@@ -1,6 +1,6 @@
 <?php
 /**
- * Price page template — backward-compatible alias for level templates.
+ * Level 3 — carat / all-shapes hub.
  *
  * @package LoupeDiamondNetwork
  */

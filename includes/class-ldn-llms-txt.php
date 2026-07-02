@@ -27,17 +27,24 @@ final class LDN_Llms_Txt {
     private $config;
 
     /**
+     * @var LDN_Artefacts|null
+     */
+    private $artefacts;
+
+    /**
      * @var string
      */
     private $site_id;
 
     /**
-     * @param string     $site_id
-     * @param LDN_Config $config
+     * @param string              $site_id
+     * @param LDN_Config          $config
+     * @param LDN_Artefacts|null  $artefacts Optional entitlement gate for size URLs.
      */
-    public function __construct($site_id, $config) {
+    public function __construct($site_id, $config, $artefacts = null) {
         $this->site_id = (string) $site_id;
         $this->config = $config;
+        $this->artefacts = $artefacts;
     }
 
     /**
@@ -127,6 +134,25 @@ final class LDN_Llms_Txt {
         $lines[] = '- Sources: major online diamond retailers (see site for current pool)';
         $lines[] = '- Format: daily-refreshed market index with distribution and time-series charts';
 
+        $size_urls = $this->size_sample_page_urls($base);
+        if ($size_urls !== array()) {
+            $lines[] = '';
+            $lines[] = '## Diamond size analysis';
+            $lines[] = '> Real face-up dimensions, length/width spread, and shape comparisons'
+                . ' from retailer inventory measurements (not ideal-cut theory alone).';
+            foreach ($size_urls as $label => $url) {
+                if ($url !== '') {
+                    $lines[] = '- ' . $label . ': ' . $url;
+                }
+            }
+            $lines[] = '';
+            $lines[] = '## Size dataset';
+            $lines[] = '- Median length, width, face-up area (mm²), depth %, and L/W ratio per shape × carat';
+            $lines[] = '- Percentile spreads (p10–p90) on individual size pages';
+            $lines[] = '- Sources: aggregated measurements from major US online diamond retailers';
+            $lines[] = '- Format: server-rendered charts and tables; curated comparisons indexed, long-tail on demand';
+        }
+
         return implode("\n", $lines) . "\n";
     }
 
@@ -164,6 +190,115 @@ final class LDN_Llms_Txt {
             );
         }
         return $out;
+    }
+
+    /**
+     * Key size-module URLs when the site is entitled and url_structures defines size paths.
+     *
+     * @param string $base Site origin (https://domain).
+     * @return array<string, string> label => absolute URL
+     */
+    public function size_sample_page_urls($base) {
+        if (!$this->size_module_enabled()) {
+            return array();
+        }
+
+        $structure = $this->config->get_url_structure($this->site_id);
+        if (!is_array($structure) || empty($structure['size_level_1'])) {
+            return array();
+        }
+
+        $base = rtrim($base, '/');
+        $carat = $this->sample_carat_slug($structure);
+        $shape = 'round';
+        $shape_slug = $this->config->shape_to_s3_slug($shape);
+        $out = array();
+
+        $out['Diamond size chart (all shapes)'] = $this->size_path_url(
+            $base,
+            (string) $structure['size_level_1'],
+            array('shape' => $shape_slug, 'carat' => $carat)
+        );
+
+        if (!empty($structure['size_level_2'])) {
+            $out['Round diamond size chart'] = $this->size_path_url(
+                $base,
+                (string) $structure['size_level_2'],
+                array('shape' => $shape_slug, 'carat' => $carat)
+            );
+        }
+
+        if (!empty($structure['size_level_3'])) {
+            $out['1 carat round size (example)'] = $this->size_path_url(
+                $base,
+                (string) $structure['size_level_3'],
+                array('shape' => $shape_slug, 'carat' => $carat)
+            );
+        }
+
+        if (!empty($structure['size_level_compare'])) {
+            $princess_slug = $this->config->shape_to_s3_slug('princess');
+            $compare_slug = $shape_slug . '-' . $carat . '-vs-' . $princess_slug . '-' . $carat;
+            $out['Size comparison (example)'] = $this->size_path_url(
+                $base,
+                (string) $structure['size_level_compare'],
+                array('shape' => $shape_slug, 'carat' => $carat, 'compare' => $compare_slug)
+            );
+        }
+
+        if (!empty($structure['size_level_sitemap'])) {
+            $out['Size pages XML sitemap'] = $this->size_path_url(
+                $base,
+                (string) $structure['size_level_sitemap'],
+                array()
+            );
+        }
+
+        return $out;
+    }
+
+    /**
+     * Whether this site should document the size module in llms.txt.
+     *
+     * @return bool
+     */
+    public function size_module_enabled() {
+        $structure = $this->config->get_url_structure($this->site_id);
+        if (!is_array($structure) || empty($structure['size_level_1'])) {
+            return false;
+        }
+        if ($this->artefacts instanceof LDN_Artefacts) {
+            return $this->artefacts->site_entitled_to_artefact($this->site_id, 'size_summary_json');
+        }
+        return true;
+    }
+
+    /**
+     * Build an absolute size-module URL from a url_structures pattern.
+     *
+     * @param string               $base
+     * @param string               $pattern
+     * @param array<string,string> $parts shape, carat, compare
+     * @return string
+     */
+    public function size_path_url($base, $pattern, array $parts) {
+        $path = (string) $pattern;
+        $replacements = array(
+            '{shape}'   => $parts['shape'] ?? 'round',
+            '{carat}'   => $parts['carat'] ?? '1-carat',
+            '{compare}' => $parts['compare'] ?? '',
+        );
+        foreach ($replacements as $placeholder => $value) {
+            $path = str_replace($placeholder, $value, $path);
+        }
+        $path = preg_replace('#/+#', '/', $path);
+        if ($path === '' || $path[0] !== '/') {
+            $path = '/' . ltrim($path, '/');
+        }
+        if (!preg_match('/\.xml$/i', $path)) {
+            $path = user_trailingslashit($path);
+        }
+        return rtrim($base, '/') . $path;
     }
 
     /**

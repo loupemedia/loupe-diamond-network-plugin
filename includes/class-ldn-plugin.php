@@ -89,6 +89,13 @@ final class LDN_Plugin {
     private $renderer = null;
 
     /**
+     * Ops dashboard config reader (feature flags).
+     *
+     * @var LDN_Dashboard|null
+     */
+    private $dashboard = null;
+
+    /**
      * Memoised resolution of the current request's site_id.
      *
      * Uses a sentinel (false) to distinguish "not yet resolved" from the
@@ -131,7 +138,8 @@ final class LDN_Plugin {
         if ($this->is_network_site()) {
             $this->router()->register();
             $this->dispatcher()->register();
-            (new LDN_Llms_Txt($this->site_id(), $this->config()))->register();
+            (new LDN_Llms_Txt($this->site_id(), $this->config(), $this->artefacts()))->register();
+            require_once LDN_INCLUDES_DIR . 'class-ldn-sitemap-module.php';
         }
 
         if (is_admin()) {
@@ -298,6 +306,29 @@ final class LDN_Plugin {
             $this->renderer = new LDN_Renderer($this->data_fetcher(), $this->config());
         }
         return $this->renderer;
+    }
+
+    /**
+     * Ops dashboard reader (feature flags, active_sites metadata).
+     *
+     * @return LDN_Dashboard
+     */
+    public function dashboard() {
+        if ($this->dashboard === null) {
+            $this->dashboard = new LDN_Dashboard($this->config());
+        }
+        return $this->dashboard;
+    }
+
+    /**
+     * Whether a future product feature should render for this site/country.
+     *
+     * @param string      $flag         e.g. show_inventory, show_sparklescore.
+     * @param string|null $country_code
+     * @return bool
+     */
+    public function feature_enabled($flag, $country_code = null) {
+        return $this->dashboard()->is_feature_enabled($flag, $country_code);
     }
 
     /**

@@ -21,18 +21,24 @@
  *      (ldn-chrome--loupe-classic) so it matches the family stylesheet selector.
  *      Would fail if the underscore profile slug (loupe_classic) leaked into the
  *      class as ldn-chrome--loupe_classic, leaving the heading CSS inert.
+ *   5. breadcrumb_html() renders only when schema_features includes breadcrumb;
+ *      freshness_html() shows analysis_date + sample_size when present.
  */
 
 error_reporting(E_ALL);
 
 // --- Minimal WordPress shims -------------------------------------------------
 define('ABSPATH', __DIR__ . '/');
+define('LDN_PLUGIN_DIR', dirname(__DIR__) . '/');
 
 if (!function_exists('__')) {
     function __($s, $d = null) { return $s; }
 }
 if (!function_exists('esc_html')) {
     function esc_html($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
+}
+if (!function_exists('esc_attr__')) {
+    function esc_attr__($s, $d = null) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 }
 if (!function_exists('esc_html__')) {
     function esc_html__($s, $d = null) { return htmlspecialchars((string) $s, ENT_QUOTES); }
@@ -76,8 +82,10 @@ if (!class_exists('LDN_Config')) {
         public function get_currency($site_id, $country) { return 'USD'; }
         public function get_url_structure($site_id) {
             return array(
-                'level_3'      => 'diamond-prices/{type}/{carat}',
-                'level_4'      => 'diamond-prices/{type}/{carat}/{shape}',
+                'level_1'      => '{country}/diamond-prices',
+                'level_2'      => '{country}/diamond-prices/{type}',
+                'level_3'      => '{country}/diamond-prices/{type}/{carat}',
+                'level_4'      => '{country}/diamond-prices/{type}/{carat}/{shape}',
                 'carat_format' => '{value}-carat',
                 'type_natural' => 'natural',
                 'type_lab'     => 'lab-grown',
@@ -89,6 +97,7 @@ if (!class_exists('LDN_Config')) {
     }
 }
 
+require_once __DIR__ . '/../includes/class-ldn-schema.php';
 require_once __DIR__ . '/../includes/class-ldn-renderer.php';
 
 // --- Tiny assertion harness --------------------------------------------------
@@ -191,6 +200,41 @@ check(
         === 'ldn-chrome--minimal',
     'invalid heading_style falls back to minimal'
 );
+check(
+    $renderer->chrome_heading_class(array('page_chrome' => array('heading_style' => 'ringspo_classic')))
+        === 'ldn-chrome--ringspo-classic',
+    'ringspo_classic heading_style maps to hyphenated ldn-chrome--ringspo-classic'
+);
+
+// --- 5b. visible breadcrumbs + freshness (CP53_05) --------------------------
+$breadcrumb_profile = array('schema_features' => array('faq', 'breadcrumb'));
+$crumbs = $renderer->breadcrumb_html(
+    $shape_ctx,
+    'https://example.com/us/diamond-prices/natural/1-carat/round/',
+    $breadcrumb_profile
+);
+check(
+    strpos($crumbs, 'ldn-breadcrumbs') !== false && strpos($crumbs, 'Diamond Prices') !== false,
+    'breadcrumb_html renders a nav when schema_features includes breadcrumb'
+);
+check(
+    $renderer->breadcrumb_html($shape_ctx, '', array('schema_features' => array('faq'))) === '',
+    'breadcrumb_html is omitted when breadcrumb is not in schema_features'
+);
+$fresh = $renderer->freshness_html($shape_ctx, array(
+    'analysis_date' => '2026-06-22',
+    'distribution'  => array('sample_size' => 12500),
+));
+check(
+    strpos($fresh, 'ldn-freshness') !== false
+        && strpos($fresh, 'datetime="2026-06-22"') !== false
+        && strpos($fresh, '12,500') !== false,
+    'freshness_html shows analysis date and sample size from summary-data'
+);
+check(
+    $renderer->freshness_html($shape_ctx, array()) === '',
+    'freshness_html is omitted when no analysis date is present'
+);
 
 // --- 6. carat_price_table_html navigation table (top-level nav) -------------
 // Rule: emits one row per carat with a lab-grown discount, and links each price
@@ -215,11 +259,11 @@ $carat_overview = array(
 );
 $carat_html = $renderer->carat_price_table_html($top_ctx, $carat_overview, '$');
 check(
-    strpos($carat_html, 'https://example.com/diamond-prices/natural/1-carat/') !== false,
+    strpos($carat_html, 'https://example.com/us/diamond-prices/natural/1-carat/') !== false,
     'carat table links natural price down to the type+carat all-shapes page'
 );
 check(
-    strpos($carat_html, 'https://example.com/diamond-prices/lab-grown/1-carat/') !== false,
+    strpos($carat_html, 'https://example.com/us/diamond-prices/lab-grown/1-carat/') !== false,
     'carat table links lab-grown price down to the type+carat all-shapes page'
 );
 check(
@@ -287,11 +331,11 @@ $ranking_bag = array(
 );
 $ranking_html = $renderer->shapes_ranking_table_html($all_shapes_ctx, $ranking_bag);
 check(
-    strpos($ranking_html, 'https://example.com/diamond-prices/natural/1-carat/round/') !== false,
+    strpos($ranking_html, 'https://example.com/us/diamond-prices/natural/1-carat/round/') !== false,
     'shapes ranking table links each shape down to its shape page'
 );
 check(
-    strpos($ranking_html, 'https://example.com/diamond-prices/natural/1-carat/oval/') !== false,
+    strpos($ranking_html, 'https://example.com/us/diamond-prices/natural/1-carat/oval/') !== false,
     'shapes ranking table links oval shape page'
 );
 
@@ -307,11 +351,11 @@ $ladder_bag = array(
 );
 $ladder_html = $renderer->carat_ladder_html($shape_ctx, $ladder_bag, 'USD');
 check(
-    strpos($ladder_html, 'https://example.com/diamond-prices/natural/2-carat/round/') !== false,
+    strpos($ladder_html, 'https://example.com/us/diamond-prices/natural/2-carat/round/') !== false,
     'carat ladder links non-page carat rows to sibling shape pages'
 );
 check(
-    strpos($ladder_html, 'https://example.com/diamond-prices/natural/1-carat/') !== false,
+    strpos($ladder_html, 'https://example.com/us/diamond-prices/natural/1-carat/') !== false,
     'carat ladder includes link up to the all-shapes hub page'
 );
 check(
@@ -653,6 +697,80 @@ $cc_via_section = $renderer->render_section(
 check(
     strpos($cc_via_section, 'ldn-color-clarity') !== false,
     'render_section dispatches the color_clarity id to the heatmap builder (gap closed)'
+);
+
+// --- 7. Standalone homepage sections (DPE / carat hub) --------------------
+// Test intent: Top-level hub sections surface market scale and type entry links from market_overview.
+// Would fail if: hub_stats or type_nav_links return empty when overview payload is present.
+
+$dpe_ctx = new LDN_Page_Context('diamondpriceuk', 'top-level', 'uk');
+$dpe_profile = array(
+    'homepage' => array('h1' => 'Diamond Price'),
+    'tagline'  => 'Real-time diamond prices in your currency',
+);
+$hub_bag = array(
+    'market_overview' => array(
+        'total_diamonds_tracked' => 125000,
+        'analysis_date'          => '2026-06-01',
+        'natural'                => array('total_sample_size' => 80000),
+        'lab_grown'              => array('total_sample_size' => 45000),
+        'currency'               => 'GBP',
+        'carat_price_table'      => array(
+            array(
+                'carat_weight'            => '1',
+                'natural_median_price'    => 5000,
+                'lab_grown_median_price'  => 2000,
+                'lab_grown_discount_pct'  => 60,
+            ),
+        ),
+    ),
+    'top_tables' => array(
+        'natural_top' => array(
+            array(
+                'shape'         => 'round',
+                'carat'         => '1',
+                'diamond_type'  => 'natural',
+                'median_price'  => 5200,
+                'sample_size'   => 9000,
+            ),
+        ),
+    ),
+    'summary' => array(),
+);
+
+check(
+    $renderer->homepage_headline($dpe_ctx, $dpe_profile) === 'Diamond Price',
+    'homepage_headline uses profile homepage.h1 on top-level pages'
+);
+check(
+    strpos($renderer->homepage_tagline_html($dpe_ctx, $dpe_profile), 'Real-time diamond prices') !== false,
+    'homepage_tagline_html renders profile tagline under the H1'
+);
+
+$hub_stats_html = $renderer->render_section('hub_stats', $dpe_ctx, $hub_bag, 'GBP');
+check(
+    strpos($hub_stats_html, 'ldn-hub-stats') !== false,
+    'hub_stats renders a stats section from market_overview'
+);
+check(
+    strpos($hub_stats_html, '125,000') !== false,
+    'hub_stats formats total_diamonds_tracked for display'
+);
+
+$type_nav_html = $renderer->render_section('type_nav_links', $dpe_ctx, $hub_bag, 'GBP');
+check(
+    strpos($type_nav_html, 'ldn-type-nav') !== false,
+    'type_nav_links renders the natural/lab entry grid'
+);
+
+$popular_html = $renderer->render_section('popular_searches', $dpe_ctx, $hub_bag, 'GBP');
+check(
+    strpos($popular_html, 'ldn-carat-price-table') !== false,
+    'popular_searches includes the carat price ladder table'
+);
+check(
+    strpos($popular_html, 'ldn-popular-shapes') !== false,
+    'popular_searches lists top shape links when top_tables is present'
 );
 
 // --- Report -----------------------------------------------------------------

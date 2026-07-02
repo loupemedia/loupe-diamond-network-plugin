@@ -1,6 +1,6 @@
 <?php
 /**
- * Price page template — backward-compatible alias for level templates.
+ * Level 2 — diamond type (natural / lab-grown).
  *
  * @package LoupeDiamondNetwork
  */
