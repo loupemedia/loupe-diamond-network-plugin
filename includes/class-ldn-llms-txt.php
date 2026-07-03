@@ -237,6 +237,12 @@ final class LDN_Llms_Txt {
         }
 
         if (!empty($structure['size_level_compare'])) {
+            $compare_tool = (string) preg_replace('#/\\{compare\\}.*$#', '', (string) $structure['size_level_compare']);
+            $out['Diamond size comparison tool'] = $this->size_path_url(
+                $base,
+                $compare_tool,
+                array()
+            );
             $princess_slug = $this->config->shape_to_s3_slug('princess');
             $compare_slug = $shape_slug . '-' . $carat . '-vs-' . $princess_slug . '-' . $carat;
             $out['Size comparison (example)'] = $this->size_path_url(
@@ -245,6 +251,15 @@ final class LDN_Llms_Txt {
                 array('shape' => $shape_slug, 'carat' => $carat, 'compare' => $compare_slug)
             );
         }
+
+        $spread_checker = !empty($structure['size_level_spread_checker'])
+            ? (string) $structure['size_level_spread_checker']
+            : '/diamond-size/spread-checker';
+        $out['Diamond stone spread checker'] = $this->size_path_url(
+            $base,
+            $spread_checker,
+            array()
+        );
 
         if (!empty($structure['size_level_sitemap'])) {
             $out['Size pages XML sitemap'] = $this->size_path_url(

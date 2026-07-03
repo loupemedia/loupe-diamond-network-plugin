@@ -70,6 +70,25 @@
 	background-color: #fff;
 }
 
+.ldn-chrome--ringspo-classic .ldn-size-intro {
+	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
+	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));
+	padding: 1.25rem var(--ldn-padding, 1.25rem) 1.75rem;
+	background-color: rgba(112, 108, 200, 0.08);
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-intro .ldn-size-factual {
+	margin: 0 0 0.75rem;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-intro p {
+	margin: 0 0 0.65rem;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-intro p:last-child {
+	margin-bottom: 0;
+}
+
 .ldn-chrome--ringspo-classic .ldn-section {
 	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
 	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));

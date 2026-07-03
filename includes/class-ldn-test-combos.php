@@ -205,6 +205,12 @@ final class LDN_Test_Combos {
             }
             return false;
         }
+        if ($ctx->page_level === 'size-comparison-tool') {
+            return $combos !== array();
+        }
+        if ($ctx->page_level === 'size-spread-checker') {
+            return $combos !== array();
+        }
         return false;
     }
 

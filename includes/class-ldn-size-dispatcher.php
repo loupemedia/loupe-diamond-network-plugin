@@ -15,10 +15,12 @@ final class LDN_Size_Dispatcher {
     const ROUTE = 'size';
 
     const PRIMARY_ARTEFACT = array(
-        'size-individual'  => 'size_summary_json',
-        'size-shape-hub'   => 'size_summary_json',
-        'size-mega-hub'    => 'size_summary_json',
-        'size-comparison'  => 'size_summary_json',
+        'size-individual'        => 'size_summary_json',
+        'size-shape-hub'         => 'size_summary_json',
+        'size-mega-hub'          => 'size_summary_json',
+        'size-comparison'        => 'size_summary_json',
+        'size-comparison-tool'   => 'size_summary_json',
+        'size-spread-checker'    => 'size_summary_json',
     );
 
     /** @var string */
@@ -268,6 +270,10 @@ final class LDN_Size_Dispatcher {
                 return 'size-individual';
             case 'compare':
                 return 'size-comparison';
+            case 'compare-tool':
+                return 'size-comparison-tool';
+            case 'spread-checker':
+                return 'size-spread-checker';
             case 'sitemap':
                 return 'size-sitemap';
             default:

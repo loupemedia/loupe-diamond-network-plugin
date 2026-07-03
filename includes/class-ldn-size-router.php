@@ -118,14 +118,24 @@ final class LDN_Size_Router {
         $compare = is_array($structure) && !empty($structure['size_level_compare'])
             ? (string) $structure['size_level_compare']
             : '/diamond-size/compare/{compare}';
+        $compare_tool = is_array($structure) && !empty($structure['size_level_compare'])
+            ? (string) preg_replace('#/\\{compare\\}.*$#', '', $compare)
+            : '/diamond-size/compare';
+        $spread_checker = is_array($structure) && !empty($structure['size_level_spread_checker'])
+            ? (string) $structure['size_level_spread_checker']
+            : '/diamond-size/spread-checker';
 
         $individual = $this->pattern_to_regex($level3);
         $shape_hub = $this->pattern_to_regex($level2);
         $mega = $this->pattern_to_regex($level1);
         $comparison = $this->pattern_to_regex($compare);
+        $comparison_tool = $this->pattern_to_regex($compare_tool);
+        $spread_checker_rule = $this->pattern_to_regex($spread_checker);
 
         return array(
             $comparison => 'index.php?ldn_route=size&ldn_size_level=compare&ldn_compare_slug=$matches[1]',
+            $comparison_tool => 'index.php?ldn_route=size&ldn_size_level=compare-tool',
+            $spread_checker_rule => 'index.php?ldn_route=size&ldn_size_level=spread-checker',
             $individual => 'index.php?ldn_route=size&ldn_size_level=individual&ldn_shape=$matches[1]&ldn_carat=$matches[2]',
             $shape_hub => 'index.php?ldn_route=size&ldn_size_level=shape&ldn_shape=$matches[1]',
             $mega => 'index.php?ldn_route=size&ldn_size_level=mega',

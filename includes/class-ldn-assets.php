@@ -67,6 +67,40 @@ final class LDN_Assets {
 			true
 		);
 
+		if ($ctx->page_level === 'size-comparison-tool') {
+			wp_enqueue_script(
+				'ldn-size-faceted-overlay',
+				$base_url . 'assets/js/size-faceted-overlay.js',
+				array(),
+				$version,
+				true
+			);
+			wp_enqueue_script(
+				'ldn-size-comparison',
+				$base_url . 'assets/js/size-comparison.js',
+				array('ldn-size-faceted-overlay'),
+				$version,
+				true
+			);
+		}
+
+		if ($ctx->page_level === 'size-spread-checker') {
+			wp_enqueue_script(
+				'ldn-size-faceted-overlay',
+				$base_url . 'assets/js/size-faceted-overlay.js',
+				array(),
+				$version,
+				true
+			);
+			wp_enqueue_script(
+				'ldn-size-spread-checker',
+				$base_url . 'assets/js/size-spread-checker.js',
+				array('ldn-size-faceted-overlay'),
+				$version,
+				true
+			);
+		}
+
 		$deps = array('ldn-shared');
 		$webfont_url = self::google_fonts_url_for_site($ctx->site_id, $config);
 		if ($webfont_url !== null && apply_filters('ldn_enqueue_webfonts', true, $ctx)) {
