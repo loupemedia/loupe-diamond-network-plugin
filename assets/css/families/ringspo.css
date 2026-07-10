@@ -1,10 +1,20 @@
 /**
  * Ringspo — ringspo_classic heading variant (CP53).
  *
- * Serif headings, alternating coloured section bands, and full-bleed layout
- * inside the WP content column. Activated when page_chrome.heading_style is
- * ringspo_classic (Ringspo family).
+ * Serif headings on a full-bleed layout. The pricing page leads with a single
+ * signature-green header band (page_chrome.hero_band) that holds the title,
+ * breadcrumbs, the hero chart on a white card, and white headline stat cards.
+ * Content sections below are edge-to-edge: white alternating with solid
+ * signature-purple bands (#706cc8) and white text. Two brand colours only.
+ * Sharp edges throughout.
  */
+
+.ldn-chrome--ringspo-classic {
+	--ringspo-green: #6cc8be;
+	--ringspo-purple: #706cc8;
+	--ringspo-ink: #1a1a2e;
+	--ringspo-muted: #4a4a68;
+}
 
 .ldn-page-shell {
 	width: 100vw;
@@ -12,69 +22,233 @@
 	margin-right: calc(50% - 50vw);
 }
 
+/* ----- Full-bleed helper: header band + sections span the viewport width,
+   while their inner content stays aligned to the readable column. ----- */
+.ldn-chrome--ringspo-classic .ldn-hero-band,
+.ldn-chrome--ringspo-classic .ldn-section,
+.ldn-chrome--ringspo-classic > h1.ldn-page-title,
+.ldn-chrome--ringspo-classic > .ldn-breadcrumbs {
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+	padding-left: calc(50vw - 50%);
+	padding-right: calc(50vw - 50%);
+}
+
+/* =====================================================================
+   Hero band (signature green, edge-to-edge)
+   ===================================================================== */
+
+.ldn-chrome--ringspo-classic .ldn-hero-band {
+	padding-top: 1.5rem;
+	padding-bottom: 1.75rem;
+	background-color: var(--ringspo-green);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band > h1.ldn-page-title {
+	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
+	font-size: var(--ldn-title-size, 2rem);
+	font-weight: 700;
+	line-height: 1.25;
+	color: #fff;
+	background: transparent;
+	margin: 0 0 0.5rem;
+	padding: 0;
+	max-width: none;
+	border-bottom: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-breadcrumbs {
+	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
+	font-size: 0.85rem;
+	margin: 0 0 1rem;
+	padding: 0;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-breadcrumbs a {
+	color: #fff;
+	text-decoration: underline;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-breadcrumbs__sep {
+	margin: 0 0.35rem;
+	color: rgba(255, 255, 255, 0.6);
+}
+
+/* Hero chart sits on a white card so the brand line stays readable. */
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-chart {
+	margin: 0 0 1.25rem;
+	padding: 1rem;
+	background-color: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-chart figcaption {
+	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
+	font-style: italic;
+	color: var(--ringspo-muted);
+	margin-bottom: 0.5rem;
+}
+
+/* Headline stat cards (white) under the chart. */
+.ldn-chrome--ringspo-classic .ldn-hero-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 0.75rem;
+	margin: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-stat {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	padding: 0.85rem 1rem;
+	background-color: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-stat .ldn-stat-label {
+	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
+	font-size: 0.72rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ringspo-muted);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-stat .ldn-stat-value {
+	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
+	font-size: 1.4rem;
+	font-weight: 700;
+	line-height: 1.15;
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-stat.ldn-stat--down .ldn-stat-value {
+	color: #b3261e;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-stat.ldn-stat--up .ldn-stat-value {
+	color: #1a7f5a;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-freshness {
+	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
+	font-size: 0.85rem;
+	color: rgba(255, 255, 255, 0.9);
+	margin: 1rem 0 0;
+	padding: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-freshness time {
+	font-weight: 600;
+	color: #fff;
+}
+
+/* =====================================================================
+   Non-band contexts (e.g. size pages): green title band for consistency.
+   ===================================================================== */
+
 .ldn-chrome--ringspo-classic > h1.ldn-page-title {
 	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
 	font-size: var(--ldn-title-size, 2rem);
 	font-weight: 700;
 	line-height: 1.25;
-	color: #1a1a2e;
-	background-color: #fde8dc;
-	padding: 1.5rem 1.25rem;
-	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
-	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));
+	color: #fff;
+	background-color: var(--ringspo-green);
+	padding-top: 1.5rem;
+	padding-bottom: 1.5rem;
 	margin-bottom: 0;
 	border-bottom: none;
 	max-width: none;
 }
 
-.ldn-chrome--ringspo-classic .ldn-breadcrumbs {
+.ldn-chrome--ringspo-classic > .ldn-breadcrumbs {
 	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
 	font-size: 0.875rem;
-	margin: 0 calc(-1 * var(--ldn-padding, 1.25rem)) 0;
-	padding: 0.65rem var(--ldn-padding, 1.25rem);
-	background-color: #fde8dc;
-	color: #4a4a68;
+	padding-top: 0.65rem;
+	padding-bottom: 0.65rem;
+	background-color: var(--ringspo-green);
+	color: rgba(255, 255, 255, 0.9);
 }
 
-.ldn-chrome--ringspo-classic .ldn-breadcrumbs a {
-	color: var(--ldn-primary, #706cc8);
-	text-decoration: none;
-}
-
-.ldn-chrome--ringspo-classic .ldn-breadcrumbs a:hover {
+.ldn-chrome--ringspo-classic > .ldn-breadcrumbs a {
+	color: #fff;
 	text-decoration: underline;
 }
 
-.ldn-chrome--ringspo-classic .ldn-breadcrumbs__sep {
+.ldn-chrome--ringspo-classic > .ldn-breadcrumbs .ldn-breadcrumbs__sep {
 	margin: 0 0.35rem;
-	color: #8a8aa0;
+	color: rgba(255, 255, 255, 0.6);
 }
 
 .ldn-chrome--ringspo-classic .ldn-freshness {
 	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
 	font-size: 0.9rem;
-	color: #4a4a68;
+	color: var(--ringspo-muted);
 	margin: 0.75rem 0 1.25rem;
-	padding: 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-freshness time {
 	font-weight: 600;
-	color: #1a1a2e;
+	color: var(--ringspo-ink);
 }
 
+/* Chart outside the hero band (size pages / other levels): white, full width. */
 .ldn-chrome--ringspo-classic .ldn-chart {
-	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
-	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));
-	padding: 1.25rem var(--ldn-padding, 1.25rem);
 	background-color: #fff;
 }
 
+/* =====================================================================
+   Content sections: white, edge-to-edge, separated by a thin rule.
+   ===================================================================== */
+
+.ldn-chrome--ringspo-classic .ldn-section {
+	padding-top: 1.75rem;
+	padding-bottom: 1.75rem;
+	background-color: #fff;
+}
+
+/* Coloured content bands (edge-to-edge, same full-bleed as the hero). The first
+   two sections — Pricing context and Expert take — stay white; remaining odd
+   sections use solid signature purple with white text. */
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) {
+	background-color: var(--ringspo-purple);
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) h2,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) h3,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) p,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) li,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) dt,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) dd {
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) a {
+	color: #fff;
+	text-decoration: underline;
+}
+
+/* Data tables and charts sit on white cards inside purple bands. */
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-scroll,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-chart {
+	background-color: #fff;
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-table thead th,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-table tbody th {
+	color: var(--ringspo-ink);
+}
+
 .ldn-chrome--ringspo-classic .ldn-size-intro {
-	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
-	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));
-	padding: 1.25rem var(--ldn-padding, 1.25rem) 1.75rem;
-	background-color: rgba(112, 108, 200, 0.08);
+	padding-top: 1.25rem;
+	padding-bottom: 1.75rem;
+	background-color: #fff;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-intro .ldn-size-factual {
@@ -89,29 +263,11 @@
 	margin-bottom: 0;
 }
 
-.ldn-chrome--ringspo-classic .ldn-section {
-	margin-left: calc(-1 * var(--ldn-padding, 1.25rem));
-	margin-right: calc(-1 * var(--ldn-padding, 1.25rem));
-	padding: 1.75rem var(--ldn-padding, 1.25rem);
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(3n + 1) {
-	background-color: rgba(112, 108, 200, 0.12);
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(3n + 2) {
-	background-color: #fff;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(3n) {
-	background-color: rgba(25, 179, 154, 0.1);
-}
-
 .ldn-chrome--ringspo-classic .ldn-section h2 {
 	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
 	font-size: 1.5rem;
 	font-weight: 700;
-	color: #1a1a2e;
+	color: var(--ringspo-ink);
 	margin-top: 0;
 }
 
@@ -126,7 +282,7 @@
 }
 
 .ldn-chrome--ringspo-classic .ldn-section a {
-	color: var(--ldn-primary, #706cc8);
+	color: var(--ldn-primary, var(--ringspo-purple));
 }
 
 .ldn-chrome--ringspo-classic .ldn-faq dt {
@@ -134,12 +290,16 @@
 }
 
 @media screen and (max-width: 768px) {
+	.ldn-chrome--ringspo-classic .ldn-hero-band > h1.ldn-page-title,
 	.ldn-chrome--ringspo-classic > h1.ldn-page-title {
 		font-size: var(--ldn-title-size-mobile, 1.35rem);
-		padding: 1.1rem 1rem;
 	}
 
 	.ldn-chrome--ringspo-classic .ldn-section h2 {
+		font-size: 1.25rem;
+	}
+
+	.ldn-chrome--ringspo-classic .ldn-hero-stat .ldn-stat-value {
 		font-size: 1.25rem;
 	}
 }

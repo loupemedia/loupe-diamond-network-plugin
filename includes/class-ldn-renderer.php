@@ -216,12 +216,14 @@ final class LDN_Renderer {
         $out .= '<main class="ldn-price-page ldn-' . esc_attr($ctx->page_level) . '-page '
             . esc_attr($this->chrome_heading_class($profile)) . '">';
         $out .= $this->theme_style_block($profile);
-        $out .= '<h1 class="ldn-page-title">'
-            . esc_html($this->headline($ctx, $this->country_in_content_flag($profile, 'h1_headings')))
-            . '</h1>';
 
         $canonical = $this->current_url();
-        $out .= $this->breadcrumb_html($ctx, $canonical, $profile);
+        $summary = isset($bag['summary']) && is_array($bag['summary']) ? $bag['summary'] : array();
+
+        $title_html = '<h1 class="ldn-page-title">'
+            . esc_html($this->headline($ctx, $this->country_in_content_flag($profile, 'h1_headings')))
+            . '</h1>';
+        $breadcrumb_html = $this->breadcrumb_html($ctx, $canonical, $profile);
 
         // The editorial intro now leads the page; the structured data summary still
         // feeds the meta description + JSON-LD via render_head_content().
@@ -231,11 +233,35 @@ final class LDN_Renderer {
         // A profile can position the hero inline by listing a `hero` token in its
         // sections; otherwise the hero renders first (back-compatible default).
         $hero_inline = in_array('hero', $sections, true);
-        if (!$hero_inline) {
-            $out .= $hero_html;
-        }
+        $freshness_html = $this->freshness_html($ctx, $summary);
 
-        $out .= $this->freshness_html($ctx, $bag['summary'] ?? array());
+        // page_chrome.hero_band groups the title, breadcrumbs, hero chart and
+        // headline stat cards into one full-bleed <header> (Ringspo). Boolean
+        // flags are read from the raw profile (resolved_page_chrome keeps only
+        // string chrome values).
+        $page_chrome = (isset($profile['page_chrome']) && is_array($profile['page_chrome']))
+            ? $profile['page_chrome']
+            : array();
+        $hero_band = !empty($page_chrome['hero_band']);
+
+        if ($hero_band) {
+            $out .= '<header class="ldn-hero-band">';
+            $out .= $title_html;
+            $out .= $breadcrumb_html;
+            if (!$hero_inline) {
+                $out .= $hero_html;
+            }
+            $out .= $this->hero_stats_html($ctx, $summary, $currency);
+            $out .= $freshness_html;
+            $out .= '</header>';
+        } else {
+            $out .= $title_html;
+            $out .= $breadcrumb_html;
+            if (!$hero_inline) {
+                $out .= $hero_html;
+            }
+            $out .= $freshness_html;
+        }
 
         foreach ($sections as $section_id) {
             if ((string) $section_id === 'hero') {

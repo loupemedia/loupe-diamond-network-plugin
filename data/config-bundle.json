@@ -1,6 +1,6 @@
 {
-  "version": "4a1c28e",
-  "generated_at": "2026-07-02T11:01:08.997115+00:00",
+  "version": "4ef4967",
+  "generated_at": "2026-07-10T21:22:29.161401+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8652,6 +8652,19 @@
       },
       "report_charts": [
         {
+          "id": "retail_index_headline",
+          "title": "Online Retail Listing Indexes — {month_label}",
+          "type": "multi_index",
+          "source": "retail_index_daily"
+        },
+        {
+          "id": "retail_index_price_availability",
+          "title": "{segment_label} — Price & Availability",
+          "type": "dual_line",
+          "source": "retail_index_daily",
+          "description": "Price index (median PPC) and availability index (active listings), rebased to 100 at period start"
+        },
+        {
           "id": "stress_index_monthly",
           "title": "Market Stress Index — {month_label}",
           "type": "time_series"
@@ -8789,7 +8802,9 @@
         "webfont_families": [
           "Open Sans"
         ],
-        "heading_style": "ringspo_classic"
+        "heading_style": "ringspo_classic",
+        "hero_band": true,
+        "intro_style": "cards"
       },
       "brand_positioning": "Independent diamond guidance from someone who knows the market and talks plainly",
       "tagline": "Expert advice without the jewellery-store sales pitch",
@@ -8944,9 +8959,8 @@
         "individual_shape": {
           "hero_component": "distribution_chart",
           "sections": [
-            "intro_dynamic",
-            "expert_take_static",
             "pricing_context_static",
+            "expert_take_static",
             "color_clarity",
             "buying_guidance_static",
             "faq_static",

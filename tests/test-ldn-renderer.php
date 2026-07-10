@@ -447,6 +447,91 @@ check(
     'intro_html falls back to the legacy 7-day clause when no policy is present'
 );
 
+// --- 9b. headline price prefers the median over the (outlier-inflated) mean --
+// Test intent: when summary-data.json carries a distribution median, intro_html
+// and stats_html lead with the MEDIAN (matching the carat-ladder table), not the
+// higher current_price (avg). This is the $3,711-vs-$4,281 consistency fix.
+// Would fail if: the headline read current_price/time_series.current_price while
+// a distribution.median_price was present (the pre-fix behaviour).
+$median_summary = array(
+    'current_price' => 4281,
+    'num_diamonds'  => 30543,
+    'distribution'  => array(
+        'median_price' => 3711,
+        'price_range'  => array('min' => 342, 'max' => 43023),
+    ),
+);
+$median_intro = $renderer->intro_html($shape_ctx, $median_summary, 'USD');
+check(
+    strpos($median_intro, '$3,711') !== false,
+    'intro_html leads with the distribution median ($3,711)'
+);
+check(
+    strpos($median_intro, '$4,281') === false,
+    'intro_html does not lead with the outlier-inflated mean ($4,281)'
+);
+$median_stats = $renderer->stats_html($shape_ctx, $median_summary, 'USD');
+check(
+    strpos($median_stats, '$3,711') !== false && strpos($median_stats, '$4,281') === false,
+    'stats_html "Current price" uses the median ($3,711), not the mean'
+);
+
+// p50 fallback path when median_price is absent but percentiles exist.
+$p50_summary = array(
+    'current_price' => 4281,
+    'num_diamonds'  => 30543,
+    'distribution'  => array('percentiles' => array('p50' => 3711)),
+);
+$p50_intro = $renderer->intro_html($shape_ctx, $p50_summary, 'USD');
+check(
+    strpos($p50_intro, '$3,711') !== false,
+    'intro_html falls back to percentiles.p50 when median_price is absent'
+);
+
+// --- 9c. hero_stats_html emits median-led cards incl. range + period change --
+// Test intent: the hero-band stat cards lead with the median price, show the
+// sample count, render min–max as a single "Price range" card, and add a
+// period-change card carrying a direction modifier class (down for a fall).
+// Would fail if: hero_stats used the mean, split range into two cards, or
+// dropped the change/trend class.
+$hero_summary = array(
+    'distribution' => array(
+        'median_price' => 3510,
+        'sample_size'  => 27523,
+        'price_range'  => array('min' => 1030, 'max' => 19270),
+    ),
+    'time_series'  => array('change_12_months' => -5.39),
+);
+$hero_cards = $loupe_renderer->hero_stats_html($shape_ctx, $hero_summary, 'USD');
+check(
+    strpos($hero_cards, 'ldn-hero-stats') !== false,
+    'hero_stats_html renders the hero stat card grid'
+);
+check(
+    strpos($hero_cards, '$3,510') !== false && strpos($hero_cards, 'Current price') !== false,
+    'hero_stats_html leads with the median current price'
+);
+check(
+    strpos($hero_cards, '27,523') !== false,
+    'hero_stats_html shows the diamonds-analysed count'
+);
+check(
+    strpos($hero_cards, '$1,030') !== false
+        && strpos($hero_cards, '$19,270') !== false
+        && strpos($hero_cards, 'Price range') !== false,
+    'hero_stats_html renders min–max as a single price-range card'
+);
+check(
+    strpos($hero_cards, 'ldn-stat--down') !== false && strpos($hero_cards, '5.39%') !== false,
+    'hero_stats_html adds a down-trend change card for a price fall'
+);
+
+$hero_empty = $loupe_renderer->hero_stats_html($shape_ctx, array(), 'USD');
+check(
+    $hero_empty === '',
+    'hero_stats_html returns empty string when no price figure is present'
+);
+
 // --- 10. shapes ranking table change column tracks the policy period --------
 // Test intent: the ranking change column label + visibility follow C5.1's
 // `change_period` field (Loupe = 12 months); an explicit null drops the column;

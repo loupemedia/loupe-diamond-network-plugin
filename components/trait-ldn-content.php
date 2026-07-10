@@ -231,7 +231,12 @@ trait LDN_Trait_Content {
      * @return string
      */
     public function intro_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
+        // Headline price tracks the MEDIAN (p50) — the same figure the carat
+        // ladder table shows — so the intro, hero stat and table always agree.
+        // Falls back to current_price (trimmed avg) only when no median is present.
         $current_price = $this->dig_first($summary, array(
+            array('distribution', 'median_price'),
+            array('distribution', 'percentiles', 'p50'),
             array('time_series', 'current_price'),
             array('current_price'),
         ));
@@ -421,7 +426,11 @@ trait LDN_Trait_Content {
     }
 
     public function stats_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
+        // Prefer the median (p50) so the "Current price" stat matches the carat
+        // ladder table and intro sentence; fall back to current_price (avg).
         $current = $this->dig_first($summary, array(
+            array('distribution', 'median_price'),
+            array('distribution', 'percentiles', 'p50'),
             array('time_series', 'current_price'),
             array('current_price'),
         ));
@@ -485,6 +494,110 @@ trait LDN_Trait_Content {
                     . esc_html($cell['value']) . '</span></div>';
             }
             $html .= '</div>';
+        }
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Headline stat cards for the hero band (page_chrome.hero_band): current
+     * (median) price, diamonds analysed, price range, and the period price
+     * change. Rendered as a flat card grid so families can skin it edge-to-edge
+     * (Ringspo). Returns '' when there is no usable price figure.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $summary
+     * @param string|null      $currency
+     * @return string
+     */
+    public function hero_stats_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
+        $current = $this->dig_first($summary, array(
+            array('distribution', 'median_price'),
+            array('distribution', 'percentiles', 'p50'),
+            array('time_series', 'current_price'),
+            array('current_price'),
+        ));
+        if ($current === null || !is_numeric($current)) {
+            return '';
+        }
+
+        $samples = $this->dig_first($summary, array(
+            array('distribution', 'sample_size'),
+            array('num_diamonds'),
+            array('sample_size'),
+        ));
+        $low = $this->dig_first($summary, array(
+            array('distribution', 'price_range', 'min'),
+            array('min_price'),
+            array('price_low'),
+        ));
+        $high = $this->dig_first($summary, array(
+            array('distribution', 'price_range', 'max'),
+            array('max_price'),
+            array('price_high'),
+        ));
+
+        $symbol = $this->currency_symbol($currency);
+
+        $cards = array();
+        $cards[] = array(
+            'label' => __('Current price', 'loupe-diamond-network'),
+            'value' => $this->format_stat($current, 'currency', $currency),
+        );
+        if ($samples !== null && is_numeric($samples)) {
+            $cards[] = array(
+                'label' => __('Diamonds analysed', 'loupe-diamond-network'),
+                'value' => $this->format_stat($samples, 'integer', $currency),
+            );
+        }
+        if (is_numeric($low) && is_numeric($high) && (float) $high > 0) {
+            $cards[] = array(
+                'label' => __('Price range', 'loupe-diamond-network'),
+                'value' => $symbol . number_format((float) $low, 0) . ' – ' . $symbol . number_format((float) $high, 0),
+            );
+        }
+
+        // Period price change (policy-driven; e.g. Ringspo headlines 1 month).
+        $policy = $this->shape_change_policy($ctx);
+        $period = $policy['period'];
+        if ($policy['show_change']) {
+            $change_key = $period !== null ? 'change_' . $period : 'change_7_days';
+            $change = $this->dig_first($summary, array(
+                array('time_series', $change_key),
+                array($change_key),
+            ));
+            if ($change !== null && is_numeric($change)) {
+                $change = (float) $change;
+                if ($change > 0) {
+                    $glyph = "\xE2\x96\xB2 "; // ▲
+                    $trend = 'up';
+                } elseif ($change < 0) {
+                    $glyph = "\xE2\x96\xBC "; // ▼
+                    $trend = 'down';
+                } else {
+                    $glyph = '';
+                    $trend = 'flat';
+                }
+                $cards[] = array(
+                    'label' => sprintf(
+                        /* translators: %s: period adjective, e.g. "1-month" */
+                        __('%s change', 'loupe-diamond-network'),
+                        $this->change_period_short_label($period)
+                    ),
+                    'value' => $glyph . sprintf('%.2f%%', abs($change)),
+                    'trend' => $trend,
+                );
+            }
+        }
+
+        $html = '<div class="ldn-hero-stats">';
+        foreach ($cards as $card) {
+            $trend_class = isset($card['trend']) ? ' ldn-stat--' . $card['trend'] : '';
+            $html .= '<div class="ldn-stat ldn-hero-stat' . $trend_class . '">'
+                . '<span class="ldn-stat-label">' . esc_html($card['label']) . '</span>'
+                . '<span class="ldn-stat-value">' . esc_html($card['value']) . '</span>'
+                . '</div>';
         }
         $html .= '</div>';
 

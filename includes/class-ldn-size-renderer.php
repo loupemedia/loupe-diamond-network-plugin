@@ -79,7 +79,7 @@ final class LDN_Size_Renderer {
         } elseif ($ctx->page_level === 'size-spread-checker') {
             $out .= $this->spread_checker_body_html($ctx, $summary);
         } elseif ($ctx->page_level === 'size-individual') {
-            $out .= $this->individual_body_html($ctx, $summary);
+            $out .= $this->individual_body_html($ctx, $summary, $copy);
             $out .= $this->methodology_html($summary);
             $out .= $this->internal_links_html($ctx, $summary);
         } else {
@@ -112,9 +112,10 @@ final class LDN_Size_Renderer {
     /**
      * @param LDN_Page_Context $ctx
      * @param array            $summary
+     * @param array            $copy Size-copy.json payload (for the spread variation note).
      * @return string
      */
-    private function individual_body_html(LDN_Page_Context $ctx, array $summary) {
+    private function individual_body_html(LDN_Page_Context $ctx, array $summary, array $copy = array()) {
         $visuals = isset($summary['visuals']) && is_array($summary['visuals']) ? $summary['visuals'] : array();
         $scale_svg = '';
         if (!empty($visuals['scale_reference_svg']) && is_string($visuals['scale_reference_svg'])) {
