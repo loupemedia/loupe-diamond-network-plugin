@@ -238,8 +238,8 @@ final class LDN_S3_Key_Resolver {
                 return $root . '/compare/' . $ctx->compare_slug . '/';
             case 'size-comparison-tool':
                 return $root . '/compare/';
-            case 'size-spread-checker':
-                return $root . '/spread-checker/';
+            case 'size-methodology':
+                return $root . '/methodology/';
             default:
                 return null;
         }

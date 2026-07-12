@@ -124,6 +124,9 @@ final class LDN_Size_Router {
         $spread_checker = is_array($structure) && !empty($structure['size_level_spread_checker'])
             ? (string) $structure['size_level_spread_checker']
             : '/diamond-size/spread-checker';
+        $methodology = is_array($structure) && !empty($structure['size_level_methodology'])
+            ? (string) $structure['size_level_methodology']
+            : '/diamond-size/methodology';
 
         $individual = $this->pattern_to_regex($level3);
         $shape_hub = $this->pattern_to_regex($level2);
@@ -131,11 +134,14 @@ final class LDN_Size_Router {
         $comparison = $this->pattern_to_regex($compare);
         $comparison_tool = $this->pattern_to_regex($compare_tool);
         $spread_checker_rule = $this->pattern_to_regex($spread_checker);
+        $methodology_rule = $this->pattern_to_regex($methodology);
 
         return array(
             $comparison => 'index.php?ldn_route=size&ldn_size_level=compare&ldn_compare_slug=$matches[1]',
             $comparison_tool => 'index.php?ldn_route=size&ldn_size_level=compare-tool',
+            // Legacy URL: dispatcher issues a 301 to the merged size checker at /compare/.
             $spread_checker_rule => 'index.php?ldn_route=size&ldn_size_level=spread-checker',
+            $methodology_rule => 'index.php?ldn_route=size&ldn_size_level=methodology',
             $individual => 'index.php?ldn_route=size&ldn_size_level=individual&ldn_shape=$matches[1]&ldn_carat=$matches[2]',
             $shape_hub => 'index.php?ldn_route=size&ldn_size_level=shape&ldn_shape=$matches[1]',
             $mega => 'index.php?ldn_route=size&ldn_size_level=mega',

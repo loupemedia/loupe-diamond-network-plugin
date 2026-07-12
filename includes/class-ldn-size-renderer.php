@@ -42,6 +42,12 @@ final class LDN_Size_Renderer {
     /** @var LDN_Renderer|null */
     private $price_renderer = null;
 
+    /** @var array|null|false Per-request cache for the size-checker manifest (false = not fetched). */
+    private $checker_manifest_cache = false;
+
+    /** @var bool Manifest JSON already embedded on this page. */
+    private $checker_manifest_emitted = false;
+
     /**
      * @param LDN_Data_Fetcher $fetcher
      * @param LDN_Config       $config
@@ -64,23 +70,20 @@ final class LDN_Size_Renderer {
         $out = $this->page_shell_open($ctx);
         $out .= $this->breadcrumb_html($ctx, $canonical);
         $out .= '<h1 class="ldn-page-title">' . esc_html($this->headline($ctx, $summary)) . '</h1>';
-        $lead = isset($copy['plain_text']) && is_string($copy['plain_text']) && $copy['plain_text'] !== ''
-            ? $copy['plain_text']
-            : $this->factual_fallback($summary);
         $out .= '<section class="ldn-section ldn-size-intro">';
-        $out .= '<p class="ldn-size-factual ldn-intro-dynamic">' . esc_html($lead) . '</p>';
+        $out .= $this->intro_paragraphs_html($ctx, $summary, $copy);
         $out .= $this->copy_notes_html($copy);
         $out .= '</section>';
 
         if ($ctx->page_level === 'size-comparison') {
             $out .= $this->comparison_body_html($ctx, $summary);
         } elseif ($ctx->page_level === 'size-comparison-tool') {
-            $out .= $this->comparison_tool_body_html($ctx, $summary);
-        } elseif ($ctx->page_level === 'size-spread-checker') {
-            $out .= $this->spread_checker_body_html($ctx, $summary);
+            $out .= $this->size_checker_body_html($ctx, $summary);
+        } elseif ($ctx->page_level === 'size-methodology') {
+            $out .= $this->methodology_body_html($ctx, $summary, $copy);
         } elseif ($ctx->page_level === 'size-individual') {
             $out .= $this->individual_body_html($ctx, $summary, $copy);
-            $out .= $this->methodology_html($summary);
+            $out .= $this->methodology_html($summary, $ctx->site_id);
             $out .= $this->internal_links_html($ctx, $summary);
         } else {
             $out .= $this->hub_body_html($ctx, $summary);
@@ -110,6 +113,39 @@ final class LDN_Size_Renderer {
     }
 
     /**
+     * Intro paragraphs inside the header band. The mega hub uses the templated
+     * multi-paragraph intro (total sample size + real-data positioning) from
+     * size-copy.json; every other level keeps the single factual lead.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $summary
+     * @param array            $copy
+     * @return string
+     */
+    public function intro_paragraphs_html(LDN_Page_Context $ctx, array $summary, array $copy) {
+        if ($ctx->page_level === 'size-mega-hub'
+            && isset($copy['intro_paragraphs']) && is_array($copy['intro_paragraphs'])
+            && $copy['intro_paragraphs'] !== array()
+        ) {
+            $out = '';
+            foreach ($copy['intro_paragraphs'] as $i => $para) {
+                if (!is_string($para) || trim($para) === '') {
+                    continue;
+                }
+                $cls = $i === 0 ? 'ldn-size-factual ldn-intro-dynamic' : 'ldn-size-intro__note';
+                $out .= '<p class="' . esc_attr($cls) . '">' . esc_html(trim($para)) . '</p>';
+            }
+            if ($out !== '') {
+                return $out;
+            }
+        }
+        $lead = isset($copy['plain_text']) && is_string($copy['plain_text']) && $copy['plain_text'] !== ''
+            ? $copy['plain_text']
+            : $this->factual_fallback($summary);
+        return '<p class="ldn-size-factual ldn-intro-dynamic">' . esc_html($lead) . '</p>';
+    }
+
+    /**
      * @param LDN_Page_Context $ctx
      * @param array            $summary
      * @param array            $copy Size-copy.json payload (for the spread variation note).
@@ -129,14 +165,13 @@ final class LDN_Size_Renderer {
         $spread_svg = (!empty($visuals['spread_svg']) && is_string($visuals['spread_svg']))
             ? $visuals['spread_svg'] : '';
         $dims = $this->dimensions_table($summary);
-        $ideal = $this->ideal_vs_real_html($summary);
         $hero = '';
 
         if ($scale_svg !== '' || $dims !== '') {
             $hero = '<section class="ldn-section ldn-size-hero">';
             if ($scale_svg !== '') {
-                $hero .= '<div class="ldn-size-hero__outline"><div class="ldn-size-outline ldn-size-outline--scale">'
-                    . $scale_svg . '</div></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                $hero .= '<div class="ldn-size-hero__outline">'
+                    . $this->scale_figure_html($scale_svg, $summary) . '</div>';
             }
             if ($dims !== '') {
                 $hero .= '<div class="ldn-size-hero__dims">' . $dims . '</div>';
@@ -156,12 +191,148 @@ final class LDN_Size_Renderer {
                     'These outlines show the bottom 10%, average, and top 10% of face-up size from real inventory at this carat weight.',
                     'loupe-diamond-network'
                 ) . '</p>'
+                . '<figure class="ldn-size-figure ldn-size-figure--spread">'
                 . '<div class="ldn-size-outline ldn-size-outline--spread">' . $spread_svg . '</div>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                . $this->spread_labels_html($summary)
+                . '<figcaption class="ldn-size-figure__caption">'
+                . esc_html__('Dashed line = typical crown height · stones aligned on a shared baseline.', 'loupe-diamond-network')
+                . '</figcaption></figure>'
                 . '</section>';
         }
 
-        return $hero . $spread . $this->chart_html($ctx) . $this->proportions_html($summary)
-            . $ideal;
+        return $hero . $spread . $this->cut_grade_html($summary) . $this->chart_html($ctx) . $this->chart_vs_real_html($summary);
+    }
+
+    /**
+     * Cut-grade segmentation table (round brilliant only).
+     *
+     * @param array $summary
+     * @return string
+     */
+    public function cut_grade_html(array $summary) {
+        $shape = isset($summary['shape']) ? (string) $summary['shape'] : '';
+        if ($shape !== 'round') {
+            return '';
+        }
+        $segments = isset($summary['cut_segments']) && is_array($summary['cut_segments'])
+            ? $summary['cut_segments'] : array();
+        if ($segments === array()) {
+            return '';
+        }
+
+        $rows = '';
+        foreach ($segments as $segment) {
+            if (!is_array($segment)) {
+                continue;
+            }
+            $label = isset($segment['label']) ? (string) $segment['label'] : '';
+            $n = isset($segment['n']) ? (int) $segment['n'] : 0;
+            $share = isset($segment['share_pct']) ? (float) $segment['share_pct'] : null;
+            $diameter = $this->dig($segment, array('diameter_mm', 'median'));
+            $faceup = $this->dig($segment, array('faceup_area_mm2', 'median'));
+            $depth = $this->dig($segment, array('depth_percent', 'median'));
+            if ($label === '' || $n <= 0) {
+                continue;
+            }
+            $share_txt = $share !== null ? sprintf('%s%%', (string) $share) : '—';
+            $diameter_txt = $diameter !== null ? sprintf('Ø %s mm', (string) $diameter) : '—';
+            $faceup_txt = $faceup !== null ? sprintf('%s mm²', (string) $faceup) : '—';
+            $depth_txt = $depth !== null ? (string) $depth : '—';
+            $rows .= '<tr>'
+                . '<th scope="row">' . esc_html($label) . '</th>'
+                . '<td>' . esc_html(number_format($n)) . '</td>'
+                . '<td>' . esc_html($share_txt) . '</td>'
+                . '<td>' . esc_html($diameter_txt) . '</td>'
+                . '<td>' . esc_html($faceup_txt) . '</td>'
+                . '<td>' . esc_html($depth_txt) . '</td>'
+                . '</tr>';
+        }
+        if ($rows === '') {
+            return '';
+        }
+
+        return '<section class="ldn-section ldn-size-cut-grade"><h2>'
+            . esc_html__('How does cut grade affect size?', 'loupe-diamond-network') . '</h2>'
+            . '<p class="ldn-size-cut-grade__lead">'
+            . esc_html__(
+                'Median dimensions from real inventory at this carat weight, split by GIA cut grade. The headline size above pools all grades.',
+                'loupe-diamond-network'
+            ) . '</p>'
+            . '<table class="ldn-size-table ldn-size-table--cut-grade"><thead><tr>'
+            . '<th scope="col">' . esc_html__('Cut grade', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Stones', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Share', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Median diameter', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Median face-up', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Median depth %', 'loupe-diamond-network') . '</th>'
+            . '</tr></thead><tbody>' . $rows . '</tbody></table></section>';
+    }
+
+    /**
+     * Scale-reference SVG wrapped in a figure with the HTML caption that used to
+     * live inside the SVG (in-SVG text scales unpredictably with the container).
+     *
+     * @param string $svg     Inline SVG markup.
+     * @param array  $summary
+     * @return string
+     */
+    public function scale_figure_html($svg, array $summary) {
+        $shape = isset($summary['shape'])
+            ? strtolower(str_replace('-', ' ', (string) $summary['shape']))
+            : 'diamond';
+        $carat = isset($summary['carat_band']) ? (string) $summary['carat_band'] : '';
+        $caption = $carat !== ''
+            ? sprintf(
+                /* translators: 1: carat weight, 2: shape name */
+                __('Relative actual size (mm): US quarter (24.26 mm) beside the median %1$s carat %2$s.', 'loupe-diamond-network'),
+                $carat,
+                $shape
+            )
+            : __('Relative actual size (mm): US quarter (24.26 mm) beside the median stone.', 'loupe-diamond-network');
+        return '<figure class="ldn-size-figure ldn-size-figure--scale">'
+            . '<div class="ldn-size-outline ldn-size-outline--scale">' . $svg . '</div>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+            . '<figcaption class="ldn-size-figure__caption">' . esc_html($caption) . '</figcaption>'
+            . '</figure>';
+    }
+
+    /**
+     * HTML tier labels under the spread SVG (bottom 10% / average / top 10%),
+     * replacing the in-SVG text that rendered at unpredictable sizes.
+     *
+     * @param array $summary
+     * @return string
+     */
+    public function spread_labels_html(array $summary) {
+        $tiers = array(
+            'p10'    => __('Bottom 10% of size', 'loupe-diamond-network'),
+            'median' => __('Average size', 'loupe-diamond-network'),
+            'p90'    => __('Top 10% of size', 'loupe-diamond-network'),
+        );
+        $near_round = $this->is_near_round($summary);
+        $cells = '';
+        foreach ($tiers as $tier => $label) {
+            if ($near_round) {
+                $d = $this->average_diameter_mm($summary, $tier);
+                $dim_txt = $d !== null ? sprintf('Ø %s mm', (string) $d) : '';
+            } else {
+                $length = $this->dig($summary, array('dimensions_mm', 'length', $tier));
+                $width = $this->dig($summary, array('dimensions_mm', 'width', $tier));
+                $dim_txt = ($length !== null && $width !== null)
+                    ? sprintf('%s × %s mm', (string) $width, (string) $length)
+                    : '';
+            }
+            $faceup = $this->dig($summary, array('faceup_area_mm2', $tier));
+            $area_txt = $faceup !== null ? sprintf('%s mm² face-up', (string) $faceup) : '';
+            $cells .= '<div class="ldn-size-spread-label"><strong>' . esc_html($label) . '</strong>';
+            if ($dim_txt !== '') {
+                $cells .= '<span>' . esc_html($dim_txt) . '</span>';
+            }
+            if ($area_txt !== '') {
+                $cells .= '<span>' . esc_html($area_txt) . '</span>';
+            }
+            $cells .= '</div>';
+        }
+        return '<div class="ldn-size-spread-labels">' . $cells . '</div>';
     }
 
     /**
@@ -201,10 +372,10 @@ final class LDN_Size_Renderer {
      */
     public function page_title(LDN_Page_Context $ctx, array $summary) {
         if ($ctx->page_level === 'size-comparison-tool') {
-            return __('Diamond Size & Shape Comparison Tool — Compare Carat & MM Size', 'loupe-diamond-network');
+            return __('Diamond Size Checker — Check & Compare Diamond Sizes vs Real Market Data', 'loupe-diamond-network');
         }
-        if ($ctx->page_level === 'size-spread-checker') {
-            return __('Diamond Stone Spread Checker — Rank Your Measurements vs Market', 'loupe-diamond-network');
+        if ($ctx->page_level === 'size-methodology') {
+            return __('How We Measure Diamond Sizes — Methodology', 'loupe-diamond-network');
         }
         if ($ctx->page_level === 'size-individual' && $ctx->shape !== null && $ctx->carat !== null) {
             $shape = ucwords(str_replace('-', ' ', $ctx->shape));
@@ -243,10 +414,10 @@ final class LDN_Size_Renderer {
             return $this->comparison_headline($summary['a'], $summary['b']);
         }
         if ($ctx->page_level === 'size-comparison-tool') {
-            return __('Diamond Size & Shape Comparison Tool', 'loupe-diamond-network');
+            return __('Diamond Size Checker', 'loupe-diamond-network');
         }
-        if ($ctx->page_level === 'size-spread-checker') {
-            return __('Diamond Stone Spread Checker', 'loupe-diamond-network');
+        if ($ctx->page_level === 'size-methodology') {
+            return __('How We Measure Diamond Sizes', 'loupe-diamond-network');
         }
         return 'Diamond Size';
     }
@@ -258,11 +429,21 @@ final class LDN_Size_Renderer {
      * @return string
      */
     public function factual_fallback(array $summary) {
-        if (isset($summary['type']) && $summary['type'] === 'comparison_tool') {
-            return __('Compare diamond shapes and carat weights using real inventory medians.', 'loupe-diamond-network');
+        if (isset($summary['type'])
+            && in_array($summary['type'], array('size_checker', 'comparison_tool', 'spread_checker'), true)
+        ) {
+            return __('Check one diamond against real market sizes or compare two diamonds side by side.', 'loupe-diamond-network');
         }
-        if (isset($summary['type']) && $summary['type'] === 'spread_checker') {
-            return __('Rank your diamond measurements against real market spread percentiles.', 'loupe-diamond-network');
+        if (isset($summary['type']) && $summary['type'] === 'methodology') {
+            $total = isset($summary['stats']['total_n']) ? (int) $summary['stats']['total_n'] : 0;
+            if ($total > 0) {
+                return sprintf(
+                    /* translators: %s: formatted diamond count */
+                    __('How our diamond size data is generated from %s real diamond measurements.', 'loupe-diamond-network'),
+                    number_format($total)
+                );
+            }
+            return __('How our diamond size data is generated from real diamond measurements.', 'loupe-diamond-network');
         }
         if (isset($summary['type']) && $summary['type'] === 'comparison'
             && isset($summary['a'], $summary['b'])
@@ -309,10 +490,22 @@ final class LDN_Size_Renderer {
             return '';
         }
         $id = 'ldn-size-chart-' . md5($ctx->page_level . ($ctx->shape ?? '') . ($ctx->carat ?? ''));
+        // Consumer-first heading; "face-up size distribution" stays in the lead
+        // copy for search/AEO term coverage.
+        if ($ctx->shape !== null && $ctx->carat !== null) {
+            $heading = sprintf(
+                /* translators: 1: carat weight, 2: shape name */
+                __('Do all %1$s carat %2$s diamonds look the same size?', 'loupe-diamond-network'),
+                $ctx->carat,
+                strtolower(str_replace('-', ' ', $ctx->shape))
+            );
+        } else {
+            $heading = __('Face-up size distribution', 'loupe-diamond-network');
+        }
         $out = '<section class="ldn-section ldn-chart ldn-size-chart">';
-        $out .= '<h2>' . esc_html__('Face-up size distribution', 'loupe-diamond-network') . '</h2>';
+        $out .= '<h2>' . esc_html($heading) . '</h2>';
         $out .= '<p class="ldn-size-chart__lead">' . esc_html__(
-            'How face-up area is distributed across real stones of this carat weight. The bars show how many stones fall in each size band; the dotted line marks the industry chart ideal.',
+            'Real stones of the same carat weight spread across a range of face-up sizes. This face-up size distribution shows how many stones fall in each size band; the dotted line marks the industry chart ideal.',
             'loupe-diamond-network'
         ) . '</p>';
         $out .= '<div id="' . esc_attr($id) . '" class="ldn-chart-target"></div>';
@@ -332,6 +525,14 @@ final class LDN_Size_Renderer {
      */
     public function dimensions_table(array $summary) {
         $rows = '';
+        if (!empty($summary['shape'])) {
+            $rows .= '<tr><th>' . esc_html__('Shape', 'loupe-diamond-network')
+                . '</th><td>' . esc_html(ucwords(str_replace('-', ' ', (string) $summary['shape']))) . '</td></tr>';
+        }
+        if (!empty($summary['carat_band'])) {
+            $rows .= '<tr><th>' . esc_html__('Carat weight', 'loupe-diamond-network')
+                . '</th><td>' . esc_html((string) $summary['carat_band'] . ' ct') . '</td></tr>';
+        }
         if ($this->is_near_round($summary)) {
             $diameter = $this->average_diameter_mm($summary, 'median');
             if ($diameter !== null) {
@@ -476,9 +677,25 @@ final class LDN_Size_Renderer {
         if ($n_phrase !== '') {
             $text .= ' ' . $n_phrase;
         }
-        return '<section class="ldn-section ldn-size-ideal-real"><h2>'
-            . esc_html__('Ideal vs real measurements', 'loupe-diamond-network') . '</h2><p>'
-            . esc_html($text) . '</p></section>';
+        return '<div class="ldn-size-ideal-real"><p>' . esc_html($text) . '</p></div>';
+    }
+
+    /**
+     * Merged "chart numbers vs real stones" section: the ideal-vs-real callout
+     * and the depth↔face-up correlation narrative under a single heading.
+     *
+     * @param array $summary
+     * @return string
+     */
+    public function chart_vs_real_html(array $summary) {
+        $ideal = $this->ideal_vs_real_html($summary);
+        $depth = $this->proportions_html($summary);
+        if ($ideal === '' && $depth === '') {
+            return '';
+        }
+        return '<section class="ldn-section ldn-size-chart-vs-real"><h2>'
+            . esc_html__('Chart numbers vs real stones', 'loupe-diamond-network') . '</h2>'
+            . $ideal . $depth . '</section>';
     }
 
     /**
@@ -528,54 +745,104 @@ final class LDN_Size_Renderer {
     public function hub_body_html(LDN_Page_Context $ctx, array $summary) {
         $out = '';
         if ($ctx->page_level === 'size-mega-hub') {
-            $out .= $this->comparison_tool_cta_html($ctx->site_id);
-            $out .= $this->spread_checker_cta_html($ctx->site_id);
-            $out .= $this->shape_selector_html($ctx->site_id, $summary);
+            $matrix = $this->mega_matrix_table_html($ctx, $summary);
+            $out .= $matrix !== '' ? $matrix : $this->hub_table_html($ctx, $summary);
+            $out .= $this->size_checker_cta_html($ctx->site_id);
+            return $out;
         }
         if ($ctx->page_level === 'size-shape-hub') {
             $out .= $this->shape_hub_scale_html($ctx);
         }
         $out .= $this->hub_table_html($ctx, $summary);
+        if ($ctx->page_level === 'size-shape-hub') {
+            $out .= $this->size_checker_widget_html($ctx);
+        }
         return $out;
     }
 
     /**
-     * Crawlable shape tiles linking to per-shape hub pages (mega hub only).
+     * Mega-hub matrix table: one row per shape, one column per anchor carat,
+     * each cell a true-to-scale outline with L×W mm linking to the individual
+     * page. Sticky header + sticky shape column via CSS. Returns '' when the
+     * summary has no matrix payload (pre-migration artefacts) so the caller
+     * can fall back to the flat ladder table.
      *
-     * @param string $site_id
-     * @param array  $summary Hub summary with rows[].
+     * @param LDN_Page_Context $ctx
+     * @param array            $summary Mega hub summary with matrix{carats, rows}.
      * @return string
      */
-    public function shape_selector_html($site_id, array $summary) {
-        $rows = isset($summary['rows']) && is_array($summary['rows']) ? $summary['rows'] : array();
-        if ($rows === array()) {
+    public function mega_matrix_table_html(LDN_Page_Context $ctx, array $summary) {
+        $matrix = isset($summary['matrix']) && is_array($summary['matrix']) ? $summary['matrix'] : array();
+        $carats = isset($matrix['carats']) && is_array($matrix['carats']) ? $matrix['carats'] : array();
+        $rows = isset($matrix['rows']) && is_array($matrix['rows']) ? $matrix['rows'] : array();
+        if ($carats === array() || $rows === array()) {
             return '';
         }
-        $shapes = array();
+        $site_id = $ctx->site_id;
+
+        $head = '<th class="ldn-size-matrix__shape-col">'
+            . esc_html__('Shape', 'loupe-diamond-network') . '</th>';
+        foreach ($carats as $carat) {
+            $head .= '<th>' . esc_html((string) $carat . ' ct') . '</th>';
+        }
+
+        $body = '';
         foreach ($rows as $row) {
             if (!is_array($row) || empty($row['shape'])) {
                 continue;
             }
-            $shapes[(string) $row['shape']] = true;
+            $shape = (string) $row['shape'];
+            $label = isset($row['label']) ? (string) $row['label'] : ucwords(str_replace('-', ' ', $shape));
+            $hub_url = $this->build_size_shape_hub_url($site_id, $shape);
+            $shape_cell = $hub_url !== ''
+                ? '<a href="' . esc_url($hub_url) . '">' . esc_html($label) . '</a>'
+                : esc_html($label);
+            $body .= '<tr><th class="ldn-size-matrix__shape-col" scope="row">' . $shape_cell . '</th>';
+            $cells = isset($row['cells']) && is_array($row['cells']) ? $row['cells'] : array();
+            foreach ($carats as $carat) {
+                $carat = (string) $carat;
+                $cell = isset($cells[$carat]) && is_array($cells[$carat]) ? $cells[$carat] : null;
+                if ($cell === null) {
+                    $body .= '<td class="ldn-size-matrix__cell ldn-size-matrix__cell--empty">—</td>';
+                    continue;
+                }
+                $url = $this->build_size_individual_url($site_id, $shape, $carat);
+                $svg = (!empty($cell['outline_svg']) && is_string($cell['outline_svg']))
+                    ? '<span class="ldn-size-matrix__outline">' . $cell['outline_svg'] . '</span>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                    : '';
+                $dims = '';
+                if (isset($cell['length_mm'], $cell['width_mm'])) {
+                    $dims = '<span class="ldn-size-matrix__dims">'
+                        . esc_html((string) $cell['length_mm'] . ' × ' . (string) $cell['width_mm'] . ' mm')
+                        . '</span>';
+                }
+                $inner = $svg . $dims;
+                $body .= '<td class="ldn-size-matrix__cell">'
+                    . ($url !== ''
+                        ? '<a class="ldn-size-matrix__link" href="' . esc_url($url) . '">' . $inner . '</a>'
+                        : $inner)
+                    . '</td>';
+            }
+            $body .= '</tr>';
         }
-        if ($shapes === array()) {
+        if ($body === '') {
             return '';
         }
-        ksort($shapes);
-        $tiles = '';
-        foreach (array_keys($shapes) as $shape) {
-            $url = $this->build_size_shape_hub_url($site_id, $shape);
-            $label = ucwords(str_replace('-', ' ', $shape));
-            $tiles .= '<a class="ldn-size-shape-tile" href="' . esc_url($url) . '">'
-                . esc_html($label) . '</a>';
-        }
-        return '<nav class="ldn-size-shape-selector" aria-label="'
-            . esc_attr__('Diamond shapes', 'loupe-diamond-network') . '">'
-            . $tiles . '</nav>';
+        return '<section class="ldn-section ldn-size-hub-table ldn-size-matrix-section"><h2>'
+            . esc_html__('Diamond size chart by shape and carat weight', 'loupe-diamond-network')
+            . '</h2><p class="ldn-size-matrix__lead">' . esc_html__(
+                'Outlines are drawn to a shared scale — a 3 carat stone really is that much bigger than a 1 carat. Click any size for the full breakdown, or a shape for its complete carat-by-carat chart.',
+                'loupe-diamond-network'
+            ) . '</p><div class="ldn-size-matrix-scroll"><table class="ldn-size-table ldn-size-matrix">'
+            . '<thead><tr>' . $head . '</tr></thead><tbody>' . $body . '</tbody></table></div></section>';
     }
 
     /**
-     * 1 ct scale reference for a shape hub (fetched from the individual artefact).
+     * Interactive true-scale explorer for a shape hub: carat slider (snapping
+     * to available bands) + in-place shape dropdown, defaulting to this hub's
+     * shape at 1 ct. The server-rendered 1 ct scale figure stays inside the
+     * mount as the crawlable no-JS fallback; size-scale-explorer.js progressively
+     * enhances it using the shared size-checker manifest.
      *
      * @param LDN_Page_Context $ctx
      * @return string
@@ -608,14 +875,84 @@ final class LDN_Size_Renderer {
             return '';
         }
         $shape_label = ucwords(str_replace('-', ' ', $ctx->shape));
-        return '<section class="ldn-section ldn-size-hub-scale"><h2>'
-            . esc_html(sprintf(
-                /* translators: %s: diamond shape */
-                __('%s at 1 carat — actual size', 'loupe-diamond-network'),
-                $shape_label
-            )) . '</h2>'
-            . '<div class="ldn-size-outline ldn-size-outline--scale">' . $svg . '</div>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-            . '</section>';
+        $out = '<section class="ldn-section ldn-size-hub-scale" id="ldn-size-scale-explorer"'
+            . ' data-shape="' . esc_attr($ctx->shape) . '" data-carat="1">';
+        $out .= '<h2>' . esc_html(sprintf(
+            /* translators: %s: diamond shape */
+            __('%s diamonds at actual size', 'loupe-diamond-network'),
+            $shape_label
+        )) . '</h2>';
+        $out .= '<p class="ldn-size-chart__lead">' . esc_html__(
+            'Drag the slider to change the carat weight and watch the stone grow beside a US quarter (24.26 mm). Switch shape to compare outlines at true relative scale.',
+            'loupe-diamond-network'
+        ) . '</p>';
+        $out .= '<div class="ldn-size-scale-controls" id="ldn-scale-controls" hidden>';
+        $out .= '<div class="ldn-size-scale-control"><label for="ldn-scale-shape">'
+            . esc_html__('Shape', 'loupe-diamond-network') . '</label>'
+            . '<select id="ldn-scale-shape"></select></div>';
+        $out .= '<div class="ldn-size-scale-control ldn-size-scale-control--slider">'
+            . '<label for="ldn-scale-carat">' . esc_html__('Carat weight', 'loupe-diamond-network')
+            . ' <output id="ldn-scale-carat-out">1 ct</output></label>'
+            . '<input type="range" id="ldn-scale-carat" min="0" max="1" step="1" value="0">'
+            . '</div>';
+        $out .= '</div>';
+        $out .= '<div id="ldn-scale-figure">' . $this->scale_figure_html($svg, $rep) . '</div>';
+        $out .= $this->checker_manifest_script($ctx);
+        $out .= '</section>';
+        return $out;
+    }
+
+    /**
+     * Fetch the shared size-checker manifest (compare/ prefix), cached per request.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return array|null
+     */
+    public function checker_manifest(LDN_Page_Context $ctx) {
+        if ($this->checker_manifest_cache !== false) {
+            return $this->checker_manifest_cache;
+        }
+        $tool_ctx = $ctx->page_level === 'size-comparison-tool'
+            ? $ctx
+            : new LDN_Page_Context(
+                $ctx->site_id,
+                'size-comparison-tool',
+                $ctx->country_code,
+                null,
+                null,
+                null,
+                'size'
+            );
+        $manifest = $this->fetcher->fetch_artefact('size_summary_json', $tool_ctx);
+        $this->checker_manifest_cache = (is_array($manifest)
+            && isset($manifest['type'])
+            && in_array($manifest['type'], array('size_checker', 'spread_checker'), true))
+            ? $manifest
+            : null;
+        return $this->checker_manifest_cache;
+    }
+
+    /**
+     * Embed the size-checker manifest JSON once per page (explorer + widget share it).
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    public function checker_manifest_script(LDN_Page_Context $ctx) {
+        if ($this->checker_manifest_emitted) {
+            return '';
+        }
+        $manifest = $this->checker_manifest($ctx);
+        if ($manifest === null) {
+            return '';
+        }
+        $json = wp_json_encode($manifest, self::JSON_SCRIPT_FLAGS);
+        if (!is_string($json) || $json === '') {
+            return '';
+        }
+        $this->checker_manifest_emitted = true;
+        return '<script type="application/json" id="ldn-size-checker-manifest">'
+            . str_replace('</', '<\/', $json) . '</script>';
     }
 
     /**
@@ -630,22 +967,18 @@ final class LDN_Size_Renderer {
         if ($rows === array()) {
             return '';
         }
-        $has_lw_range = false;
+        $has_lw = false;
         $has_depth = false;
-        $has_delta = false;
         $has_visual = false;
         foreach ($rows as $probe) {
             if (!is_array($probe)) {
                 continue;
             }
-            if (isset($probe['lw_low'], $probe['lw_high'])) {
-                $has_lw_range = true;
+            if (isset($probe['lw_ratio'])) {
+                $has_lw = true;
             }
             if (isset($probe['depth_pct'])) {
                 $has_depth = true;
-            }
-            if (array_key_exists('faceup_delta_pct', $probe)) {
-                $has_delta = true;
             }
             if (!empty($probe['outline_svg']) && is_string($probe['outline_svg'])) {
                 $has_visual = true;
@@ -682,29 +1015,11 @@ final class LDN_Size_Renderer {
             $body .= '<td>' . esc_html((string) ($row['length_mm'] ?? '')) . '</td>';
             $body .= '<td>' . esc_html((string) ($row['width_mm'] ?? '')) . '</td>';
             $body .= '<td>' . esc_html((string) ($row['faceup_area_mm2'] ?? '')) . '</td>';
-            if ($has_lw_range || isset($row['lw_ratio'])) {
-                $lw = $row['lw_ratio'] ?? '';
-                $lo = $row['lw_low'] ?? null;
-                $hi = $row['lw_high'] ?? null;
-                if ($has_lw_range && $lo !== null && $hi !== null && $lw !== '') {
-                    $lw_cell = esc_html((string) $lw) . ' <span class="ldn-size-muted">('
-                        . esc_html((string) $lo) . '–' . esc_html((string) $hi) . ')</span>';
-                } else {
-                    $lw_cell = esc_html((string) $lw);
-                }
-                $body .= '<td>' . $lw_cell . '</td>';
+            if ($has_lw) {
+                $body .= '<td>' . esc_html((string) ($row['lw_ratio'] ?? '')) . '</td>';
             }
             if ($has_depth) {
                 $body .= '<td>' . esc_html((string) ($row['depth_pct'] ?? '')) . '</td>';
-            }
-            if ($has_delta) {
-                $delta = $row['faceup_delta_pct'] ?? null;
-                if ($delta === null || $delta === '') {
-                    $body .= '<td></td>';
-                } else {
-                    $sign = (float) $delta >= 0 ? '+' : '';
-                    $body .= '<td>' . esc_html($sign . (string) $delta . '%') . '</td>';
-                }
             }
             $body .= '</tr>';
         }
@@ -722,21 +1037,21 @@ final class LDN_Size_Renderer {
         $head .= '<th>' . esc_html__('Length (mm)', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Width (mm)', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Face-up (mm²)', 'loupe-diamond-network') . '</th>';
-        if ($has_lw_range || (isset($rows[0]) && is_array($rows[0]) && isset($rows[0]['lw_ratio']))) {
+        if ($has_lw) {
             $head .= '<th>' . esc_html__('L/W ratio', 'loupe-diamond-network') . '</th>';
         }
         if ($has_depth) {
             $head .= '<th>' . esc_html__('Depth %', 'loupe-diamond-network') . '</th>';
         }
-        if ($has_delta) {
-            $head .= '<th title="' . esc_attr__(
-                'How much larger or smaller real inventory faces up compared to the ideal quoted on most conversion charts.',
-                'loupe-diamond-network'
-            ) . '">' . esc_html__('vs chart ideal', 'loupe-diamond-network') . '</th>';
+        if ($ctx->page_level === 'size-shape-hub' && $ctx->shape !== null) {
+            $title = esc_html(sprintf(
+                /* translators: %s: diamond shape */
+                __('%s diamond size chart by carat weight', 'loupe-diamond-network'),
+                ucwords(str_replace('-', ' ', $ctx->shape))
+            ));
+        } else {
+            $title = esc_html__('All shapes and carat weights', 'loupe-diamond-network');
         }
-        $title = $ctx->page_level === 'size-shape-hub'
-            ? esc_html__('Carat size chart', 'loupe-diamond-network')
-            : esc_html__('All shapes and carat weights', 'loupe-diamond-network');
         return '<section class="ldn-section ldn-size-hub-table"><h2>' . $title
             . '</h2><table class="ldn-size-table"><thead><tr>' . $head
             . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
@@ -761,6 +1076,8 @@ final class LDN_Size_Renderer {
 
         $price_renderer = $this->price_renderer();
         $country = $this->config->size_rollout_country($ctx->site_id);
+        $currency = $this->config->get_currency($ctx->site_id, $country);
+        $cards = array();
         $links = array();
         foreach (array('natural', 'lab-grown') as $dtype) {
             $price_ctx = new LDN_Page_Context(
@@ -776,15 +1093,121 @@ final class LDN_Size_Renderer {
             if ($url === '') {
                 continue;
             }
-            $label = $dtype === 'lab-grown' ? 'Lab-grown prices' : 'Natural prices';
-            $links[] = '<a href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
+            $label = $dtype === 'lab-grown' ? __('Lab-grown', 'loupe-diamond-network') : __('Natural', 'loupe-diamond-network');
+            $card = $this->price_snapshot_card_html($price_ctx, $url, $label, $currency);
+            if ($card !== '') {
+                $cards[] = $card;
+            } else {
+                $links[] = '<a href="' . esc_url($url) . '">'
+                    . esc_html(sprintf(
+                        /* translators: %s: diamond type label */
+                        __('%s prices', 'loupe-diamond-network'),
+                        $label
+                    )) . '</a>';
+            }
         }
-        if ($links === array()) {
+        if ($cards === array() && $links === array()) {
             return '';
         }
-        return '<section class="ldn-section ldn-size-price-links"><p>'
-            . esc_html__('View diamond prices for this size:', 'loupe-diamond-network') . ' '
-            . implode(' · ', $links) . '</p></section>';
+        $out = '<section class="ldn-section ldn-size-price-links"><h2>'
+            . esc_html(sprintf(
+                /* translators: 1: carat weight, 2: shape name */
+                __('What does a %1$s carat %2$s cost?', 'loupe-diamond-network'),
+                (string) $ctx->carat,
+                strtolower(str_replace('-', ' ', (string) $ctx->shape))
+            )) . '</h2>';
+        if ($cards !== array()) {
+            $out .= '<div class="ldn-size-price-cards">' . implode('', $cards) . '</div>';
+        }
+        if ($links !== array()) {
+            $out .= '<p>' . esc_html__('View diamond prices for this size:', 'loupe-diamond-network')
+                . ' ' . implode(' · ', $links) . '</p>';
+        }
+        return $out . '</section>';
+    }
+
+    /**
+     * Compact live price snapshot for one diamond type, sourced from the same
+     * summary-data.json that powers the pricing page hero. Returns '' when no
+     * usable price figure exists so the caller can fall back to a plain link.
+     *
+     * @param LDN_Page_Context $price_ctx
+     * @param string           $url      Pricing page URL.
+     * @param string           $label    "Natural" | "Lab-grown".
+     * @param string|null      $currency
+     * @return string
+     */
+    public function price_snapshot_card_html(LDN_Page_Context $price_ctx, $url, $label, $currency) {
+        $summary = $this->fetcher->fetch_artefact('summary_data_json', $price_ctx);
+        if (!is_array($summary)) {
+            return '';
+        }
+        $price_renderer = $this->price_renderer();
+        $current = $this->dig_any($summary, array(
+            array('distribution', 'median_price'),
+            array('time_series', 'current_price'),
+            array('current_price'),
+            array('median_price'),
+        ));
+        if ($current === null || !is_numeric($current)) {
+            return '';
+        }
+        $low = $this->dig_any($summary, array(
+            array('distribution', 'price_range', 'min'),
+            array('min_price'),
+        ));
+        $high = $this->dig_any($summary, array(
+            array('distribution', 'price_range', 'max'),
+            array('max_price'),
+        ));
+        $samples = $this->dig_any($summary, array(
+            array('distribution', 'sample_size'),
+            array('num_diamonds'),
+            array('sample_size'),
+        ));
+
+        $out = '<a class="ldn-size-price-card" href="' . esc_url($url) . '">';
+        $out .= '<span class="ldn-size-price-card__type">' . esc_html($label) . '</span>';
+        $out .= '<span class="ldn-size-price-card__price">'
+            . esc_html($price_renderer->format_stat($current, 'currency', $currency)) . '</span>';
+        if (is_numeric($low) && is_numeric($high) && (float) $high > 0) {
+            $out .= '<span class="ldn-size-price-card__range">'
+                . esc_html(sprintf(
+                    /* translators: 1: low price, 2: high price */
+                    __('Range %1$s – %2$s', 'loupe-diamond-network'),
+                    $price_renderer->format_stat($low, 'currency', $currency),
+                    $price_renderer->format_stat($high, 'currency', $currency)
+                )) . '</span>';
+        }
+        if (is_numeric($samples) && (int) $samples > 0) {
+            $out .= '<span class="ldn-size-price-card__samples">'
+                . esc_html(sprintf(
+                    /* translators: %s: diamond count */
+                    __('Based on %s diamonds', 'loupe-diamond-network'),
+                    number_format((int) $samples)
+                )) . '</span>';
+        }
+        $out .= '<span class="ldn-size-price-card__cta">'
+            . esc_html__('See full price analysis', 'loupe-diamond-network') . ' →</span>';
+        $out .= '</a>';
+        return $out;
+    }
+
+    /**
+     * First non-null value across candidate paths into a nested array.
+     *
+     * @param array $arr
+     * @param array $paths
+     * @return mixed|null
+     */
+    private function dig_any(array $arr, array $paths) {
+        foreach ($paths as $path) {
+            $value = $this->dig($arr, $path);
+            if ($value !== null) {
+                return $value;
+            }
+        }
+        return null;
     }
 
     /**
@@ -898,18 +1321,17 @@ final class LDN_Size_Renderer {
             number_format($n),
             $direction
         );
-        return '<section class="ldn-section ldn-size-proportions"><h2>'
-            . esc_html__('Depth and face-up size', 'loupe-diamond-network') . '</h2><p>'
-            . esc_html($para) . '</p></section>';
+        return '<div class="ldn-size-proportions"><p>' . esc_html($para) . '</p></div>';
     }
 
     /**
-     * Data methodology transparency strip.
+     * Data methodology transparency strip (links to the full methodology page).
      *
-     * @param array $summary
+     * @param array       $summary
+     * @param string|null $site_id When given, appends a link to /diamond-size/methodology/.
      * @return string
      */
-    public function methodology_html(array $summary) {
+    public function methodology_html(array $summary, $site_id = null) {
         $n = isset($summary['n']) ? (int) $summary['n'] : 0;
         $source = isset($summary['source']) ? (string) $summary['source'] : '';
         if ($n <= 0 && $source === '') {
@@ -946,9 +1368,17 @@ final class LDN_Size_Renderer {
         if ($parts === array()) {
             return '';
         }
+        $link = '';
+        if ($site_id !== null) {
+            $url = $this->build_methodology_url($site_id);
+            if ($url !== '') {
+                $link = ' <a href="' . esc_url($url) . '">'
+                    . esc_html__('Read our full methodology', 'loupe-diamond-network') . '</a>.';
+            }
+        }
         return '<section class="ldn-section ldn-size-methodology"><h2>'
             . esc_html__('About this data', 'loupe-diamond-network') . '</h2><p>'
-            . esc_html(implode(' ', $parts)) . '</p></section>';
+            . esc_html(implode(' ', $parts)) . $link . '</p></section>';
     }
 
     /**
@@ -1103,14 +1533,14 @@ final class LDN_Size_Renderer {
 
         if ($ctx->page_level === 'size-comparison-tool') {
             $trail[] = array(
-                'name' => __('Comparison Tool', 'loupe-diamond-network'),
+                'name' => __('Size Checker', 'loupe-diamond-network'),
                 'url'  => $canonical_url,
             );
         }
 
-        if ($ctx->page_level === 'size-spread-checker') {
+        if ($ctx->page_level === 'size-methodology') {
             $trail[] = array(
-                'name' => __('Spread Checker', 'loupe-diamond-network'),
+                'name' => __('Methodology', 'loupe-diamond-network'),
                 'url'  => $canonical_url,
             );
         }
@@ -1151,36 +1581,88 @@ final class LDN_Size_Renderer {
         $width = $this->dig($summary, array('dimensions_mm', 'width', 'median'));
         $faceup = $this->dig($summary, array('faceup_area_mm2', 'median'));
         $n = isset($summary['n']) ? (int) $summary['n'] : 0;
+        if ($n <= 0 && isset($summary['total_n'])) {
+            $n = (int) $summary['total_n'];
+        }
         $domain = isset($site['domain']) ? (string) $site['domain'] : '';
         $brand = isset($site['brand_name']) ? (string) $site['brand_name'] : '';
+        $site_url = $domain !== '' ? 'https://' . $domain : '';
+        $generated_date = isset($summary['generated_date']) && is_string($summary['generated_date'])
+            ? $summary['generated_date'] : '';
+
+        $org_ref = $site_url !== ''
+            ? array('@id' => rtrim($site_url, '/') . '/#organization')
+            : array('@type' => 'Organization', 'name' => $brand);
+
+        if ($site_url !== '') {
+            $graph[] = array(
+                '@type'     => 'WebSite',
+                '@id'       => rtrim($site_url, '/') . '/#website',
+                'url'       => $site_url,
+                'name'      => $brand,
+                'publisher' => $org_ref,
+            );
+        }
+
+        $webpage = array(
+            '@type'       => 'WebPage',
+            '@id'         => $canonical . '#webpage',
+            'url'         => $canonical,
+            'name'        => $title,
+            'description' => $description,
+        );
+        if ($site_url !== '') {
+            $webpage['isPartOf'] = array('@id' => rtrim($site_url, '/') . '/#website');
+        }
+        if ($generated_date !== '') {
+            $webpage['dateModified'] = $generated_date;
+        }
+        $graph[] = $webpage;
 
         $measured = array();
         if ($length !== null) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'length_mm', 'value' => $length);
+            $measured[] = array('@type' => 'PropertyValue', 'name' => 'length_mm', 'value' => $length, 'unitText' => 'mm');
         }
         if ($width !== null) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'width_mm', 'value' => $width);
+            $measured[] = array('@type' => 'PropertyValue', 'name' => 'width_mm', 'value' => $width, 'unitText' => 'mm');
         }
         if ($faceup !== null) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'faceup_area_mm2', 'value' => $faceup);
+            $measured[] = array('@type' => 'PropertyValue', 'name' => 'faceup_area_mm2', 'value' => $faceup, 'unitText' => 'mm²');
         }
         if ($n > 0) {
             $measured[] = array('@type' => 'PropertyValue', 'name' => 'sample_size', 'value' => $n);
         }
 
-        $graph[] = array(
-            '@type'              => 'Dataset',
-            'name'               => $title,
-            'description'        => $description,
-            'url'                => $canonical,
-            'creator'            => array(
-                '@type' => 'Organization',
-                'name'  => $brand,
-                'url'   => $domain !== '' ? 'https://' . $domain : '',
-            ),
-            'variableMeasured'   => $measured,
-            'isAccessibleForFree'=> true,
+        $dataset = array(
+            '@type'                => 'Dataset',
+            'name'                 => $title,
+            'description'          => $description,
+            'url'                  => $canonical,
+            'creator'              => $org_ref,
+            'variableMeasured'     => $measured,
+            'measurementTechnique' => 'Aggregated measurements of real retailer diamond inventory (median, P10–P90 percentiles), not calculated from ideal proportion formulas.',
+            'license'              => 'https://creativecommons.org/licenses/by-nc/4.0/',
+            'isAccessibleForFree'  => true,
         );
+        if ($generated_date !== '') {
+            $dataset['dateModified'] = $generated_date;
+        }
+        $graph[] = $dataset;
+
+        if ($ctx->page_level === 'size-comparison-tool') {
+            $graph[] = array(
+                '@type'                => 'WebApplication',
+                '@id'                  => $canonical . '#webapp',
+                'name'                 => $title,
+                'url'                  => $canonical,
+                'applicationCategory'  => 'UtilityApplication',
+                'operatingSystem'      => 'Any',
+                'description'          => $description,
+                'isAccessibleForFree'  => true,
+                'offers'               => array('@type' => 'Offer', 'price' => '0'),
+                'provider'             => $org_ref,
+            );
+        }
 
         if ($this->schema_feature_enabled('faq', $ctx->site_id)) {
             $faq = isset($copy['faq']) && is_array($copy['faq']) ? $copy['faq'] : array();
@@ -1334,136 +1816,314 @@ final class LDN_Size_Renderer {
     }
 
     /**
-     * CTA on mega hub linking to the comparison tool.
+     * White-box CTA on a purple band (below the mega-hub matrix) linking to the
+     * Diamond Size Checker.
      *
      * @param string $site_id
      * @return string
      */
-    public function comparison_tool_cta_html($site_id) {
+    public function size_checker_cta_html($site_id) {
         $url = $this->build_comparison_tool_url($site_id);
         if ($url === '') {
             return '';
         }
-        return '<section class="ldn-section ldn-size-compare-cta"><h2>'
-            . esc_html__('Diamond Size Comparison Tool', 'loupe-diamond-network') . '</h2><p>'
+        return '<section class="ldn-section ldn-size-checker-cta-band">'
+            . '<div class="ldn-size-checker-cta"><h2>'
+            . esc_html__('Check a diamond\'s size', 'loupe-diamond-network') . '</h2><p>'
             . esc_html__(
-                'Compare any two shapes and carat weights side by side using real inventory measurements.',
+                'Compare any of the sizes above, or enter a real diamond\'s carat weight, shape and millimetre measurements to see how it ranks against the market — and how it compares to another stone.',
                 'loupe-diamond-network'
             ) . '</p><p><a class="ldn-btn ldn-btn--primary" href="' . esc_url($url) . '">'
-            . esc_html__('Open comparison tool', 'loupe-diamond-network') . '</a></p></section>';
+            . esc_html__('Open the Diamond Size Checker', 'loupe-diamond-network') . '</a></p></div></section>';
     }
 
     /**
-     * Interactive comparison hub: selectors, manifest, popular links, live preview mount.
+     * One stone panel of the size checker (reference pick or manual mm entry).
      *
-     * @param LDN_Page_Context $ctx
-     * @param array            $summary comparison_tool manifest from S3.
+     * @param string $prefix   'a' | 'b'
+     * @param string $title
+     * @param array  $defaults shape/carat/length_mm/width_mm defaults from the manifest.
+     * @param array  $shapes
+     * @param array  $carat_bands
      * @return string
      */
-    public function comparison_tool_body_html(LDN_Page_Context $ctx, array $summary) {
+    private function size_checker_panel_html($prefix, $title, array $defaults, array $shapes, array $carat_bands) {
+        $shape = isset($defaults['shape']) ? (string) $defaults['shape'] : 'round';
+        $carat = isset($defaults['carat']) ? (string) $defaults['carat'] : '1';
+        $length = $defaults['length_mm'] ?? '';
+        $width = $defaults['width_mm'] ?? '';
+        $p = esc_attr($prefix);
+
+        $shape_opts = '';
+        foreach ($shapes as $s) {
+            if (!is_string($s) || $s === '') {
+                continue;
+            }
+            $shape_opts .= '<option value="' . esc_attr($s) . '"' . selected($s, $shape, false) . '>'
+                . esc_html(ucwords(str_replace('-', ' ', $s))) . '</option>';
+        }
+        $band_opts = '';
+        foreach ($carat_bands as $band) {
+            $band = (string) $band;
+            $band_opts .= '<option value="' . esc_attr($band) . '"' . selected($band, $carat, false) . '>'
+                . esc_html($band . ' ct') . '</option>';
+        }
+
+        $out = '<fieldset class="ldn-size-checker-panel ldn-size-checker-panel--' . $p . '"'
+            . ' id="ldn-checker-panel-' . $p . '" data-stone="' . $p . '">';
+        $out .= '<legend class="ldn-size-checker-panel__title">' . esc_html($title) . '</legend>';
+
+        $out .= '<label for="ldn-checker-shape-' . $p . '">' . esc_html__('Shape', 'loupe-diamond-network') . '</label>';
+        $out .= '<select id="ldn-checker-shape-' . $p . '" name="shape_' . $p . '">' . $shape_opts . '</select>';
+
+        $out .= '<div class="ldn-size-checker-mode" role="radiogroup" aria-label="'
+            . esc_attr__('Measurement source', 'loupe-diamond-network') . '">';
+        $out .= '<label class="ldn-size-checker-mode__option"><input type="radio" name="mode_' . $p
+            . '" value="reference" checked> ' . esc_html__('Typical market size', 'loupe-diamond-network') . '</label>';
+        $out .= '<label class="ldn-size-checker-mode__option"><input type="radio" name="mode_' . $p
+            . '" value="manual"> ' . esc_html__('Enter measurements', 'loupe-diamond-network') . '</label>';
+        $out .= '</div>';
+
+        $out .= '<div class="ldn-size-checker-fields ldn-size-checker-fields--reference" id="ldn-checker-ref-' . $p . '">';
+        $out .= '<label for="ldn-checker-band-' . $p . '">' . esc_html__('Carat weight', 'loupe-diamond-network') . '</label>';
+        $out .= '<select id="ldn-checker-band-' . $p . '" name="band_' . $p . '">' . $band_opts . '</select>';
+        $out .= '</div>';
+
+        $out .= '<div class="ldn-size-checker-fields ldn-size-checker-fields--manual" id="ldn-checker-manual-' . $p . '" hidden>';
+        $out .= '<label for="ldn-checker-carat-' . $p . '">' . esc_html__('Carat weight', 'loupe-diamond-network') . '</label>';
+        $out .= '<input type="number" id="ldn-checker-carat-' . $p . '" name="carat_' . $p
+            . '" min="0.1" max="20" step="0.01" value="' . esc_attr($carat) . '" inputmode="decimal">';
+        $out .= '<div class="ldn-size-checker-mm">';
+        $out .= '<div><label for="ldn-checker-length-' . $p . '">' . esc_html__('Length (mm)', 'loupe-diamond-network') . '</label>'
+            . '<input type="number" id="ldn-checker-length-' . $p . '" name="length_' . $p
+            . '" min="1" max="30" step="0.01" value="' . esc_attr((string) $length) . '" inputmode="decimal"></div>';
+        $out .= '<div><label for="ldn-checker-width-' . $p . '">' . esc_html__('Width (mm)', 'loupe-diamond-network') . '</label>'
+            . '<input type="number" id="ldn-checker-width-' . $p . '" name="width_' . $p
+            . '" min="1" max="30" step="0.01" value="' . esc_attr((string) $width) . '" inputmode="decimal"></div>';
+        $out .= '<div><label for="ldn-checker-depth-' . $p . '">' . esc_html__('Depth (mm, optional)', 'loupe-diamond-network') . '</label>'
+            . '<input type="number" id="ldn-checker-depth-' . $p . '" name="depth_' . $p
+            . '" min="0.5" max="25" step="0.01" inputmode="decimal"></div>';
+        $out .= '</div>';
+        $out .= '<p class="ldn-size-checker-hint">' . esc_html__(
+            'Copy these from the listing or grading certificate (shown as length × width × depth).',
+            'loupe-diamond-network'
+        ) . '</p>';
+        $out .= '</div>';
+
+        $out .= '</fieldset>';
+        return $out;
+    }
+
+    /**
+     * Merged Diamond Size Checker: analyse one stone against real-market
+     * percentiles, or compare two stones (reference medians or manual mm).
+     * Results render in a separate section after the Check button is pressed.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $summary size_checker manifest from S3.
+     * @param bool             $widget  Compact widget mode (shape hubs etc.).
+     * @return string
+     */
+    public function size_checker_body_html(LDN_Page_Context $ctx, array $summary, $widget = false) {
         $shapes = isset($summary['shapes']) && is_array($summary['shapes']) ? $summary['shapes'] : array();
-        $carats = isset($summary['carats']) && is_array($summary['carats']) ? $summary['carats'] : array();
-        if ($shapes === array() || $carats === array()) {
+        $carat_bands = isset($summary['carat_bands']) && is_array($summary['carat_bands'])
+            ? $summary['carat_bands'] : array();
+        if ($shapes === array() || $carat_bands === array()) {
             return '';
         }
 
         $default_a = isset($summary['default_a']) && is_array($summary['default_a'])
-            ? $summary['default_a'] : array('shape' => 'round', 'carat' => '1');
+            ? $summary['default_a'] : array('shape' => 'oval', 'carat' => '1.1');
         $default_b = isset($summary['default_b']) && is_array($summary['default_b'])
-            ? $summary['default_b'] : array('shape' => 'oval', 'carat' => '1');
+            ? $summary['default_b'] : array('shape' => 'oval', 'carat' => '1.3');
 
-        $shape_options = static function (array $shape_list, $selected) {
-            $out = '';
-            foreach ($shape_list as $shape) {
-                if (!is_string($shape) || $shape === '') {
-                    continue;
-                }
-                $label = ucwords(str_replace('-', ' ', $shape));
-                $out .= '<option value="' . esc_attr($shape) . '"'
-                    . selected($shape, $selected, false) . '>'
-                    . esc_html($label) . '</option>';
-            }
-            return $out;
-        };
-
-        $carat_options = static function (array $carat_list, $selected) {
-            $out = '';
-            foreach ($carat_list as $carat) {
-                $carat = (string) $carat;
-                $out .= '<option value="' . esc_attr($carat) . '"'
-                    . selected($carat, (string) $selected, false) . '>'
-                    . esc_html($carat) . ' ct</option>';
-            }
-            return $out;
-        };
-
-        $manifest_json = wp_json_encode($summary, self::JSON_SCRIPT_FLAGS);
-        $out = '<section class="ldn-section ldn-size-compare-tool" id="ldn-size-compare-tool"'
+        $out = '<section class="ldn-section ldn-size-checker' . ($widget ? ' ldn-size-checker--widget' : '') . '"'
+            . ' id="ldn-size-checker"'
             . ' data-compare-base="' . esc_attr($this->build_comparison_tool_url($ctx->site_id)) . '">';
 
-        $out .= '<form class="ldn-size-compare-form" id="ldn-size-compare-form" action="#" method="get">';
-        $out .= '<div class="ldn-size-compare-panels">';
-        $out .= '<div class="ldn-size-compare-panel ldn-size-compare-panel--a">';
-        $out .= '<h2 class="ldn-size-compare-panel__title">'
-            . esc_html__('First diamond', 'loupe-diamond-network') . '</h2>';
-        $out .= '<label for="ldn-compare-shape-a">' . esc_html__('Shape', 'loupe-diamond-network') . '</label>';
-        $out .= '<select id="ldn-compare-shape-a" name="shape_a">'
-            . $shape_options($shapes, $default_a['shape'] ?? 'round') . '</select>';
-        $out .= '<label for="ldn-compare-carat-a">' . esc_html__('Carat', 'loupe-diamond-network') . '</label>';
-        $out .= '<select id="ldn-compare-carat-a" name="carat_a">'
-            . $carat_options($carats, $default_a['carat'] ?? '1') . '</select>';
-        $out .= '</div>';
+        if ($widget) {
+            $out .= '<h2>' . esc_html__('Diamond Size Checker', 'loupe-diamond-network') . '</h2>';
+            $out .= '<p class="ldn-size-chart__lead">' . esc_html__(
+                'Check a diamond against real market sizes, or compare two stones side by side.',
+                'loupe-diamond-network'
+            ) . '</p>';
+        }
 
-        $out .= '<div class="ldn-size-compare-vs" aria-hidden="true">'
-            . esc_html__('vs', 'loupe-diamond-network') . '</div>';
-
-        $out .= '<div class="ldn-size-compare-panel ldn-size-compare-panel--b">';
-        $out .= '<h2 class="ldn-size-compare-panel__title">'
-            . esc_html__('Second diamond', 'loupe-diamond-network') . '</h2>';
-        $out .= '<label for="ldn-compare-shape-b">' . esc_html__('Shape', 'loupe-diamond-network') . '</label>';
-        $out .= '<select id="ldn-compare-shape-b" name="shape_b">'
-            . $shape_options($shapes, $default_b['shape'] ?? 'oval') . '</select>';
-        $out .= '<label for="ldn-compare-carat-b">' . esc_html__('Carat', 'loupe-diamond-network') . '</label>';
-        $out .= '<select id="ldn-compare-carat-b" name="carat_b">'
-            . $carat_options($carats, $default_b['carat'] ?? '1') . '</select>';
+        $out .= '<form class="ldn-size-checker-form" id="ldn-size-checker-form" action="#" method="get">';
+        $out .= '<div class="ldn-size-checker-panels">';
+        $out .= $this->size_checker_panel_html(
+            'a',
+            __('Your diamond', 'loupe-diamond-network'),
+            $default_a,
+            $shapes,
+            $carat_bands
+        );
+        $out .= '<div class="ldn-size-checker-second" id="ldn-checker-second">';
+        $out .= '<label class="ldn-size-checker-toggle"><input type="checkbox" id="ldn-checker-enable-b"> '
+            . esc_html__('Compare with a second diamond', 'loupe-diamond-network') . '</label>';
+        $out .= '<div id="ldn-checker-panel-b-wrap" hidden>';
+        $out .= $this->size_checker_panel_html(
+            'b',
+            __('Second diamond', 'loupe-diamond-network'),
+            $default_b,
+            $shapes,
+            $carat_bands
+        );
+        $out .= '</div></div>';
         $out .= '</div>';
-        $out .= '</div>';
-
-        $out .= '<p class="ldn-size-compare-actions">'
-            . '<button type="submit" class="ldn-btn ldn-btn--primary" id="ldn-compare-submit">'
-            . esc_html__('View full comparison', 'loupe-diamond-network') . '</button></p>';
+        $out .= '<p class="ldn-size-checker-actions">'
+            . '<button type="submit" class="ldn-btn ldn-btn--primary" id="ldn-checker-submit">'
+            . esc_html__('Check size', 'loupe-diamond-network') . '</button></p>';
         $out .= '</form>';
 
-        $out .= '<div class="ldn-size-compare-preview" id="ldn-size-compare-preview" aria-live="polite">';
-        $out .= '<h2>' . esc_html__('Face-up area', 'loupe-diamond-network') . '</h2>';
-        $out .= '<div class="ldn-faceup-visual" id="ldn-compare-faceup-visual"></div>';
+        $out .= '<div class="ldn-size-checker-results" id="ldn-size-checker-results" aria-live="polite" hidden>';
+        $out .= '<h2 class="ldn-size-checker-results__title">' . esc_html__('Results', 'loupe-diamond-network') . '</h2>';
+        $out .= '<div class="ldn-size-checker-results__cards" id="ldn-checker-cards"></div>';
+        $out .= '<div class="ldn-size-checker-results__comparison" id="ldn-checker-comparison"></div>';
         $out .= '</div>';
 
-        $popular = isset($summary['popular']) && is_array($summary['popular']) ? $summary['popular'] : array();
-        if ($popular !== array()) {
-            $links = '';
-            foreach ($popular as $item) {
-                if (!is_array($item) || empty($item['slug'])) {
-                    continue;
+        if (!$widget) {
+            $popular = isset($summary['popular']) && is_array($summary['popular']) ? $summary['popular'] : array();
+            if ($popular !== array()) {
+                $links = '';
+                foreach ($popular as $item) {
+                    if (!is_array($item) || empty($item['slug'])) {
+                        continue;
+                    }
+                    $slug = (string) $item['slug'];
+                    $label = isset($item['label']) ? (string) $item['label'] : $slug;
+                    $path = '/diamond-size/compare/' . $slug . '/';
+                    $url = function_exists('home_url')
+                        ? home_url(user_trailingslashit(ltrim($path, '/')))
+                        : $path;
+                    $links .= '<li><a href="' . esc_url($url) . '">' . esc_html($label) . '</a></li>';
                 }
-                $slug = (string) $item['slug'];
-                $label = isset($item['label']) ? (string) $item['label'] : $slug;
-                $path = '/diamond-size/compare/' . $slug . '/';
-                $url = function_exists('home_url')
-                    ? home_url(user_trailingslashit(ltrim($path, '/')))
-                    : $path;
-                $links .= '<li><a href="' . esc_url($url) . '">' . esc_html($label) . '</a></li>';
+                if ($links !== '') {
+                    $out .= '<section class="ldn-section ldn-size-compare-popular"><h2>'
+                        . esc_html__('Popular comparisons', 'loupe-diamond-network') . '</h2><ul>'
+                        . $links . '</ul></section>';
+                }
             }
-            if ($links !== '') {
-                $out .= '<section class="ldn-section ldn-size-compare-popular"><h2>'
-                    . esc_html__('Popular comparisons', 'loupe-diamond-network') . '</h2><ul>'
-                    . $links . '</ul></section>';
+        } else {
+            $tool_url = $this->build_comparison_tool_url($ctx->site_id);
+            if ($tool_url !== '') {
+                $out .= '<p class="ldn-size-checker-full-link"><a href="' . esc_url($tool_url) . '">'
+                    . esc_html__('Open the full Diamond Size Checker', 'loupe-diamond-network') . ' →</a></p>';
             }
         }
 
-        $out .= '<script type="application/json" id="ldn-size-compare-manifest">'
-            . str_replace('</', '<\/', $manifest_json) . '</script>';
+        $manifest_json = wp_json_encode($summary, self::JSON_SCRIPT_FLAGS);
+        if (is_string($manifest_json) && $manifest_json !== '' && !$this->checker_manifest_emitted) {
+            $this->checker_manifest_emitted = true;
+            $out .= '<script type="application/json" id="ldn-size-checker-manifest">'
+                . str_replace('</', '<\/', $manifest_json) . '</script>';
+        }
         $out .= '</section>';
+
+        return $out;
+    }
+
+    /**
+     * Drop-in size checker widget for non-tool pages (shape hubs, individual
+     * pages): fetches the shared manifest from the compare/ prefix and renders
+     * the compact checker. Returns '' when the manifest is unavailable.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    public function size_checker_widget_html(LDN_Page_Context $ctx) {
+        $manifest = $this->checker_manifest($ctx);
+        if ($manifest === null) {
+            return '';
+        }
+        if ($ctx->shape !== null) {
+            $defaults = isset($manifest['default_a']) && is_array($manifest['default_a'])
+                ? $manifest['default_a'] : array();
+            $defaults['shape'] = $ctx->shape;
+            if ($ctx->carat !== null) {
+                $defaults['carat'] = $ctx->carat;
+            }
+            $manifest['default_a'] = $defaults;
+        }
+        return $this->size_checker_body_html($ctx, $manifest, true);
+    }
+
+    /**
+     * Methodology page body: dataset stat cards + templated sections from
+     * size-copy.json (why real data, collection, face-up method, drawbacks,
+     * freshness).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $summary methodology summary with stats{}.
+     * @param array            $copy    methodology copy with sections[].
+     * @return string
+     */
+    public function methodology_body_html(LDN_Page_Context $ctx, array $summary, array $copy) {
+        $stats = isset($summary['stats']) && is_array($summary['stats']) ? $summary['stats'] : array();
+        $out = '';
+
+        $cards = array();
+        if (!empty($stats['total_n'])) {
+            $cards[] = array(
+                __('Real diamonds measured', 'loupe-diamond-network'),
+                number_format((int) $stats['total_n']),
+            );
+        }
+        if (!empty($stats['shape_count'])) {
+            $cards[] = array(__('Shapes covered', 'loupe-diamond-network'), (string) (int) $stats['shape_count']);
+        }
+        if (!empty($stats['band_count'])) {
+            $cards[] = array(__('Carat weights', 'loupe-diamond-network'), (string) (int) $stats['band_count']);
+        }
+        if (!empty($stats['retailer_count'])
+            && (int) $stats['retailer_count'] >= self::RETAILER_DISCLOSURE_THRESHOLD
+        ) {
+            $cards[] = array(__('Retailers sampled', 'loupe-diamond-network'), (string) (int) $stats['retailer_count']);
+        }
+        if ($cards !== array()) {
+            $out .= '<section class="ldn-section ldn-size-methodology-stats"><dl class="ldn-stats">';
+            foreach ($cards as $card) {
+                $out .= '<div><dt>' . esc_html($card[0]) . '</dt><dd>' . esc_html($card[1]) . '</dd></div>';
+            }
+            $out .= '</dl></section>';
+        }
+
+        $sections = isset($copy['sections']) && is_array($copy['sections']) ? $copy['sections'] : array();
+        foreach ($sections as $section) {
+            if (!is_array($section) || empty($section['heading'])) {
+                continue;
+            }
+            $sid = isset($section['id']) && is_string($section['id']) && $section['id'] !== ''
+                ? ' id="' . esc_attr($section['id']) . '"'
+                : '';
+            $out .= '<section class="ldn-section ldn-size-methodology-section"' . $sid . '><h2>'
+                . esc_html((string) $section['heading']) . '</h2>';
+            $paragraphs = isset($section['paragraphs']) && is_array($section['paragraphs'])
+                ? $section['paragraphs'] : array();
+            foreach ($paragraphs as $para) {
+                if (is_string($para) && trim($para) !== '') {
+                    $out .= '<p>' . esc_html(trim($para)) . '</p>';
+                }
+            }
+            $out .= '</section>';
+        }
+
+        $mega_url = $this->build_size_mega_hub_url($ctx->site_id);
+        $tool_url = $this->build_comparison_tool_url($ctx->site_id);
+        $links = array();
+        if ($mega_url !== '') {
+            $links[] = '<a href="' . esc_url($mega_url) . '">'
+                . esc_html__('Diamond size chart', 'loupe-diamond-network') . '</a>';
+        }
+        if ($tool_url !== '') {
+            $links[] = '<a href="' . esc_url($tool_url) . '">'
+                . esc_html__('Diamond Size Checker', 'loupe-diamond-network') . '</a>';
+        }
+        if ($links !== array()) {
+            $out .= '<section class="ldn-section ldn-size-internal-links"><h2>'
+                . esc_html__('Explore the data', 'loupe-diamond-network') . '</h2><ul><li>'
+                . implode('</li><li>', $links) . '</li></ul></section>';
+        }
 
         return $out;
     }
@@ -1472,129 +2132,15 @@ final class LDN_Size_Renderer {
      * @param string $site_id
      * @return string
      */
-    public function build_spread_checker_url($site_id) {
+    public function build_methodology_url($site_id) {
         $structure = $this->config->get_url_structure($site_id);
-        $path = is_array($structure) && !empty($structure['size_level_spread_checker'])
-            ? (string) $structure['size_level_spread_checker']
-            : '/diamond-size/spread-checker';
+        $path = is_array($structure) && !empty($structure['size_level_methodology'])
+            ? (string) $structure['size_level_methodology']
+            : '/diamond-size/methodology';
         if (!function_exists('home_url')) {
             return $path;
         }
         return home_url(user_trailingslashit(ltrim($path, '/')));
-    }
-
-    /**
-     * CTA linking to the spread checker from hubs.
-     *
-     * @param string $site_id
-     * @return string
-     */
-    public function spread_checker_cta_html($site_id) {
-        $url = $this->build_spread_checker_url($site_id);
-        if ($url === '') {
-            return '';
-        }
-        return '<section class="ldn-section ldn-size-spread-cta"><h2>'
-            . esc_html__('Diamond Stone Spread Checker', 'loupe-diamond-network') . '</h2><p>'
-            . esc_html__(
-                'Enter length and width from a listing to see how your stone ranks for spread vs real market inventory — compare two options at different carat weights.',
-                'loupe-diamond-network'
-            ) . '</p><p><a class="ldn-btn ldn-btn--primary" href="' . esc_url($url) . '">'
-            . esc_html__('Check your stone spread', 'loupe-diamond-network') . '</a></p></section>';
-    }
-
-    /**
-     * Spread checker hub: free-form carat + mm inputs for two stones.
-     *
-     * @param LDN_Page_Context $ctx
-     * @param array            $summary spread_checker manifest from S3.
-     * @return string
-     */
-    public function spread_checker_body_html(LDN_Page_Context $ctx, array $summary) {
-        $shapes = isset($summary['shapes']) && is_array($summary['shapes']) ? $summary['shapes'] : array();
-        if ($shapes === array()) {
-            return '';
-        }
-
-        $default_a = isset($summary['default_a']) && is_array($summary['default_a'])
-            ? $summary['default_a'] : array('shape' => 'oval', 'carat' => '1.1', 'length_mm' => 8.2, 'width_mm' => 5.5);
-        $default_b = isset($summary['default_b']) && is_array($summary['default_b'])
-            ? $summary['default_b'] : array('shape' => 'oval', 'carat' => '1.3', 'length_mm' => 7.8, 'width_mm' => 5.4);
-
-        $shape_options = static function (array $shape_list, $selected) {
-            $out = '';
-            foreach ($shape_list as $shape) {
-                if (!is_string($shape) || $shape === '') {
-                    continue;
-                }
-                $label = ucwords(str_replace('-', ' ', $shape));
-                $out .= '<option value="' . esc_attr($shape) . '"'
-                    . selected($shape, $selected, false) . '>'
-                    . esc_html($label) . '</option>';
-            }
-            return $out;
-        };
-
-        $panel = static function ($prefix, $title, $defaults, $shape_options, $shapes) {
-            $shape = $defaults['shape'] ?? 'oval';
-            $carat = $defaults['carat'] ?? '1';
-            $length = $defaults['length_mm'] ?? '';
-            $width = $defaults['width_mm'] ?? '';
-            $out = '<div class="ldn-size-spread-panel ldn-size-spread-panel--' . esc_attr($prefix) . '">';
-            $out .= '<h2 class="ldn-size-spread-panel__title">' . esc_html($title) . '</h2>';
-            $out .= '<label for="ldn-spread-shape-' . esc_attr($prefix) . '">'
-                . esc_html__('Shape', 'loupe-diamond-network') . '</label>';
-            $out .= '<select id="ldn-spread-shape-' . esc_attr($prefix) . '" name="shape_' . esc_attr($prefix) . '">'
-                . $shape_options($shapes, $shape) . '</select>';
-            $out .= '<label for="ldn-spread-carat-' . esc_attr($prefix) . '">'
-                . esc_html__('Carat weight', 'loupe-diamond-network') . '</label>';
-            $out .= '<input type="number" id="ldn-spread-carat-' . esc_attr($prefix) . '" name="carat_' . esc_attr($prefix) . '"'
-                . ' min="0.1" max="20" step="0.01" value="' . esc_attr((string) $carat) . '">';
-            $out .= '<label for="ldn-spread-length-' . esc_attr($prefix) . '">'
-                . esc_html__('Length (mm)', 'loupe-diamond-network') . '</label>';
-            $out .= '<input type="number" id="ldn-spread-length-' . esc_attr($prefix) . '" name="length_' . esc_attr($prefix) . '"'
-                . ' min="1" max="30" step="0.01" value="' . esc_attr((string) $length) . '">';
-            $out .= '<label for="ldn-spread-width-' . esc_attr($prefix) . '">'
-                . esc_html__('Width (mm)', 'loupe-diamond-network') . '</label>';
-            $out .= '<input type="number" id="ldn-spread-width-' . esc_attr($prefix) . '" name="width_' . esc_attr($prefix) . '"'
-                . ' min="1" max="30" step="0.01" value="' . esc_attr((string) $width) . '">';
-            $out .= '<div class="ldn-spread-card" id="ldn-spread-result-' . esc_attr($prefix) . '" aria-live="polite"></div>';
-            $out .= '</div>';
-            return $out;
-        };
-
-        $manifest_json = wp_json_encode($summary, self::JSON_SCRIPT_FLAGS);
-        $out = '<section class="ldn-section ldn-size-spread-checker" id="ldn-size-spread-checker">';
-        $out .= '<form class="ldn-size-spread-form" id="ldn-size-spread-form" action="#" method="get">';
-        $out .= '<div class="ldn-size-spread-panels">';
-        $out .= $panel(
-            'a',
-            __('Stone A', 'loupe-diamond-network'),
-            $default_a,
-            $shape_options,
-            $shapes
-        );
-        $out .= '<div class="ldn-size-spread-vs" aria-hidden="true">'
-            . esc_html__('vs', 'loupe-diamond-network') . '</div>';
-        $out .= $panel(
-            'b',
-            __('Stone B', 'loupe-diamond-network'),
-            $default_b,
-            $shape_options,
-            $shapes
-        );
-        $out .= '</div></form>';
-
-        $out .= '<div class="ldn-size-spread-results" aria-live="polite">';
-        $out .= '<h2>' . esc_html__('Face-up area', 'loupe-diamond-network') . '</h2>';
-        $out .= '<div class="ldn-faceup-visual" id="ldn-spread-faceup-visual"></div>';
-        $out .= '</div>';
-
-        $out .= '<script type="application/json" id="ldn-size-spread-manifest">'
-            . str_replace('</', '<\/', $manifest_json) . '</script>';
-        $out .= '</section>';
-
-        return $out;
     }
 
     /**
@@ -1621,11 +2167,14 @@ final class LDN_Size_Renderer {
         $pattern = is_array($structure) && !empty($structure['size_level_3'])
             ? (string) $structure['size_level_3']
             : '/diamond-size/{shape}/{carat}';
+        // The router regex appends '-carat' to the {carat} segment
+        // (LDN_Size_Router::pattern_to_regex), so the builder must too —
+        // otherwise internal links and canonicals point at a 404 variant.
         $path = str_replace(
             array('{shape}', '{carat}'),
             array(
                 $this->config->shape_to_s3_slug($shape),
-                LDN_Test_Combos::normalise_carat($carat),
+                LDN_Test_Combos::normalise_carat($carat) . '-carat',
             ),
             $pattern
         );
@@ -1659,8 +2208,8 @@ final class LDN_Size_Renderer {
         if ($ctx->page_level === 'size-comparison-tool') {
             return $this->build_comparison_tool_url($ctx->site_id);
         }
-        if ($ctx->page_level === 'size-spread-checker') {
-            return $this->build_spread_checker_url($ctx->site_id);
+        if ($ctx->page_level === 'size-methodology') {
+            return $this->build_methodology_url($ctx->site_id);
         }
         if (!function_exists('home_url')) {
             return '';

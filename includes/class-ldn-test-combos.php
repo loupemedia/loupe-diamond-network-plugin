@@ -208,7 +208,7 @@ final class LDN_Test_Combos {
         if ($ctx->page_level === 'size-comparison-tool') {
             return $combos !== array();
         }
-        if ($ctx->page_level === 'size-spread-checker') {
+        if ($ctx->page_level === 'size-methodology') {
             return $combos !== array();
         }
         return false;

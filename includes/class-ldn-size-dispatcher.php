@@ -20,7 +20,7 @@ final class LDN_Size_Dispatcher {
         'size-mega-hub'          => 'size_summary_json',
         'size-comparison'        => 'size_summary_json',
         'size-comparison-tool'   => 'size_summary_json',
-        'size-spread-checker'    => 'size_summary_json',
+        'size-methodology'       => 'size_summary_json',
     );
 
     /** @var string */
@@ -65,6 +65,11 @@ final class LDN_Size_Dispatcher {
      */
     public function dispatch($template) {
         if (get_query_var('ldn_route') !== self::ROUTE) {
+            return $template;
+        }
+
+        if (strtolower((string) get_query_var('ldn_size_level')) === 'spread-checker') {
+            $this->redirect_spread_checker();
             return $template;
         }
 
@@ -272,8 +277,8 @@ final class LDN_Size_Dispatcher {
                 return 'size-comparison';
             case 'compare-tool':
                 return 'size-comparison-tool';
-            case 'spread-checker':
-                return 'size-spread-checker';
+            case 'methodology':
+                return 'size-methodology';
             case 'sitemap':
                 return 'size-sitemap';
             default:
@@ -303,6 +308,22 @@ final class LDN_Size_Dispatcher {
         }
         $value = (string) $vars[$key];
         return $value === '' ? null : $value;
+    }
+
+    /**
+     * 301 the retired /diamond-size/spread-checker/ URL to the merged
+     * Diamond Size Checker at /diamond-size/compare/.
+     *
+     * @return void
+     */
+    private function redirect_spread_checker() {
+        $renderer = new LDN_Size_Renderer($this->fetcher, $this->config);
+        $target = $renderer->build_comparison_tool_url($this->site_id);
+        if ($target === '' || !function_exists('wp_safe_redirect')) {
+            return;
+        }
+        wp_safe_redirect($target, 301);
+        exit;
     }
 
     /**

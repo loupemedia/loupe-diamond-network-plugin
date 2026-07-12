@@ -1,14 +1,15 @@
 /**
  * Shared faceted diamond overlay + face-up comparison visuals (diamdb-style).
  *
- * Stone A = fuchsia, Stone B = slate grey (high contrast on overlay + bars).
- * Expects unit-box faceted snippets in manifest.faceted_shapes (built by Z3).
+ * Stone A = Ringspo brand purple, Stone B = Ringspo signature green
+ * (high contrast on overlay + bars). Expects unit-box faceted snippets in
+ * manifest.faceted_shapes (built by Z3).
  */
 (function (global) {
     'use strict';
 
-    var STONE_A_COLOR = '#d946ef';
-    var STONE_B_COLOR = '#64748b';
+    var STONE_A_COLOR = '#706cc8';
+    var STONE_B_COLOR = '#6cc8be';
 
     function escapeHtml(text) {
         return String(text)

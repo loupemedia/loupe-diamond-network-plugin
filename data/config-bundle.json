@@ -1,6 +1,6 @@
 {
-  "version": "4ef4967",
-  "generated_at": "2026-07-10T21:22:29.161401+00:00",
+  "version": "4513846",
+  "generated_at": "2026-07-11T20:40:03.975927+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -9510,6 +9510,7 @@
         "size_level_2": "/diamond-size/{shape}",
         "size_level_3": "/diamond-size/{shape}/{carat}",
         "size_level_compare": "/diamond-size/compare/{compare}",
+        "size_level_methodology": "/diamond-size/methodology",
         "size_level_sitemap": "/diamond-size/sitemap.xml"
       },
       "diamondpriceguru": {

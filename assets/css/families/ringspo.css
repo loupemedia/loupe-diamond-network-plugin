@@ -157,8 +157,11 @@
 	line-height: 1.25;
 	color: #fff;
 	background-color: var(--ringspo-green);
-	padding-top: 1.5rem;
+	padding-top: 0.5rem;
 	padding-bottom: 1.5rem;
+	/* margin-top 0: the default h1 top margin opened a white line between the
+	   green breadcrumb band and the green title band. */
+	margin-top: 0;
 	margin-bottom: 0;
 	border-bottom: none;
 	max-width: none;
@@ -167,6 +170,9 @@
 .ldn-chrome--ringspo-classic > .ldn-breadcrumbs {
 	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
 	font-size: 0.875rem;
+	/* margin 0: the shared 1rem bottom margin opened a white gap between the
+	   green breadcrumb band and the green title band. */
+	margin: 0;
 	padding-top: 0.65rem;
 	padding-bottom: 0.65rem;
 	background-color: var(--ringspo-green);
@@ -232,12 +238,27 @@
 	text-decoration: underline;
 }
 
-/* Data tables and charts sit on white cards inside purple bands. */
+/* Data tables, charts, size figures and price cards sit on white cards inside
+   purple bands so multi-colour SVGs and stat text stay readable. */
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-scroll,
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-chart {
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-chart,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-figure,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-price-card,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-ideal-real {
 	background-color: #fff;
 	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-figure p,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-figure figcaption,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-ideal-real p,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-price-card span {
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-price-card {
+	text-decoration: none;
 }
 
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-table thead th,
@@ -245,10 +266,66 @@
 	color: var(--ringspo-ink);
 }
 
+/* Inside white tables on purple bands, cell text and links must stay dark —
+   the band-wide white-text rules above made carat links and SVG thumbnails
+   (currentColor) invisible on the white table background. */
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table th,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table td {
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table a {
+	color: var(--ringspo-purple);
+	text-decoration: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table a:hover {
+	text-decoration: underline;
+}
+
+/* New white-card components keep dark text when they land on a purple band:
+   size-checker panels/results, scale-explorer controls, matrix scroll wrapper
+   and the size-checker CTA box. */
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-matrix-scroll,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-panel,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-card,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-scale-controls,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-cta,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-faceup-callout {
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-panel h3,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-panel p,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-panel label,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results h2,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results h3,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results p,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results li,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-scale-controls label,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-cta h2,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-cta p {
+	color: var(--ringspo-ink);
+}
+
+/* Size-page intro extends the green header band: white copy on signature
+   green, flush against the title band above it. */
 .ldn-chrome--ringspo-classic .ldn-size-intro {
-	padding-top: 1.25rem;
+	margin-top: 0;
+	padding-top: 0.5rem;
 	padding-bottom: 1.75rem;
-	background-color: #fff;
+	background-color: var(--ringspo-green);
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-intro p {
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-intro a {
+	color: #fff;
+	text-decoration: underline;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-intro .ldn-size-factual {

@@ -67,7 +67,7 @@ final class LDN_Assets {
 			true
 		);
 
-		if ($ctx->page_level === 'size-comparison-tool') {
+		if (in_array($ctx->page_level, array('size-comparison-tool', 'size-shape-hub'), true)) {
 			wp_enqueue_script(
 				'ldn-size-faceted-overlay',
 				$base_url . 'assets/js/size-faceted-overlay.js',
@@ -76,25 +76,8 @@ final class LDN_Assets {
 				true
 			);
 			wp_enqueue_script(
-				'ldn-size-comparison',
-				$base_url . 'assets/js/size-comparison.js',
-				array('ldn-size-faceted-overlay'),
-				$version,
-				true
-			);
-		}
-
-		if ($ctx->page_level === 'size-spread-checker') {
-			wp_enqueue_script(
-				'ldn-size-faceted-overlay',
-				$base_url . 'assets/js/size-faceted-overlay.js',
-				array(),
-				$version,
-				true
-			);
-			wp_enqueue_script(
-				'ldn-size-spread-checker',
-				$base_url . 'assets/js/size-spread-checker.js',
+				'ldn-size-checker',
+				$base_url . 'assets/js/size-checker.js',
 				array('ldn-size-faceted-overlay'),
 				$version,
 				true

@@ -238,7 +238,7 @@ final class LDN_Llms_Txt {
 
         if (!empty($structure['size_level_compare'])) {
             $compare_tool = (string) preg_replace('#/\\{compare\\}.*$#', '', (string) $structure['size_level_compare']);
-            $out['Diamond size comparison tool'] = $this->size_path_url(
+            $out['Diamond size checker'] = $this->size_path_url(
                 $base,
                 $compare_tool,
                 array()
@@ -252,12 +252,12 @@ final class LDN_Llms_Txt {
             );
         }
 
-        $spread_checker = !empty($structure['size_level_spread_checker'])
-            ? (string) $structure['size_level_spread_checker']
-            : '/diamond-size/spread-checker';
-        $out['Diamond stone spread checker'] = $this->size_path_url(
+        $methodology = !empty($structure['size_level_methodology'])
+            ? (string) $structure['size_level_methodology']
+            : '/diamond-size/methodology';
+        $out['Size data methodology'] = $this->size_path_url(
             $base,
-            $spread_checker,
+            $methodology,
             array()
         );
 
