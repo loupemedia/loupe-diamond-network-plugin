@@ -624,6 +624,40 @@ final class LDN_Config {
         return !empty($site['size_module']['price_internal_links']);
     }
 
+    /**
+     * Size URL tree layout: shape_first (Ringspo) or carat_first (Diamond Chart).
+     *
+     * @param string $site_id
+     * @return string
+     */
+    public function size_url_layout($site_id) {
+        $site = $this->get_site($site_id);
+        if (is_array($site)
+            && isset($site['size_module']['url_layout'])
+            && is_string($site['size_module']['url_layout'])
+        ) {
+            $layout = strtolower(trim($site['size_module']['url_layout']));
+            if ($layout === 'carat_first' || $layout === 'shape_first') {
+                return $layout;
+            }
+        }
+        return 'shape_first';
+    }
+
+    /**
+     * Whether the site serves a marketing shell at WordPress front page (/).
+     *
+     * @param string $site_id
+     * @return bool
+     */
+    public function size_marketing_home($site_id) {
+        $site = $this->get_site($site_id);
+        return is_array($site)
+            && isset($site['size_module'])
+            && is_array($site['size_module'])
+            && !empty($site['size_module']['marketing_home']);
+    }
+
     // =========================================================================
     // Internal
     // =========================================================================

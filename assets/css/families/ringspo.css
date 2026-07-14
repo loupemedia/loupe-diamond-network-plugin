@@ -309,14 +309,38 @@
 	color: var(--ringspo-ink);
 }
 
-/* Size-page intro extends the green header band: white copy on signature
-   green, flush against the title band above it. */
+/* Size-page intro inside the green hero band. */
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-size-intro,
 .ldn-chrome--ringspo-classic .ldn-size-intro {
 	margin-top: 0;
 	padding-top: 0.5rem;
-	padding-bottom: 1.75rem;
-	background-color: var(--ringspo-green);
+	padding-bottom: 0;
+	background: transparent;
 	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-breadcrumbs {
+	text-align: left;
+}
+
+.ldn-chrome--ringspo-classic.ldn-size-page,
+.ldn-chrome--ringspo-classic.ldn-size-methodology-page {
+	padding-top: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple {
+	background-color: var(--ringspo-purple);
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple h2,
+.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple p {
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic.ldn-size-page > .ldn-section:last-of-type,
+.ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-section:last-of-type {
+	margin-bottom: 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-intro p {

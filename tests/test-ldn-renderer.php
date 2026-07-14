@@ -201,9 +201,19 @@ check(
     'invalid heading_style falls back to minimal'
 );
 check(
+    $renderer->chrome_heading_class(array('page_chrome' => array('heading_style' => 'editorial')))
+        === 'ldn-chrome--editorial',
+    'editorial heading_style maps to ldn-chrome--editorial'
+);
+check(
     $renderer->chrome_heading_class(array('page_chrome' => array('heading_style' => 'ringspo_classic')))
         === 'ldn-chrome--ringspo-classic',
     'ringspo_classic heading_style maps to hyphenated ldn-chrome--ringspo-classic'
+);
+check(
+    $renderer->chrome_heading_class(array('page_chrome' => array('heading_style' => 'bogus')))
+        === 'ldn-chrome--minimal',
+    'unknown heading_style falls back to minimal'
 );
 
 // --- 5b. visible breadcrumbs + freshness (CP53_05) --------------------------

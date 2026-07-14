@@ -67,7 +67,9 @@ final class LDN_Assets {
 			true
 		);
 
-		if (in_array($ctx->page_level, array('size-comparison-tool', 'size-shape-hub'), true)) {
+		if ($config->size_url_layout($ctx->site_id) === 'shape_first'
+			&& in_array($ctx->page_level, array('size-comparison-tool', 'size-shape-hub'), true)
+		) {
 			wp_enqueue_script(
 				'ldn-size-faceted-overlay',
 				$base_url . 'assets/js/size-faceted-overlay.js',
@@ -78,6 +80,32 @@ final class LDN_Assets {
 			wp_enqueue_script(
 				'ldn-size-checker',
 				$base_url . 'assets/js/size-checker.js',
+				array('ldn-size-faceted-overlay'),
+				$version,
+				true
+			);
+			wp_localize_script(
+				'ldn-size-checker',
+				'ldnSizeChecker',
+				array(
+					'quarterImgUrl' => self::us_quarter_image_url(),
+				)
+			);
+		}
+
+		if ($config->size_url_layout($ctx->site_id) === 'carat_first'
+			&& $ctx->page_level === 'size-carat-hub'
+		) {
+			wp_enqueue_script(
+				'ldn-size-faceted-overlay',
+				$base_url . 'assets/js/size-faceted-overlay.js',
+				array(),
+				$version,
+				true
+			);
+			wp_enqueue_script(
+				'ldn-size-carat-explorer',
+				$base_url . 'assets/js/size-carat-explorer.js',
 				array('ldn-size-faceted-overlay'),
 				$version,
 				true
@@ -94,6 +122,17 @@ final class LDN_Assets {
 				null
 			);
 			$deps = array('ldn-webfonts', 'ldn-shared');
+		}
+
+		$heading_style_sheet = self::heading_style_stylesheet($ctx->site_id, $config, $css_dir);
+		if ($heading_style_sheet !== null) {
+			wp_enqueue_style(
+				'ldn-heading-style',
+				$base_url . 'assets/css/' . $heading_style_sheet,
+				$deps,
+				$version
+			);
+			$deps = array('ldn-heading-style');
 		}
 
 		$family = self::family_stylesheet($ctx->site_id, $config, $css_dir);
@@ -168,6 +207,37 @@ final class LDN_Assets {
 	}
 
 	/**
+	 * Resolve heading_style chrome CSS (e.g. editorial → families/editorial.css).
+	 *
+	 * @param string     $site_id
+	 * @param LDN_Config $config
+	 * @param string     $css_dir Absolute path to assets/css.
+	 * @return string|null Path relative to assets/css.
+	 */
+	public static function heading_style_stylesheet($site_id, LDN_Config $config, $css_dir = '') {
+		$profile = $config->get_content_profile($site_id);
+		if (!is_array($profile)) {
+			return null;
+		}
+		$chrome = isset($profile['page_chrome']) && is_array($profile['page_chrome'])
+			? $profile['page_chrome']
+			: array();
+		$style = isset($chrome['heading_style']) ? (string) $chrome['heading_style'] : '';
+		$style = preg_replace('/[^a-z0-9_]/', '', strtolower($style));
+		if ($style === '' || $style === 'minimal') {
+			return null;
+		}
+
+		if ($css_dir === '') {
+			$css_dir = (defined('LDN_PLUGIN_DIR') ? LDN_PLUGIN_DIR : '') . 'assets/css/';
+		}
+		$css_dir = rtrim($css_dir, '/') . '/';
+
+		$relative = 'families/' . str_replace('_', '-', $style) . '.css';
+		return is_readable($css_dir . $relative) ? $relative : null;
+	}
+
+	/**
 	 * Resolve the family CSS path relative to assets/css/, or null when absent.
 	 *
 	 * Convention: config/sites/{site}.yaml ``template_folder`` →
@@ -197,5 +267,20 @@ final class LDN_Assets {
 
 		$relative = 'families/' . $folder . '.css';
 		return is_readable($css_dir . $relative) ? $relative : null;
+	}
+
+	/**
+	 * Public URL for the US quarter scale-reference PNG (cache-busted).
+	 *
+	 * @return string
+	 */
+	public static function us_quarter_image_url() {
+		$base = defined('LDN_PLUGIN_URL') ? LDN_PLUGIN_URL : '';
+		$version = defined('LDN_VERSION') ? LDN_VERSION : '0.1.0';
+		if ($base === '') {
+			return '';
+		}
+
+		return $base . 'assets/img/us-quarter.png?ver=' . rawurlencode($version);
 	}
 }

@@ -31,6 +31,7 @@ trait LDN_Trait_Chrome {
         'minimal'         => true,
         'loupe_classic'   => true,
         'ringspo_classic' => true,
+        'editorial'       => true,
     );
 
     /**

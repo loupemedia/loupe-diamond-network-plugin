@@ -224,9 +224,19 @@ final class LDN_S3_Key_Resolver {
                     return null;
                 }
                 return $root . '/' . $this->config->shape_to_s3_slug($ctx->shape) . '/';
+            case 'size-carat-hub':
+                if ($ctx->carat === null) {
+                    return null;
+                }
+                return $root . '/' . $ctx->carat . '-carat/';
             case 'size-individual':
                 if ($ctx->shape === null || $ctx->carat === null) {
                     return null;
+                }
+                if ($this->config->size_url_layout($ctx->site_id) === 'carat_first') {
+                    return $root . '/'
+                        . $ctx->carat . '-carat/'
+                        . $this->config->shape_to_s3_slug($ctx->shape) . '/';
                 }
                 return $root . '/'
                     . $this->config->shape_to_s3_slug($ctx->shape) . '/'

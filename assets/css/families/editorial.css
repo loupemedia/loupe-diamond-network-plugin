@@ -1,0 +1,304 @@
+/**
+ * Editorial chrome — dark hero, light page, white card sections.
+ *
+ * Crypto Head–inspired palette (dark navy hero, gold accent, card grids).
+ * Activated via page_chrome.heading_style: editorial. Shared by any site
+ * that opts in (e.g. diamondchart.org size pages); site template_folder CSS
+ * can add minor overrides on top.
+ *
+ * Size pages mirror the Ringspo size layout (hero band + ldn-section blocks)
+ * but swap the green/purple bands for a dark hero and elevated white cards.
+ */
+
+.ldn-chrome--editorial {
+	--editorial-ink: var(--ldn-text, #0f172a);
+	--editorial-muted: var(--ldn-secondary-text, #64748b);
+	--editorial-hero: var(--ldn-primary, #0b1628);
+	--editorial-hero-end: color-mix(in srgb, var(--editorial-hero) 78%, #000);
+	--editorial-accent: var(--ldn-accent, #f0b429);
+	--editorial-surface: #fff;
+	--editorial-page: var(--ldn-background, #f4f6f8);
+	--editorial-border: rgba(15, 23, 42, 0.08);
+	--editorial-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.ldn-chrome--editorial.ldn-size-page,
+.ldn-chrome--editorial.ldn-size-methodology-page {
+	background: var(--editorial-page);
+	padding: 0 0 2.5rem;
+}
+
+/* ----- Full-bleed hero band (dark) ----- */
+
+.ldn-chrome--editorial .ldn-hero-band {
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+	padding: 2rem calc(50vw - 50% + var(--ldn-padding, 1.5rem)) 2.25rem;
+	background: linear-gradient(165deg, var(--editorial-hero) 0%, var(--editorial-hero-end) 100%);
+	color: #fff;
+}
+
+.ldn-chrome--editorial .ldn-hero-band > h1.ldn-page-title {
+	font-family: var(--ldn-font-title, Georgia, serif);
+	font-size: clamp(1.75rem, 4vw, 2.35rem);
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+	color: #fff;
+	margin: 0 0 0.75rem;
+	padding: 0;
+	max-width: none;
+	background: transparent;
+	border-bottom: none;
+}
+
+.ldn-chrome--editorial .ldn-hero-band .ldn-breadcrumbs {
+	font-family: var(--ldn-font-body, system-ui, sans-serif);
+	font-size: 0.85rem;
+	margin: 0 0 1rem;
+	padding: 0;
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.ldn-chrome--editorial .ldn-hero-band .ldn-breadcrumbs a {
+	color: #fff;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.ldn-chrome--editorial .ldn-hero-band .ldn-breadcrumbs__sep {
+	margin: 0 0.35rem;
+	color: rgba(255, 255, 255, 0.45);
+}
+
+.ldn-chrome--editorial .ldn-hero-band .ldn-size-intro,
+.ldn-chrome--editorial .ldn-size-intro {
+	margin-top: 0;
+	padding: 0;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.92);
+	max-width: 42rem;
+}
+
+.ldn-chrome--editorial .ldn-size-intro p {
+	font-family: var(--ldn-font-body, system-ui, sans-serif);
+	font-size: 1.02rem;
+	line-height: 1.65;
+	margin: 0 0 0.65rem;
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.ldn-chrome--editorial .ldn-size-intro p:last-child {
+	margin-bottom: 0;
+}
+
+.ldn-chrome--editorial .ldn-size-intro a {
+	color: var(--editorial-accent);
+}
+
+/* ----- Card sections (size + methodology) ----- */
+
+.ldn-chrome--editorial.ldn-size-page > .ldn-section,
+.ldn-chrome--editorial.ldn-size-methodology-page > .ldn-section {
+	max-width: var(--ldn-max-width, 1080px);
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 1.25rem;
+	padding: 1.5rem var(--ldn-padding, 1.5rem);
+	background: var(--editorial-surface);
+	border: 1px solid var(--editorial-border);
+	border-radius: 14px;
+	box-shadow: var(--editorial-shadow);
+}
+
+.ldn-chrome--editorial.ldn-size-page > .ldn-section.ldn-size-methodology-cta-band,
+.ldn-chrome--editorial.ldn-size-page > .ldn-section.ldn-size-checker-cta-band,
+.ldn-chrome--editorial.ldn-size-methodology-page > .ldn-section.ldn-size-methodology-cta-band {
+	background: linear-gradient(135deg, var(--editorial-hero) 0%, var(--editorial-hero-end) 100%);
+	border: none;
+	box-shadow: var(--editorial-shadow);
+	padding: 2rem 1.5rem;
+}
+
+.ldn-chrome--editorial.ldn-size-page > .ldn-section:last-of-type,
+.ldn-chrome--editorial.ldn-size-methodology-page > .ldn-section:last-of-type {
+	margin-bottom: 0;
+}
+
+.ldn-chrome--editorial .ldn-section h2 {
+	font-family: var(--ldn-font-title, Georgia, serif);
+	font-size: 1.45rem;
+	font-weight: 700;
+	line-height: 1.25;
+	letter-spacing: -0.02em;
+	color: var(--editorial-ink);
+	margin: 0 0 0.85rem;
+}
+
+.ldn-chrome--editorial .ldn-section h3 {
+	font-family: var(--ldn-font-title, Georgia, serif);
+	color: var(--editorial-ink);
+}
+
+.ldn-chrome--editorial .ldn-section p,
+.ldn-chrome--editorial .ldn-section li,
+.ldn-chrome--editorial .ldn-section dd,
+.ldn-chrome--editorial .ldn-section dt {
+	font-family: var(--ldn-font-body, system-ui, sans-serif);
+	line-height: 1.65;
+	color: var(--editorial-ink);
+}
+
+.ldn-chrome--editorial .ldn-section a {
+	color: var(--editorial-hero-end);
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.ldn-chrome--editorial .ldn-section a:hover {
+	color: var(--editorial-accent);
+}
+
+.ldn-chrome--editorial .ldn-size-checker-cta,
+.ldn-chrome--editorial .ldn-size-methodology-cta {
+	border-radius: 12px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ----- Matrix + hub tables ----- */
+
+.ldn-chrome--editorial .ldn-size-matrix-section h2 {
+	letter-spacing: -0.02em;
+}
+
+.ldn-chrome--editorial .ldn-size-matrix__lead,
+.ldn-chrome--editorial .ldn-size-spread__lead,
+.ldn-chrome--editorial .ldn-size-spread__note,
+.ldn-chrome--editorial .ldn-size-percentile-note,
+.ldn-chrome--editorial .ldn-size-chart__lead,
+.ldn-chrome--editorial .ldn-size-muted {
+	color: var(--editorial-muted);
+}
+
+.ldn-chrome--editorial .ldn-size-matrix thead th {
+	background: var(--editorial-page);
+	color: var(--editorial-ink);
+	font-weight: 600;
+}
+
+.ldn-chrome--editorial .ldn-size-matrix tbody tr:nth-child(even) td,
+.ldn-chrome--editorial .ldn-size-matrix tbody tr:nth-child(even) th {
+	background: rgba(244, 246, 248, 0.85);
+}
+
+.ldn-chrome--editorial .ldn-size-matrix__link:hover .ldn-size-matrix__dims {
+	color: var(--editorial-accent);
+}
+
+.ldn-chrome--editorial .ldn-size-table th {
+	background: var(--editorial-page);
+	color: var(--editorial-ink);
+}
+
+.ldn-chrome--editorial .ldn-size-hub-table a {
+	color: var(--editorial-hero-end);
+	font-weight: 600;
+}
+
+.ldn-chrome--editorial .ldn-size-hub-table a:hover {
+	color: var(--editorial-accent);
+}
+
+/* ----- Individual page visuals ----- */
+
+.ldn-chrome--editorial .ldn-size-hero {
+	gap: 1.25rem 1.75rem;
+}
+
+.ldn-chrome--editorial .ldn-size-outline {
+	background: var(--editorial-page);
+	border-radius: 10px;
+}
+
+.ldn-chrome--editorial .ldn-size-figure {
+	border: 1px solid var(--editorial-border);
+	border-radius: 10px;
+	box-shadow: none;
+}
+
+.ldn-chrome--editorial .ldn-size-price-card {
+	border: 1px solid var(--editorial-border);
+	border-radius: 10px;
+	box-shadow: none;
+}
+
+.ldn-chrome--editorial .ldn-size-price-card__cta {
+	color: var(--editorial-accent);
+}
+
+/* ----- FAQ ----- */
+
+.ldn-chrome--editorial .ldn-faq dt {
+	font-family: var(--ldn-font-title, Georgia, serif);
+	font-weight: 700;
+	color: var(--editorial-ink);
+}
+
+.ldn-chrome--editorial .ldn-faq dd {
+	color: var(--editorial-muted);
+}
+
+/* ----- Methodology accent band ----- */
+
+.ldn-chrome--editorial .ldn-size-methodology-section--purple {
+	background: linear-gradient(135deg, var(--editorial-hero) 0%, var(--editorial-hero-end) 100%);
+	color: #fff;
+	border-radius: 10px;
+	padding: 1.25rem 1.5rem;
+	margin: 0 -0.25rem 1rem;
+}
+
+.ldn-chrome--editorial .ldn-size-methodology-section--purple h2,
+.ldn-chrome--editorial .ldn-size-methodology-section--purple p {
+	color: #fff;
+}
+
+/* ----- Pricing pages (editorial heading on non-size routes) ----- */
+
+.ldn-chrome--editorial.ldn-price-page:not(.ldn-size-page) {
+	background: var(--editorial-page);
+}
+
+.ldn-chrome--editorial.ldn-price-page:not(.ldn-size-page) > h1.ldn-page-title {
+	font-family: var(--ldn-font-title, Georgia, serif);
+	color: var(--editorial-ink);
+}
+
+.ldn-chrome--editorial.ldn-price-page:not(.ldn-size-page) .ldn-section {
+	background: var(--editorial-surface);
+	border: 1px solid var(--editorial-border);
+	border-radius: 12px;
+	box-shadow: var(--editorial-shadow);
+	padding: 1.25rem 1.5rem;
+	margin-bottom: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+	.ldn-chrome--editorial .ldn-hero-band {
+		padding-top: 1.5rem;
+		padding-bottom: 1.75rem;
+	}
+
+	.ldn-chrome--editorial .ldn-hero-band > h1.ldn-page-title {
+		font-size: var(--ldn-title-size-mobile, 1.45rem);
+	}
+
+	.ldn-chrome--editorial .ldn-section h2 {
+		font-size: 1.25rem;
+	}
+
+	.ldn-chrome--editorial .ldn-size-hero {
+		grid-template-columns: 1fr;
+	}
+}

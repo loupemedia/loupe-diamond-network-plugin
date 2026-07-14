@@ -26,6 +26,10 @@
     }
 
     var QUARTER_MM = 24.26;
+    var quarterImgUrl = (typeof window.ldnSizeChecker !== 'undefined'
+        && window.ldnSizeChecker.quarterImgUrl)
+        ? window.ldnSizeChecker.quarterImgUrl
+        : '';
     var PERCENTILE_KNOTS = [
         [10, 'p10'],
         [25, 'p25'],
@@ -128,23 +132,35 @@
         return null;
     }
 
-    function sizeQualityLabel(pct) {
+    function sizeQualityLabel(pct, band, shape) {
         if (pct === null) {
             return 'Insufficient market data';
         }
+        var shapeLbl = shapeLabel(shape);
+        var ctx = band + ' carat ' + shapeLbl + 's';
+        if (pct >= 99) {
+            return 'Top 1% for ' + ctx;
+        }
+        if (pct >= 95) {
+            return 'Top 5% for ' + ctx;
+        }
         if (pct >= 90) {
-            return 'Faces up much larger than typical (top 10%)';
+            return 'Top 10% for ' + ctx;
         }
-        if (pct >= 75) {
-            return 'Faces up larger than typical';
+        if (pct <= 1) {
+            return 'Bottom 1% for ' + ctx;
         }
-        if (pct >= 40) {
-            return 'Typical face-up size';
+        if (pct <= 5) {
+            return 'Bottom 5% for ' + ctx;
         }
-        if (pct >= 25) {
-            return 'Faces up smaller than typical';
+        if (pct <= 10) {
+            return 'Bottom 10% for ' + ctx;
         }
-        return 'Faces up much smaller than typical (bottom 25%)';
+        var rounded = Math.round(pct);
+        if (rounded >= 50) {
+            return 'Bigger than ' + rounded + '% of ' + ctx;
+        }
+        return 'Smaller than ' + (100 - rounded) + '% of ' + ctx;
     }
 
     function classifyProportion(shape, ratio, geo) {
@@ -325,7 +341,7 @@
                 faceup: faceup,
                 perCarat: faceup !== null ? faceup / carat : null,
                 percentile: pct,
-                quality: sizeQualityLabel(pct),
+                quality: sizeQualityLabel(pct, band, shape),
                 n: market ? (market.n || 0) : 0,
                 marketDepth: market ? median(market.depth_mm) : null,
                 bandNote: bandNote
@@ -339,7 +355,7 @@
             }
             var html = '<div class="ldn-size-checker-card"><h3>' + escapeHtml(title) + '</h3>';
             html += '<p class="ldn-size-checker-card__stone">'
-                + escapeHtml(stone.carat + ' ct ' + shapeLabel(stone.shape)) + '</p>';
+                + escapeHtml(stone.carat + ' carat ' + shapeLabel(stone.shape)) + '</p>';
             html += '<p class="ldn-size-checker-card__quality"><strong>'
                 + escapeHtml(stone.quality) + '</strong></p>';
             html += '<ul class="ldn-size-checker-card__stats">';
@@ -357,9 +373,9 @@
                 html += '<li>Per carat: <strong>' + stone.perCarat.toFixed(2) + ' mm²/ct</strong></li>';
             }
             if (stone.mode === 'manual' && stone.percentile !== null) {
-                html += '<li>Size rank: <strong>' + Math.round(stone.percentile)
-                    + 'th percentile</strong> for ' + escapeHtml(stone.band + ' ct '
-                    + shapeLabel(stone.shape)) + '</li>';
+                html += '<li>Size rank: <strong>'
+                    + escapeHtml(sizeQualityLabel(stone.percentile, stone.band, stone.shape))
+                    + '</strong></li>';
             }
             if (stone.mode === 'manual' && stone.depth !== null && stone.marketDepth !== null) {
                 html += '<li>Depth: <strong>' + stone.depth.toFixed(2)
@@ -412,7 +428,8 @@
                 labelB: fo.stoneLabel(b.shape, b.carat, b.length, b.width),
                 catalog: manifest.faceted_shapes || {},
                 widthPercent: true,
-                cssClass: 'ldn-size-compare-svg',
+                cssClass: 'ldn-size-compare-svg ldn-size-compare-svg--compact',
+                maxPx: 200,
                 ariaLabel: 'Face-up size comparison',
                 footnote: footnoteParts.join(' ')
             });
@@ -551,39 +568,47 @@
             var gapMm = 4;
             var coinD = QUARTER_MM;
             var canvasWmm = coinD + gapMm + width;
-            var canvasLmm = Math.max(coinD, length);
-            var w = canvasWmm * pxPerMm;
-            var h = canvasLmm * pxPerMm;
-            var coinR = (coinD / 2) * pxPerMm;
-            var coinCx = coinR;
-            var coinCy = h / 2;
-            var stoneW = width * pxPerMm;
-            var stoneL = length * pxPerMm;
-            var stoneX = (coinD + gapMm) * pxPerMm;
-            var stoneY = (h - stoneL) / 2;
+            var canvasHmm = Math.max(coinD, length) + 2;
+            var qy = (canvasHmm - coinD) / 2;
+            var dy = (canvasHmm - length) / 2;
+            var dx = coinD + gapMm;
+            var coinCx = coinD / 2;
+            var coinCy = qy + coinD / 2;
+            var coinR = coinD / 2;
 
             var stoneMarkup;
             var catalog = manifest.faceted_shapes || {};
             if (window.LdnFacetedOverlay && catalog[currentShape]) {
-                stoneMarkup = '<g transform="translate(' + stoneX + ',' + stoneY
-                    + ') scale(' + stoneW + ',' + stoneL + ')" style="color:#706cc8">'
+                stoneMarkup = '<g transform="translate(' + dx + ',' + dy
+                    + ') scale(' + width + ',' + length + ')" style="color:#706cc8">'
                     + catalog[currentShape] + '</g>';
             } else {
-                stoneMarkup = '<ellipse cx="' + (stoneX + stoneW / 2) + '" cy="' + (stoneY + stoneL / 2)
-                    + '" rx="' + (stoneW / 2) + '" ry="' + (stoneL / 2)
-                    + '" fill="none" stroke="#706cc8" stroke-width="2" />';
+                stoneMarkup = '<ellipse cx="' + (dx + width / 2) + '" cy="' + (dy + length / 2)
+                    + '" rx="' + (width / 2) + '" ry="' + (length / 2)
+                    + '" fill="none" stroke="#706cc8" stroke-width="0.2" />';
             }
 
             var aria = currentBand + ' carat ' + shapeLabel(currentShape)
                 + ' (' + width.toFixed(2) + ' × ' + length.toFixed(2)
                 + ' mm) next to a US quarter (24.26 mm)';
-            var svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" width="100%" role="img"'
+            var quarterMarkup;
+            if (quarterImgUrl) {
+                quarterMarkup = '<defs><clipPath id="ldn-scale-quarter-clip">'
+                    + '<circle cx="' + coinCx + '" cy="' + coinCy + '" r="' + coinR + '"/>'
+                    + '</clipPath></defs>'
+                    + '<image href="' + escapeHtml(quarterImgUrl) + '" x="0" y="' + qy
+                    + '" width="' + coinD + '" height="' + coinD + '"'
+                    + ' clip-path="url(#ldn-scale-quarter-clip)" preserveAspectRatio="xMidYMid meet"/>';
+            } else {
+                quarterMarkup = '<circle cx="' + coinCx + '" cy="' + coinCy + '" r="' + coinR
+                    + '" fill="#e5e0d5" stroke="#b8b0a0" stroke-width="0.15" />'
+                    + '<text x="' + coinCx + '" y="' + coinCy + '" text-anchor="middle"'
+                    + ' dominant-baseline="central" font-size="' + (coinR * 0.34)
+                    + '" fill="#7a7261" font-family="sans-serif">quarter</text>';
+            }
+            var svg = '<svg viewBox="0 0 ' + canvasWmm + ' ' + canvasHmm + '" width="100%" role="img"'
                 + ' class="ldn-size-scale-svg" aria-label="' + escapeHtml(aria) + '">'
-                + '<circle cx="' + coinCx + '" cy="' + coinCy + '" r="' + coinR
-                + '" fill="#e5e0d5" stroke="#b8b0a0" stroke-width="2" />'
-                + '<text x="' + coinCx + '" y="' + coinCy + '" text-anchor="middle"'
-                + ' dominant-baseline="central" font-size="' + (coinR * 0.34)
-                + '" fill="#7a7261" font-family="sans-serif">quarter</text>'
+                + quarterMarkup
                 + stoneMarkup
                 + '</svg>';
 

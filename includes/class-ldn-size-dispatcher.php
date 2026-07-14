@@ -17,6 +17,7 @@ final class LDN_Size_Dispatcher {
     const PRIMARY_ARTEFACT = array(
         'size-individual'        => 'size_summary_json',
         'size-shape-hub'         => 'size_summary_json',
+        'size-carat-hub'         => 'size_summary_json',
         'size-mega-hub'          => 'size_summary_json',
         'size-comparison'        => 'size_summary_json',
         'size-comparison-tool'   => 'size_summary_json',
@@ -57,6 +58,41 @@ final class LDN_Size_Dispatcher {
      */
     public function register() {
         add_filter('template_include', array($this, 'dispatch'), 5);
+    }
+
+    /**
+     * Serve chart-reference marketing shell at WordPress front page (/).
+     *
+     * @return void
+     */
+    public function maybe_serve_marketing_home() {
+        if (!$this->config->size_marketing_home($this->site_id)) {
+            return;
+        }
+        if (!function_exists('is_front_page') || !is_front_page()) {
+            return;
+        }
+        $route = get_query_var('ldn_route');
+        if ($route !== '' && $route !== false) {
+            return;
+        }
+        $template = LDN_PLUGIN_DIR . 'templates/chart-site-home.php';
+        if (!is_file($template)) {
+            return;
+        }
+        $country = $this->config->size_rollout_country($this->site_id) ?? 'us';
+        $ctx = new LDN_Page_Context(
+            $this->site_id,
+            'site-marketing-home',
+            $country,
+            null,
+            null,
+            null,
+            'size'
+        );
+        LDN_Assets::register_enqueue($ctx, $this->config);
+        include $template;
+        exit;
     }
 
     /**
@@ -271,6 +307,8 @@ final class LDN_Size_Dispatcher {
                 return 'size-mega-hub';
             case 'shape':
                 return 'size-shape-hub';
+            case 'carat':
+                return 'size-carat-hub';
             case 'individual':
                 return 'size-individual';
             case 'compare':

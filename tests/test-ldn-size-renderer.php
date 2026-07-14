@@ -12,6 +12,12 @@
 error_reporting(E_ALL);
 define('ABSPATH', __DIR__ . '/');
 define('LDN_PLUGIN_DIR', dirname(__DIR__) . '/');
+if (!defined('LDN_PLUGIN_URL')) {
+    define('LDN_PLUGIN_URL', 'https://ringspo.test/wp-content/plugins/loupe-diamond-network/');
+}
+if (!defined('LDN_VERSION')) {
+    define('LDN_VERSION', '0.6.6');
+}
 
 if (!function_exists('__')) {
     function __($s, $d = null) { return $s; }
@@ -89,6 +95,21 @@ if (!class_exists('LDN_Data_Fetcher')) {
 if (!class_exists('LDN_Config')) {
     class LDN_Config {
         public function get_content_profile($site_id) {
+            if ((string) $site_id === 'diamondchart') {
+                return array(
+                    'schema_features' => array('faq', 'breadcrumb'),
+                    'brand_name' => 'Diamond Chart',
+                    'tagline' => 'Full measured size ranges',
+                    'homepage' => array(
+                        'h1' => 'Diamond Chart',
+                        'tagline' => 'Authoritative reference charts',
+                        'primary_cta' => array(
+                            'label' => 'Diamond Size Chart',
+                            'path' => '/size/',
+                        ),
+                    ),
+                );
+            }
             return array('schema_features' => array('faq', 'breadcrumb'));
         }
         public function get_currency($site_id, $country) {
@@ -100,7 +121,21 @@ if (!class_exists('LDN_Config')) {
         public function size_rollout_country($site_id) {
             return 'us';
         }
+        public function size_url_layout($site_id) {
+            return (string) $site_id === 'diamondchart' ? 'carat_first' : 'shape_first';
+        }
+        public function size_marketing_home($site_id) {
+            return (string) $site_id === 'diamondchart';
+        }
         public function get_url_structure($site_id) {
+            if ((string) $site_id === 'diamondchart') {
+                return array(
+                    'size_level_1' => '/size',
+                    'size_level_2' => '/size/{carat}',
+                    'size_level_3' => '/size/{carat}/{shape}',
+                    'size_level_methodology' => '/size/methodology',
+                );
+            }
             return array(
                 'size_level_1' => '/diamond-size',
                 'size_level_2' => '/diamond-size/{shape}',
@@ -125,6 +160,12 @@ if (!class_exists('LDN_Config')) {
             return str_replace('-', ' ', strtolower((string) $slug));
         }
         public function get_site($site_id) {
+            if ((string) $site_id === 'diamondchart') {
+                return array(
+                    'domain' => 'diamondchart.org',
+                    'size_module' => array('url_layout' => 'carat_first'),
+                );
+            }
             return array('domain' => 'ringspo.com', 'brand_name' => 'Ringspo');
         }
     }
@@ -132,6 +173,7 @@ if (!class_exists('LDN_Config')) {
 
 require_once __DIR__ . '/../includes/class-ldn-schema.php';
 require_once __DIR__ . '/../includes/class-ldn-renderer.php';
+require_once __DIR__ . '/../includes/class-ldn-assets.php';
 require_once __DIR__ . '/../includes/class-ldn-size-renderer.php';
 
 $GLOBALS['__tests'] = 0;
@@ -414,15 +456,27 @@ check(strpos($renderer->methodology_html($summary, 'ringspo'), '/diamond-size/me
 $dims = $renderer->dimensions_table($summary);
 check(strpos($dims, 'Shape') !== false && strpos($dims, 'Round') !== false, 'key dimensions names the shape');
 check(strpos($dims, 'Carat weight') !== false && strpos($dims, '1 ct') !== false, 'key dimensions names the carat weight');
+check(
+    strpos($dims, '1 Carat Round Diamond Key Dimensions') !== false,
+    'key dimensions heading uses carat + shape title case'
+);
+check(strpos($dims, '10th') !== false, 'key dimensions labels percentile ranges');
+$spread_body = $renderer->percentile_range_note_html($summary, 'ringspo', 'ldn-size-spread__note');
+check(strpos($spread_body, '10th') !== false && strpos($spread_body, 'why-percentile-ranges') !== false,
+    'percentile note links to methodology anchor');
 
 // Test intent: figure captions and tier labels are HTML rendered by the plugin,
 // never <text> inside the mm-scaled SVGs (which renders at unpredictable size).
 // Would fail if: the caption/labels moved back into the SVG payload.
 $fig = $renderer->scale_figure_html('<svg xmlns="http://www.w3.org/2000/svg"></svg>', $summary);
 check(strpos($fig, 'figcaption') !== false && strpos($fig, 'Relative actual size') !== false, 'scale figure carries HTML caption');
+$quarter_svg = '<svg><image href="{{LDN_US_QUARTER_IMG}}" width="24.26" height="24.26"/></svg>';
+$resolved = $renderer->resolve_quarter_image_hrefs($quarter_svg);
+check(strpos($resolved, '{{LDN_US_QUARTER_IMG}}') === false, 'quarter placeholder is resolved');
+check(strpos($resolved, 'assets/img/us-quarter.png') !== false, 'quarter image uses plugin asset path');
 $labels = $renderer->spread_labels_html($summary);
 check(substr_count($labels, '<div class="ldn-size-spread-label">') === 3, 'spread labels render three tiers');
-check(strpos($labels, "\xC3\x98 6.39 mm") !== false, 'spread labels show median diameter for near-round');
+check(strpos($labels, '6.39 mm average diameter') !== false, 'spread labels show median diameter for near-round');
 check(strpos($labels, 'face-up') !== false, 'spread labels show face-up areas');
 
 // Test intent: the ideal-vs-real callout and depth↔face-up narrative merge into
@@ -433,6 +487,7 @@ check(strpos($merged, 'Chart numbers vs real stones') !== false, 'merged section
 check(strpos($merged, 'ldn-size-ideal-real') !== false && strpos($merged, 'ldn-size-proportions') !== false,
     'merged section contains both the ideal callout and the depth narrative');
 check(substr_count($merged, '<h2>') === 1, 'merged section has exactly one h2');
+check(substr_count($merged, '<h3>') === 2, 'merged section splits ideal vs depth into two subsections');
 check(substr_count($merged, '<section') === 1, 'merged block is a single section');
 
 // Test intent: the price block embeds live figures from the pricing summary
@@ -477,5 +532,77 @@ $cut_html = $renderer->cut_grade_html($summary_with_cut);
 check(strpos($cut_html, 'How does cut grade affect size?') !== false, 'cut-grade section heading renders');
 check(strpos($cut_html, 'Excellent') !== false && strpos($cut_html, '6.41') !== false, 'cut-grade table shows segment stats');
 check($renderer->cut_grade_html(array_merge($summary, array('shape' => 'emerald'))) === '', 'cut-grade omitted for fancy shapes');
+
+// Test intent: diamondchart full_range presentation uses min–max copy and two spread labels.
+// Would fail if: renderer still showed p10–p90 percentile rows when range_presentation is full_range.
+$full_range_summary = $summary;
+$full_range_summary['range_presentation'] = 'full_range';
+$full_range_summary['dimensions_mm']['length']['range_min'] = 6.1;
+$full_range_summary['dimensions_mm']['length']['range_max'] = 6.72;
+$full_range_summary['dimensions_mm']['width']['range_min'] = 6.1;
+$full_range_summary['dimensions_mm']['width']['range_max'] = 6.71;
+$full_range_summary['faceup_area_mm2']['range_min'] = 30.5;
+$full_range_summary['faceup_area_mm2']['range_max'] = 34.8;
+$full_dims = $renderer->dimensions_table($full_range_summary);
+check(strpos($full_dims, 'min–max') !== false && strpos($full_dims, '10th') === false,
+    'full_range key dimensions show min–max not percentile band');
+$full_labels = $renderer->spread_labels_html($full_range_summary);
+check(substr_count($full_labels, '<div class="ldn-size-spread-label">') === 2, 'full_range spread labels render two tiers');
+$full_note = $renderer->percentile_range_note_html($full_range_summary, 'diamondchart');
+check(strpos($full_note, 'full measured spread') !== false, 'full_range note explains min–max methodology');
+
+$ctx_dc = new LDN_Page_Context('diamondchart', 'size-mega-hub', 'us', null, null);
+check($renderer->headline($ctx_dc, $summary) === 'Diamond Size Chart',
+    'diamondchart mega hub H1 targets diamond size chart keyword');
+check($renderer->page_title($ctx_dc, $summary) === 'Diamond Size Chart — Full Measured Range',
+    'diamondchart document title carries full measured range qualifier');
+$meth_cta = $renderer->methodology_cta_html('diamondchart');
+check(strpos($meth_cta, 'methodology') !== false, 'diamondchart mega hub links to methodology page');
+check($renderer->size_checker_cta_html('diamondchart') === '', 'diamondchart omits size checker CTA');
+check(
+    $renderer->build_size_mega_hub_url('diamondchart') === 'https://ringspo.test/size/',
+    'diamondchart mega hub lives at /size/'
+);
+check(
+    $renderer->build_size_carat_hub_url('diamondchart', '2') === 'https://ringspo.test/size/2-carat/',
+    'diamondchart carat hub URL'
+);
+check(
+    $renderer->build_size_individual_url('diamondchart', 'round', '2') === 'https://ringspo.test/size/2-carat/round/',
+    'diamondchart individual URL is carat-first'
+);
+check($renderer->build_size_shape_hub_url('diamondchart', 'round') === '', 'diamondchart drops shape hub URLs');
+
+$ctx_carat_hub = new LDN_Page_Context('diamondchart', 'size-carat-hub', 'us', null, '2');
+$carat_hub_summary = array(
+    'type' => 'carat_hub',
+    'carat_band' => '2',
+    'scale_grid' => array(
+        'carat_band' => '2',
+        'shapes' => array(
+            array(
+                'shape' => 'round',
+                'label' => 'Round',
+                'length_mm' => 8.1,
+                'width_mm' => 8.0,
+                'outline_svg' => '<svg></svg>',
+            ),
+        ),
+    ),
+    'rows' => array(),
+);
+$carat_scale = $renderer->carat_hub_scale_html($ctx_carat_hub, $carat_hub_summary);
+check(strpos($carat_scale, 'ldn-carat-scale-explorer') !== false, 'carat hub renders scale explorer');
+check(strpos($carat_scale, 'ldn-carat-scale-manifest') !== false, 'carat hub embeds scale manifest');
+check(strpos($carat_scale, 'quarter') === false, 'carat hub scale omits quarter reference');
+
+$ctx_ind = new LDN_Page_Context('diamondchart', 'size-individual', 'us', null, '1', 'round');
+$title_fr = $renderer->page_title($ctx_ind, $full_range_summary);
+check(strpos($title_fr, 'Full Range') !== false && strpos($title_fr, '6.1') !== false,
+    'diamondchart individual document title leads with full range');
+
+$marketing = $renderer->render_marketing_home('diamondchart');
+check(strpos($marketing, 'Diamond Size Chart') !== false, 'marketing home links to size chart');
+check(strpos($marketing, '/size/') !== false, 'marketing home CTA targets /size/');
 
 exit($GLOBALS['__fails'] > 0 ? 1 : 0);

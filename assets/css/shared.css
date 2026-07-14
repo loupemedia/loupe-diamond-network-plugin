@@ -551,6 +551,8 @@
 }
 
 .ldn-size-spread__lead,
+.ldn-size-spread__note,
+.ldn-size-percentile-note,
 .ldn-size-chart__lead {
 	margin: 0 0 1rem;
 	color: var(--ldn-text-muted, #4b5563);
@@ -731,8 +733,28 @@
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 1rem;
-	align-items: start;
+	align-items: stretch;
 	margin-bottom: 1rem;
+}
+
+.ldn-size-checker-row--shape-carat {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+	margin-bottom: 0.25rem;
+}
+
+.ldn-size-checker-row--shape-carat label {
+	margin-top: 0 !important;
+}
+
+.ldn-size-checker-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 600;
+	cursor: pointer;
+	margin-bottom: 0.75rem;
 }
 
 .ldn-size-checker-panel {
@@ -813,14 +835,6 @@
 	gap: 0.75rem;
 }
 
-.ldn-size-checker-toggle {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.5rem;
-	font-weight: 600;
-	cursor: pointer;
-}
-
 .ldn-size-checker-actions {
 	margin: 0.5rem 0 0;
 }
@@ -836,7 +850,6 @@
 	padding: 1.5rem;
 	border-radius: 12px;
 	background: var(--ldn-surface-muted, #f8f7fc);
-	border-top: 4px solid var(--ldn-primary, #706cc8);
 }
 
 .ldn-size-checker-results__title {
@@ -845,9 +858,10 @@
 
 .ldn-size-checker-results__cards {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	grid-template-columns: 1fr 1fr;
 	gap: 1rem;
 	margin-bottom: 1.25rem;
+	align-items: stretch;
 }
 
 .ldn-size-checker-card {
@@ -855,6 +869,9 @@
 	border-radius: 10px;
 	background: #fff;
 	border: 1px solid var(--ldn-border, #e5e7eb);
+	display: flex;
+	flex-direction: column;
+	min-height: 100%;
 }
 
 .ldn-size-checker-card h3 {
@@ -882,6 +899,7 @@
 	margin: 0;
 	font-size: 0.95rem;
 	line-height: 1.7;
+	flex: 1;
 }
 
 .ldn-size-checker-card__note {
@@ -897,6 +915,38 @@
 
 .ldn-size-checker-results__comparison {
 	text-align: center;
+}
+
+.ldn-size-compare-svg--compact {
+	max-width: 280px;
+	margin: 0 auto;
+}
+
+.ldn-size-comparison-columns__grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1.5rem;
+}
+
+.ldn-size-comparison-column__scale {
+	max-width: 320px;
+	margin-bottom: 1rem;
+}
+
+.ldn-size-chart__subheading {
+	font-size: 1.1rem;
+	margin: 1.5rem 0 0.75rem;
+}
+
+.ldn-size-methodology--inline {
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+	border-top: 1px solid var(--ldn-border, #e5e7eb);
+}
+
+.ldn-size-methodology--inline h3 {
+	margin-top: 0;
+	font-size: 1.1rem;
 }
 
 .ldn-size-checker-full-link {

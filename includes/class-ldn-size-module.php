@@ -46,6 +46,7 @@ final class LDN_Size_Module {
             $plugin->data_fetcher()
         );
         self::$dispatcher->register();
+        add_action('template_redirect', array(self::$dispatcher, 'maybe_serve_marketing_home'), 1);
     }
 
     /**

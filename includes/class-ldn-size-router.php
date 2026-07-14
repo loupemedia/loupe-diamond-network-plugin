@@ -2,8 +2,9 @@
 /**
  * Dynamic router (size module) — PRD-015 CP106.
  *
- * Registers rewrite rules for the /diamond-size/ tree when rollout enables
+ * Registers rewrite rules for the size URL tree when rollout enables
  * size for the site's configured rollout country (US-only at launch).
+ * Patterns come from config/url_structures.yaml per site_id.
  *
  * @package LoupeDiamondNetwork
  * @since   0.2.0
@@ -115,37 +116,83 @@ final class LDN_Size_Router {
         $level1 = is_array($structure) && !empty($structure['size_level_1'])
             ? (string) $structure['size_level_1']
             : '/diamond-size';
-        $compare = is_array($structure) && !empty($structure['size_level_compare'])
-            ? (string) $structure['size_level_compare']
-            : '/diamond-size/compare/{compare}';
-        $compare_tool = is_array($structure) && !empty($structure['size_level_compare'])
-            ? (string) preg_replace('#/\\{compare\\}.*$#', '', $compare)
-            : '/diamond-size/compare';
-        $spread_checker = is_array($structure) && !empty($structure['size_level_spread_checker'])
-            ? (string) $structure['size_level_spread_checker']
-            : '/diamond-size/spread-checker';
         $methodology = is_array($structure) && !empty($structure['size_level_methodology'])
             ? (string) $structure['size_level_methodology']
             : '/diamond-size/methodology';
 
-        $individual = $this->pattern_to_regex($level3);
-        $shape_hub = $this->pattern_to_regex($level2);
-        $mega = $this->pattern_to_regex($level1);
-        $comparison = $this->pattern_to_regex($compare);
-        $comparison_tool = $this->pattern_to_regex($compare_tool);
-        $spread_checker_rule = $this->pattern_to_regex($spread_checker);
-        $methodology_rule = $this->pattern_to_regex($methodology);
-
-        return array(
-            $comparison => 'index.php?ldn_route=size&ldn_size_level=compare&ldn_compare_slug=$matches[1]',
-            $comparison_tool => 'index.php?ldn_route=size&ldn_size_level=compare-tool',
-            // Legacy URL: dispatcher issues a 301 to the merged size checker at /compare/.
-            $spread_checker_rule => 'index.php?ldn_route=size&ldn_size_level=spread-checker',
-            $methodology_rule => 'index.php?ldn_route=size&ldn_size_level=methodology',
-            $individual => 'index.php?ldn_route=size&ldn_size_level=individual&ldn_shape=$matches[1]&ldn_carat=$matches[2]',
-            $shape_hub => 'index.php?ldn_route=size&ldn_size_level=shape&ldn_shape=$matches[1]',
-            $mega => 'index.php?ldn_route=size&ldn_size_level=mega',
+        $rules = array(
+            $this->pattern_to_regex($methodology) => $this->pattern_to_query($methodology, 'methodology'),
+            $this->pattern_to_regex($level3) => $this->pattern_to_query($level3, 'individual'),
+            $this->pattern_to_regex($level2) => $this->pattern_to_query(
+                $level2,
+                $this->hub_level_from_pattern($level2)
+            ),
+            $this->pattern_to_regex($level1) => 'index.php?ldn_route=size&ldn_size_level=mega',
         );
+
+        if (is_array($structure) && !empty($structure['size_level_compare'])) {
+            $compare = (string) $structure['size_level_compare'];
+            $compare_tool = (string) preg_replace('#/\\{compare\\}.*$#', '', $compare);
+            $rules[$this->pattern_to_regex($compare)] = $this->pattern_to_query($compare, 'compare');
+            $rules[$this->pattern_to_regex($compare_tool)] = 'index.php?ldn_route=size&ldn_size_level=compare-tool';
+        }
+
+        if (is_array($structure) && !empty($structure['size_level_spread_checker'])) {
+            $spread_checker = (string) $structure['size_level_spread_checker'];
+            $rules[$this->pattern_to_regex($spread_checker)] = 'index.php?ldn_route=size&ldn_size_level=spread-checker';
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Level-2 hub: shape-first sites use ``shape``; carat-first use ``carat``.
+     *
+     * @param string $pattern
+     * @return string
+     */
+    public function hub_level_from_pattern($pattern) {
+        $path = trim((string) $pattern, '/');
+        $has_carat = strpos($path, '{carat}') !== false;
+        $has_shape = strpos($path, '{shape}') !== false;
+        if ($has_carat && !$has_shape) {
+            return 'carat';
+        }
+        return 'shape';
+    }
+
+    /**
+     * Build a rewrite query string mapping {shape}/{carat} tokens to query vars.
+     *
+     * @param string $pattern
+     * @param string $size_level mega|shape|carat|individual|compare|methodology
+     * @return string
+     */
+    public function pattern_to_query($pattern, $size_level) {
+        $path = trim((string) $pattern, '/');
+        $parts = $path === '' ? array() : explode('/', $path);
+        $query = array(
+            'index.php?ldn_route=size',
+            'ldn_size_level=' . $size_level,
+        );
+        $match_index = 1;
+        foreach ($parts as $part) {
+            if ($part === '{shape}') {
+                $query[] = 'ldn_shape=$matches[' . $match_index . ']';
+                ++$match_index;
+                continue;
+            }
+            if ($part === '{carat}') {
+                $query[] = 'ldn_carat=$matches[' . $match_index . ']';
+                ++$match_index;
+                continue;
+            }
+            if ($part === '{compare}') {
+                $query[] = 'ldn_compare_slug=$matches[' . $match_index . ']';
+                ++$match_index;
+            }
+        }
+        return implode('&', $query);
     }
 
     /**
@@ -158,25 +205,25 @@ final class LDN_Size_Router {
         $path = trim((string) $pattern, '/');
         $parts = $path === '' ? array() : explode('/', $path);
         $regex_parts = array();
-        $match_index = 1;
 
         foreach ($parts as $part) {
             if ($part === '{shape}') {
                 $regex_parts[] = '([^/]+)';
-                ++$match_index;
                 continue;
             }
             if ($part === '{carat}') {
                 $regex_parts[] = '([0-9]+(?:\\.[0-9]+)?)-carat';
-                ++$match_index;
                 continue;
             }
             if ($part === '{compare}') {
                 $regex_parts[] = '([^/]+)';
-                ++$match_index;
                 continue;
             }
             $regex_parts[] = preg_quote($part, '/');
+        }
+
+        if ($regex_parts === array()) {
+            return '^$';
         }
 
         return '^' . implode('/', $regex_parts) . '/?$';

@@ -171,6 +171,18 @@ final class LDN_Test_Combos {
             }
             return false;
         }
+        if ($ctx->page_level === 'size-carat-hub') {
+            if ($ctx->carat === null) {
+                return false;
+            }
+            foreach ($combos as $combo) {
+                $carat = isset($combo['carat']) ? self::normalise_carat($combo['carat']) : '';
+                if ($carat !== '' && self::normalise_carat($ctx->carat) === $carat) {
+                    return true;
+                }
+            }
+            return false;
+        }
         if ($ctx->page_level === 'size-individual') {
             foreach ($combos as $combo) {
                 if (self::size_combo_matches($ctx, $combo)) {

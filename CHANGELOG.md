@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.7.0] — 2026-07-13
+
+- **Diamond Chart pre-launch (CP 114)**: carat-hub mm ruler/grid scale explorer (no quarter); individual pages lead with full min–max spread; profile marketing shell at `/` with CTAs to `/size/`; `z3_enabled` on; CORS whitelist for `diamondchart.org`.
+
+## [0.6.9] — 2026-07-13
+
+- **Diamond Chart URL IA (CP 114)**: carat-first `/size/` tree — mega hub `/size/`, carat hubs `/size/{carat}-carat/`, individuals `/size/{carat}-carat/{shape}/`; no shape hubs, compare routes, or checker on carat-first sites. Router matches `{carat}`/`{shape}` token order from `url_structures.yaml`.
+
+## [0.6.8] — 2026-07-13
+
+- **Editorial chrome (CP 114)**: register `page_chrome.heading_style: editorial` (was falling back to minimal). New `families/editorial.css` — Crypto Head–inspired dark hero, light page, white card sections; shared by any site that opts in. LDN loads `families/{heading_style}.css` when present. Diamond Chart palette + site overrides updated.
+
+## [0.6.7] — 2026-07-13
+
+- **Diamond Chart SEO (CP 114)**: mega hub H1 is plain "Diamond Size Chart" (ranking target); "Full Measured Range" moves to document title only. Profile-driven `matrix_carats` for homepage matrix columns (distinct from Ringspo). Z3 respects dashboard `site_ids`; ops dashboard + LDO catalog register `diamondchart`.
+
+## [0.6.6] — 2026-07-13
+
+- **Diamond Chart copy & homepage (CP 114)**: site-specific FAQ/methodology templates with real-data placeholders (`range_min`/`range_max`, `{total_n}`); mega hub title "Full Measured Range", matrix range labels, detailed min–max table, methodology CTA (no size checker); `families/diamondchart.css`.
+
+## [0.6.5] — 2026-07-13
+
+- **Diamond Chart (`full_range` presentation, CP 114 scaffold)**: size renderer supports `range_presentation: full_range` in `size-summary.json` — min–max spread labels, key-dimensions rows, and range note copy (vs Ringspo p10–p90). Z3 profile `full_0_100` emits two-stone spread SVG. Site config + entitlements scaffolded; Z3 uploads remain gated until bucket live.
+
+## [0.6.4] — 2026-07-13
+
+- **Percentile rationale (p10–p90)**: methodology page adds a dedicated section and FAQ explaining why ranges use 10th–90th percentiles instead of min/max; individual pages label range rows `(10th–90th %)`, add a spread-section note with link to `#why-percentile-ranges`, and mention percentiles in the inline "About this data" strip. Z3 `size-copy.json` gains a `percentile_range_note` blurb for the page intro after re-run.
+
+## [0.6.3] — 2026-07-13
+
+- **Shape-aware distribution charts**: round / near-round individual pages show an average-diameter histogram; elongated shapes show length (mm) and L/W ratio histograms. The confusing chart-ideal overlay line is removed from histograms (ideal vs real stays in the "Chart numbers vs real stones" section).
+- **Spread diagram**: dashed crown-height guide only — solid median line and dot markers removed. Tier labels drop the Ø symbol (`6.39 mm average diameter`).
+- **Key dimensions heading** is now title case: "{carat} Carat {Shape} Diamond Key Dimensions".
+- **Chart numbers vs real stones** splits into two subsections: "What published charts assume" and "How depth changes face-up size". "About this data" moves inline under the distribution charts.
+- **Comparison pages**: two-column layout with per-stone quarter-scale image, measurements, depth %, table %, ideal proportions, and face-up delta vs chart ideal; overlay comparison below.
+- **Size Checker widget**: shape + carat on one row; "Depth (mm)" label; dropdowns use "1 carat" not "1 ct"; results cards use "carat" wording and new percentile phrasing; quarter stays fixed size in the shape-hub scale explorer (mm-based viewBox).
+- **Methodology page**: green header band, white body sections; only "The drawbacks of ideal-proportion charts" uses the purple band. Footer gap after the last section fixed on size pages.
+- **Requires Z2 → Z3 re-run** on staging for new histogram fields (`diameter_histogram`, `length_histogram`, `lw_ratio_histogram`) and comparison `visuals` in S3 artefacts.
+
+## [0.6.2] — 2026-07-12
+
+- **US quarter scale reference**: replaces the programmatic coin circles with a raster quarter PNG (`assets/img/us-quarter.png`) at the official **24.26 mm** diameter in true-mm scale SVGs (individual pages, shape-hub SSR fallback) and the interactive scale explorer (`size-checker.js`). Z3 emits a `{{LDN_US_QUARTER_IMG}}` placeholder; WP resolves it to the plugin asset URL at render time.
+
 ## [0.6.1] — 2026-07-12
 
 - **Cut-grade size table** on round individual size pages: when `size-summary.json` includes `cut_segments` (from Z2.1 + Z3), renders "How does cut grade affect size?" with median diameter, face-up area, and depth % per GIA cut grade. Headline pooled stats are unchanged.

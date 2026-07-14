@@ -1,6 +1,6 @@
 {
-  "version": "4513846",
-  "generated_at": "2026-07-11T20:40:03.975927+00:00",
+  "version": "e7f6f8f",
+  "generated_at": "2026-07-13T17:14:54.407792+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -3940,6 +3940,36 @@
         "graph_prefix": "{country}/{diamond_type}/{carat}-carat/{shape}/"
       }
     },
+    "diamondchart": {
+      "site_id": "diamondchart",
+      "domain": "diamondchart.org",
+      "brand_name": "Diamond Chart",
+      "template_folder": "diamondchart",
+      "site_type": "single_country",
+      "canonical_source_country": "us",
+      "content_profile": "config/content_profiles/diamondchart.yaml",
+      "countries": [
+        {
+          "code": "us",
+          "locale": "en-US",
+          "currency": "USD",
+          "table_prefix": "ringspo_usa",
+          "full_name": "United States"
+        }
+      ],
+      "size_module": {
+        "rollout_country": "us",
+        "url_base": "/size",
+        "url_layout": "carat_first",
+        "range_mode": "full_0_100",
+        "z3_enabled": true,
+        "marketing_home": true
+      },
+      "s3": {
+        "bucket": "diamondchart",
+        "size_prefix": "chart"
+      }
+    },
     "diamondhuntuk": {
       "site_id": "diamondhuntuk",
       "domain": "diamondhunt.co.uk",
@@ -7266,6 +7296,83 @@
         "emphasis_on_quality": true
       }
     },
+    "diamondchart": {
+      "site_id": "diamondchart",
+      "domain": "diamondchart.org",
+      "brand_name": "Diamond Chart",
+      "brand_tokens": {
+        "primary": "#0B1628",
+        "secondary": "#1E3A5F",
+        "accent": "#F0B429",
+        "negative": "#E85D4C",
+        "background": "#F4F6F8",
+        "text": "#0F172A",
+        "secondary_text": "#64748B"
+      },
+      "page_chrome": {
+        "max_width": "1080px",
+        "content_padding": "1.5rem",
+        "section_spacing": "1.25rem",
+        "title_font": "\"Source Serif 4\", Georgia, serif",
+        "body_font": "\"Inter\", \"Helvetica Neue\", sans-serif",
+        "webfont_families": [
+          "Inter",
+          "Source Serif 4"
+        ],
+        "heading_style": "editorial"
+      },
+      "brand_positioning": "Authoritative diamond size charts",
+      "tagline": "Full measured size ranges for every shape and carat",
+      "homepage": {
+        "h1": "Diamond Chart",
+        "tagline": "Authoritative reference charts for diamond size and quality",
+        "primary_cta": {
+          "label": "Diamond Size Chart",
+          "path": "/size/"
+        },
+        "secondary_cta": {
+          "label": "How we measure sizes",
+          "path": "/size/methodology/"
+        }
+      },
+      "target_audience": {
+        "primary": "Buyers comparing face-up size across shapes",
+        "secondary": "Jewellers and researchers needing population ranges",
+        "knowledge_level": "Beginner to intermediate"
+      },
+      "content_tone": "chart_reference",
+      "writing_style": {
+        "person": "second_person",
+        "formality": "neutral_informative",
+        "technical_level": "accessible"
+      },
+      "graph_style": {
+        "color_scheme": {
+          "primary": "#0B1628",
+          "secondary": "#1E3A5F"
+        },
+        "chart_style": {
+          "line_width": 2,
+          "marker_size": 6
+        }
+      },
+      "size_module": {
+        "range_mode": "full_0_100",
+        "faq_templates": "content_library/diamond_size/faq_templates_diamondchart.yaml",
+        "matrix_carats": [
+          "0.25",
+          "0.5",
+          "0.75",
+          "1",
+          "1.25",
+          "1.5",
+          "2",
+          "2.5",
+          "3",
+          "5"
+        ]
+      }
+    },
     "diamondhuntuk": {
       "site_id": "diamondhuntuk",
       "domain": "diamondhunt.co.uk",
@@ -9513,6 +9620,20 @@
         "size_level_methodology": "/diamond-size/methodology",
         "size_level_sitemap": "/diamond-size/sitemap.xml"
       },
+      "diamondchart": {
+        "site_id": "diamondchart",
+        "domain": "diamondchart.org",
+        "size_level_1": "/size",
+        "size_level_2": "/size/{carat}",
+        "size_level_3": "/size/{carat}/{shape}",
+        "size_level_methodology": "/size/methodology",
+        "size_level_sitemap": "/size/sitemap.xml",
+        "examples": {
+          "size_level_1": "/size",
+          "size_level_2": "/size/2-carat",
+          "size_level_3": "/size/2-carat/round"
+        }
+      },
       "diamondpriceguru": {
         "site_id": "diamondpriceguru",
         "domain": "diamondpriceguru.com",
@@ -10384,6 +10505,31 @@
             "wp_widgets": {
               "size_distribution_chart": {
                 "presentation": "distribution"
+              },
+              "size_table": true,
+              "shape_outline": true
+            }
+          }
+        }
+      },
+      "diamondchart": {
+        "review_status": "planned",
+        "family": "diamondchart",
+        "differentiation": "Chart-reference EMD site: full 0–100 measured size range (min–max among valid inventory), not p10–p90. Carat-first /size/ URL tree; no shape hubs or checker. See docs/strategy/diamondchart-org.md.\n",
+        "pages": {
+          "size": {
+            "pipeline_artefacts": [
+              "size_summary_json",
+              "size_distribution_json",
+              "size_distribution_html",
+              "size_chart_html",
+              "shape_outline_svg",
+              "size_copy_json",
+              "size_sitemap_xml"
+            ],
+            "wp_widgets": {
+              "size_distribution_chart": {
+                "presentation": "full_range"
               },
               "size_table": true,
               "shape_outline": true
