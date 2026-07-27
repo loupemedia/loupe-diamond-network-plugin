@@ -88,6 +88,27 @@ final class LDN_Diagnostics {
     }
 
     /**
+     * Release date to print after the plugin version, as plain text.
+     *
+     * Answers "did my deploy land?", which the version alone only answers if you
+     * remember what was current. On drift the date is withheld and the
+     * changelog's newest version named instead — the date on file belongs to an
+     * older build, and a confidently wrong date is worse than none.
+     *
+     * @return string Leading space included, or '' when the changelog is unreadable.
+     */
+    private static function release_suffix() {
+        $release = LDN_Plugin::release_info();
+        if (!is_array($release)) {
+            return '';
+        }
+        if ($release['version'] !== LDN_Plugin::instance()->version()) {
+            return ' (undated — changelog stops at v' . $release['version'] . ')';
+        }
+        return ' (' . $release['date'] . ')';
+    }
+
+    /**
      * HTML panel for wp_footer (staging only).
      *
      * @return string
@@ -111,6 +132,7 @@ final class LDN_Diagnostics {
         $html .= '<p style="margin:0 0 .75rem;font:bold 14px sans-serif;">LDN staging diagnostics</p>';
         $html .= '<p style="margin:0 0 .5rem;">Environment: <strong>' . esc_html(LDN_Environment::current()) . '</strong>';
         $html .= ' · Plugin v' . esc_html(LDN_Plugin::instance()->version());
+        $html .= esc_html(self::release_suffix());
         if ($rollout instanceof LDN_Rollout_Reader) {
             $html .= ' · Rollout v' . esc_html((string) $rollout->current_version());
             if ($rollout->is_test_only($ctx->country_code, 'price')) {

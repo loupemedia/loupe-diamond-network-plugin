@@ -13,12 +13,21 @@ trait LDN_Trait_Charts {
     /**
      * Inline Plotly chart block from a Plotly payload, or '' when absent.
      *
-     * @param mixed  $payload Plotly figure (expects a `data` array).
+     * When *$fallback* is supplied it is rendered **inside** the Plotly target
+     * div. `Plotly.newPlot()` clears the container before drawing, so the text is
+     * present in the HTML source and visible to anything that does not execute
+     * JavaScript (crawlers, JS-disabled browsers, a blocked Plotly CDN), and
+     * disappears the moment the chart draws. That mutual exclusivity is the point:
+     * it satisfies CP54_04 without showing readers a sentence that restates the
+     * intro paragraph they can already see.
+     *
+     * @param mixed  $payload  Plotly figure (expects a `data` array).
      * @param string $dom_id
      * @param string $title
+     * @param string $fallback Plain-text description of the chart's data.
      * @return string
      */
-    public function chart_html($payload, $dom_id, $title) {
+    public function chart_html($payload, $dom_id, $title, $fallback = '') {
         if (!is_array($payload) || empty($payload['data']) || !is_array($payload['data'])) {
             return '';
         }
@@ -34,7 +43,11 @@ trait LDN_Trait_Charts {
         $html = $this->plotly_loader();
         $html .= '<figure class="ldn-chart">';
         $html .= '<figcaption>' . esc_html($title) . '</figcaption>';
-        $html .= '<div id="' . esc_attr($dom_id) . '" class="ldn-chart-target"></div>';
+        $fallback_html = (is_string($fallback) && $fallback !== '')
+            ? '<p class="ldn-chart-fallback">' . esc_html($fallback) . '</p>'
+            : '';
+        $html .= '<div id="' . esc_attr($dom_id) . '" class="ldn-chart-target">'
+            . $fallback_html . '</div>';
         $html .= '<script>(function(){function d(){Plotly.newPlot('
             . wp_json_encode($dom_id)
             . ',' . $data . ',' . $layout_json . ',' . $cfg . ');}'

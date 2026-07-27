@@ -16,15 +16,26 @@ trait LDN_Trait_Sections {
      * @param string|null      $hero
      * @param LDN_Page_Context $ctx
      * @param array            $bag
+     * @param string|null      $currency ISO code, for the chart's text fallback.
      * @return string
      */
-    private function render_hero($hero, LDN_Page_Context $ctx, array $bag) {
+    private function render_hero($hero, LDN_Page_Context $ctx, array $bag, $currency = null) {
         switch ($hero) {
             case 'distribution_chart':
-                return $this->chart_html($bag['dist'], 'ldn-distribution-chart', __('Price distribution', 'loupe-diamond-network'));
+                return $this->chart_html(
+                    $bag['dist'],
+                    'ldn-distribution-chart',
+                    __('Price distribution', 'loupe-diamond-network'),
+                    $this->chart_fallback_text($ctx, $bag, $currency)
+                );
             case 'price_graph':
             case 'price_chart':
-                return $this->chart_html($bag['price'], 'ldn-price-chart', __('Price over time', 'loupe-diamond-network'));
+                return $this->chart_html(
+                    $bag['price'],
+                    'ldn-price-chart',
+                    __('Price over time', 'loupe-diamond-network'),
+                    $this->chart_fallback_text($ctx, $bag, $currency)
+                );
             case 'table_chart':
                 return $this->shapes_at_carat_html($ctx, $bag);
             case 'bar_chart':
@@ -54,6 +65,23 @@ trait LDN_Trait_Sections {
     }
 
     /**
+     * Text fallback for a summary-backed chart (CP54_04), or '' when the page has
+     * no summary payload to describe.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @param string|null      $currency
+     * @return string
+     */
+    private function chart_fallback_text(LDN_Page_Context $ctx, array $bag, $currency = null) {
+        $summary = isset($bag['summary']) && is_array($bag['summary']) ? $bag['summary'] : array();
+        if (empty($summary)) {
+            return '';
+        }
+        return $this->data_summary_text($ctx, $summary, $currency);
+    }
+
+    /**
      * Render a single section by id, or '' when unmapped / not entitled / empty.
      *
      * Public so the section-routing contract (which ids render vs are skipped)
@@ -70,7 +98,12 @@ trait LDN_Trait_Sections {
         }
 
         if ($section_id === 'price_graph') {
-            return $this->chart_html($bag['price'], 'ldn-price-chart', __('Price over time', 'loupe-diamond-network'));
+            return $this->chart_html(
+                $bag['price'],
+                'ldn-price-chart',
+                __('Price over time', 'loupe-diamond-network'),
+                $this->chart_fallback_text($ctx, $bag, $currency)
+            );
         }
         if ($section_id === 'faq_static') {
             return $this->faq_html($this->section_value($section_id, $ctx, $bag));

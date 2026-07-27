@@ -4,6 +4,7 @@
  *
  * @var string|null $version
  * @var string      $plugin_version
+ * @var array|null  $plugin_release
  * @var string      $environment
  * @var string|null $site_id
  * @var string      $saved_site_id
@@ -70,6 +71,24 @@ if (!defined('ABSPATH')) {
             <tr><th><?php esc_html_e('Effective site ID', 'loupe-diamond-network'); ?></th><td><code><?php echo esc_html($site_id !== null ? $site_id : '—'); ?></code></td></tr>
             <tr><th><?php esc_html_e('Environment', 'loupe-diamond-network'); ?></th><td><code><?php echo esc_html($environment); ?></code></td></tr>
             <tr><th><?php esc_html_e('Plugin version', 'loupe-diamond-network'); ?></th><td><code><?php echo esc_html($plugin_version); ?></code></td></tr>
+            <tr>
+                <th><?php esc_html_e('Released', 'loupe-diamond-network'); ?></th>
+                <td>
+                    <?php if (is_array($plugin_release) && $plugin_release['version'] === $plugin_version) : ?>
+                        <?php echo esc_html($plugin_release['date']); ?>
+                    <?php elseif (is_array($plugin_release)) : ?>
+                        <?php
+                        printf(
+                            /* translators: %s: newest version found in CHANGELOG.md */
+                            esc_html__('Unknown — CHANGELOG.md stops at v%s', 'loupe-diamond-network'),
+                            esc_html($plugin_release['version'])
+                        );
+                        ?>
+                    <?php else : ?>
+                        <?php esc_html_e('Unknown — CHANGELOG.md not readable', 'loupe-diamond-network'); ?>
+                    <?php endif; ?>
+                </td>
+            </tr>
             <tr><th><?php esc_html_e('Cached rollout version', 'loupe-diamond-network'); ?></th><td><?php echo esc_html($version !== null ? (string) $version : '—'); ?></td></tr>
         </tbody>
     </table>

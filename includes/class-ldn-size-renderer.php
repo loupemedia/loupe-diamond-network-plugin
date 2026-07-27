@@ -471,8 +471,12 @@ final class LDN_Size_Renderer {
             ? $copy['plain_text']
             : $this->factual_fallback($summary);
 
-        $out = '<title>' . esc_html($title) . '</title>' . "\n";
-        $out .= '<meta name="description" content="' . esc_attr($description) . '" />' . "\n";
+        // No <title> here: `LDN_Query_Signals` supplies it on
+        // `pre_get_document_title`, which core renders at wp_head priority 1 —
+        // ahead of this block at priority 5. Emitting one here as well produced
+        // two <title> elements, and since only the first is valid the SEO
+        // plugin's blog-index guess won while this one was ignored.
+        $out = '<meta name="description" content="' . esc_attr($description) . '" />' . "\n";
         if (!$indexable) {
             $out .= '<meta name="robots" content="noindex, follow" />' . "\n";
         }
@@ -480,6 +484,15 @@ final class LDN_Size_Renderer {
         $out .= '<meta property="og:title" content="' . esc_attr($title) . '" />' . "\n";
         $out .= '<meta property="og:description" content="' . esc_attr($description) . '" />' . "\n";
         $out .= '<meta property="og:url" content="' . esc_url($canonical) . '" />' . "\n";
+        // Emitted even though they carry no page-specific data: `LDN_Seo_Bridge`
+        // suppresses the SEO plugin's copies on LDN routes, and on size pages the
+        // plugin was the only source of them.
+        $out .= '<meta property="og:type" content="website" />' . "\n";
+        $site = $this->config->get_site($ctx->site_id);
+        $brand = is_array($site) && !empty($site['brand_name']) ? (string) $site['brand_name'] : '';
+        if ($brand !== '') {
+            $out .= '<meta property="og:site_name" content="' . esc_attr($brand) . '" />' . "\n";
+        }
         $out .= $this->json_ld_script($ctx, $summary, $copy, $canonical, $title, $description);
 
         return $out;

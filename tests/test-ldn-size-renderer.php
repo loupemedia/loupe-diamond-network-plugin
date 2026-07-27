@@ -296,6 +296,60 @@ $ctx_cmp = new LDN_Page_Context('ringspo', 'size-comparison', 'us', null, null, 
 $head_longtail = $renderer->render_head_content($ctx_cmp, $comp, false);
 check(strpos($head_longtail, 'noindex') !== false, 'long-tail comparison emits noindex');
 
+// --- Size page <head> contract ----------------------------------------------
+// Test intent: whatever LDN_Seo_Bridge claims from the SEO plugin on an LDN
+// route, the LDN head must emit itself — the bridge removes the plugin's copy,
+// so a claimed tag with no replacement disappears from the page entirely. Plus
+// the size head must NOT emit <title>: LDN_Query_Signals supplies it via
+// pre_get_document_title at wp_head priority 1, ahead of this block at 5.
+// Would fail if: the size head emitted its own <title> again (two <title>
+// elements, and only the first counts — that is how the SEO plugin's blog-index
+// guess beat the real one), or if og:type / og:site_name were dropped while the
+// bridge kept suppressing SEOPress's.
+require_once __DIR__ . '/../includes/class-ldn-seo-bridge.php';
+
+$size_head = $renderer->render_head_content($ctx, $summary);
+
+check(strpos($size_head, '<title>') === false, 'size head emits no <title> of its own');
+
+// Tag each suppressed SEOPress filter is responsible for.
+$bridge_tags = array(
+    'seopress_titles_canonical'    => 'rel="canonical"',
+    'seopress_titles_desc'         => 'name="description"',
+    'seopress_social_og_url'       => 'property="og:url"',
+    'seopress_social_og_type'      => 'property="og:type"',
+    'seopress_social_og_title'     => 'property="og:title"',
+    'seopress_social_og_desc'      => 'property="og:description"',
+    'seopress_social_og_site_name' => 'property="og:site_name"',
+);
+// Claimed but deliberately not replaced on size pages:
+//   og:image      — SEOPress's was empty, and og_preview_url() only resolves a
+//                   preview PNG for price shape pages; size pages render SVG.
+//   twitter:image — omitted on purpose so X falls back to og:image rather than
+//                   the unrelated media-library upload SEOPress chose.
+$bridge_unreplaced = array('seopress_social_og_thumb', 'seopress_social_twitter_card_thumb');
+
+foreach (LDN_Seo_Bridge::SEOPRESS_FILTERS as $filter) {
+    if (in_array($filter, $bridge_unreplaced, true)) {
+        continue;
+    }
+    check(
+        isset($bridge_tags[$filter]),
+        "bridge filter {$filter} is accounted for by the size head contract"
+    );
+    if (isset($bridge_tags[$filter])) {
+        check(
+            substr_count($size_head, $bridge_tags[$filter]) === 1,
+            "size head emits exactly one {$bridge_tags[$filter]} (claimed from {$filter})"
+        );
+    }
+}
+
+check(
+    strpos($size_head, 'content="Ringspo"') !== false,
+    'og:site_name carries the brand from site config'
+);
+
 // Test intent: the mega hub renders the matrix table (one row per shape ×
 // anchor carat columns, sticky-ready classes, every cell linking to its
 // individual page) and falls back to the flat ladder when no matrix payload

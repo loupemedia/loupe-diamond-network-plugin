@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.13.0] — 2026-07-27
+
+- **Operator surfaces show when the build was cut, not just which one it is**: the staging diagnostics panel and **Tools → Loupe Diamond Network** now print the release date alongside `Plugin v0.13.0`. The version alone only answers "did my deploy land?" if you remember what was current.
+- The date comes from the newest `CHANGELOG.md` entry via `LDN_Plugin::release_info()`, not a new constant — a fourth version source would be the one most likely to be forgotten, and `filemtime()` is both banned as a version source and wrong for this (it moves on every redeploy of an unchanged build). The file is streamed and capped at 40 lines since the entry is always at the top and the panel renders on every staging page view.
+- If the newest entry is not the running version, the date is withheld and the changelog's newest version named instead: that date belongs to an older build, and a confidently wrong date is worse than none. `tests/unit/test_plugin_version_changelog_sync.py` fails on that drift for all three plugins, so it should not reach a deploy.
+
+## [0.12.1] — 2026-07-27
+
+- **Size pages had two `<title>` elements**: `LDN_Size_Renderer::render_head_content()` emitted its own on `wp_head` priority 5, and 0.11.0 added a second at priority 1 via `pre_get_document_title`. Only the first counts, so the size page's descriptive title lost to whatever the blog-index query produced — the exact defect 0.11.0 set out to fix, still visible on size URLs. The size head no longer emits a `<title>`; the document title comes from `LDN_Query_Signals` alone, as on price pages, and now carries the site name and separator like every other page on the site.
+- **`og:type` and `og:site_name` restored on size pages**: 0.12.0 suppressed SEOPress's copies on every LDN route, but only the price head emits replacements — the size head's OG set stopped at `og:url`. Both tags vanished from size pages. The size head now emits them, `og:site_name` from the site config's `brand_name`.
+- Size pages still have no `og:image`: SEOPress's was empty and is now suppressed, and `og_preview_url()` resolves a preview only for price shape pages. `twitter:image` is likewise absent by design so X falls back to `og:image`, which on a size page means no image at all. Producing a size preview needs a new artefact from the pipeline, not a plugin change — see `docs/TECH_DEBT.md`.
+- `tests/test-ldn-size-renderer.php` now walks `LDN_Seo_Bridge::SEOPRESS_FILTERS` and asserts the size head emits a replacement for each claimed tag, with the two unreplaced ones named explicitly. Adding a filter to the bridge without emitting the tag now fails a test instead of silently deleting it from the page.
+
+## [0.12.0] — 2026-07-27
+
+- **Routed pages had no meta description at all**: `seo_plugin_emits_meta()` stood down whenever an SEO plugin was merely installed, but SEOPress emits a description only for a singular post, a posts page carrying `_seopress_titles_desc`, or a blog-as-front-page site — a routed LDN page is none of those. Both plugins stayed silent, so every price page on the network shipped without one. LDN now owns the tag. (Size pages were unaffected — `LDN_Size_Renderer` emits its description unconditionally, without consulting `seo_plugin_emits_meta()`.)
+- **One canonical instead of two**: SEOPress's DEFAULT CANONICAL branch emits a canonical on these routes after all, derived from the request URL — it agreed with LDN's only because `LDN_Canonical_Redirect` guarantees the request URL is already the canonical form. Two tags that agree by luck are one settings change away from disagreeing, and conflicting canonicals are ignored outright.
+- **Social previews use the page's chart again**: SEOPress emitted an empty `og:image` (plus empty `og:image:secure_url` and `og:image:alt`) *ahead* of LDN's real one, and pointed `twitter:image` at an unrelated media-library upload. Scrapers take the first occurrence, so the chart preview never won. Duplicate `og:url`, `og:type` and `og:site_name` are gone too.
+- New `LDN_Seo_Bridge` handles all of the above by suppressing SEOPress's version of each tag LDN emits, scoped to routes where a dispatcher holds a page context — so ordinary posts and pages keep their SEO plugin output untouched, and so does an LDN route that 404s. Filter names were verified against SEOPress 8.x source; each takes the fully rendered tag, so returning `''` removes it. `og:locale`, `twitter:card` and `twitter:creator` are deliberately left alone as site-level facts LDN does not emit. Yoast and Rank Math are not bridged and LDN keeps deferring its description to them, as before.
+- `head_tags()` had no test coverage, which is how the missing description survived; `tests/test-ldn-renderer.php` § 15 now asserts one canonical, one description and a non-empty `og:image` with SEOPress active, and fails if the old rule returns.
+
+## [0.11.0] — 2026-07-27
+
+- **Routed pages get their own `<title>`**: LDN rewrite rules target `index.php?ldn_route=…` with no core query vars, and WordPress treats a query carrying no core vars as the blog index — so every price and size page inherited the blog index's title, rendering as the bare site name while `og:title` carried the real "1 Carat Round Natural Diamond Prices (US)". New `LDN_Query_Signals` supplies the page's own title via `pre_get_document_title`, sourced from the new `LDN_Renderer::document_title()` (price) and `LDN_Size_Renderer::page_title()` (size) so the tab, the SERP link and the social card cannot disagree. The site name and `document_title_separator` are applied here because returning from `pre_get_document_title` short-circuits `wp_get_document_title()` before its own assembly.
+- **No more `page/2/` on pricing URLs**: the same blog-index query left its pagination state live, so a paginated blog advertised `…/1-carat/round/page/2/` as the next page of a pricing URL. The main posts query — which the templates never read; `level-1-landing.php` has no loop — is now skipped via `posts_pre_query` with `found_posts` and `max_num_pages` flattened, removing the crawl trap and a wasted `SELECT` on every LDN page across the network.
+- `is_home()` is deliberately left true: core's `WP::handle_404()` spares a post-less main query from a 404 only for a fixed set of conditionals, and `is_home()` is the one that applies here, so clearing it would 404 every LDN page once the posts query is skipped. It is also what the theme keys its body classes off. That leaves the `itemtype="schema.org/Blog"` on `<body>` in place (a weak signal the JSON-LD `Dataset` overrides) — see `docs/TECH_DEBT.md`. Disable either correction per site with the `ldn_normalise_query` filter.
+
+## [0.10.1] — 2026-07-27
+
+- **Chart fallback date matches the page**: the CP54_04 factual statement rendered its date as raw ISO (`as of 2026-06-30`) while the freshness line a few hundred pixels below showed `June 30, 2026`. `data_summary_text()` now formats the date with the site's `date_format`, and the date-localisation logic shared with `freshness_html()` moved into `LDN_Trait_Data::localised_date()`. The JSON-LD `Dataset.description` and the meta description are unchanged and keep ISO — `dataset_description()` only substitutes a display date when one is passed, which just the visible fallback does.
+
+## [0.10.0] — 2026-07-27
+
+- **Chart text fallback without JavaScript (CP54_04)**: summary-backed charts now carry their factual statement (median price, sample size, analysis date) inside the Plotly target div. `Plotly.newPlot()` clears the container when it draws, so the text is in the HTML source for crawlers, JS-disabled browsers and a blocked Plotly CDN, but never shown alongside the chart — which is why it does not duplicate the intro paragraph or freshness line for ordinary readers. `LDN_Trait_Content::data_summary_html()` (dead code since the editorial intro took over the page) is replaced by `data_summary_text()`, returning bare text for the chart to render. The statement is the same string as the JSON-LD `Dataset.description`, which previously had no visible counterpart.
+
+## [0.9.0] — 2026-07-27
+
+- **One URL form per page**: price and size routes matched both `/…/round` and `/…/round/` with no redirect between them, so a single page served 200 on two URLs. New `LDN_Canonical_Redirect` 301s the non-canonical form on `template_redirect`, deriving the target from `user_trailingslashit()` so the 200 URL always agrees with the canonical tag, `og:url`, JSON-LD `@id`/`url` and hreflang. Sitemap routes are excluded (`.xml` must not gain a slash).
+- **Sitemap emits the canonical form**: `canonical_url` in `ops.page_url_registry` is now slash-terminated (written by C4.5), so `<loc>` values and cross-site comparison links no longer advertise the variant that redirects.
+
 ## [0.8.3] — 2026-07-14
 
 - **Ringspo card chrome**: all white card surfaces (hero chart, headline stat cards, shape/price/size cards, tables on purple bands, size-module panels) use a consistent **12px** corner radius via `--ringspo-card-radius`.

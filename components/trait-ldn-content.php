@@ -111,9 +111,10 @@ trait LDN_Trait_Content {
         $canonical = $this->current_url();
         $out .= $this->breadcrumb_html($ctx, $canonical, $profile);
 
-        // The editorial intro now leads the page; the structured data summary still
-        // feeds the meta description + JSON-LD via render_head_content().
-        $hero_html = $this->render_hero($layout['hero_component'], $ctx, $bag);
+        // The editorial intro leads the page; the structured data summary feeds the
+        // meta description + JSON-LD via render_head_content(), and the chart's
+        // no-JavaScript fallback via render_hero().
+        $hero_html = $this->render_hero($layout['hero_component'], $ctx, $bag, $currency);
         $sections = is_array($layout['sections']) ? $layout['sections'] : array();
 
         // A profile can position the hero inline by listing a `hero` token in its
@@ -191,23 +192,33 @@ trait LDN_Trait_Content {
     /**
      * Plain-text factual data summary for AI extraction (CP54_04).
      *
-     * Distinct from intro_dynamic editorial copy — one structured sentence with
-     * price, sample size, and analysis date visible without JavaScript.
+     * One structured sentence — subject, median price, sample size, analysis date
+     * — for consumers that do not execute JavaScript. It carries the same claims
+     * as the JSON-LD `Dataset.description`, which is deliberate: Google expects a
+     * structured-data claim to be supported by content in the page, and until now
+     * that description had no counterpart in the HTML. The only difference is the
+     * date, rendered here in the site's display format because this copy is
+     * visible; the structured data and meta description keep ISO.
+     *
+     * Returns bare text, not a section. Callers pass it to `chart_html()`, which
+     * renders it inside the Plotly target div so it is mutually exclusive with the
+     * chart. An earlier version emitted its own `<section>`; that was removed from
+     * the page because it restated `intro_html()` (price, sample size) and
+     * `freshness_html()` (date, sample size) in different words, and it must not
+     * be reinstated as a standalone block for that reason.
      *
      * @param LDN_Page_Context $ctx
      * @param array            $summary
      * @param string|null      $currency
-     * @return string
+     * @return string Plain text, unescaped — escaped at the point of rendering.
      */
-    public function data_summary_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
+    public function data_summary_text(LDN_Page_Context $ctx, array $summary, $currency = null) {
         $schema = new LDN_Schema();
-        $text = $schema->dataset_description($ctx, $summary, $currency);
-        if ($text === '') {
-            return '';
-        }
-        return '<section class="ldn-section ldn-data-summary" aria-label="'
-            . esc_attr__('Data summary', 'loupe-diamond-network') . '"><p>'
-            . esc_html($text) . '</p></section>';
+        // Visible copy, so the date is formatted the same way freshness_html()
+        // formats it — a raw ISO date reads as unfinished next to "June 30, 2026"
+        // in the freshness line a few hundred pixels below.
+        $display_date = $this->localised_date($schema->analysis_date($summary));
+        return $schema->dataset_description($ctx, $summary, $currency, $display_date);
     }
 
     /**

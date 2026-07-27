@@ -70,6 +70,28 @@ trait LDN_Trait_Data {
     }
 
     /**
+     * Render an ISO date (YYYY-MM-DD) in the site's configured display format.
+     *
+     * Returns the input unchanged when WordPress date functions are unavailable
+     * or the value is unparseable, so callers always get something printable.
+     * The timestamp is built at midday to stop a timezone offset rolling the
+     * date back to the previous day.
+     *
+     * @param string $date_iso
+     * @return string
+     */
+    private function localised_date($date_iso) {
+        if (!is_string($date_iso) || $date_iso === '' || !function_exists('date_i18n')) {
+            return is_string($date_iso) ? $date_iso : '';
+        }
+        $ts = strtotime($date_iso . 'T12:00:00');
+        if ($ts === false) {
+            return $date_iso;
+        }
+        return date_i18n(get_option('date_format'), $ts);
+    }
+
+    /**
      * @param string|null $currency
      * @return string
      */

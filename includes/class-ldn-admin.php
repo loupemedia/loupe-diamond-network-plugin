@@ -59,6 +59,7 @@ final class LDN_Admin {
         $rollout = $plugin->rollout();
         $version = ($rollout instanceof LDN_Rollout_Reader) ? $rollout->current_version() : null;
         $plugin_version = $plugin->version();
+        $plugin_release = LDN_Plugin::release_info();
         $environment = LDN_Environment::current();
         $site_id = $plugin->site_id();
         $saved_site_id = LDN_Site_Resolver::get_saved_site_id();

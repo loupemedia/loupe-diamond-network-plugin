@@ -481,9 +481,14 @@ final class LDN_Schema {
      * @param LDN_Page_Context $ctx
      * @param array            $summary
      * @param string|null      $currency
+     * @param string|null      $display_date Human-formatted date to use in place of
+     *                                       the ISO one. Only for visible on-page
+     *                                       copy (the chart's no-JS fallback); the
+     *                                       meta description and JSON-LD Dataset
+     *                                       pass null and keep ISO.
      * @return string
      */
-    public function dataset_description(LDN_Page_Context $ctx, array $summary, $currency = null) {
+    public function dataset_description(LDN_Page_Context $ctx, array $summary, $currency = null, $display_date = null) {
         $subject = $this->plain_subject($ctx);
         if ($subject === 'diamond') {
             $base = 'Market pricing data for diamonds.';
@@ -491,8 +496,16 @@ final class LDN_Schema {
             $base = sprintf('Market pricing data for %s diamonds.', $subject);
         }
 
+        // Resolution order must match intro_html() and hero_stats_html(), including
+        // the distribution.percentiles.p50 step. Without p50 here, a summary that
+        // carries percentiles but no explicit median_price would make this
+        // description skip to time_series.current_price (a trimmed mean) while the
+        // visible intro and hero cards quote p50 — so the meta description, the
+        // JSON-LD Dataset and the chart's no-JS fallback would contradict the page.
         $median = $this->dig_first($summary, array(
-            array('distribution', 'median_price'), array('median_price'),
+            array('distribution', 'median_price'),
+            array('median_price'),
+            array('distribution', 'percentiles', 'p50'),
         ));
         if ($median === null) {
             $median = $this->dig_first($summary, array(
@@ -514,6 +527,9 @@ final class LDN_Schema {
         }
         $date = $this->dataset_date($summary);
         if ($date !== '') {
+            if (is_string($display_date) && $display_date !== '') {
+                $date = $display_date;
+            }
             $detail .= sprintf(' as of %s', $date);
         }
         return $base . ' ' . $detail . '.';

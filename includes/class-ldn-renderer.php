@@ -237,9 +237,10 @@ final class LDN_Renderer {
             . '</h1>';
         $breadcrumb_html = $this->breadcrumb_html($ctx, $canonical, $profile);
 
-        // The editorial intro now leads the page; the structured data summary still
-        // feeds the meta description + JSON-LD via render_head_content().
-        $hero_html = $this->render_hero($layout['hero_component'], $ctx, $bag);
+        // The editorial intro leads the page; the structured data summary feeds the
+        // meta description + JSON-LD via render_head_content(), and the chart's
+        // no-JavaScript fallback via render_hero().
+        $hero_html = $this->render_hero($layout['hero_component'], $ctx, $bag, $currency);
         $sections = is_array($layout['sections']) ? $layout['sections'] : array();
 
         // A profile can position the hero inline by listing a `hero` token in its

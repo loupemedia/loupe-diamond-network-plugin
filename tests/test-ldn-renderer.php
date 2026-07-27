@@ -69,6 +69,17 @@ if (!function_exists('user_trailingslashit')) {
 if (!function_exists('sanitize_title')) {
     function sanitize_title($s) { return strtolower(preg_replace('/[^A-Za-z0-9]+/', '-', (string) $s)); }
 }
+// Date stubs must be present, not absent: localised_date() degrades to the raw
+// ISO string when date_i18n() is missing, so without these the display-format
+// assertions below would pass against unformatted dates and prove nothing.
+if (!function_exists('get_option')) {
+    function get_option($key, $default = false) {
+        return $key === 'date_format' ? 'F j, Y' : $default;
+    }
+}
+if (!function_exists('date_i18n')) {
+    function date_i18n($format, $ts = null) { return date($format, $ts === null ? time() : $ts); }
+}
 
 require_once __DIR__ . '/../includes/class-ldn-page-context.php';
 
@@ -1132,6 +1143,203 @@ $title_pos = strpos($page_html, 'ldn-page-title');
 check(
     $crumb_pos !== false && $title_pos !== false && $crumb_pos < $title_pos,
     'render() outputs breadcrumbs before the H1 inside the hero band'
+);
+
+// --- 14. CP54_04 chart text fallback ----------------------------------------
+// Test intent: a summary-backed chart carries its factual statement INSIDE the
+// Plotly target div, so the data is in the HTML source for anything that does not
+// run JavaScript, and Plotly.newPlot() wipes it when the chart draws (no visible
+// duplication of intro_html / freshness_html for ordinary readers).
+// Would fail if: the fallback were emitted as a sibling of the target div or its
+// own <section> (permanently visible, duplicating the intro), if it were omitted
+// entirely (empty div — the CP54_04 gap), or if it were injected unescaped.
+$cp5404_summary = array(
+    'analysis_date' => '2026-07-27',
+    'distribution'  => array('median_price' => 5200, 'sample_size' => 1842),
+);
+$cp5404_payload = array(
+    'data'   => array(array('x' => array(1, 2), 'y' => array(3, 4), 'type' => 'scatter')),
+    'layout' => array(),
+);
+
+$fallback_text = $renderer->data_summary_text($shape_ctx, $cp5404_summary, 'USD');
+check($fallback_text !== '', 'data_summary_text produces a factual statement');
+check(
+    strpos($fallback_text, '5,200') !== false && strpos($fallback_text, '1,842') !== false,
+    'fallback statement carries median price and sample size'
+);
+check(
+    strpos($fallback_text, '<') === false,
+    'data_summary_text returns bare text, not markup (escaped at render time)'
+);
+
+$chart_with_fallback = $renderer->chart_html(
+    $cp5404_payload,
+    'ldn-price-chart',
+    'Price over time',
+    $fallback_text
+);
+$target_pos = strpos($chart_with_fallback, 'class="ldn-chart-target"');
+$fallback_pos = strpos($chart_with_fallback, 'ldn-chart-fallback');
+$close_pos = strpos($chart_with_fallback, '</div>');
+check($fallback_pos !== false, 'chart renders the text fallback');
+check(
+    $target_pos !== false && $fallback_pos > $target_pos && $fallback_pos < $close_pos,
+    'fallback sits INSIDE the Plotly target div so newPlot() replaces it'
+);
+check(
+    strpos($chart_with_fallback, 'ldn-data-summary') === false,
+    'fallback is not emitted as a standalone data-summary section'
+);
+
+// Without a fallback the container must stay empty — back-compatible for the
+// chart callers (tables, homepage) that have no summary to describe.
+$chart_no_fallback = $renderer->chart_html($cp5404_payload, 'ldn-price-chart', 'Price over time');
+check(
+    strpos($chart_no_fallback, 'class="ldn-chart-target"></div>') !== false,
+    'chart_html without a fallback leaves the target div empty'
+);
+
+// Escaping: a stray angle bracket in the statement must not open a tag.
+$chart_escaped = $renderer->chart_html($cp5404_payload, 'ldn-price-chart', 'T', 'a <b> c');
+check(
+    strpos($chart_escaped, '<b>') === false && strpos($chart_escaped, '&lt;b&gt;') !== false,
+    'fallback text is escaped before rendering'
+);
+
+// --- 14b. the fallback must quote the same figure as the visible page --------
+// Test intent: the factual statement resolves its headline price through the same
+// order as intro_html() and hero_stats_html(), so the text a crawler reads can
+// never contradict the price a reader sees.
+// Would fail if: dataset_description() omitted the distribution.percentiles.p50
+// step — this summary has percentiles but no median_price, so it would fall
+// through to time_series.current_price (the trimmed mean, 9,999) while the intro
+// and hero cards quote p50 (7,400).
+$p50_only_summary = array(
+    'analysis_date' => '2026-07-27',
+    'distribution'  => array(
+        'percentiles' => array('p50' => 7400),
+        'sample_size' => 500,
+    ),
+    'time_series'   => array('current_price' => 9999),
+);
+$p50_fallback = $renderer->data_summary_text($shape_ctx, $p50_only_summary, 'USD');
+$p50_intro = $renderer->intro_html($shape_ctx, $p50_only_summary, 'USD');
+$p50_hero = $renderer->hero_stats_html($shape_ctx, $p50_only_summary, 'USD');
+check(
+    strpos($p50_fallback, '7,400') !== false,
+    'fallback quotes p50 when no explicit median_price is present'
+);
+check(
+    strpos($p50_fallback, '9,999') === false,
+    'fallback does not fall through to the trimmed mean while the page shows p50'
+);
+check(
+    strpos($p50_intro, '7,400') !== false && strpos($p50_hero, '7,400') !== false,
+    'intro and hero cards quote the same p50 figure as the fallback'
+);
+
+// --- 14c. visible fallback formats its date, machine-readable copy keeps ISO --
+// Test intent: the chart's no-JS fallback is visible page copy, so its date is
+// rendered in the site's display format and matches the freshness line; the meta
+// description and JSON-LD Dataset description keep the ISO date for machines.
+// Would fail if: data_summary_text() emitted the raw "2026-07-27" (reads as
+// unfinished beside "July 27, 2026" in the freshness line), or if the default
+// dataset_description() started localising and pushed a display-formatted date
+// into the meta description and structured data.
+$dated_summary = array(
+    'analysis_date' => '2026-07-27',
+    'distribution'  => array('median_price' => 5200, 'sample_size' => 1842),
+);
+$dated_fallback = $renderer->data_summary_text($shape_ctx, $dated_summary, 'USD');
+$dated_freshness = $renderer->freshness_html($shape_ctx, $dated_summary);
+$dated_machine = (new LDN_Schema())->dataset_description($shape_ctx, $dated_summary, 'USD');
+
+check(
+    strpos($dated_fallback, 'July 27, 2026') !== false,
+    'visible fallback renders the date in the display format'
+);
+check(
+    strpos($dated_fallback, '2026-07-27') === false,
+    'visible fallback does not leak the raw ISO date'
+);
+check(
+    strpos($dated_freshness, 'July 27, 2026') !== false,
+    'fallback and freshness line agree on the date format'
+);
+check(
+    strpos($dated_machine, '2026-07-27') !== false
+        && strpos($dated_machine, 'July 27, 2026') === false,
+    'meta description / Dataset description keeps the ISO date'
+);
+
+// A summary with no date must not gain a date clause just because a display date
+// could be computed — an empty display date is not a licence to invent one.
+$undated_summary = array('distribution' => array('median_price' => 5200, 'sample_size' => 1842));
+check(
+    strpos($renderer->data_summary_text($shape_ctx, $undated_summary, 'USD'), 'as of') === false,
+    'fallback omits the date clause entirely when the summary carries no date'
+);
+
+// --- 15. head_tags() emits one of each tag it owns --------------------------
+// Test intent: a routed page emits exactly one canonical and exactly one meta
+// description, and the description is emitted whenever no unbridged SEO plugin
+// owns it — SEOPress does not, because LDN_Seo_Bridge suppresses SEOPress's.
+// Would fail if: seo_plugin_emits_meta() went back to standing down for any
+// installed SEO plugin, which left every LDN page on this network with no meta
+// description at all while SEOPress emitted none either.
+if (!function_exists('apply_filters')) {
+    function apply_filters($hook, $value) { return $value; }
+}
+require_once __DIR__ . '/../includes/class-ldn-seo-bridge.php';
+
+// SEOPress present, as on every live network site. This is the condition under
+// which the description went missing, so asserting without it proves nothing.
+// Declared last in the file because it is process-global once defined.
+define('SEOPRESS_VERSION', '8.0');
+
+class LDN_Fetcher_Og_Preview extends LDN_Data_Fetcher {
+    public function resolve_artefact_url($artefact_id, $ctx) {
+        return $artefact_id === 'og_preview_png'
+            ? 'https://ringspo.s3.amazonaws.com/us/natural/1-carat/round/og-preview.png'
+            : null;
+    }
+}
+
+$head_renderer = new LDN_Renderer(new LDN_Fetcher_Og_Preview(), new LDN_Config());
+$head_summary = array(
+    'analysis_date' => '2026-06-30',
+    'distribution'  => array('median_price' => 3510, 'sample_size' => 27523),
+);
+$head = $head_renderer->head_tags(
+    $shape_ctx,
+    'https://ringspo.com/us/diamond-prices/natural/1-carat/round/',
+    $head_summary,
+    'USD'
+);
+
+check(substr_count($head, 'rel="canonical"') === 1, 'head_tags emits exactly one canonical');
+check(substr_count($head, 'name="description"') === 1, 'head_tags emits exactly one meta description');
+check(
+    strpos($head, 'content="Market pricing data for 1 carat round natural diamonds') !== false,
+    'the meta description carries the page\'s own facts'
+);
+check(substr_count($head, 'property="og:url"') === 1, 'head_tags emits exactly one og:url');
+check(substr_count($head, 'property="og:title"') === 1, 'head_tags emits exactly one og:title');
+
+// An empty og:image is worse than none — it is what SEOPress was emitting ahead
+// of this one, and scrapers take the first occurrence.
+check(
+    strpos($head, '<meta property="og:image" content="" ') === false
+        && strpos($head, 'og-preview.png') !== false,
+    'og:image points at the page\'s chart preview and is never empty'
+);
+
+// og:title must be the same string the <title> uses (LDN_Query_Signals feeds it
+// from document_title()), or the tab and the social card disagree again.
+check(
+    strpos($head, 'property="og:title" content="' . esc_attr($head_renderer->document_title($shape_ctx)) . '"') !== false,
+    'og:title and the document title are the same string'
 );
 
 // --- Report -----------------------------------------------------------------

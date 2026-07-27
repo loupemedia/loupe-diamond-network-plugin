@@ -29,7 +29,7 @@ trait LDN_Trait_Head {
         if ($canonical_url === null) {
             $canonical_url = $this->current_url();
         }
-        $title = $this->headline($ctx, $this->country_in_content_flag($this->profile($ctx), 'page_titles'));
+        $title = $this->document_title($ctx);
         $schema = new LDN_Schema();
         $desc = $schema->dataset_description($ctx, $summary, $currency);
 
@@ -65,6 +65,21 @@ trait LDN_Trait_Head {
     }
 
     /**
+     * The page's title, honouring the profile's `country_in_content.page_titles`.
+     *
+     * Shared by `og:title` and the `<title>` element (`LDN_Query_Signals` feeds it
+     * to `pre_get_document_title`) so the browser tab, the SERP link and the
+     * social card cannot disagree. Exposed separately because the country flag
+     * and the content profile are resolved from private renderer state.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    public function document_title(LDN_Page_Context $ctx) {
+        return $this->headline($ctx, $this->country_in_content_flag($this->profile($ctx), 'page_titles'));
+    }
+
+    /**
      * Public HTTPS URL for the page's OG chart preview PNG, or '' when absent.
      *
      * @param LDN_Page_Context $ctx
@@ -79,23 +94,35 @@ trait LDN_Trait_Head {
     }
 
     /**
-     * Whether a common SEO plugin is likely to emit meta description on its own.
+     * Whether another plugin owns the meta description on this page.
      *
-     * LDN dynamic routes still emit OG tags (SEOPress often misses these URLs).
+     * Only true for an SEO plugin LDN does not bridge. This used to be true for
+     * any installed SEO plugin, which cost every LDN page on a SEOPress site its
+     * meta description entirely: SEOPress emits one only for a singular post, a
+     * posts page carrying `_seopress_titles_desc`, or a blog-as-front-page site,
+     * and a routed LDN page is none of those — so LDN stood down for a tag nobody
+     * was producing. `LDN_Seo_Bridge` now suppresses SEOPress's description on
+     * these routes, making LDN unambiguously the owner.
      *
      * @return bool
      */
     private function seo_plugin_emits_meta() {
-        return defined('SEOPRESS_VERSION') || defined('WPSEO_VERSION') || defined('RANK_MATH_VERSION');
+        return LDN_Seo_Bridge::unbridged_plugin_active();
     }
 
     /**
-     * Whether a common SEO plugin is likely to emit canonical on its own.
+     * Whether another plugin owns the canonical tag on this page.
+     *
+     * False by design: LDN owns the canonical URL contract for its own routes
+     * (trailing slash included — see `LDN_Canonical_Redirect`), and
+     * `LDN_Seo_Bridge` suppresses SEOPress's competing tag rather than yielding
+     * to it. SEOPress derived its canonical from the request URL, which agreed
+     * with LDN's only because the redirect guarantees the request URL is already
+     * the canonical form.
      *
      * @return bool
      */
     private function seo_plugin_emits_canonical() {
-        // Dynamic LDN routes are invisible to most SEO plugins — keep our canonical.
         return false;
     }
 }

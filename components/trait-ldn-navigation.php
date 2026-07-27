@@ -92,13 +92,7 @@ trait LDN_Trait_Navigation {
         ));
         $sample_size = is_numeric($sample_size) ? (int) $sample_size : 0;
 
-        $display_date = $date_iso;
-        if (function_exists('date_i18n')) {
-            $ts = strtotime($date_iso . 'T12:00:00');
-            if ($ts !== false) {
-                $display_date = date_i18n(get_option('date_format'), $ts);
-            }
-        }
+        $display_date = $this->localised_date($date_iso);
 
         $parts = array(
             sprintf(

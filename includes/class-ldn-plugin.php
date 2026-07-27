@@ -19,11 +19,27 @@ if (!defined('ABSPATH')) {
 final class LDN_Plugin {
 
     /**
+     * How far into CHANGELOG.md to look for the newest entry before giving up.
+     * The heading sits in the first few lines; this only guards against
+     * scanning a long file if the format ever changes.
+     */
+    const CHANGELOG_SCAN_LINES = 40;
+
+    /**
      * Singleton instance.
      *
      * @var LDN_Plugin|null
      */
     private static $instance = null;
+
+    /**
+     * Parsed newest changelog entry. `false` = not yet read, `null` = read and
+     * unparseable — distinguished so an unreadable file is not re-read on every
+     * call within a request.
+     *
+     * @var array|null|false
+     */
+    private static $release_info = false;
 
     /**
      * Whether init() has already run (idempotency guard).
@@ -138,6 +154,9 @@ final class LDN_Plugin {
         if ($this->is_network_site()) {
             $this->router()->register();
             $this->dispatcher()->register();
+            (new LDN_Canonical_Redirect())->register();
+            (new LDN_Query_Signals())->register();
+            (new LDN_Seo_Bridge())->register();
             (new LDN_Llms_Txt($this->site_id(), $this->config(), $this->artefacts()))->register();
             require_once LDN_INCLUDES_DIR . 'class-ldn-sitemap-module.php';
         }
@@ -165,6 +184,72 @@ final class LDN_Plugin {
      */
     public function version() {
         return defined('LDN_VERSION') ? LDN_VERSION : '0.0.0';
+    }
+
+    /**
+     * Version and release date of the newest CHANGELOG.md entry.
+     *
+     * The version alone tells an operator *what* is deployed but not *when* it
+     * was cut, which is the question being asked when someone is checking
+     * whether a deploy landed. The changelog is the only place that date is
+     * recorded, so it is read from there rather than declared a second time in
+     * PHP — a separate constant would be a fourth version source to keep in
+     * sync, and the one most likely to be forgotten.
+     *
+     * Deliberately NOT `filemtime()`: that reports when the file reached the
+     * server, which changes on every redeploy of an unchanged build, and the
+     * versioning rule bans it as a version source.
+     *
+     * The caller compares `version` against `version()` — when they disagree,
+     * the changelog is missing an entry for the running build and its date
+     * belongs to an older one, so it must not be presented as this build's.
+     * `tests/unit/test_plugin_version_changelog_sync.py` fails on that drift,
+     * so it should not reach a deploy.
+     *
+     * @return array{version:string,date:string}|null Null if unreadable or unparsed.
+     */
+    public static function release_info() {
+        if (self::$release_info === false) {
+            self::$release_info = self::parse_release(LDN_PLUGIN_DIR . 'CHANGELOG.md');
+        }
+        return self::$release_info;
+    }
+
+    /**
+     * Read the topmost `## [x.y.z] — YYYY-MM-DD` heading.
+     *
+     * Streamed and capped rather than read whole: the changelog only grows, the
+     * entry wanted is always at the top, and this runs on the staging
+     * diagnostics panel on every page view.
+     *
+     * @param string $path
+     * @return array{version:string,date:string}|null
+     */
+    private static function parse_release($path) {
+        if (!is_readable($path)) {
+            return null;
+        }
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return null;
+        }
+
+        $release = null;
+        $lines = 0;
+        while (($line = fgets($handle)) !== false) {
+            if (++$lines > self::CHANGELOG_SCAN_LINES) {
+                break;
+            }
+            // Any dash variant: which one the file uses is cosmetic, the ISO
+            // date is not.
+            if (preg_match('/^##\s*\[([^\]]+)\]\s*[—–-]\s*(\d{4}-\d{2}-\d{2})/u', $line, $matches)) {
+                $release = array('version' => $matches[1], 'date' => $matches[2]);
+                break;
+            }
+        }
+        fclose($handle);
+
+        return $release;
     }
 
     /**
