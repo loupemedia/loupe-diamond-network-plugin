@@ -26,7 +26,9 @@ trait LDN_Trait_Sections {
             case 'price_chart':
                 return $this->chart_html($bag['price'], 'ldn-price-chart', __('Price over time', 'loupe-diamond-network'));
             case 'table_chart':
-                return $this->shapes_at_carat_hero_html($ctx, $bag);
+                return $this->shapes_at_carat_html($ctx, $bag);
+            case 'bar_chart':
+                return $this->shapes_at_carat_html($ctx, $bag);
             case 'comparison_chart':
                 $type_label = isset(self::$TYPE_LABELS[$ctx->diamond_type])
                     ? self::$TYPE_LABELS[$ctx->diamond_type]
@@ -40,6 +42,7 @@ trait LDN_Trait_Sections {
                         $type_label
                     )
                 );
+            case 'summary_cards':
             case 'summary_table':
             case 'market_overview':
                 return $this->market_overview_table_html($ctx, $bag);
@@ -83,11 +86,12 @@ trait LDN_Trait_Sections {
             return $this->carat_ladder_html($ctx, $bag, $currency);
         }
         if ($section_id === 'color_clarity') {
-            return $this->color_clarity_table_html(
+            $html = $this->color_clarity_table_html(
                 $ctx,
                 isset($bag['color_clarity']) ? $bag['color_clarity'] : array(),
                 $currency
             );
+            return $html . $this->size_dimensions_card_html($ctx, $currency);
         }
         if ($section_id === 'hub_stats') {
             return $this->hub_stats_html($ctx, $bag);
@@ -100,6 +104,9 @@ trait LDN_Trait_Sections {
         }
         if ($section_id === 'popular_searches') {
             return $this->popular_searches_html($ctx, $bag);
+        }
+        if ($section_id === 'shapes_at_carat') {
+            return $this->shapes_at_carat_html($ctx, $bag);
         }
         if (substr($section_id, -8) === '_dynamic') {
             if ($ctx->page_level !== 'shape') {
@@ -115,6 +122,9 @@ trait LDN_Trait_Sections {
                     return $dynamic;
                 }
                 if ($section_id === 'type_overview_dynamic') {
+                    if ($this->type_intro_in_hero) {
+                        return '';
+                    }
                     return $this->type_intro_html($ctx, $bag, $currency);
                 }
             }

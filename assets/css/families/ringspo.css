@@ -6,7 +6,7 @@
  * breadcrumbs, the hero chart on a white card, and white headline stat cards.
  * Content sections below are edge-to-edge: white alternating with solid
  * signature-purple bands (#706cc8) and white text. Two brand colours only.
- * Sharp edges throughout.
+ * White card surfaces use a consistent 12px corner radius.
  */
 
 .ldn-chrome--ringspo-classic {
@@ -14,6 +14,7 @@
 	--ringspo-purple: #706cc8;
 	--ringspo-ink: #1a1a2e;
 	--ringspo-muted: #4a4a68;
+	--ringspo-card-radius: 12px;
 }
 
 .ldn-page-shell {
@@ -81,7 +82,9 @@
 	margin: 0 0 1.25rem;
 	padding: 1rem;
 	background-color: #fff;
+	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+	overflow: hidden;
 }
 
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-chart figcaption {
@@ -105,6 +108,7 @@
 	gap: 0.3rem;
 	padding: 0.85rem 1rem;
 	background-color: #fff;
+	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
 }
 
@@ -204,6 +208,16 @@
 /* Chart outside the hero band (size pages / other levels): white, full width. */
 .ldn-chrome--ringspo-classic .ldn-chart {
 	background-color: #fff;
+	border-radius: var(--ringspo-card-radius);
+	overflow: hidden;
+}
+
+/* Hero-band data tables (carat tiers, market overview) as white cards. */
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table {
+	background-color: #fff;
+	border-radius: var(--ringspo-card-radius);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+	overflow: hidden;
 }
 
 /* =====================================================================
@@ -240,14 +254,31 @@
 
 /* Data tables, charts, size figures and price cards sit on white cards inside
    purple bands so multi-colour SVGs and stat text stay readable. */
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-scroll,
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table,
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-chart,
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-figure,
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-price-card,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-price-size-card,
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-ideal-real {
 	background-color: #fff;
 	color: var(--ringspo-ink);
+}
+
+/* Colour/clarity heatmap: scroll wrapper stays transparent; only the table is carded. */
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-scroll {
+	background-color: transparent;
+	padding: 0.25rem 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-table {
+	border-radius: var(--ringspo-card-radius);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+	overflow: hidden;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table {
+	border-radius: var(--ringspo-card-radius);
+	overflow: hidden;
 }
 
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-figure p,
@@ -257,7 +288,15 @@
 	color: var(--ringspo-ink);
 }
 
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-price-size-card span {
+	color: var(--ringspo-ink);
+}
+
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-price-card {
+	text-decoration: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-price-size-card {
 	text-decoration: none;
 }
 
@@ -309,9 +348,51 @@
 	color: var(--ringspo-ink);
 }
 
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-shape-cards,
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-shape-cards__grid {
+	margin-top: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-shape-cards h2,
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-shape-cards p {
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card,
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card span {
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card {
+	text-decoration: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-shape-card,
+.ldn-chrome--ringspo-classic .ldn-size-price-card,
+.ldn-chrome--ringspo-classic .ldn-price-size-card,
+.ldn-chrome--ringspo-classic .ldn-type-nav-card,
+.ldn-chrome--ringspo-classic .ldn-size-figure,
+.ldn-chrome--ringspo-classic .ldn-size-ideal-real,
+.ldn-chrome--ringspo-classic .ldn-size-matrix-scroll,
+.ldn-chrome--ringspo-classic .ldn-size-checker-panel,
+.ldn-chrome--ringspo-classic .ldn-size-checker-results,
+.ldn-chrome--ringspo-classic .ldn-size-checker-card,
+.ldn-chrome--ringspo-classic .ldn-size-scale-controls,
+.ldn-chrome--ringspo-classic .ldn-size-checker-cta,
+.ldn-chrome--ringspo-classic .ldn-faceup-callout {
+	border-radius: var(--ringspo-card-radius);
+	overflow: hidden;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card__shape {
+	color: var(--ringspo-purple);
+}
+
 /* Size-page intro inside the green hero band. */
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-size-intro,
-.ldn-chrome--ringspo-classic .ldn-size-intro {
+.ldn-chrome--ringspo-classic .ldn-size-intro,
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-type-intro--hero-band,
+.ldn-chrome--ringspo-classic .ldn-type-intro--hero-band {
 	margin-top: 0;
 	padding-top: 0.5rem;
 	padding-bottom: 0;
@@ -345,6 +426,15 @@
 
 .ldn-chrome--ringspo-classic .ldn-size-intro p {
 	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-type-intro--hero-band p {
+	color: #fff;
+	margin: 0 0 0.65rem;
+}
+
+.ldn-chrome--ringspo-classic .ldn-type-intro--hero-band p:last-child {
+	margin-bottom: 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-intro a {

@@ -286,7 +286,7 @@ trait LDN_Trait_Content {
 
         $symbol = $this->currency_symbol($currency);
         $country_name = $this->country_full_name($ctx);
-        $color_word = strtolower($ctx->country_code) === 'us' ? 'color' : 'colour';
+        $color_word = $this->locale_color_word($ctx);
         $carat_label = $this->format_carat_label($ctx->carat);
         $shape_label = $ctx->shape !== null
             ? ucwords(str_replace('-', ' ', $ctx->shape))
@@ -374,9 +374,12 @@ trait LDN_Trait_Content {
      * @param LDN_Page_Context $ctx
      * @param array            $bag
      * @param string|null      $currency ISO code for price formatting.
+     * @param bool             $in_hero_band When true, render white-on-green copy
+     *                                       inside page_chrome.hero_band (no body
+     *                                       section padding).
      * @return string
      */
-    public function type_intro_html(LDN_Page_Context $ctx, array $bag, $currency = null) {
+    public function type_intro_html(LDN_Page_Context $ctx, array $bag, $currency = null, $in_hero_band = false) {
         $payload = is_array($bag['type_summary']) ? $bag['type_summary'] : array();
         $aggregate = isset($payload['aggregate']) && is_array($payload['aggregate'])
             ? $payload['aggregate']
@@ -420,7 +423,11 @@ trait LDN_Trait_Content {
             $body .= "\n\n" . $detail;
         }
 
-        return '<section class="ldn-section ldn-intro-dynamic ldn-type-intro">'
+        $class = $in_hero_band
+            ? 'ldn-type-intro ldn-type-intro--hero-band'
+            : 'ldn-section ldn-intro-dynamic ldn-type-intro';
+
+        return '<section class="' . esc_attr($class) . '">'
             . wp_kses_post(wpautop($body))
             . '</section>';
     }

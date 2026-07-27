@@ -284,8 +284,10 @@ trait LDN_Trait_Tables {
 
         $currency_code = isset($payload['currency']) ? (string) $payload['currency'] : (string) $currency;
         $symbol = $this->currency_symbol($currency_code !== '' ? $currency_code : $currency);
+        $color_word = $this->locale_color_word($ctx);
+        $color_label = ucfirst($color_word);
 
-        $head = '<th scope="col">' . esc_html__('Clarity \\ Colour', 'loupe-diamond-network') . '</th>';
+        $head = '<th scope="col">' . esc_html(sprintf('Clarity \\ %s', $color_label)) . '</th>';
         foreach ($colors as $color) {
             $head .= '<th scope="col">' . esc_html(strtoupper($color)) . '</th>';
         }
@@ -306,11 +308,14 @@ trait LDN_Trait_Tables {
         }
 
         return '<section class="ldn-section ldn-color-clarity">'
-            . '<h2>' . esc_html__('Price by colour and clarity', 'loupe-diamond-network') . '</h2>'
-            . '<p>' . esc_html__(
-                'Average price for this shape and carat weight across the colour (D is the highest grade) and clarity grades we track. Darker cells cost more.',
-                'loupe-diamond-network'
-            ) . '</p>'
+            . '<h2>' . esc_html(sprintf(__('Price by %s and clarity', 'loupe-diamond-network'), $color_word)) . '</h2>'
+            . '<p>' . esc_html(sprintf(
+                __(
+                    'Average price for this shape and carat weight across the %s (D is the highest grade) and clarity grades we track. Darker cells cost more.',
+                    'loupe-diamond-network'
+                ),
+                $color_word
+            )) . '</p>'
             . '<div class="ldn-cc-scroll"><table class="ldn-data-table ldn-cc-table">'
             . '<thead><tr>' . $head . '</tr></thead>'
             . '<tbody>' . $body . '</tbody></table></div></section>';

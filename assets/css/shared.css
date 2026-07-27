@@ -119,6 +119,70 @@
 	font-size: 0.9em;
 }
 
+/* ----- Shape hub cards (CP53_08) ----- */
+
+.ldn-shape-cards__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	gap: 0.75rem;
+	margin-top: 1rem;
+}
+
+.ldn-shape-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 1rem 1.1rem;
+	border: 1px solid var(--ldn-border, #e2e2e8);
+	border-radius: 4px;
+	background: #fff;
+	color: var(--ldn-text, #1a1a2e);
+	text-decoration: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ldn-shape-card:hover,
+.ldn-shape-card:focus-visible {
+	border-color: var(--ldn-primary, #333);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	text-decoration: none;
+}
+
+.ldn-shape-card__shape {
+	font-weight: 600;
+	font-size: 1rem;
+	color: var(--ldn-primary, #333);
+}
+
+.ldn-shape-card__price {
+	font-size: 1.25rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.ldn-shape-card__change {
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+.ldn-shape-card__change--up {
+	color: #1a7f37;
+}
+
+.ldn-shape-card__change--down {
+	color: #c0392b;
+}
+
+.ldn-shape-card__change--flat {
+	color: var(--ldn-secondary-text, #666);
+}
+
+.ldn-shape-cards__hint {
+	margin: 0 0 0.5rem;
+	font-size: 0.9375rem;
+	color: var(--ldn-secondary-text, inherit);
+}
+
 /* ----- Sections ----- */
 
 .ldn-section {
@@ -538,6 +602,53 @@
 }
 
 .ldn-size-price-card__cta {
+	margin-top: 0.35rem;
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--ldn-primary, #706cc8);
+}
+
+/* Size snapshot cards on pricing pages (link through to size pages). */
+.ldn-price-size-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 1rem;
+	margin-top: 0.75rem;
+}
+
+.ldn-price-size-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	padding: 1rem 1.25rem;
+	background: #fff;
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 4px;
+	text-decoration: none;
+	color: var(--ldn-text, #1f2937);
+}
+
+.ldn-price-size-card__label {
+	font-size: 0.78rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ldn-text-muted, #4b5563);
+}
+
+.ldn-price-size-card__dimension {
+	font-size: 1.5rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.ldn-price-size-card__detail {
+	font-size: 0.85rem;
+	color: var(--ldn-text-muted, #4b5563);
+	font-variant-numeric: tabular-nums;
+}
+
+.ldn-price-size-card__cta {
 	margin-top: 0.35rem;
 	font-size: 0.9rem;
 	font-weight: 600;

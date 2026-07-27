@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.3] — 2026-07-14
+
+- **Ringspo card chrome**: all white card surfaces (hero chart, headline stat cards, shape/price/size cards, tables on purple bands, size-module panels) use a consistent **12px** corner radius via `--ringspo-card-radius`.
+
+## [0.8.2] — 2026-07-14
+
+- **Diamond-type pages**: type-summary intro copy now renders inside the green hero band (white on green) when templated copy is absent; the body section no longer duplicates it.
+- **Pricing → size link**: shape pages show a size snapshot card (median mm dimensions + CTA) after the colour/clarity table instead of a plain footer link.
+- **Purple-band tables**: colour/clarity heatmap scroll wrapper is transparent; only the table is carded for a less boxy look on purple sections.
+
+## [0.8.1] — 2026-07-14
+
+- **Top-level hub**: `summary_cards` hero component now renders the C5.3 natural vs lab-grown carat price table (was an unmapped no-op on Ringspo).
+- **Breadcrumbs**: pricing pages render the breadcrumb trail above the H1 in the hero band (and on non-band pages).
+- **US locale**: color/clarity heatmap headings and copy use American *color* spelling on `us` pages; other countries keep *colour*.
+
+## [0.8.0] — 2026-07-14
+
+- **Shape hub cards (CP53_08)**: `shapes_at_carat` widget with entitlement-driven presentations — `shape_cards` (linked card grid for Ringspo, DA, BDI), `bar_chart_links` (chart + table for Loupe/DPE), `table_ranked` (ranked table for DPG/DHUK/carat EMD). `bar_chart` / `table_chart` hero components now dispatch through this layer instead of rendering nothing on Ringspo all-shapes pages.
+
 ## [0.7.0] — 2026-07-13
 
 - **Diamond Chart pre-launch (CP 114)**: carat-hub mm ruler/grid scale explorer (no quarter); individual pages lead with full min–max spread; profile marketing shell at `/` with CTAs to `/size/`; `z3_enabled` on; CORS whitelist for `diamondchart.org`.

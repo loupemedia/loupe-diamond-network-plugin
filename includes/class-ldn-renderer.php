@@ -39,6 +39,7 @@ require_once LDN_PLUGIN_DIR . 'components/trait-ldn-schema-bridge.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-url.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-data.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-homepage.php';
+require_once LDN_PLUGIN_DIR . 'components/trait-ldn-shapes-at-carat.php';
 
 final class LDN_Renderer {
     use LDN_Trait_Chrome;
@@ -49,6 +50,7 @@ final class LDN_Renderer {
     use LDN_Trait_Tables;
     use LDN_Trait_Sections;
     use LDN_Trait_Homepage;
+    use LDN_Trait_Shapes_At_Carat;
     use LDN_Trait_SchemaBridge;
     use LDN_Trait_Url;
     use LDN_Trait_Data;
@@ -191,6 +193,14 @@ final class LDN_Renderer {
     private $plotly_emitted = false;
 
     /**
+     * Set when diamond-type intro fallback renders inside the hero band so
+     * type_overview_dynamic does not repeat the same copy in the body.
+     *
+     * @var bool
+     */
+    private $type_intro_in_hero = false;
+
+    /**
      * @param LDN_Data_Fetcher $fetcher
      * @param LDN_Config       $config
      */
@@ -206,6 +216,8 @@ final class LDN_Renderer {
      * @return string
      */
     public function render(LDN_Page_Context $ctx) {
+        $this->type_intro_in_hero = false;
+
         $layout = $this->config->get_page_layout($ctx->site_id, $ctx->page_level, $ctx->country_code);
         $bag = $this->prefetch($ctx);
         $currency = $this->config->get_currency($ctx->site_id, $ctx->country_code);
@@ -246,17 +258,26 @@ final class LDN_Renderer {
 
         if ($hero_band) {
             $out .= '<header class="ldn-hero-band">';
-            $out .= $title_html;
             $out .= $breadcrumb_html;
+            $out .= $title_html;
             if (!$hero_inline) {
                 $out .= $hero_html;
+            }
+            if ($ctx->page_level === 'diamond-type'
+                && $this->copy_dynamic_html('type_overview_dynamic', $ctx, $bag) === ''
+            ) {
+                $type_intro_hero = $this->type_intro_html($ctx, $bag, $currency, true);
+                if ($type_intro_hero !== '') {
+                    $out .= $type_intro_hero;
+                    $this->type_intro_in_hero = true;
+                }
             }
             $out .= $this->hero_stats_html($ctx, $summary, $currency);
             $out .= $freshness_html;
             $out .= '</header>';
         } else {
-            $out .= $title_html;
             $out .= $breadcrumb_html;
+            $out .= $title_html;
             if (!$hero_inline) {
                 $out .= $hero_html;
             }
@@ -271,7 +292,6 @@ final class LDN_Renderer {
             $out .= $this->render_section((string) $section_id, $ctx, $bag, $currency);
         }
 
-        $out .= $this->size_price_link_html($ctx);
         $out .= $this->future_feature_mounts($ctx);
 
         $out .= '</main>';

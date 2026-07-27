@@ -11,6 +11,16 @@ if (!defined('ABSPATH')) {
 
 trait LDN_Trait_Navigation {
     /**
+     * American vs British spelling for the diamond color grade (US → color).
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    protected function locale_color_word(LDN_Page_Context $ctx) {
+        return strtolower((string) $ctx->country_code) === 'us' ? 'color' : 'colour';
+    }
+
+    /**
      * Visible breadcrumb trail when the profile lists `breadcrumb` in schema_features.
      *
      * @param LDN_Page_Context $ctx
@@ -162,23 +172,17 @@ trait LDN_Trait_Navigation {
     }
 
     /**
-     * US-only link from a pricing shape page to the matching size page (Decision 5).
+     * US-only size snapshot card from a pricing shape page (Decision 5).
+     *
+     * Mirrors the live price cards on size pages but links pricing → size with
+     * median mm dimensions when size-summary.json is available.
      *
      * @param LDN_Page_Context $ctx
+     * @param string|null      $currency
      * @return string
      */
-    public function size_price_link_html(LDN_Page_Context $ctx) {
-        if ($ctx->module !== 'price' || $ctx->page_level !== 'shape') {
-            return '';
-        }
-        if (!$this->config->size_price_internal_links($ctx->site_id)) {
-            return '';
-        }
-        $rollout_country = $this->config->size_rollout_country($ctx->site_id);
-        if (strtolower($ctx->country_code) !== strtolower($rollout_country)) {
-            return '';
-        }
-        if ($ctx->shape === null || $ctx->carat === null) {
+    public function size_dimensions_card_html(LDN_Page_Context $ctx, $currency = null) {
+        if (!$this->size_price_link_eligible($ctx)) {
             return '';
         }
 
@@ -188,15 +192,127 @@ trait LDN_Trait_Navigation {
             return '';
         }
 
+        $size_ctx = new LDN_Page_Context(
+            $ctx->site_id,
+            'size-individual',
+            $ctx->country_code,
+            null,
+            $ctx->carat,
+            $ctx->shape,
+            'size'
+        );
+        $summary = $this->fetcher->fetch_artefact('size_summary_json', $size_ctx);
+        $summary = is_array($summary) ? $summary : array();
+
         $shape_label = ucwords(str_replace('-', ' ', $ctx->shape));
-        $text = sprintf(
+        $carat_label = $this->format_carat_label($ctx->carat);
+        $primary = $this->size_card_primary_dimension($size_renderer, $summary);
+        $secondary = $this->size_card_secondary_line($size_renderer, $summary);
+
+        $heading = sprintf(
             /* translators: 1: carat weight, 2: diamond shape */
-            __('View %1$s carat %2$s diamond size (mm dimensions)', 'loupe-diamond-network'),
-            $this->format_carat_label($ctx->carat),
+            __('How big is a %1$s carat %2$s?', 'loupe-diamond-network'),
+            $carat_label,
             $shape_label
         );
 
-        return '<section class="ldn-section ldn-price-size-link"><p><a href="'
-            . esc_url($url) . '">' . esc_html($text) . '</a></p></section>';
+        $card = '<a class="ldn-price-size-card" href="' . esc_url($url) . '">';
+        $card .= '<span class="ldn-price-size-card__label">' . esc_html($shape_label)
+            . ' · ' . esc_html($carat_label) . ' ct</span>';
+        if ($primary !== '') {
+            $card .= '<span class="ldn-price-size-card__dimension">' . esc_html($primary) . '</span>';
+        }
+        if ($secondary !== '') {
+            $card .= '<span class="ldn-price-size-card__detail">' . esc_html($secondary) . '</span>';
+        }
+        $card .= '<span class="ldn-price-size-card__cta">'
+            . esc_html__('View mm dimensions & size chart', 'loupe-diamond-network') . ' →</span>';
+        $card .= '</a>';
+
+        return '<section class="ldn-section ldn-price-size-link"><h2>' . esc_html($heading) . '</h2>'
+            . '<div class="ldn-price-size-cards">' . $card . '</div></section>';
+    }
+
+    /**
+     * @param LDN_Page_Context $ctx
+     * @return bool
+     */
+    private function size_price_link_eligible(LDN_Page_Context $ctx) {
+        if ($ctx->module !== 'price' || $ctx->page_level !== 'shape') {
+            return false;
+        }
+        if (!$this->config->size_price_internal_links($ctx->site_id)) {
+            return false;
+        }
+        $rollout_country = $this->config->size_rollout_country($ctx->site_id);
+        if (strtolower($ctx->country_code) !== strtolower((string) $rollout_country)) {
+            return false;
+        }
+        return $ctx->shape !== null && $ctx->carat !== null;
+    }
+
+    /**
+     * @param LDN_Size_Renderer $size_renderer
+     * @param array             $summary
+     * @return string
+     */
+    private function size_card_primary_dimension(LDN_Size_Renderer $size_renderer, array $summary) {
+        if ($size_renderer->is_near_round($summary)) {
+            $diameter = $size_renderer->average_diameter_mm($summary, 'median');
+            if ($diameter !== null) {
+                return sprintf(
+                    /* translators: %s: diameter in millimetres */
+                    __('Median diameter: %s mm', 'loupe-diamond-network'),
+                    (string) $diameter
+                );
+            }
+            return '';
+        }
+
+        $length = $this->dig_first($summary, array(array('dimensions_mm', 'length', 'median')));
+        $width = $this->dig_first($summary, array(array('dimensions_mm', 'width', 'median')));
+        if ($length !== null && $width !== null) {
+            return sprintf(
+                /* translators: 1: width mm, 2: length mm */
+                __('Median size: %1$s × %2$s mm', 'loupe-diamond-network'),
+                (string) $width,
+                (string) $length
+            );
+        }
+        return '';
+    }
+
+    /**
+     * @param LDN_Size_Renderer $size_renderer
+     * @param array             $summary
+     * @return string
+     */
+    private function size_card_secondary_line(LDN_Size_Renderer $size_renderer, array $summary) {
+        $faceup = $this->dig_first($summary, array(
+            array('faceup_area_mm2', 'median'),
+            array('ideal', 'faceup_area_mm2'),
+        ));
+        if ($faceup !== null && is_numeric($faceup)) {
+            return sprintf(
+                /* translators: %s: face-up area in square millimetres */
+                __('Face-up area: %s mm²', 'loupe-diamond-network'),
+                (string) $faceup
+            );
+        }
+
+        if ($size_renderer->is_near_round($summary)) {
+            $p10 = $size_renderer->average_diameter_mm($summary, 'p10');
+            $p90 = $size_renderer->average_diameter_mm($summary, 'p90');
+            if ($p10 !== null && $p90 !== null) {
+                return sprintf(
+                    /* translators: 1: low diameter mm, 2: high diameter mm */
+                    __('Typical range: %1$s – %2$s mm', 'loupe-diamond-network'),
+                    (string) $p10,
+                    (string) $p90
+                );
+            }
+        }
+
+        return '';
     }
 }

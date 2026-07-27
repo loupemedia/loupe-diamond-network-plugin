@@ -74,10 +74,15 @@ require_once __DIR__ . '/../includes/class-ldn-page-context.php';
 
 // --- Minimal collaborator stubs (constructor type hints) ---------------------
 if (!class_exists('LDN_Data_Fetcher')) {
-    class LDN_Data_Fetcher {}
+    class LDN_Data_Fetcher {
+        public function fetch_artefact($artefact_id, $ctx) {
+            return null;
+        }
+    }
 }
 if (!class_exists('LDN_Config')) {
     class LDN_Config {
+        public function get_bundle() { return array(); }
         public function get_content_profile($site_id) { return array(); }
         public function get_currency($site_id, $country) { return 'USD'; }
         public function get_url_structure($site_id) {
@@ -94,10 +99,14 @@ if (!class_exists('LDN_Config')) {
         public function get_site($site_id) {
             return array('countries' => array(array('code' => 'us', 'full_name' => 'United States')));
         }
+        public function size_price_internal_links($site_id) {
+            return false;
+        }
     }
 }
 
 require_once __DIR__ . '/../includes/class-ldn-schema.php';
+require_once __DIR__ . '/../includes/class-ldn-artefacts.php';
 require_once __DIR__ . '/../includes/class-ldn-renderer.php';
 
 // --- Tiny assertion harness --------------------------------------------------
@@ -740,6 +749,124 @@ check(
     'type_overview_dynamic falls back to type_intro_html when copy.json is absent'
 );
 
+$type_intro_hero = $renderer->type_intro_html($type_ctx, $type_summary_bag, 'USD', true);
+check(
+    strpos($type_intro_hero, 'ldn-type-intro--hero-band') !== false,
+    'type_intro_html emits hero-band modifier when in_hero_band=true'
+);
+
+$intro_ref = new ReflectionClass($renderer);
+$intro_flag = $intro_ref->getProperty('type_intro_in_hero');
+$intro_flag->setAccessible(true);
+$intro_flag->setValue($renderer, true);
+$type_overview_suppressed = $renderer->render_section('type_overview_dynamic', $type_ctx, $type_summary_bag, 'USD');
+check(
+    $type_overview_suppressed === '',
+    'type_overview_dynamic is empty when intro already rendered in the hero band'
+);
+$intro_flag->setValue($renderer, false);
+
+if (!class_exists('LDN_Config_Type_Hero_Render')) {
+    class LDN_Config_Type_Hero_Render extends LDN_Config {
+        public function get_content_profile($site_id) {
+            return array('page_chrome' => array('hero_band' => true));
+        }
+
+        public function get_page_layout($site_id, $page_level, $country_code = null) {
+            return array(
+                'hero_component' => null,
+                'sections'       => array('type_overview_dynamic'),
+                'ad_slots'       => array(),
+            );
+        }
+    }
+}
+if (!class_exists('LDN_Fetcher_Type_Summary')) {
+    class LDN_Fetcher_Type_Summary extends LDN_Data_Fetcher {
+        public function fetch_artefact($artefact_id, $ctx) {
+            if ($artefact_id === 'type_summary_json') {
+                return array(
+                    'aggregate' => array(
+                        'carat_count'           => 19,
+                        'most_popular_carat'    => '1',
+                        'weighted_median_price' => 3873,
+                        'total_sample_size'     => 510000,
+                    ),
+                );
+            }
+            return null;
+        }
+    }
+}
+$type_page_renderer = new LDN_Renderer(new LDN_Fetcher_Type_Summary(), new LDN_Config_Type_Hero_Render());
+$type_page_html = $type_page_renderer->render($type_ctx);
+check(
+    strpos($type_page_html, 'ldn-type-intro--hero-band') !== false,
+    'diamond-type render places type-summary intro inside the hero band when copy is absent'
+);
+check(
+    substr_count($type_page_html, '19 carat weights') === 1,
+    'diamond-type intro is not duplicated in the hero band and body'
+);
+
+// --- 17. pricing → size snapshot card (Decision 5) ---------------------------
+// Test intent: US shape pages append a size snapshot card after colour/clarity
+// when size_price_internal_links is enabled; card shows median mm dimensions from
+// size-summary.json. Would fail if: link stayed a plain footer anchor or card
+// omitted ldn-price-size-card markup.
+require_once LDN_PLUGIN_DIR . 'includes/class-ldn-test-combos.php';
+require_once LDN_PLUGIN_DIR . 'includes/class-ldn-size-renderer.php';
+
+if (!class_exists('LDN_Config_Size_Link')) {
+    class LDN_Config_Size_Link extends LDN_Config {
+        public function size_price_internal_links($site_id) {
+            return true;
+        }
+
+        public function size_rollout_country($site_id) {
+            return 'us';
+        }
+
+        public function get_url_structure($site_id) {
+            $structure = parent::get_url_structure($site_id);
+            $structure['size_level_3'] = '/size/{carat}/{shape}/';
+            return $structure;
+        }
+
+        public function shape_to_s3_slug($shape) {
+            return (string) $shape;
+        }
+    }
+}
+if (!class_exists('LDN_Fetcher_Size_Summary')) {
+    class LDN_Fetcher_Size_Summary extends LDN_Data_Fetcher {
+        public function fetch_artefact($artefact_id, $ctx) {
+            if ($artefact_id === 'size_summary_json') {
+                return array(
+                    'shape' => 'round',
+                    'dimensions_mm' => array(
+                        'length' => array('median' => 6.4),
+                        'width'  => array('median' => 6.4),
+                    ),
+                    'faceup_area_mm2' => array('median' => 32.2),
+                );
+            }
+            return null;
+        }
+    }
+}
+$ringspo_shape_ctx = new LDN_Page_Context('ringspo', 'shape', 'us', 'natural', '1', 'round');
+$size_card_renderer = new LDN_Renderer(new LDN_Fetcher_Size_Summary(), new LDN_Config_Size_Link());
+$size_card_html = $size_card_renderer->size_dimensions_card_html($ringspo_shape_ctx, 'USD');
+check(
+    strpos($size_card_html, 'ldn-price-size-card') !== false,
+    'size_dimensions_card_html renders the pricing→size snapshot card'
+);
+check(
+    strpos($size_card_html, 'Median diameter: 6.4 mm') !== false,
+    'size_dimensions_card_html shows median diameter from size-summary.json'
+);
+
 // --- 11. color_clarity_table_html heatmap grid (shape pages) ----------------
 // Test intent: the colour x clarity grid renders one cell per (colour, clarity)
 // from C5.7 color-clarity.json (`price_table[color][clarity] = {price,count}`),
@@ -767,6 +894,17 @@ check(
     strpos($cc_html, 'ldn-color-clarity') !== false && strpos($cc_html, '$9,800') !== false,
     'color_clarity grid renders the section with formatted cell prices'
 );
+$cc_with_size = $size_card_renderer->render_section(
+    'color_clarity',
+    $ringspo_shape_ctx,
+    array('color_clarity' => $cc_payload),
+    'USD'
+);
+check(
+    strpos($cc_with_size, 'ldn-color-clarity') !== false
+        && strpos($cc_with_size, 'ldn-price-size-card') !== false,
+    'color_clarity section appends the size dimensions card after the heatmap'
+);
 check(
     strpos($cc_html, '<th scope="col">D</th>') < strpos($cc_html, '<th scope="col">H</th>'),
     'colour columns are ordered best (D) before worse (H) regardless of JSON order'
@@ -778,6 +916,18 @@ check(
 check(
     strpos($cc_html, 'color-mix(in srgb, var(--ldn-primary)') !== false,
     'cells are tinted by price via the brand --ldn-primary heatmap colour'
+);
+check(
+    strpos($cc_html, 'Clarity \\ Color') !== false
+        && strpos($cc_html, 'Price by color and clarity') !== false,
+    'US color/clarity grid uses American color spelling'
+);
+$uk_shape_ctx = new LDN_Page_Context('modernjeweler', 'shape', 'uk', 'natural', '1', 'round');
+$uk_cc_html = $renderer->color_clarity_table_html($uk_shape_ctx, $cc_payload, 'GBP');
+check(
+    strpos($uk_cc_html, 'Clarity \\ Colour') !== false
+        && strpos($uk_cc_html, 'Price by colour and clarity') !== false,
+    'non-US color/clarity grid keeps British colour spelling'
 );
 check(
     $renderer->color_clarity_table_html($shape_ctx, array(), 'USD') === '',
@@ -866,6 +1016,122 @@ check(
 check(
     strpos($popular_html, 'ldn-popular-shapes') !== false,
     'popular_searches lists top shape links when top_tables is present'
+);
+
+// --- 12. shape_cards hub (CP53_08) ------------------------------------------
+// Test intent: shape_cards renders a crawlable linked card per shape from
+// shapes-ranking.json; bar_chart hero dispatches to the entitlement layer.
+// Would fail if: bar_chart hero still returned '' on Ringspo all-shapes pages.
+$all_shapes_ctx = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'natural', '1');
+$shape_hub_bag = array(
+    'ranking' => array(
+        'currency_symbol' => '$',
+        'change_period'   => '1_month',
+        'shapes' => array(
+            array('shape' => 'Round', 'median_price' => 3510, 'price_change' => -5.39),
+            array('shape' => 'Oval', 'median_price' => 3200, 'price_change' => 1.2),
+        ),
+    ),
+);
+$cards_html = $renderer->shape_cards_html($all_shapes_ctx, $shape_hub_bag);
+check(
+    strpos($cards_html, 'ldn-shape-cards') !== false
+        && strpos($cards_html, 'ldn-shape-card') !== false,
+    'shape_cards_html renders the linked card grid'
+);
+check(
+    strpos($cards_html, 'https://example.com/us/diamond-prices/natural/1-carat/round/') !== false,
+    'shape_cards links Round down to the shape page'
+);
+check(
+    strpos($cards_html, '$3,510') !== false && strpos($cards_html, '5.39%') !== false,
+    'shape_cards shows formatted median price and period change'
+);
+
+if (!class_exists('LDN_Config_Ringspo_Shape_Hub')) {
+    class LDN_Config_Ringspo_Shape_Hub extends LDN_Config {
+        public function get_bundle() {
+            return array(
+                'entitlements' => array(
+                    'sites' => array(
+                        'ringspo' => array(
+                            'pages' => array(
+                                'all-shapes' => array(
+                                    'wp_widgets' => array(
+                                        'shapes_at_carat' => array(
+                                            'presentation' => 'shape_cards',
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            );
+        }
+
+        public function get_content_profile($site_id) { return array(); }
+        public function get_currency($site_id, $country) { return 'USD'; }
+        public function get_url_structure($site_id) {
+            return array(
+                'level_1'      => '{country}/diamond-prices',
+                'level_2'      => '{country}/diamond-prices/{type}',
+                'level_3'      => '{country}/diamond-prices/{type}/{carat}',
+                'level_4'      => '{country}/diamond-prices/{type}/{carat}/{shape}',
+                'carat_format' => '{value}-carat',
+                'type_natural' => 'natural',
+                'type_lab'     => 'lab-grown',
+            );
+        }
+        public function get_site($site_id) {
+            return array('countries' => array(array('code' => 'us', 'full_name' => 'United States')));
+        }
+    }
+}
+$ringspo_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Ringspo_Shape_Hub());
+$hub_html = $ringspo_renderer->shapes_at_carat_html($all_shapes_ctx, $shape_hub_bag);
+check(
+    strpos($hub_html, 'ldn-shape-cards') !== false,
+    'shapes_at_carat dispatches to shape_cards when entitled on all-shapes'
+);
+
+// --- 13. summary_cards hero + breadcrumb order --------------------------------
+// Test intent: top-level summary_cards maps to the market overview table; breadcrumbs
+// lead the hero band before the visible H1. Would fail if: summary_cards still
+// fell through render_hero as '' or title preceded breadcrumbs in render output.
+$hero_ref = new ReflectionMethod($renderer, 'render_hero');
+$hero_ref->setAccessible(true);
+$summary_hero = $hero_ref->invoke($renderer, 'summary_cards', $top_ctx, $market_bag);
+check(
+    strpos($summary_hero, 'ldn-carat-price-table') !== false,
+    'summary_cards hero maps to the market overview carat price table'
+);
+
+if (!class_exists('LDN_Config_Breadcrumb_Order')) {
+    class LDN_Config_Breadcrumb_Order extends LDN_Config {
+        public function get_content_profile($site_id) {
+            return array(
+                'page_chrome' => array('hero_band' => true),
+                'schema_features' => array('breadcrumb'),
+            );
+        }
+
+        public function get_page_layout($site_id, $page_level, $country_code = null) {
+            return array(
+                'hero_component' => null,
+                'sections'       => array(),
+                'ad_slots'       => array(),
+            );
+        }
+    }
+}
+$chrome_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Breadcrumb_Order());
+$page_html = $chrome_renderer->render($shape_ctx);
+$crumb_pos = strpos($page_html, 'ldn-breadcrumbs');
+$title_pos = strpos($page_html, 'ldn-page-title');
+check(
+    $crumb_pos !== false && $title_pos !== false && $crumb_pos < $title_pos,
+    'render() outputs breadcrumbs before the H1 inside the hero band'
 );
 
 // --- Report -----------------------------------------------------------------
