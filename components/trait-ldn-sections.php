@@ -160,6 +160,9 @@ trait LDN_Trait_Sections {
                     }
                     return $this->type_intro_html($ctx, $bag, $currency);
                 }
+                if ($section_id === 'market_overview_dynamic' && $this->market_intro_in_hero) {
+                    return '';
+                }
             }
             return $this->stats_html($ctx, is_array($bag['summary']) ? $bag['summary'] : array(), $currency);
         }

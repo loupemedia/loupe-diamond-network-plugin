@@ -38,15 +38,27 @@ trait LDN_Trait_Data {
     }
 
     /**
-     * @param array  $profile
-     * @param string $key
-     * @param bool   $default
+     * @param array             $profile
+     * @param string            $key
+     * @param bool              $default
+     * @param LDN_Page_Context|null $ctx When set, honour country_overrides for this key.
      * @return bool
      */
-    private function country_in_content_flag(array $profile, $key, $default = true) {
+    private function country_in_content_flag(array $profile, $key, $default = true, $ctx = null) {
         $cic = isset($profile['country_in_content']) && is_array($profile['country_in_content'])
             ? $profile['country_in_content']
             : array();
+        if ($ctx instanceof LDN_Page_Context) {
+            $overrides = isset($cic['country_overrides']) && is_array($cic['country_overrides'])
+                ? $cic['country_overrides']
+                : array();
+            $code = strtolower((string) $ctx->country_code);
+            if (isset($overrides[$code]) && is_array($overrides[$code])
+                && array_key_exists($key, $overrides[$code])
+            ) {
+                return (bool) $overrides[$code][$key];
+            }
+        }
         return array_key_exists($key, $cic) ? (bool) $cic[$key] : $default;
     }
 
@@ -158,6 +170,9 @@ trait LDN_Trait_Data {
                 break;
             case 'diamond-type':
                 $bag['type_summary'] = $this->fetcher->fetch_artefact('type_summary_json', $ctx);
+                if (!is_array($bag['summary']) || empty($bag['summary'])) {
+                    $bag['summary'] = is_array($bag['type_summary']) ? $bag['type_summary'] : array();
+                }
                 break;
             case 'top-level':
                 $bag['market_overview'] = $this->fetcher->fetch_artefact('market_overview_json', $ctx);

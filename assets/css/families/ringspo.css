@@ -358,6 +358,45 @@
 	color: #fff;
 }
 
+/* All-shapes shape hub: purple band (not nested in the green hero). */
+.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards {
+	background-color: var(--ringspo-purple);
+	color: #fff;
+	margin-top: 0;
+	padding-top: 1.5rem;
+	padding-bottom: 1.5rem;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards h2,
+.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards p,
+.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards .ldn-shape-cards__hint {
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards h2 {
+	margin: 0 0 0.5rem;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards .ldn-shape-card {
+	background-color: #fff;
+	color: var(--ringspo-ink);
+	text-decoration: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards .ldn-shape-card__shape {
+	color: var(--ringspo-purple);
+}
+
+/* Tighten the first body block after the hero (copy / editorial). */
+.ldn-chrome--ringspo-classic .ldn-hero-band + .ldn-section {
+	margin-top: 0;
+	padding-top: 1.25rem;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section h2 {
+	margin-bottom: 0.65rem;
+}
+
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card,
 .ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card span {
 	color: var(--ringspo-ink);

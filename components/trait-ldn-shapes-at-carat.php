@@ -61,7 +61,6 @@ trait LDN_Trait_Shapes_At_Carat {
 
         $currency = isset($payload['currency_symbol']) ? (string) $payload['currency_symbol'] : '$';
         $carat_label = $this->format_carat_label($ctx->carat);
-        $country_name = $this->country_full_name($ctx);
 
         if (array_key_exists('change_period', $payload)) {
             $change_period = is_string($payload['change_period']) ? $payload['change_period'] : null;
@@ -117,10 +116,9 @@ trait LDN_Trait_Shapes_At_Carat {
         }
 
         $heading = sprintf(
-            /* translators: 1: carat label, 2: country name */
-            __('%1$s carat diamond prices in %2$s by shape', 'loupe-diamond-network'),
-            $carat_label !== '' ? $carat_label : '1',
-            $country_name
+            /* translators: %s: carat label */
+            __('%s carat diamonds by shape', 'loupe-diamond-network'),
+            $carat_label !== '' ? $carat_label : '1'
         );
 
         $change_caption = '';

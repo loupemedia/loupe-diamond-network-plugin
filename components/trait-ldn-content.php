@@ -376,6 +376,56 @@ trait LDN_Trait_Content {
     }
 
     /**
+     * Hero-band intro for aggregate hubs (diamond-type / top-level): date sits
+     * above this, then the table. Prefer templated copy.json; fall back to
+     * type_intro_html on diamond-type pages.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @param string|null      $currency
+     * @return string
+     */
+    private function hub_intro_hero_html(LDN_Page_Context $ctx, array $bag, $currency = null) {
+        if ($ctx->page_level === 'diamond-type') {
+            $sections = $this->copy_sections(is_array($bag['copy']) ? $bag['copy'] : array());
+            $text = '';
+            if (isset($sections['intro']) && is_scalar($sections['intro']) && (string) $sections['intro'] !== '') {
+                $text = (string) $sections['intro'];
+            }
+            if ($text !== '') {
+                $this->type_intro_in_hero = true;
+                return '<section class="ldn-type-intro ldn-type-intro--hero-band">'
+                    . $this->format_prose_html($text)
+                    . '</section>';
+            }
+            $fallback = $this->type_intro_html($ctx, $bag, $currency, true);
+            if ($fallback !== '') {
+                $this->type_intro_in_hero = true;
+            }
+            return $fallback;
+        }
+
+        if ($ctx->page_level === 'top-level') {
+            $sections = $this->copy_sections(is_array($bag['copy']) ? $bag['copy'] : array());
+            $parts = array();
+            foreach (array('intro', 'market_size') as $key) {
+                if (isset($sections[$key]) && is_scalar($sections[$key]) && (string) $sections[$key] !== '') {
+                    $parts[] = (string) $sections[$key];
+                }
+            }
+            if (empty($parts)) {
+                return '';
+            }
+            $this->market_intro_in_hero = true;
+            return '<section class="ldn-type-intro ldn-type-intro--hero-band">'
+                . $this->format_prose_html(implode("\n\n", $parts))
+                . '</section>';
+        }
+
+        return '';
+    }
+
+    /**
      * Diamond-type intro from type-summary.json when copy.json is absent or stale.
      *
      * Mirrors the Loupe C5.8 ``diamond_type.intro`` template so the page leads with
@@ -408,16 +458,18 @@ trait LDN_Trait_Content {
         }
 
         $symbol = $this->currency_symbol($currency);
-        $country_name = $this->country_full_name($ctx);
+        $include_country = $this->country_in_content_flag($this->profile($ctx), 'body_copy', true, $ctx);
+        $country_name = $include_country ? $this->country_full_name($ctx) : '';
+        $in_country = $country_name !== '' ? ' in ' . $country_name : '';
         $type_label = $ctx->diamond_type !== null && isset(self::$TYPE_LABELS[$ctx->diamond_type])
             ? self::$TYPE_LABELS[$ctx->diamond_type]
             : ($ctx->diamond_type !== null ? ucwords(str_replace('-', ' ', $ctx->diamond_type)) : 'Diamond');
         $popular_label = $this->format_carat_label($popular);
 
         $lead = sprintf(
-            '%s diamond prices in %s span %d carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.',
+            '%s diamond prices%s span %d carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.',
             esc_html($type_label),
-            esc_html($country_name),
+            esc_html($in_country),
             $carat_count
         );
         $detail = '';

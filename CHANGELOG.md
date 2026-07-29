@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1] — 2026-07-28
+
+- **All-shapes shape cards move to a purple body band** with the title `{carat} carat diamonds by shape` (no longer nested inside the green hero — that nesting caused the large gap before copy).
+- **Type and top-level hubs**: freshness date renders under the title; intro copy renders above the carat/overview table; body sections no longer repeat that intro.
+- **US body-copy country policy** applied in the diamond-type intro fallback so blanked country names cannot produce "in span".
+- Spacing: first section after the hero and `h2` → prose gaps tightened on Ringspo chrome.
+
 ## [0.13.0] — 2026-07-27
 
 - **Operator surfaces show when the build was cut, not just which one it is**: the staging diagnostics panel and **Tools → Loupe Diamond Network** now print the release date alongside `Plugin v0.13.0`. The version alone only answers "did my deploy land?" if you remember what was current.

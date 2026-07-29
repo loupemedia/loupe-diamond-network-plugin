@@ -797,6 +797,7 @@ if (!class_exists('LDN_Fetcher_Type_Summary')) {
         public function fetch_artefact($artefact_id, $ctx) {
             if ($artefact_id === 'type_summary_json') {
                 return array(
+                    'analysis_date' => '2026-07-28',
                     'aggregate' => array(
                         'carat_count'           => 19,
                         'most_popular_carat'    => '1',
@@ -818,6 +819,14 @@ check(
 check(
     substr_count($type_page_html, '19 carat weights') === 1,
     'diamond-type intro is not duplicated in the hero band and body'
+);
+$fresh_pos = strpos($type_page_html, 'ldn-freshness');
+$intro_pos = strpos($type_page_html, 'ldn-type-intro--hero-band');
+$title_pos = strpos($type_page_html, 'ldn-page-title');
+check(
+    $title_pos !== false && $fresh_pos !== false && $intro_pos !== false
+        && $title_pos < $fresh_pos && $fresh_pos < $intro_pos,
+    'diamond-type hero order is title → freshness → intro'
 );
 
 // --- 17. pricing → size snapshot card (Decision 5) ---------------------------
@@ -1031,8 +1040,9 @@ check(
 
 // --- 12. shape_cards hub (CP53_08) ------------------------------------------
 // Test intent: shape_cards renders a crawlable linked card per shape from
-// shapes-ranking.json; bar_chart hero dispatches to the entitlement layer.
-// Would fail if: bar_chart hero still returned '' on Ringspo all-shapes pages.
+// shapes-ranking.json; all-shapes pages mount cards via the shapes_at_carat
+// section (Ringspo purple band), not as a nested hero component.
+// Would fail if: shapes_at_carat returned '' on Ringspo all-shapes pages.
 $all_shapes_ctx = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'natural', '1');
 $shape_hub_bag = array(
     'ranking' => array(
@@ -1057,6 +1067,10 @@ check(
 check(
     strpos($cards_html, '$3,510') !== false && strpos($cards_html, '5.39%') !== false,
     'shape_cards shows formatted median price and period change'
+);
+check(
+    strpos($cards_html, '1 carat diamonds by shape') !== false,
+    'shape_cards uses the short hub title without a country clause'
 );
 
 if (!class_exists('LDN_Config_Ringspo_Shape_Hub')) {

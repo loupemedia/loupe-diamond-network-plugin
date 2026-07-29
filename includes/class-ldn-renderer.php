@@ -193,12 +193,20 @@ final class LDN_Renderer {
     private $plotly_emitted = false;
 
     /**
-     * Set when diamond-type intro fallback renders inside the hero band so
+     * Set when diamond-type intro renders inside the hero band so
      * type_overview_dynamic does not repeat the same copy in the body.
      *
      * @var bool
      */
     private $type_intro_in_hero = false;
+
+    /**
+     * Set when top-level intro renders inside the hero band so
+     * market_overview_dynamic does not repeat the same copy in the body.
+     *
+     * @var bool
+     */
+    private $market_intro_in_hero = false;
 
     /**
      * @param LDN_Data_Fetcher $fetcher
@@ -217,6 +225,7 @@ final class LDN_Renderer {
      */
     public function render(LDN_Page_Context $ctx) {
         $this->type_intro_in_hero = false;
+        $this->market_intro_in_hero = false;
 
         $layout = $this->config->get_page_layout($ctx->site_id, $ctx->page_level, $ctx->country_code);
         $bag = $this->prefetch($ctx);
@@ -233,7 +242,7 @@ final class LDN_Renderer {
         $summary = isset($bag['summary']) && is_array($bag['summary']) ? $bag['summary'] : array();
 
         $title_html = '<h1 class="ldn-page-title">'
-            . esc_html($this->headline($ctx, $this->country_in_content_flag($profile, 'h1_headings')))
+            . esc_html($this->headline($ctx, $this->country_in_content_flag($profile, 'h1_headings', true, $ctx)))
             . '</h1>';
         $breadcrumb_html = $this->breadcrumb_html($ctx, $canonical, $profile);
 
@@ -261,28 +270,25 @@ final class LDN_Renderer {
             $out .= '<header class="ldn-hero-band">';
             $out .= $breadcrumb_html;
             $out .= $title_html;
+            // Date near the title (before table / intro) so freshness matches
+            // shape pages and aggregate hubs.
+            $out .= $freshness_html;
+            $hub_intro = $this->hub_intro_hero_html($ctx, $bag, $currency);
+            if ($hub_intro !== '') {
+                $out .= $hub_intro;
+            }
             if (!$hero_inline) {
                 $out .= $hero_html;
             }
-            if ($ctx->page_level === 'diamond-type'
-                && $this->copy_dynamic_html('type_overview_dynamic', $ctx, $bag) === ''
-            ) {
-                $type_intro_hero = $this->type_intro_html($ctx, $bag, $currency, true);
-                if ($type_intro_hero !== '') {
-                    $out .= $type_intro_hero;
-                    $this->type_intro_in_hero = true;
-                }
-            }
             $out .= $this->hero_stats_html($ctx, $summary, $currency);
-            $out .= $freshness_html;
             $out .= '</header>';
         } else {
             $out .= $breadcrumb_html;
             $out .= $title_html;
+            $out .= $freshness_html;
             if (!$hero_inline) {
                 $out .= $hero_html;
             }
-            $out .= $freshness_html;
         }
 
         foreach ($sections as $section_id) {

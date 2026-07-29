@@ -1,6 +1,6 @@
 {
-  "version": "e7f6f8f",
-  "generated_at": "2026-07-13T17:14:54.407792+00:00",
+  "version": "37a3829",
+  "generated_at": "2026-07-28T12:24:07.072715+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8422,11 +8422,11 @@
           "shape_analysis": "At {carat} carats, {most_expensive_shape} leads on price at {currency_symbol}{most_expensive_price:,.0f} while {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\n"
         },
         "diamond_type": {
-          "intro": "{type_title} diamond prices in {country_name} span {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most searched weight, with a median of {currency_symbol}{weighted_median_price:,.0f} across every shape at that weight.\n",
-          "buyer_context": "This page shows how {type_title_lower} diamond prices scale by carat weight in {country_name}. Each figure is a weighted median across every shape in our index — use it to set a budget before you compare round, oval, and other shapes at the weight you have in mind.\n"
+          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most searched weight, with a median of {currency_symbol}{weighted_median_price:,.0f} across every shape at that weight.\n",
+          "buyer_context": "This page shows how {type_title_lower} diamond prices scale by carat weight {in_country}. Each figure is a weighted median across every shape in our index — use it to set a budget before you compare round, oval, and other shapes at the weight you have in mind.\n"
         },
         "top_level": {
-          "intro": "Our index tracks {total_diamonds_tracked:,} diamonds in {country_name} — {natural_sample_size:,} natural stones and {lab_sample_size:,} lab-grown across every shape and carat weight we monitor.\nAt 1 carat, the typical natural diamond sits at {currency_symbol}{one_carat_natural:,.0f} versus {currency_symbol}{one_carat_lab:,.0f} for lab-grown — a {one_carat_discount:.0f}% price gap that generally widens at larger weights.\n",
+          "intro": "Our index tracks {total_diamonds_tracked:,} diamonds {in_country} — {natural_sample_size:,} natural stones and {lab_sample_size:,} lab-grown across every shape and carat weight we monitor.\nAt 1 carat, the typical natural diamond sits at {currency_symbol}{one_carat_natural:,.0f} versus {currency_symbol}{one_carat_lab:,.0f} for lab-grown — a {one_carat_discount:.0f}% price gap that generally widens at larger weights.\n",
           "market_size": "Use the charts and table below to compare natural and lab-grown prices by carat weight and explore any size in more detail. {trend_clause}\n"
         }
       },
@@ -9079,8 +9079,9 @@
           ]
         },
         "all_shapes": {
-          "hero_component": "bar_chart",
+          "hero_component": null,
           "sections": [
+            "shapes_at_carat",
             "overview_dynamic",
             "shape_breakdown_static",
             "expert_recommendations",
@@ -9319,10 +9320,10 @@
           "shape_analysis": "The most expensive shape for {carat} carat {type_label} diamonds is {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}; the least expensive is {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes at this weight; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         },
         "diamond_type": {
-          "intro": "{type_title} diamond prices in {country_name} span {carat_count} carat weights in our index. The most searched weight is {most_popular_carat} carat, with a weighted median of {currency_symbol}{weighted_median_price:,.0f} across {total_sample_size:,} tracked stones.\n"
+          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index. The most searched weight is {most_popular_carat} carat, with a weighted median of {currency_symbol}{weighted_median_price:,.0f} across {total_sample_size:,} tracked stones.\n"
         },
         "top_level": {
-          "intro": "Diamond prices in {country_name} reflect broad market activity across natural and lab-grown stones. Natural diamonds average {currency_symbol}{natural_weighted_avg:,.0f} while lab-grown average {currency_symbol}{lab_weighted_avg:,.0f} in our latest snapshot.\n",
+          "intro": "Right now natural diamonds {in_country} average {currency_symbol}{natural_weighted_avg:,.0f} and lab-grown average {currency_symbol}{lab_weighted_avg:,.0f}. Pick a type or carat weight below to see the full breakdown.\n",
           "market_size": "Our index tracks {total_diamonds_tracked:,} diamonds across {natural_combo_count} natural and {lab_combo_count} lab-grown shape and carat combinations.\n"
         }
       }
@@ -13359,6 +13360,36 @@
       },
       {
         "diamond_type": "natural",
+        "carat": "1",
+        "shape": "oval"
+      },
+      {
+        "diamond_type": "natural",
+        "carat": "1.5",
+        "shape": "round"
+      },
+      {
+        "diamond_type": "natural",
+        "carat": "1.5",
+        "shape": "oval"
+      },
+      {
+        "diamond_type": "lab-grown",
+        "carat": "1",
+        "shape": "round"
+      },
+      {
+        "diamond_type": "lab-grown",
+        "carat": "1",
+        "shape": "oval"
+      },
+      {
+        "diamond_type": "lab-grown",
+        "carat": "1.5",
+        "shape": "round"
+      },
+      {
+        "diamond_type": "lab-grown",
         "carat": "1.5",
         "shape": "oval"
       },
