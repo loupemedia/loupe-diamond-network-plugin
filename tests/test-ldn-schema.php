@@ -128,6 +128,99 @@ check(
     'top-level dataset description uses bare "diamonds" when no shape/type context'
 );
 
+// Test intent: top-level meta/Dataset description uses market-overview scale fields.
+// Would fail if: hub still fell through to the generic "Market pricing data for diamonds."
+$hub_overview = array(
+    'analysis_date'          => '2026-07-29',
+    'total_diamonds_tracked' => 781852,
+    'natural'                => array('combo_count' => 167, 'total_sample_size' => 400000),
+    'lab_grown'              => array('combo_count' => 209, 'total_sample_size' => 381852),
+);
+$hub_desc = $schema->dataset_description($top_ctx, $hub_overview, 'USD');
+check(
+    strpos($hub_desc, '781,852') !== false,
+    'top-level Dataset description includes total_diamonds_tracked'
+);
+check(
+    strpos($hub_desc, '167 natural') !== false && strpos($hub_desc, '209 lab-grown') !== false,
+    'top-level Dataset description includes natural/lab combo counts'
+);
+check(
+    strpos($hub_desc, 'Market pricing data for diamonds.') === false,
+    'top-level Dataset description does not use the generic shape-page fallback when overview is present'
+);
+
+// Test intent: all-shapes meta/Dataset leads with "by shape" + country and does
+// not use the generic "Market pricing data for…" shape-page pattern.
+// Would fail if: all-shapes still fell through to the generic median template.
+$all_ctx = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'lab-grown', '1');
+$all_summary = array(
+    'analysis_date' => '2026-07-29',
+    'current_price' => 949,
+    'num_diamonds'  => 10370,
+    'aggregate'     => array('weighted_median_price' => 949),
+);
+$all_desc = $schema->dataset_description($all_ctx, $all_summary, 'USD', null, $site);
+check(
+    strpos($all_desc, 'by shape') !== false,
+    'all-shapes Dataset description includes "by shape"'
+);
+check(
+    strpos($all_desc, 'United States') !== false,
+    'all-shapes Dataset description names the country in full'
+);
+check(
+    strpos($all_desc, 'lab-grown') !== false,
+    'all-shapes Dataset description includes diamond type'
+);
+check(
+    strpos($all_desc, 'Market pricing data for') === false,
+    'all-shapes Dataset description does not use the generic shape-page fallback'
+);
+check(
+    strpos($all_desc, '949') !== false && strpos($all_desc, '10,370') !== false,
+    'all-shapes Dataset description includes weighted median and sample size'
+);
+
+// Test intent: Ringspo all-shapes Dataset.name / headline owns "by Shape" + country.
+// Would fail if: schema headline still emitted "1 Carat Lab-Grown Diamond Prices (US)".
+check(
+    $schema->headline($all_ctx, $site)
+        === '1 Carat Lab-Grown Diamond Prices by Shape — United States',
+    'Ringspo all-shapes schema headline is "{carat} {type} … by Shape — {Country}"'
+);
+
+// Test intent: all-shapes keywords differentiate from type (no bare type prices)
+// and shape (no named cut) pages.
+// Would fail if: keywords stayed ["1 carat diamond","diamond prices","diamond price chart"].
+$profile_kw = array('schema_type' => 'hybrid', 'schema_features' => array());
+$g_all = $schema->build_graph(
+    $all_ctx, $all_summary, $profile_kw, $site, 'USD',
+    'https://ringspo.com/us/diamond-prices/lab-grown/1-carat/',
+    $breadcrumb, array()
+);
+$all_dataset = node_of($g_all, 'Dataset');
+$all_kw = isset($all_dataset['keywords']) && is_array($all_dataset['keywords'])
+    ? $all_dataset['keywords']
+    : array();
+$all_kw_joined = implode('|', $all_kw);
+check(
+    strpos($all_kw_joined, 'by shape') !== false,
+    'all-shapes keywords include a "by shape" phrase'
+);
+check(
+    strpos($all_kw_joined, 'lab-grown') !== false || strpos($all_kw_joined, 'lab grown') !== false,
+    'all-shapes keywords include the diamond type'
+);
+check(
+    !in_array('lab-grown diamond prices', $all_kw, true),
+    'all-shapes keywords omit bare type-hub phrase "lab-grown diamond prices"'
+);
+check(
+    !in_array('round diamond', $all_kw, true),
+    'all-shapes keywords omit named-shape phrases that belong on shape pages'
+);
+
 // === Rule 4: Dataset enrichment ============================================
 check(isset($dataset['dateModified']) && $dataset['dateModified'] === '2026-06-22',
     'Dataset.dateModified must be the analysis date (freshness signal)');

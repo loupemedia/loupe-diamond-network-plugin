@@ -387,6 +387,16 @@ trait LDN_Trait_Content {
      */
     private function hub_intro_hero_html(LDN_Page_Context $ctx, array $bag, $currency = null) {
         if ($ctx->page_level === 'diamond-type') {
+            // Ringspo owns the type intro in PHP so popular-tier medians ship
+            // without waiting on a C5.8 re-run (stale copy.json cited type-wide
+            // weighted medians as if they belonged to the most-listed carat).
+            if ($ctx->site_id === 'ringspo') {
+                $fallback = $this->type_intro_html($ctx, $bag, $currency, true);
+                if ($fallback !== '') {
+                    $this->type_intro_in_hero = true;
+                    return $fallback;
+                }
+            }
             $sections = $this->copy_sections(is_array($bag['copy']) ? $bag['copy'] : array());
             $text = '';
             if (isset($sections['intro']) && is_scalar($sections['intro']) && (string) $sections['intro'] !== '') {
@@ -406,6 +416,15 @@ trait LDN_Trait_Content {
         }
 
         if ($ctx->page_level === 'top-level') {
+            // Ringspo hub intro is owned in PHP so the index blurb ships without
+            // waiting on a C5.8 re-run, and the weighted-average intro is omitted.
+            if ($ctx->site_id === 'ringspo') {
+                $ringspo_intro = $this->ringspo_top_level_intro_html($bag);
+                if ($ringspo_intro !== '') {
+                    $this->market_intro_in_hero = true;
+                    return $ringspo_intro;
+                }
+            }
             $sections = $this->copy_sections(is_array($bag['copy']) ? $bag['copy'] : array());
             $parts = array();
             foreach (array('intro', 'market_size') as $key) {
@@ -423,6 +442,51 @@ trait LDN_Trait_Content {
         }
 
         return '';
+    }
+
+    /**
+     * Ringspo top-level hero intro: market-size blurb only (no weighted averages).
+     *
+     * @param array $bag
+     * @return string
+     */
+    private function ringspo_top_level_intro_html(array $bag) {
+        $overview = isset($bag['market_overview']) && is_array($bag['market_overview'])
+            ? $bag['market_overview']
+            : array();
+        $total = isset($overview['total_diamonds_tracked']) ? (int) $overview['total_diamonds_tracked'] : 0;
+        $natural = isset($overview['natural']) && is_array($overview['natural']) ? $overview['natural'] : array();
+        $lab = isset($overview['lab_grown']) && is_array($overview['lab_grown']) ? $overview['lab_grown'] : array();
+        $nat_combos = isset($natural['combo_count']) ? (int) $natural['combo_count'] : 0;
+        $lab_combos = isset($lab['combo_count']) ? (int) $lab['combo_count'] : 0;
+
+        // Prefer fresh overview numbers; fall back to templated copy.market_size.
+        if ($total > 0 && ($nat_combos > 0 || $lab_combos > 0)) {
+            $text = sprintf(
+                /* translators: 1: total diamonds, 2: natural combo count, 3: lab-grown combo count */
+                __(
+                    'Our index tracks %1$s diamonds across %2$d natural and %3$d lab-grown '
+                    . 'shape and carat combinations, drawn from some of the largest diamond '
+                    . 'retailers in the world. Prices are updated every day.',
+                    'loupe-diamond-network'
+                ),
+                number_format_i18n($total),
+                $nat_combos,
+                $lab_combos
+            );
+        } else {
+            $sections = $this->copy_sections(is_array($bag['copy']) ? $bag['copy'] : array());
+            if (!isset($sections['market_size']) || !is_scalar($sections['market_size'])
+                || trim((string) $sections['market_size']) === ''
+            ) {
+                return '';
+            }
+            $text = (string) $sections['market_size'];
+        }
+
+        return '<section class="ldn-type-intro ldn-type-intro--hero-band">'
+            . $this->format_prose_html($text)
+            . '</section>';
     }
 
     /**
@@ -451,9 +515,11 @@ trait LDN_Trait_Content {
 
         $carat_count = isset($aggregate['carat_count']) ? (int) $aggregate['carat_count'] : 0;
         $popular = isset($aggregate['most_popular_carat']) ? (string) $aggregate['most_popular_carat'] : '';
-        $median = isset($aggregate['weighted_median_price']) ? $aggregate['weighted_median_price'] : null;
-        $samples = isset($aggregate['total_sample_size']) ? (int) $aggregate['total_sample_size'] : 0;
-        if ($carat_count <= 0 || !is_numeric($median)) {
+        // Cite the popular tier's own median/sample — never type-wide weighted_median.
+        $popular_tier = $this->popular_carat_tier($payload, $popular);
+        $median = isset($popular_tier['median_price']) ? $popular_tier['median_price'] : null;
+        $samples = isset($popular_tier['sample_size']) ? (int) $popular_tier['sample_size'] : 0;
+        if ($carat_count <= 0) {
             return '';
         }
 
@@ -467,7 +533,7 @@ trait LDN_Trait_Content {
         $popular_label = $this->format_carat_label($popular);
 
         $lead = sprintf(
-            '%s diamond prices%s span %d carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.',
+            '%s diamond prices%s span %d carat weights in our index.',
             esc_html($type_label),
             esc_html($in_country),
             $carat_count
@@ -475,9 +541,10 @@ trait LDN_Trait_Content {
         $detail = '';
         if ($popular_label !== '' && is_numeric($median)) {
             $detail = sprintf(
-                '%s carat is the most searched weight, with a median of %s across every shape at that weight.',
+                'The most listed weight is %s carat, with a median of %s across %s tracked stones.',
                 esc_html($popular_label),
-                esc_html($symbol . number_format((float) $median, 0))
+                esc_html($symbol . number_format((float) $median, 0)),
+                esc_html(number_format($samples))
             );
         }
 
@@ -493,6 +560,32 @@ trait LDN_Trait_Content {
         return '<section class="' . esc_attr($class) . '">'
             . wp_kses_post(wpautop($body))
             . '</section>';
+    }
+
+    /**
+     * Carat-tier row for the most-listed weight in a type-summary payload.
+     *
+     * @param array  $payload type-summary.json body
+     * @param string $popular Carat weight label from aggregate.most_popular_carat
+     * @return array
+     */
+    private function popular_carat_tier(array $payload, $popular) {
+        $popular = (string) $popular;
+        if ($popular === '') {
+            return array();
+        }
+        $tiers = isset($payload['carat_tiers']) && is_array($payload['carat_tiers'])
+            ? $payload['carat_tiers']
+            : array();
+        foreach ($tiers as $tier) {
+            if (!is_array($tier)) {
+                continue;
+            }
+            if ((string) (isset($tier['carat_weight']) ? $tier['carat_weight'] : '') === $popular) {
+                return $tier;
+            }
+        }
+        return array();
     }
 
     public function stats_html(LDN_Page_Context $ctx, array $summary, $currency = null) {

@@ -132,6 +132,9 @@ trait LDN_Trait_Sections {
         if ($section_id === 'type_nav_links') {
             return $this->type_nav_links_html($ctx);
         }
+        if ($section_id === 'market_overview_table' || $section_id === 'carat_price_table') {
+            return $this->market_overview_table_html($ctx, $bag);
+        }
         if ($section_id === 'price_trends_snapshot') {
             return $this->price_trends_snapshot_html($ctx, $bag);
         }
@@ -143,6 +146,13 @@ trait LDN_Trait_Sections {
         }
         if (substr($section_id, -8) === '_dynamic') {
             if ($ctx->page_level !== 'shape') {
+                // Skip body re-render when the same copy already led the hero band.
+                if ($section_id === 'market_overview_dynamic' && $this->market_intro_in_hero) {
+                    return '';
+                }
+                if ($section_id === 'type_overview_dynamic' && $this->type_intro_in_hero) {
+                    return '';
+                }
                 $dynamic = $this->copy_dynamic_html($section_id, $ctx, $bag);
                 if ($dynamic !== '') {
                     if ($section_id === 'overview_intro_dynamic' && $ctx->page_level === 'all-shapes') {
@@ -155,13 +165,7 @@ trait LDN_Trait_Sections {
                     return $dynamic;
                 }
                 if ($section_id === 'type_overview_dynamic') {
-                    if ($this->type_intro_in_hero) {
-                        return '';
-                    }
                     return $this->type_intro_html($ctx, $bag, $currency);
-                }
-                if ($section_id === 'market_overview_dynamic' && $this->market_intro_in_hero) {
-                    return '';
                 }
             }
             return $this->stats_html($ctx, is_array($bag['summary']) ? $bag['summary'] : array(), $currency);

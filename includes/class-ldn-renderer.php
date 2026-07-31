@@ -321,7 +321,13 @@ final class LDN_Renderer {
         $currency = $this->config->get_currency($ctx->site_id, $ctx->country_code);
         $canonical = $this->current_url();
 
-        $summary = $this->fetcher->fetch_artefact('summary_data_json', $ctx);
+        // Top-level hubs use market-overview.json as the summary source for meta /
+        // Dataset copy; shape pages use summary-data.json.
+        if ($ctx->page_level === 'top-level') {
+            $summary = $this->fetcher->fetch_artefact('market_overview_json', $ctx);
+        } else {
+            $summary = $this->fetcher->fetch_artefact('summary_data_json', $ctx);
+        }
         $summary = is_array($summary) ? $summary : array();
 
         $bag = array(
@@ -333,7 +339,7 @@ final class LDN_Renderer {
                 : null,
         );
 
-        $out = $this->head_tags($ctx, $canonical, $summary, $currency);
+        $out = $this->head_tags($ctx, $canonical, $summary, $currency, $site);
 
         $schema = new LDN_Schema();
         $out .= $schema->render(

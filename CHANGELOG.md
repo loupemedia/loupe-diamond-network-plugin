@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.13.4] — 2026-07-29
+
+- **All-shapes SEO**: Ringspo H1/title is `{carat} {Type} Diamond Prices by Shape — {Country}`; meta/Dataset description leads with compare-by-shape + full country name; keywords are level-scoped so this hub does not share primary phrases with the type hub or named-shape pages.
+
+## [0.13.3] — 2026-07-29
+
+- **Diamond-type hubs: intro cites the most-listed carat's own median/sample** (not type-wide weighted median); Ringspo H1 is `{Country} Natural/Lab-Grown Diamond Prices`; carat table adds price-per-carat + how-to-read copy; footer gap fix for type pages.
+
+## [0.13.2] — 2026-07-29
+
+- **Ringspo top-level hub polish**: H1/title is `{Country} Diamond Prices` (e.g. United States Diamond Prices); drop the weighted-average intro; keep an enhanced market-size blurb (largest retailers, updated daily).
+- Shorter nat/lab H2 and fixed comparison copy; type-nav cards move to a green band under the carat table with heading “Browse natural or lab-grown prices”; remove Comparing Diamond Shapes from the Ringspo layout.
+- Fix duplicate intro under the table (`market_overview_dynamic` now skips when the hero already showed it); close the phantom footer gap on top-level hubs.
+- SEO: top-level meta/Dataset description and keywords use market-overview scale (totals, combos, daily update) instead of the generic “Market pricing data for diamonds.” fallback.
+
 ## [0.13.1] — 2026-07-28
 
 - **All-shapes shape cards move to a purple body band** with the title `{carat} carat diamonds by shape` (no longer nested inside the green hero — that nesting caused the large gap before copy).

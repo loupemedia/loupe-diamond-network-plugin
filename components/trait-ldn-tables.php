@@ -392,23 +392,67 @@ trait LDN_Trait_Tables {
                 ? (string) $tier['page_url']
                 : $this->build_price_page_url($ctx, 'all-shapes', array('carat' => $carat));
             $price_cell = is_numeric($price) ? esc_html($currency . number_format((float) $price, 0)) : '—';
+            $ppc_cell = '—';
+            if (is_numeric($price) && is_numeric($carat) && (float) $carat > 0) {
+                $ppc_cell = esc_html($currency . number_format((float) $price / (float) $carat, 0));
+            }
             $link = $url !== ''
                 ? '<a href="' . esc_url($url) . '">' . esc_html($carat . ' ct') . '</a>'
                 : esc_html($carat . ' ct');
             $body .= '<tr><td>' . $link . '</td><td>' . $price_cell . '</td><td>'
+                . $ppc_cell . '</td><td>'
                 . esc_html(number_format($samples)) . '</td></tr>';
         }
         if ($body === '') {
             return '';
         }
 
+        $table_intro = '';
+        if ($ctx->site_id === 'ringspo') {
+            $table_intro = $this->ringspo_carat_tiers_intro_html($ctx);
+        }
+
         return '<section class="ldn-section ldn-carat-tiers-table">'
             . '<h2>' . esc_html($title) . '</h2>'
+            . $table_intro
             . '<table class="ldn-data-table"><thead><tr>'
             . '<th>' . esc_html__('Carat', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Median price', 'loupe-diamond-network') . '</th>'
+            . '<th>' . esc_html__('Price per carat', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Diamonds analysed', 'loupe-diamond-network') . '</th>'
             . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
+    }
+
+    /**
+     * Ringspo how-to-read + price-per-carat commentary above the type carat table.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    private function ringspo_carat_tiers_intro_html(LDN_Page_Context $ctx) {
+        $how_to_read = __(
+            'Each figure is a median across every shape we track at that weight. '
+            . 'Click a carat to see how prices vary by shape, then open a shape page '
+            . 'to see how colour, clarity and cut affect what you pay.',
+            'loupe-diamond-network'
+        );
+        if ($ctx->diamond_type === 'lab-grown') {
+            $ppc = __(
+                'Lab-grown diamond prices do not increase proportionally with weight. '
+                . 'Larger stones typically cost more per carat, and prices can also jump '
+                . 'around popular milestone weights such as 1, 1.5 and 2 carats.',
+                'loupe-diamond-network'
+            );
+        } else {
+            $ppc = __(
+                'Natural diamond prices do not increase proportionally with weight. '
+                . 'Larger diamonds are rarer, so the price per carat generally increases '
+                . 'as diamonds get bigger. Prices can also jump around popular milestone '
+                . 'weights such as 1, 1.5 and 2 carats.',
+                'loupe-diamond-network'
+            );
+        }
+        return $this->format_prose_html($how_to_read . "\n\n" . $ppc);
     }
 
     /**
@@ -437,9 +481,20 @@ trait LDN_Trait_Tables {
         );
 
         $type_comparison = $this->section_value('type_comparison', $ctx, $bag);
-        $table_intro = is_string($type_comparison) && trim($type_comparison) !== ''
-            ? $this->format_prose_html($type_comparison)
-            : '';
+        $table_intro = '';
+        if ($ctx->site_id === 'ringspo' && $ctx->page_level === 'top-level') {
+            $table_intro = $this->format_prose_html(
+                __(
+                    "Both natural and lab-grown diamond prices are constantly changing, as is the relationship between the two.\n\n"
+                    . 'The prices below are the medians for each carat weight, but within those there is considerable '
+                    . 'variation depending on shape and quality — so the price you can expect to pay for your diamond '
+                    . 'may be very different from the figures below, depending on what you are looking for.',
+                    'loupe-diamond-network'
+                )
+            );
+        } elseif (is_string($type_comparison) && trim($type_comparison) !== '') {
+            $table_intro = $this->format_prose_html($type_comparison);
+        }
 
         $table_html = $this->carat_price_table_html($ctx, $overview, $currency, $table_intro);
 
@@ -512,11 +567,13 @@ trait LDN_Trait_Tables {
             return '';
         }
 
-        $heading = sprintf(
-            /* translators: %s: country name */
-            __('Natural vs lab-grown diamond prices in %s by carat weight', 'loupe-diamond-network'),
-            $this->country_full_name($ctx)
-        );
+        $heading = ($ctx->site_id === 'ringspo' && $ctx->page_level === 'top-level')
+            ? __('Natural vs lab-grown prices by carat', 'loupe-diamond-network')
+            : sprintf(
+                /* translators: %s: country name */
+                __('Natural vs lab-grown diamond prices in %s by carat weight', 'loupe-diamond-network'),
+                $this->country_full_name($ctx)
+            );
 
         return '<section class="ldn-section ldn-carat-price-table">'
             . '<h2>' . esc_html($heading) . '</h2>'

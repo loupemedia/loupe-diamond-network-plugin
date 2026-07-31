@@ -143,7 +143,7 @@ trait LDN_Trait_Homepage {
 
         return '<section class="ldn-section ldn-type-nav" aria-label="'
             . esc_attr__('Browse by diamond type', 'loupe-diamond-network') . '">'
-            . '<h2>' . esc_html__('Browse by type', 'loupe-diamond-network') . '</h2>'
+            . '<h2>' . esc_html__('Browse natural or lab-grown prices', 'loupe-diamond-network') . '</h2>'
             . '<div class="ldn-type-nav-grid">' . $items . '</div></section>';
     }
 

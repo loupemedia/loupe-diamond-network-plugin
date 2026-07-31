@@ -32,7 +32,25 @@ trait LDN_Trait_Data {
         $subject = trim(implode(' ', $parts));
         $suffix = $include_country ? sprintf(' (%s)', strtoupper($ctx->country_code)) : '';
         if ($subject === '') {
+            // Ringspo top-level hub: "{Country} Diamond Prices" (full name), not a bare
+            // "Diamond Prices" / "(US)" suffix — matches the H1/title SEO brief.
+            if ($ctx->page_level === 'top-level' && $ctx->site_id === 'ringspo') {
+                return sprintf('%s Diamond Prices', $this->country_full_name($ctx));
+            }
             return 'Diamond Prices' . $suffix;
+        }
+        // Ringspo diamond-type hubs: "{Country} Natural Diamond Prices" (full name).
+        if ($ctx->page_level === 'diamond-type' && $ctx->site_id === 'ringspo') {
+            return sprintf('%s %s Diamond Prices', $this->country_full_name($ctx), $subject);
+        }
+        // Ringspo all-shapes: own "by shape" + full country — differentiate from the
+        // type hub (no carat) and shape pages (named cut + (CC) suffix).
+        if ($ctx->page_level === 'all-shapes' && $ctx->site_id === 'ringspo') {
+            return sprintf(
+                '%s Diamond Prices by Shape — %s',
+                $subject,
+                $this->country_full_name($ctx)
+            );
         }
         return sprintf('%s Diamond Prices%s', $subject, $suffix);
     }

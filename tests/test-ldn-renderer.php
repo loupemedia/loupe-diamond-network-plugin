@@ -80,6 +80,9 @@ if (!function_exists('get_option')) {
 if (!function_exists('date_i18n')) {
     function date_i18n($format, $ts = null) { return date($format, $ts === null ? time() : $ts); }
 }
+if (!function_exists('number_format_i18n')) {
+    function number_format_i18n($n, $decimals = 0) { return number_format((float) $n, (int) $decimals); }
+}
 
 require_once __DIR__ . '/../includes/class-ldn-page-context.php';
 
@@ -155,6 +158,51 @@ check(
 check(
     $renderer->headline($top_ctx, true) === 'Diamond Prices (US)',
     'top-level headline keeps country suffix by default'
+);
+
+// Test intent: Ringspo top-level H1/title uses the full country name as a prefix.
+// Would fail if: top-level still emitted bare "Diamond Prices" / "(US)" for Ringspo.
+$ringspo_top = new LDN_Page_Context('ringspo', 'top-level', 'us');
+check(
+    $renderer->headline($ringspo_top, false) === 'United States Diamond Prices',
+    'Ringspo top-level headline is "{Country} Diamond Prices" regardless of include_country'
+);
+check(
+    $renderer->headline($ringspo_top, true) === 'United States Diamond Prices',
+    'Ringspo top-level headline stays full-country with include_country=true'
+);
+
+// Test intent: Ringspo diamond-type H1 prefixes the full country name.
+// Would fail if: type hubs still used bare "Natural Diamond Prices" without country.
+$ringspo_type = new LDN_Page_Context('ringspo', 'diamond-type', 'us', 'natural');
+check(
+    $renderer->headline($ringspo_type, false) === 'United States Natural Diamond Prices',
+    'Ringspo diamond-type headline is "{Country} Natural Diamond Prices"'
+);
+$ringspo_lab = new LDN_Page_Context('ringspo', 'diamond-type', 'us', 'lab-grown');
+check(
+    $renderer->headline($ringspo_lab, false) === 'United States Lab-Grown Diamond Prices',
+    'Ringspo lab-grown type headline includes full country name'
+);
+
+// Test intent: Ringspo all-shapes H1 owns "by shape" + full country, not competing
+// with the type hub (no carat) or a shape page (named cut).
+// Would fail if: all-shapes still used "1 Carat Lab-Grown Diamond Prices (US)".
+$ringspo_all = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'lab-grown', '1');
+check(
+    $renderer->headline($ringspo_all, false)
+        === '1 Carat Lab-Grown Diamond Prices by Shape — United States',
+    'Ringspo all-shapes headline is "{carat} {type} … by Shape — {Country}"'
+);
+check(
+    $renderer->headline($ringspo_all, true)
+        === '1 Carat Lab-Grown Diamond Prices by Shape — United States',
+    'Ringspo all-shapes headline keeps full country regardless of include_country'
+);
+$loupe_all = new LDN_Page_Context('modernjeweler', 'all-shapes', 'us', 'lab-grown', '1');
+check(
+    $renderer->headline($loupe_all, true) === '1 Carat Lab-Grown Diamond Prices (US)',
+    'non-Ringspo all-shapes headline keeps the (CC) suffix form'
 );
 
 // --- 2. render_section renders suffix-less editorial sections (P1) ----------
@@ -346,6 +394,22 @@ $discount_pos = strpos($market_html, 'ldn-market-discount-chart');
 check(
     $table_pos !== false && $discount_pos !== false && $table_pos < $discount_pos,
     'carat price table appears above the lab-grown discount chart'
+);
+
+// Test intent: Ringspo top-level uses fixed short H2 + median-variation copy (not C1).
+// Would fail if: Ringspo still inlined C1 type_comparison or kept the long country H2.
+$ringspo_market = $renderer->market_overview_table_html($ringspo_top, $market_bag);
+check(
+    strpos($ringspo_market, 'Natural vs lab-grown prices by carat') !== false,
+    'Ringspo top-level uses the shortened carat-table H2'
+);
+check(
+    strpos($ringspo_market, 'constantly changing') !== false,
+    'Ringspo top-level uses the fixed median-variation comparison copy'
+);
+check(
+    strpos($ringspo_market, 'Natural and lab-grown stones differ') === false,
+    'Ringspo top-level does not inline C1 type_comparison under the table'
 );
 
 // --- 7. shapes_ranking_table_html links shape drill-down (all-shapes) -------
@@ -725,17 +789,31 @@ check(
 );
 
 // --- 16. diamond-type intro from type_summary fallback (CP3) -----------------
-// Test intent: type_overview_dynamic leads with useful copy from type-summary.json
-// when copy.json is absent; C5.8 Loupe template is the long-term source of truth.
-// Would fail if: type_overview fell through to empty stats_html with no intro.
+// Test intent: type_overview_dynamic leads with the most-listed carat tier's own
+// median/sample from type-summary.json — never the type-wide weighted median.
+// Would fail if: intro cited aggregate.weighted_median_price / total_sample_size
+// as if they belonged to most_popular_carat.
 $type_summary_bag = array(
     'type_summary' => array(
         'aggregate' => array(
-            'carat_count'           => 19,
+            'carat_count'           => 2,
             'most_popular_carat'    => '1',
-            'weighted_median_price' => 3873,
-            'total_sample_size'     => 510000,
+            'weighted_median_price' => 5412,
+            'total_sample_size'     => 456637,
         ),
+        'carat_tiers' => array(
+            array(
+                'carat_weight' => '1',
+                'median_price' => 3107,
+                'sample_size'  => 91399,
+            ),
+            array(
+                'carat_weight' => '2',
+                'median_price' => 14553,
+                'sample_size'  => 27449,
+            ),
+        ),
+        'currency' => 'USD',
     ),
     'copy'    => null,
     'static'  => null,
@@ -743,20 +821,26 @@ $type_summary_bag = array(
 );
 $type_intro = $renderer->type_intro_html($type_ctx, $type_summary_bag, 'USD');
 check(
-    strpos($type_intro, '19 carat weights') !== false,
+    strpos($type_intro, '2 carat weights') !== false,
     'type_intro_html cites carat breadth from type-summary aggregate'
 );
 check(
-    strpos($type_intro, 'most searched weight') !== false && strpos($type_intro, '$3,873') !== false,
-    'type_intro_html cites popular carat median in whole dollars'
+    strpos($type_intro, 'most listed weight') !== false
+        && strpos($type_intro, '$3,107') !== false
+        && strpos($type_intro, '91,399') !== false,
+    'type_intro_html cites popular carat median and sample from carat_tiers'
 );
 check(
-    strpos($type_intro, '510,000') === false,
-    'type_intro_html no longer cites the all-weights sample size beside the 1ct median'
+    strpos($type_intro, '$5,412') === false && strpos($type_intro, '456,637') === false,
+    'type_intro_html does not cite type-wide weighted median or total sample'
+);
+check(
+    strpos($type_intro, 'most searched') === false,
+    'type_intro_html does not claim search demand for the popular carat'
 );
 $type_overview = $renderer->render_section('type_overview_dynamic', $type_ctx, $type_summary_bag, 'USD');
 check(
-    strpos($type_overview, '19 carat weights') !== false,
+    strpos($type_overview, '2 carat weights') !== false,
     'type_overview_dynamic falls back to type_intro_html when copy.json is absent'
 );
 
@@ -774,6 +858,33 @@ $type_overview_suppressed = $renderer->render_section('type_overview_dynamic', $
 check(
     $type_overview_suppressed === '',
     'type_overview_dynamic is empty when intro already rendered in the hero band'
+);
+
+// Test intent: carat tiers table shows price-per-carat and Ringspo how-to-read copy.
+// Would fail if: PPC column missing or Ringspo intro omitted from the table section.
+$ringspo_type_ctx = new LDN_Page_Context('ringspo', 'diamond-type', 'us', 'natural');
+$tiers_html = $renderer->carat_tiers_table_html(
+    $ringspo_type_ctx,
+    $type_summary_bag,
+    'Natural diamond prices by carat weight'
+);
+check(
+    strpos($tiers_html, 'Price per carat') !== false,
+    'carat_tiers_table_html includes Price per carat column header'
+);
+check(
+    strpos($tiers_html, '$3,107') !== false && strpos($tiers_html, '91,399') !== false,
+    'carat_tiers_table_html renders median and sample for 1ct'
+);
+// 3107 / 1 = 3107
+check(
+    substr_count($tiers_html, '$3,107') >= 2,
+    'carat_tiers_table_html shows price-per-carat equal to median at 1ct'
+);
+check(
+    strpos($tiers_html, 'do not increase proportionally') !== false
+        && strpos($tiers_html, 'Click a carat') !== false,
+    'Ringspo carat tiers table includes how-to-read and PPC commentary'
 );
 $intro_flag->setValue($renderer, false);
 
@@ -1026,6 +1137,10 @@ $type_nav_html = $renderer->render_section('type_nav_links', $dpe_ctx, $hub_bag,
 check(
     strpos($type_nav_html, 'ldn-type-nav') !== false,
     'type_nav_links renders the natural/lab entry grid'
+);
+check(
+    strpos($type_nav_html, 'Browse natural or lab-grown prices') !== false,
+    'type_nav_links section carries an SEO-friendly H2 title'
 );
 
 $popular_html = $renderer->render_section('popular_searches', $dpe_ctx, $hub_bag, 'GBP');

@@ -1,6 +1,6 @@
 {
-  "version": "37a3829",
-  "generated_at": "2026-07-28T12:24:07.072715+00:00",
+  "version": "2636c99",
+  "generated_at": "2026-07-29T12:28:27.785740+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8422,7 +8422,7 @@
           "shape_analysis": "At {carat} carats, {most_expensive_shape} leads on price at {currency_symbol}{most_expensive_price:,.0f} while {least_expensive_shape} is the most accessible at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\n"
         },
         "diamond_type": {
-          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most searched weight, with a median of {currency_symbol}{weighted_median_price:,.0f} across every shape at that weight.\n",
+          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most listed weight, with a median of {currency_symbol}{most_popular_median_price:,.0f} across every shape at that weight ({most_popular_sample_size:,} stones).\n",
           "buyer_context": "This page shows how {type_title_lower} diamond prices scale by carat weight {in_country}. Each figure is a weighted median across every shape in our index — use it to set a budget before you compare round, oval, and other shapes at the weight you have in mind.\n"
         },
         "top_level": {
@@ -9107,11 +9107,11 @@
           ]
         },
         "top_level": {
-          "hero_component": "summary_cards",
+          "hero_component": null,
           "sections": [
             "market_overview_dynamic",
-            "type_comparison",
-            "shape_preview",
+            "market_overview_table",
+            "type_nav_links",
             "partner_spotlight",
             "cross_site_comparison"
           ],
@@ -9179,6 +9179,13 @@
         }
       },
       "sentence_templates": {
+        "top_level": {
+          "intro": "",
+          "market_size": "Our index tracks {total_diamonds_tracked:,} diamonds across {natural_combo_count} natural and {lab_combo_count} lab-grown shape and carat combinations, drawn from some of the largest diamond retailers in the world. Prices are updated every day.\n"
+        },
+        "diamond_type": {
+          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index. The most listed weight is {most_popular_carat} carat, with a median of {currency_symbol}{most_popular_median_price:,.0f} across {most_popular_sample_size:,} tracked stones.\n"
+        },
         "all_shapes": {
           "intro_text": "Right now a {carat} carat {type_label} diamond {in_country} runs {currency_symbol}{current_price:,.0f} — that's the median across the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nExpect anywhere from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} depending on shape, {color_word}, and clarity. The spread is wide, which means there's real room to shop smart.\n",
           "analysis": "{trend_analysis}\n",
@@ -9320,7 +9327,7 @@
           "shape_analysis": "The most expensive shape for {carat} carat {type_label} diamonds is {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}; the least expensive is {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f} — a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes at this weight; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         },
         "diamond_type": {
-          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index. The most searched weight is {most_popular_carat} carat, with a weighted median of {currency_symbol}{weighted_median_price:,.0f} across {total_sample_size:,} tracked stones.\n"
+          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index. The most listed weight is {most_popular_carat} carat, with a median of {currency_symbol}{most_popular_median_price:,.0f} across {most_popular_sample_size:,} tracked stones.\n"
         },
         "top_level": {
           "intro": "Right now natural diamonds {in_country} average {currency_symbol}{natural_weighted_avg:,.0f} and lab-grown average {currency_symbol}{lab_weighted_avg:,.0f}. Pick a type or carat weight below to see the full breakdown.\n",
@@ -12838,16 +12845,16 @@
       },
       "color_clarity_json": {
         "page_level": "shape",
-        "producing_script": "C5.7_color_clarity_grid; legacy R4_color_clarity_db_json / L4_color_clarity_db_json",
+        "producing_script": "C5.7_color_clarity_grid (data: C3.2_color_clarity_aggregate)",
         "gate": "color_clarity",
         "status": "live",
         "filename": "color-clarity.json",
-        "description": "Color × clarity price grid — average price per color/clarity combination.",
+        "description": "Colour × clarity price grid — average price per colour/clarity combination, computed from the site's own retailer pool.",
         "wp_widgets": [
           "color_clarity_grid"
         ],
         "related_artefacts": [],
-        "runtime_note": "C5.7 consults should_produce; legacy R4/L4 paths remain for non-entitled rollout."
+        "runtime_note": "C3.2 writes one grid per retailer pool to ringspo.calc_data (pool_id); C5.7 consults should_produce and reads the pool named by the site's source_site_id. R4_color_clarity_db_json retired 2026-07-30."
       },
       "static_content_json": {
         "page_level": "all",

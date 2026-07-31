@@ -387,6 +387,44 @@
 	color: var(--ringspo-purple);
 }
 
+/* Top-level type nav: green band under the carat table (cards stay white). */
+.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav {
+	background-color: var(--ringspo-green);
+	color: #fff;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 1.5rem;
+	padding-bottom: 1.75rem;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav h2 {
+	color: #fff;
+	margin: 0 0 0.85rem;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav .ldn-type-nav-card {
+	background-color: #fff;
+	color: var(--ringspo-ink);
+	border-color: transparent;
+	text-decoration: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav .ldn-type-nav-card__title {
+	color: var(--ringspo-purple);
+}
+
+.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav .ldn-type-nav-card__desc {
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic .ldn-carat-price-table-intro {
+	margin-bottom: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-carat-price-table-intro + .ldn-carat-price-table-hint {
+	margin-top: 1.15rem;
+}
+
 /* Tighten the first body block after the hero (copy / editorial). */
 .ldn-chrome--ringspo-classic .ldn-hero-band + .ldn-section {
 	margin-top: 0;

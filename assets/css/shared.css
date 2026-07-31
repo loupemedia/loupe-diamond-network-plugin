@@ -13,6 +13,13 @@
 	background-color: var(--ldn-background, transparent);
 }
 
+/* Aggregate hubs are content-length, not viewport-length — avoid a phantom gap
+   above the theme footer once the last body section ends. */
+.ldn-page-shell:has(.ldn-top-level-page),
+.ldn-page-shell:has(.ldn-diamond-type-page) {
+	min-height: 0;
+}
+
 .ldn-price-page {
 	--ldn-table-border: #ddd;
 	--ldn-table-header-bg: #f2f2f2;

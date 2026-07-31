@@ -19,9 +19,10 @@ trait LDN_Trait_Head {
      * @param string|null      $canonical_url Absolute canonical URL, or null to derive.
      * @param array            $summary       summary-data payload for rich description.
      * @param string|null      $currency      ISO currency code.
+     * @param array            $site          Optional site config for country names.
      * @return string
      */
-    public function head_tags(LDN_Page_Context $ctx, $canonical_url = null, array $summary = array(), $currency = null) {
+    public function head_tags(LDN_Page_Context $ctx, $canonical_url = null, array $summary = array(), $currency = null, array $site = array()) {
         if (!apply_filters('ldn_emit_head_tags', true, $ctx)) {
             return '';
         }
@@ -31,7 +32,7 @@ trait LDN_Trait_Head {
         }
         $title = $this->document_title($ctx);
         $schema = new LDN_Schema();
-        $desc = $schema->dataset_description($ctx, $summary, $currency);
+        $desc = $schema->dataset_description($ctx, $summary, $currency, null, $site);
 
         $tags = '';
         if (!$this->seo_plugin_emits_meta()) {

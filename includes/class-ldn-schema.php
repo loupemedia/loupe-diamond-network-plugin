@@ -266,8 +266,8 @@ final class LDN_Schema {
 
         $node = array(
             '@type'              => 'Dataset',
-            'name'               => $this->headline($ctx) . $suffix,
-            'description'        => $this->dataset_description($ctx, $summary, $currency),
+            'name'               => $this->headline($ctx, $site) . $suffix,
+            'description'        => $this->dataset_description($ctx, $summary, $currency, null, $site),
             'isAccessibleForFree' => true,
         );
         if ($canonical_url !== '') {
@@ -486,9 +486,27 @@ final class LDN_Schema {
      *                                       copy (the chart's no-JS fallback); the
      *                                       meta description and JSON-LD Dataset
      *                                       pass null and keep ISO.
+     * @param array            $site         Optional site config (country full names).
      * @return string
      */
-    public function dataset_description(LDN_Page_Context $ctx, array $summary, $currency = null, $display_date = null) {
+    public function dataset_description(LDN_Page_Context $ctx, array $summary, $currency = null, $display_date = null, array $site = array()) {
+        // Top-level hubs carry market-overview.json (totals / combos), not shape medians.
+        if ($ctx->page_level === 'top-level') {
+            $hub = $this->top_level_dataset_description($ctx, $summary, $display_date, $site);
+            if ($hub !== '') {
+                return $hub;
+            }
+        }
+
+        // All-shapes hubs compare cuts at one weight — lead with that intent + country
+        // so they do not compete with type hubs or named-shape pages.
+        if ($ctx->page_level === 'all-shapes') {
+            $all = $this->all_shapes_dataset_description($ctx, $summary, $currency, $display_date, $site);
+            if ($all !== '') {
+                return $all;
+            }
+        }
+
         $subject = $this->plain_subject($ctx);
         if ($subject === 'diamond') {
             $base = 'Market pricing data for diamonds.';
@@ -536,22 +554,196 @@ final class LDN_Schema {
     }
 
     /**
+     * Meta / Dataset description for the top-level market hub.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $overview market-overview payload (or empty)
+     * @param string|null      $display_date
+     * @return string Empty when overview lacks usable scale fields.
+     */
+    private function top_level_dataset_description(LDN_Page_Context $ctx, array $overview, $display_date = null, array $site = array()) {
+        $total = isset($overview['total_diamonds_tracked']) ? (int) $overview['total_diamonds_tracked'] : 0;
+        $natural = isset($overview['natural']) && is_array($overview['natural']) ? $overview['natural'] : array();
+        $lab = isset($overview['lab_grown']) && is_array($overview['lab_grown']) ? $overview['lab_grown'] : array();
+        $nat_combos = isset($natural['combo_count']) ? (int) $natural['combo_count'] : 0;
+        $lab_combos = isset($lab['combo_count']) ? (int) $lab['combo_count'] : 0;
+        if ($total <= 0 && $nat_combos <= 0 && $lab_combos <= 0) {
+            return '';
+        }
+
+        $country = $this->country_full_name($ctx, $site);
+        $parts = array();
+        if ($total > 0) {
+            $parts[] = sprintf(
+                'Independent %s diamond price index covering %s natural and lab-grown diamonds',
+                $country,
+                number_format($total)
+            );
+        } else {
+            $parts[] = sprintf('Independent %s diamond price index', $country);
+        }
+        if ($nat_combos > 0 || $lab_combos > 0) {
+            $parts[] = sprintf(
+                'across %d natural and %d lab-grown shape and carat combinations',
+                $nat_combos,
+                $lab_combos
+            );
+        }
+        $desc = implode(' ', $parts)
+            . '. Daily median prices by carat — compare natural vs lab-grown and drill into any weight';
+        $date = $this->dataset_date($overview);
+        if ($date !== '') {
+            if (is_string($display_date) && $display_date !== '') {
+                $date = $display_date;
+            }
+            $desc .= sprintf('. Updated %s.', $date);
+        } else {
+            $desc .= '.';
+        }
+        return $desc;
+    }
+
+    /**
+     * Meta / Dataset description for the all-shapes (carat) hub.
+     *
+     * Owns "by shape" + country so this level does not compete with the type hub
+     * (bare "{type} diamond prices") or a shape page (named cut).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $summary
+     * @param string|null      $currency
+     * @param string|null      $display_date
+     * @param array            $site
+     * @return string Empty when carat/type context is missing.
+     */
+    private function all_shapes_dataset_description(
+        LDN_Page_Context $ctx,
+        array $summary,
+        $currency = null,
+        $display_date = null,
+        array $site = array()
+    ) {
+        if ($ctx->carat === null || $ctx->diamond_type === null) {
+            return '';
+        }
+
+        $carat = $this->format_carat_label($ctx->carat);
+        $type = $this->type_phrase($ctx->diamond_type);
+        $country = $this->country_full_name($ctx, $site);
+        $desc = sprintf(
+            'Compare %s carat %s diamond prices by shape in the %s',
+            $carat,
+            $type,
+            $country
+        );
+
+        $median = $this->dig_first($summary, array(
+            array('aggregate', 'weighted_median_price'),
+            array('distribution', 'median_price'),
+            array('median_price'),
+            array('current_price'),
+            array('distribution', 'percentiles', 'p50'),
+        ));
+        $sample = $this->dig_first($summary, array(
+            array('num_diamonds'),
+            array('distribution', 'sample_size'),
+            array('sample_size'),
+        ));
+
+        if (is_numeric($median)) {
+            $symbol = $this->currency_symbol($currency);
+            $desc .= sprintf('. Weighted median %s%s', $symbol, number_format((float) $median, 0));
+            if (is_numeric($sample) && (int) $sample > 0) {
+                $desc .= sprintf(' across %s stones', number_format((int) $sample));
+            }
+        }
+
+        $date = $this->dataset_date($summary);
+        if ($date !== '') {
+            if (is_string($display_date) && $display_date !== '') {
+                $date = $display_date;
+            }
+            $desc .= sprintf(' as of %s', $date);
+        }
+        return $desc . '.';
+    }
+
+    /**
      * SEO keywords from the page context.
+     *
+     * Phrases are level-scoped so adjacent hierarchy pages do not share the same
+     * primary keyword set (type ↔ all-shapes ↔ shape).
      *
      * @param LDN_Page_Context $ctx
      * @return string[]
      */
     private function keywords(LDN_Page_Context $ctx) {
-        $words = array();
-        if ($ctx->carat !== null) {
-            $words[] = $this->format_carat_label($ctx->carat) . ' carat diamond';
+        if ($ctx->page_level === 'top-level') {
+            return array_values(array_unique(array_filter(array(
+                'diamond prices',
+                'natural diamond prices',
+                'lab-grown diamond prices',
+                'diamond price chart',
+                'diamond prices by carat',
+            ))));
         }
-        if ($ctx->shape !== null) {
-            $words[] = strtolower(str_replace('-', ' ', $ctx->shape)) . ' diamond';
+
+        $carat = $ctx->carat !== null ? $this->format_carat_label($ctx->carat) : '';
+        $type = $ctx->diamond_type !== null ? $this->type_phrase($ctx->diamond_type) : '';
+        $shape = $ctx->shape !== null
+            ? strtolower(str_replace('-', ' ', $ctx->shape))
+            : '';
+
+        if ($ctx->page_level === 'all-shapes') {
+            $words = array();
+            if ($carat !== '' && $type !== '') {
+                $words[] = $carat . ' carat ' . $type . ' diamond prices by shape';
+                $words[] = $type . ' diamond shape comparison';
+                $words[] = $carat . ' carat diamond shapes price';
+            }
+            return array_values(array_unique(array_filter($words)));
+        }
+
+        if ($ctx->page_level === 'diamond-type') {
+            $words = array();
+            if ($type !== '') {
+                $words[] = $type . ' diamond prices';
+                $words[] = $type . ' diamond prices by carat';
+            }
+            $words[] = 'diamond prices by carat';
+            return array_values(array_unique(array_filter($words)));
+        }
+
+        // Shape / individual pages.
+        $words = array();
+        if ($carat !== '' && $shape !== '' && $type !== '') {
+            $words[] = $carat . ' carat ' . $shape . ' ' . $type . ' diamond';
+            $words[] = $carat . ' carat ' . $shape . ' diamond prices';
+        } elseif ($carat !== '') {
+            $words[] = $carat . ' carat diamond';
+        }
+        if ($shape !== '') {
+            $words[] = $shape . ' diamond';
         }
         $words[] = 'diamond prices';
-        $words[] = 'diamond price chart';
         return array_values(array_unique(array_filter($words)));
+    }
+
+    /**
+     * Lowercase type phrase for meta/keywords ("lab-grown", "natural").
+     *
+     * @param string|null $diamond_type
+     * @return string
+     */
+    private function type_phrase($diamond_type) {
+        if ($diamond_type === null || $diamond_type === '') {
+            return '';
+        }
+        $normalised = strtolower(str_replace('_', '-', (string) $diamond_type));
+        if ($normalised === 'lab') {
+            return 'lab-grown';
+        }
+        return $normalised;
     }
 
     /**
@@ -604,7 +796,7 @@ final class LDN_Schema {
      * @param LDN_Page_Context $ctx
      * @return string
      */
-    public function headline(LDN_Page_Context $ctx) {
+    public function headline(LDN_Page_Context $ctx, array $site = array()) {
         $labels = array('natural' => 'Natural', 'lab-grown' => 'Lab-Grown');
         $parts = array();
         if ($ctx->carat !== null) {
@@ -620,7 +812,21 @@ final class LDN_Schema {
         }
         $subject = trim(implode(' ', $parts));
         if ($subject === '') {
+            if ($ctx->site_id === 'ringspo' && $ctx->page_level === 'top-level') {
+                // Match LDN_Renderer::headline() — full country name, no (US) suffix.
+                return sprintf('%s Diamond Prices', $this->country_full_name($ctx, $site));
+            }
             return sprintf('Diamond Prices (%s)', strtoupper($ctx->country_code));
+        }
+        if ($ctx->site_id === 'ringspo' && $ctx->page_level === 'diamond-type') {
+            return sprintf('%s %s Diamond Prices', $this->country_full_name($ctx, $site), $subject);
+        }
+        if ($ctx->site_id === 'ringspo' && $ctx->page_level === 'all-shapes') {
+            return sprintf(
+                '%s Diamond Prices by Shape — %s',
+                $subject,
+                $this->country_full_name($ctx, $site)
+            );
         }
         return sprintf('%s Diamond Prices (%s)', $subject, strtoupper($ctx->country_code));
     }
@@ -656,6 +862,33 @@ final class LDN_Schema {
                     }
                 }
             }
+        }
+        // Fallback when site config was not passed (meta description path).
+        $fallback = array(
+            'us' => 'United States',
+            'uk' => 'United Kingdom',
+            'au' => 'Australia',
+            'ca' => 'Canada',
+            'nz' => 'New Zealand',
+            'ie' => 'Ireland',
+            'fr' => 'France',
+            'de' => 'Germany',
+            'it' => 'Italy',
+            'es' => 'Spain',
+            'nl' => 'Netherlands',
+            'se' => 'Sweden',
+            'no' => 'Norway',
+            'dk' => 'Denmark',
+            'fi' => 'Finland',
+            'in' => 'India',
+            'ae' => 'United Arab Emirates',
+            'sg' => 'Singapore',
+            'hk' => 'Hong Kong',
+            'za' => 'South Africa',
+        );
+        $code = strtolower($ctx->country_code);
+        if (isset($fallback[$code])) {
+            return $fallback[$code];
         }
         return strtoupper($ctx->country_code);
     }
