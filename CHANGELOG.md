@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1] - 2026-08-02
+
+- **L/W segmentation table** on fancy-shape individual size pages when `size-summary.json` includes `lw_segments` (from Z2 `lw_stats`). Round pages keep the cut-grade table from Z2.1. Histogram charts are suppressed when the table is present or when bin counts do not cover enough of the sample.
+- **Size-page chart sections** render on a white band even when positional purple banding would colour the section; axis/heading text stays dark on the white surface.
+- **"What published charts assume"** callout: removed the purple left-border accent stripe.
+- **Percentile range note** copy clarified in `size-copy.json` source template.
+
 ## [0.18.0] - 2026-07-31
 
 - **The price calculator ships on shape pages** (`price_calculator` section, entitlement-gated), reading the percentile cells C5.9 publishes as `price-calculator.json`. The reader picks colour group, clarity group and, on round pages, cut grade; leaving the price field blank answers "what should this cost", and entering a quoted price answers where that price sits against the same set of stones. **One widget, not two**: the checker is the calculator with the price field filled in, so there is no separate `price_checker` anything.

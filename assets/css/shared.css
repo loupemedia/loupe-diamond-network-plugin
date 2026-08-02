@@ -803,7 +803,8 @@
 .ldn-size-spread__lead,
 .ldn-size-spread__note,
 .ldn-size-percentile-note,
-.ldn-size-chart__lead {
+.ldn-size-chart__lead,
+.ldn-size-segmentation__lead {
 	margin: 0 0 1rem;
 	color: var(--ldn-text-muted, #4b5563);
 	font-size: 0.95rem;
@@ -817,7 +818,6 @@
 .ldn-size-ideal-real {
 	padding: 1rem 1.25rem;
 	background: var(--ldn-surface-muted, #f8f7fc);
-	border-left: 4px solid var(--ldn-primary, #706cc8);
 	border-radius: 4px;
 }
 

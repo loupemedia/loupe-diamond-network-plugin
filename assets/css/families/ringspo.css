@@ -212,6 +212,17 @@
 	overflow: hidden;
 }
 
+/* Size-page chart sections inherit the positional purple band on odd sections;
+   force a white surface on the section itself (not only descendants). */
+.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section.ldn-chart {
+	background-color: #fff;
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section.ldn-chart :is(h2, h3, h4, p, li, figcaption) {
+	color: var(--ringspo-ink);
+}
+
 /* Hero-band data tables (carat tiers, market overview) as white cards. */
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table {
 	background-color: #fff;
@@ -286,7 +297,7 @@
 		.ldn-size-ideal-real, .ldn-size-price-card, .ldn-price-size-card,
 		.ldn-size-matrix-scroll, .ldn-size-checker-panel, .ldn-size-checker-results,
 		.ldn-size-checker-card, .ldn-size-scale-controls, .ldn-size-checker-cta,
-		.ldn-faceup-callout, .ldn-price-calculator__result) {
+		.ldn-faceup-callout, .ldn-price-calculator__result, .ldn-size-table--segmentation) {
 	background-color: #fff;
 	color: var(--ringspo-ink);
 	border-color: transparent;

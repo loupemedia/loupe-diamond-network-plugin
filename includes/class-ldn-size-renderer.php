@@ -223,7 +223,7 @@ final class LDN_Size_Renderer {
                 . '</section>';
         }
 
-        $tail = $this->cut_grade_html($summary, $ctx)
+        $tail = $this->size_segmentation_html($summary, $ctx)
             . $this->chart_html($ctx, $summary, $ctx->site_id)
             . ($full_range_site ? '' : $this->chart_vs_real_html($summary));
 
@@ -235,19 +235,40 @@ final class LDN_Size_Renderer {
     }
 
     /**
-     * Cut-grade segmentation table (round brilliant only).
+     * Shape segmentation table: cut grade (round) or L/W ratio bands (fancy shapes).
      *
-     * @param array $summary
+     * @param array                 $summary
+     * @param LDN_Page_Context|null $ctx
      * @return string
      */
-    public function cut_grade_html(array $summary, LDN_Page_Context $ctx = null) {
+    public function size_segmentation_html(array $summary, LDN_Page_Context $ctx = null) {
         if ($ctx !== null && $this->is_full_range_site($ctx->site_id)) {
             return '';
         }
         $shape = isset($summary['shape']) ? (string) $summary['shape'] : '';
-        if ($shape !== 'round') {
-            return '';
+        if ($shape === 'round') {
+            return $this->round_cut_grade_section_html($summary);
         }
+
+        return $this->lw_segment_section_html($summary);
+    }
+
+    /**
+     * Cut-grade segmentation table (round brilliant only).
+     *
+     * @param array                 $summary
+     * @param LDN_Page_Context|null $ctx
+     * @return string
+     */
+    public function cut_grade_html(array $summary, LDN_Page_Context $ctx = null) {
+        return $this->size_segmentation_html($summary, $ctx);
+    }
+
+    /**
+     * @param array $summary
+     * @return string
+     */
+    private function round_cut_grade_section_html(array $summary) {
         $segments = isset($summary['cut_segments']) && is_array($summary['cut_segments'])
             ? $summary['cut_segments'] : array();
         if ($segments === array()) {
@@ -285,18 +306,92 @@ final class LDN_Size_Renderer {
             return '';
         }
 
-        return '<section class="ldn-section ldn-size-cut-grade"><h2>'
+        return '<section class="ldn-section ldn-size-segmentation ldn-size-cut-grade"><h2>'
             . esc_html__('How does cut grade affect size?', 'loupe-diamond-network') . '</h2>'
-            . '<p class="ldn-size-cut-grade__lead">'
+            . '<p class="ldn-size-segmentation__lead">'
             . esc_html__(
                 'Median dimensions from real inventory at this carat weight, split by GIA cut grade. The headline size above pools all grades.',
                 'loupe-diamond-network'
             ) . '</p>'
-            . '<table class="ldn-size-table ldn-size-table--cut-grade"><thead><tr>'
+            . '<table class="ldn-size-table ldn-size-table--segmentation"><thead><tr>'
             . '<th scope="col">' . esc_html__('Cut grade', 'loupe-diamond-network') . '</th>'
             . '<th scope="col">' . esc_html__('Stones', 'loupe-diamond-network') . '</th>'
             . '<th scope="col">' . esc_html__('Share', 'loupe-diamond-network') . '</th>'
             . '<th scope="col">' . esc_html__('Median diameter', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Median face-up', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Median depth %', 'loupe-diamond-network') . '</th>'
+            . '</tr></thead><tbody>' . $rows . '</tbody></table></section>';
+    }
+
+    /**
+     * L/W ratio segmentation table (fancy shapes).
+     *
+     * @param array $summary
+     * @return string
+     */
+    private function lw_segment_section_html(array $summary) {
+        $segments = isset($summary['lw_segments']) && is_array($summary['lw_segments'])
+            ? $summary['lw_segments'] : array();
+        if ($segments === array()) {
+            return '';
+        }
+
+        $use_diameter = $this->is_near_round($summary);
+        $rows = '';
+        foreach ($segments as $segment) {
+            if (!is_array($segment)) {
+                continue;
+            }
+            $label = isset($segment['label']) ? (string) $segment['label'] : '';
+            $n = isset($segment['n']) ? (int) $segment['n'] : 0;
+            $share = isset($segment['share_pct']) ? (float) $segment['share_pct'] : null;
+            $diameter = $this->dig($segment, array('diameter_mm', 'median'));
+            $length = $this->dig($segment, array('dimensions_mm', 'length', 'median'));
+            $width = $this->dig($segment, array('dimensions_mm', 'width', 'median'));
+            $faceup = $this->dig($segment, array('faceup_area_mm2', 'median'));
+            $depth = $this->dig($segment, array('depth_percent', 'median'));
+            if ($label === '' || $n <= 0) {
+                continue;
+            }
+            $share_txt = $share !== null ? sprintf('%s%%', (string) $share) : '—';
+            if ($use_diameter && $diameter !== null) {
+                $dim_txt = sprintf('%s mm', (string) $diameter);
+            } elseif ($length !== null && $width !== null) {
+                $dim_txt = sprintf('%s × %s mm', (string) $width, (string) $length);
+            } else {
+                $dim_txt = '—';
+            }
+            $faceup_txt = $faceup !== null ? sprintf('%s mm²', (string) $faceup) : '—';
+            $depth_txt = $depth !== null ? (string) $depth : '—';
+            $rows .= '<tr>'
+                . '<th scope="row">' . esc_html($label) . '</th>'
+                . '<td>' . esc_html(number_format($n)) . '</td>'
+                . '<td>' . esc_html($share_txt) . '</td>'
+                . '<td>' . esc_html($dim_txt) . '</td>'
+                . '<td>' . esc_html($faceup_txt) . '</td>'
+                . '<td>' . esc_html($depth_txt) . '</td>'
+                . '</tr>';
+        }
+        if ($rows === '') {
+            return '';
+        }
+
+        $dim_header = $use_diameter
+            ? __('Median diameter', 'loupe-diamond-network')
+            : __('Median size (W × L)', 'loupe-diamond-network');
+
+        return '<section class="ldn-section ldn-size-segmentation ldn-size-lw-segments"><h2>'
+            . esc_html__('How does length-to-width ratio affect size?', 'loupe-diamond-network') . '</h2>'
+            . '<p class="ldn-size-segmentation__lead">'
+            . esc_html__(
+                'Median dimensions from real inventory at this carat weight, grouped by length-to-width ratio. The headline size above pools all proportions.',
+                'loupe-diamond-network'
+            ) . '</p>'
+            . '<table class="ldn-size-table ldn-size-table--segmentation"><thead><tr>'
+            . '<th scope="col">' . esc_html__('L/W band', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Stones', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html__('Share', 'loupe-diamond-network') . '</th>'
+            . '<th scope="col">' . esc_html($dim_header) . '</th>'
             . '<th scope="col">' . esc_html__('Median face-up', 'loupe-diamond-network') . '</th>'
             . '<th scope="col">' . esc_html__('Median depth %', 'loupe-diamond-network') . '</th>'
             . '</tr></thead><tbody>' . $rows . '</tbody></table></section>';

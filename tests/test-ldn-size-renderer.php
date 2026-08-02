@@ -585,7 +585,27 @@ $summary_with_cut['cut_segments'] = array(
 $cut_html = $renderer->cut_grade_html($summary_with_cut);
 check(strpos($cut_html, 'How does cut grade affect size?') !== false, 'cut-grade section heading renders');
 check(strpos($cut_html, 'Excellent') !== false && strpos($cut_html, '6.41') !== false, 'cut-grade table shows segment stats');
-check($renderer->cut_grade_html(array_merge($summary, array('shape' => 'emerald'))) === '', 'cut-grade omitted for fancy shapes');
+$summary_with_lw = array_merge($summary, array(
+    'shape' => 'oval',
+    'lw_segments' => array(
+        array(
+            'id' => 'classic',
+            'label' => 'Classic (L/W 1.40–1.50)',
+            'n' => 22000,
+            'share_pct' => 44.0,
+            'dimensions_mm' => array(
+                'length' => array('median' => 7.89),
+                'width' => array('median' => 5.58),
+            ),
+            'faceup_area_mm2' => array('median' => 34.6),
+            'depth_percent' => array('median' => 63.0),
+        ),
+    ),
+));
+$lw_html = $renderer->size_segmentation_html($summary_with_lw);
+check(strpos($lw_html, 'How does length-to-width ratio affect size?') !== false, 'L/W segmentation heading renders');
+check(strpos($lw_html, 'Classic (L/W 1.40–1.50)') !== false && strpos($lw_html, '5.58') !== false, 'L/W table shows segment stats');
+check($renderer->size_segmentation_html(array_merge($summary, array('shape' => 'emerald'))) === '', 'L/W segmentation omitted without lw_segments');
 
 // Test intent: diamondchart full_range presentation uses min–max copy and two spread labels.
 // Would fail if: renderer still showed p10–p90 percentile rows when range_presentation is full_range.
