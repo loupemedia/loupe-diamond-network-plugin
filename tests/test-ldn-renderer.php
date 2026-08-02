@@ -43,6 +43,9 @@ if (!function_exists('esc_attr__')) {
 if (!function_exists('esc_html__')) {
     function esc_html__($s, $d = null) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 }
+if (!function_exists('_n')) {
+    function _n($single, $plural, $number, $d = null) { return $number == 1 ? $single : $plural; }
+}
 if (!function_exists('esc_attr')) {
     function esc_attr($s) { return htmlspecialchars((string) $s, ENT_QUOTES); }
 }
@@ -361,6 +364,208 @@ check(
     'carat table renders empty when carat_price_table is absent (stale S3 safe)'
 );
 
+// Rule: every published carat row discloses how many diamonds are behind it, so a
+// thin heavy weight reading cheaper than a lighter one is interpretable rather
+// than apparently contradictory. We publish thin rows — we do not hide them.
+// Would fail if: C5.3 emitted prices with no sample field and the table rendered
+// them bare, which is the behaviour before this change.
+$sampled_overview = array(
+    'currency' => 'USD',
+    'carat_price_table' => array(
+        array(
+            'carat_weight'            => '8',
+            'natural_median_price'    => 219570,
+            'natural_sample_size'     => 113,
+            'lab_grown_median_price'  => null,
+            'lab_grown_sample_size'   => 0,
+            'lab_grown_discount_pct'  => null,
+        ),
+        array(
+            'carat_weight'            => '9',
+            'natural_median_price'    => 216419,
+            'natural_sample_size'     => 28,
+            'lab_grown_median_price'  => null,
+            'lab_grown_sample_size'   => 0,
+            'lab_grown_discount_pct'  => null,
+        ),
+    ),
+);
+$sampled_html = $renderer->carat_price_table_html($top_ctx, $sampled_overview, '$');
+check(
+    strpos($sampled_html, 'Diamonds analysed') !== false,
+    'carat table exposes a diamonds-analysed column'
+);
+check(
+    strpos($sampled_html, '>113<') !== false && strpos($sampled_html, '>28<') !== false,
+    'carat table renders the per-row sample size for each carat weight'
+);
+check(
+    strpos($sampled_html, '216,419') !== false,
+    'a thin carat row still publishes its price — disclosure, not suppression'
+);
+check(
+    strpos(
+        $renderer->carat_price_table_html($top_ctx, $carat_overview, '$'),
+        'Diamonds analysed'
+    ) !== false,
+    'legacy rows without sample fields still render the column (em dash), no fatal'
+);
+
+// --- 6b. data_methodology ("About this data") --------------------------------
+// Test intent: the methodology block states the statistic for the level it is on,
+// discloses the sample size and date, and never names a retailer or the size of
+// the pool. It renders only where the widget is entitled.
+// Would fail if: the upper levels claimed a "median" (they publish a weighted
+// composite), a retailer name or pool count reached the copy, or a partial-coverage
+// caveat appeared on a complete aggregate.
+class LDN_Config_Methodology extends LDN_Config {
+    public function get_content_profile($site_id) {
+        return array(
+            'methodology' => array(
+                'heading'      => 'About this data',
+                'source_line'  => 'We track live listings from major online diamond retailers.',
+                'price_basis'  => 'These are the prices retailers are asking today, not the prices stones finally sold for.',
+                'approximate_weight' => 'Very few diamonds are cut to an exact weight, so stones of approximately this weight are grouped together.',
+                'update_line'  => 'Prices are rebuilt daily. This page reflects {date}.',
+                'thin_sample_note' => 'Larger weights are bought and sold far less often, so we find fewer of them.',
+                'partial_coverage_note' => "Today's figure covers {shape_count} of the {shapes_expected} shapes we track at this weight.",
+                'statistic'    => array(
+                    'individual_shape' => 'These figures come from {sample_size} {shape} diamonds listed at around {carat} carat, as at {date}. The headline price is the median.',
+                    'all_shapes'       => 'This page combines every shape we track at around {carat} carat, covering {sample_size} diamonds across {shape_count} shapes as at {date}.',
+                    'diamond_type'     => 'Each row combines every shape we track at that weight. The figures cover {sample_size} diamonds as at {date}.',
+                    'top_level'        => 'Each price combines every shape we track at that weight. The figures cover {sample_size} diamonds as at {date}.',
+                ),
+            ),
+        );
+    }
+    public function get_bundle() {
+        $widgets = array('data_methodology' => array('presentation' => 'full'));
+        return array('entitlements' => array('sites' => array(
+            'methodsite' => array('pages' => array(
+                'shape'        => array('wp_widgets' => $widgets),
+                'all-shapes'   => array('wp_widgets' => $widgets),
+                'diamond-type' => array('wp_widgets' => $widgets),
+                'top-level'    => array('wp_widgets' => $widgets),
+            )),
+            'nomethodsite' => array('pages' => array(
+                'shape' => array('wp_widgets' => array(
+                    'data_methodology' => array('presentation' => 'disabled'),
+                )),
+            )),
+        )));
+    }
+}
+
+$method_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Methodology());
+$method_shape_ctx = new LDN_Page_Context('methodsite', 'shape', 'us', 'natural', '1', 'round');
+$method_all_ctx   = new LDN_Page_Context('methodsite', 'all-shapes', 'us', 'natural', '1');
+$method_top_ctx   = new LDN_Page_Context('methodsite', 'top-level', 'us');
+
+$shape_method_html = $method_renderer->data_methodology_html($method_shape_ctx, array(
+    'summary' => array(
+        'analysis_date' => '2026-07-31',
+        'distribution'  => array('median_price' => 3410, 'sample_size' => 3410),
+    ),
+));
+check(
+    strpos($shape_method_html, 'ldn-data-methodology') !== false
+        && strpos($shape_method_html, 'About this data') !== false,
+    'methodology block renders on an entitled shape page'
+);
+check(
+    strpos($shape_method_html, '3,410 round diamonds') !== false,
+    'methodology block states the sample size and shape from live data'
+);
+check(
+    strpos($shape_method_html, 'the median') !== false,
+    'shape level describes its figure as a median (C3 p50 is a true median)'
+);
+check(
+    strpos($shape_method_html, 'asking today') !== false,
+    'methodology block discloses that prices are asking prices, not sold prices'
+);
+check(
+    strpos($shape_method_html, '{') === false,
+    'no unfilled copy tokens survive into rendered output'
+);
+
+// The pool must never be identifiable from the copy.
+$forbidden_pool_terms = array(
+    'James Allen', 'Blue Nile', 'Brilliant Earth', 'Whiteflash', 'Brian Gavin',
+    'Ritani', '5 retailers', 'five retailers',
+);
+$named_retailer = false;
+foreach ($forbidden_pool_terms as $term) {
+    if (stripos($shape_method_html, $term) !== false) {
+        $named_retailer = true;
+    }
+}
+check(!$named_retailer, 'methodology block names no retailer and states no pool size');
+
+$top_method_html = $method_renderer->data_methodology_html($method_top_ctx, array(
+    'market_overview' => array('analysis_date' => '2026-07-31', 'total_diamonds_tracked' => 125000),
+));
+check(
+    strpos($top_method_html, '125,000 diamonds') !== false,
+    'top level reads its sample size from market-overview'
+);
+check(
+    stripos($top_method_html, 'the median') === false,
+    'upper levels do not claim a median, because they publish a weighted composite'
+);
+check(
+    strpos($top_method_html, 'Larger weights') !== false,
+    'table levels carry the thin-sample note that explains a heavy weight reading cheap'
+);
+
+// Coverage caveat fires only when C5.1 reported incomplete coverage.
+$complete_all_html = $method_renderer->data_methodology_html($method_all_ctx, array(
+    'summary' => array(
+        'analysis_date' => '2026-07-31',
+        'num_diamonds'  => 90460,
+        'aggregate'     => array(
+            'shape_count' => 10, 'shapes_expected' => 10, 'coverage_complete' => true,
+        ),
+    ),
+));
+$partial_all_html = $method_renderer->data_methodology_html($method_all_ctx, array(
+    'summary' => array(
+        'analysis_date' => '2026-07-31',
+        'num_diamonds'  => 41033,
+        'aggregate'     => array(
+            'shape_count' => 2, 'shapes_expected' => 10, 'coverage_complete' => false,
+        ),
+    ),
+));
+check(
+    strpos($complete_all_html, 'shapes we track at this weight.') === false,
+    'no partial-coverage caveat when the aggregate covered every shape'
+);
+check(
+    strpos($partial_all_html, 'covers 2 of the 10 shapes') !== false,
+    'partial coverage is stated on the page when C5.1 flagged it'
+);
+check(
+    $method_renderer->data_methodology_html(
+        new LDN_Page_Context('nomethodsite', 'shape', 'us', 'natural', '1', 'round'),
+        array('summary' => array('num_diamonds' => 100, 'analysis_date' => '2026-07-31'))
+    ) === '',
+    'methodology block is absent when the widget presentation is disabled'
+);
+check(
+    $method_renderer->data_methodology_html(
+        new LDN_Page_Context('unknownsite', 'shape', 'us', 'natural', '1', 'round'),
+        array('summary' => array('num_diamonds' => 100, 'analysis_date' => '2026-07-31'))
+    ) === '',
+    'methodology block is absent for a site with no entitlements entry'
+);
+check(
+    strpos($method_renderer->render_section('data_methodology', $method_shape_ctx, array(
+        'summary' => array('analysis_date' => '2026-07-31', 'num_diamonds' => 3410),
+    )), 'ldn-data-methodology') !== false,
+    'render_section routes the data_methodology id (not silently skipped)'
+);
+
 $market_bag = array(
     'market_overview' => array(
         'currency' => 'USD',
@@ -410,6 +615,150 @@ check(
 check(
     strpos($ringspo_market, 'Natural and lab-grown stones differ') === false,
     'Ringspo top-level does not inline C1 type_comparison under the table'
+);
+
+// --- 6a. most_traded_table section (top-level, C5.3 top-tables.json) --------
+// Test intent: the hub's most-traded block renders one linked row per combo in
+// natural_top / lab_grown_top, links each row to that combination's shape page
+// (making it the hub's internal-link block), and labels the figure "Median price"
+// because these are true per-combo medians rather than the all-shapes composite the
+// carat table above shows. Returns '' when the artefact is absent.
+// Would fail if: rows were unlinked (dead-end hub), the type were taken from $ctx
+// instead of the row (every link pointing at natural), or the label copied the
+// carat table's "Typical price".
+$top_tables_payload = array(
+    'metadata' => array('currency' => 'USD'),
+    'natural_top' => array(
+        array(
+            'rank' => 1, 'shape' => 'round', 'carat' => '1',
+            'diamond_type' => 'natural', 'median_price' => 4300, 'sample_size' => 5120,
+        ),
+        array(
+            'rank' => 2, 'shape' => 'oval', 'carat' => '1.5',
+            'diamond_type' => 'natural', 'median_price' => 8900, 'sample_size' => 2010,
+        ),
+    ),
+    'lab_grown_top' => array(
+        array(
+            'rank' => 1, 'shape' => 'emerald', 'carat' => '2',
+            'diamond_type' => 'lab-grown', 'median_price' => 2400, 'sample_size' => 3300,
+        ),
+    ),
+);
+$most_traded_html = $renderer->render_section(
+    'most_traded_table',
+    $ringspo_top,
+    array('top_tables' => $top_tables_payload),
+    'USD'
+);
+check(
+    strpos($most_traded_html, 'ldn-most-traded') !== false,
+    'render_section routes the most_traded_table id (not silently skipped)'
+);
+check(
+    strpos($most_traded_html, '1 ct Round') !== false
+        && strpos($most_traded_html, '2 ct Emerald') !== false,
+    'most-traded table labels each row with its carat and shape'
+);
+check(
+    substr_count($most_traded_html, '<a href=') === 3,
+    'every most-traded row is a link, so the hub is not a dead end'
+);
+check(
+    strpos($most_traded_html, 'lab-grown/2-carat/emerald') !== false,
+    'lab-grown rows link to the lab-grown tree, not the page context type'
+);
+check(
+    strpos($most_traded_html, 'Median price') !== false
+        && strpos($most_traded_html, 'Typical price') === false,
+    'most-traded table claims a median (true per-combo p50), unlike the carat table'
+);
+check(
+    strpos($most_traded_html, '5,120') !== false,
+    'most-traded table discloses the sample size behind each median'
+);
+check(
+    $renderer->render_section('most_traded_table', $ringspo_top, array(), 'USD') === '',
+    'most_traded_table renders nothing when top-tables.json is absent'
+);
+$mt_partial = $renderer->render_section(
+    'most_traded_table',
+    $ringspo_top,
+    array('top_tables' => array(
+        'metadata' => array('currency' => 'USD'),
+        'natural_top' => $top_tables_payload['natural_top'],
+        'lab_grown_top' => array(),
+    )),
+    'USD'
+);
+check(
+    strpos($mt_partial, 'Natural') !== false && strpos($mt_partial, 'Lab-grown') === false,
+    'an empty lab-grown list renders no empty Lab-grown heading'
+);
+
+// --- 6b. price_per_carat_chart section (diamond-type, C5.2) -----------------
+// Test intent: the L2 price-per-carat section renders the C5.2 chart with copy that
+// names the page's own diamond type and points the reader at the milestone-weight
+// steps; it returns '' when the artefact is absent so a site without the
+// entitlement gets no empty heading.
+// Would fail if: the section fell through render_section's "unknown -> skip"
+// branch, or the natural copy showed on the lab-grown page.
+$ppc_payload = array(
+    'data' => array(
+        array(
+            'x' => array('0.5 ct', '1 ct', '2 ct'),
+            'y' => array(3000, 5000, 7000),
+            'mode' => 'lines+markers',
+        ),
+    ),
+    'layout' => array('margin' => array('t' => 150)),
+);
+$ppc_nat_ctx = new LDN_Page_Context('ringspo', 'diamond-type', 'us', 'natural');
+$ppc_lab_ctx = new LDN_Page_Context('ringspo', 'diamond-type', 'us', 'lab-grown');
+$ppc_html = $renderer->render_section(
+    'price_per_carat_chart',
+    $ppc_nat_ctx,
+    array('price_per_carat_chart' => $ppc_payload),
+    'USD'
+);
+check(
+    strpos($ppc_html, 'ldn-price-per-carat') !== false,
+    'render_section routes the price_per_carat_chart id (not silently skipped)'
+);
+check(
+    strpos($ppc_html, 'Natural diamond price per carat by weight') !== false,
+    'price-per-carat heading names the page diamond type'
+);
+check(
+    strpos($ppc_html, 'Large rough is genuinely scarce') !== false,
+    'natural page explains the per-carat climb by rough scarcity'
+);
+check(
+    strpos($ppc_html, '1, 1.5 and 2 carats') !== false,
+    'price-per-carat copy points the reader at the milestone-weight steps'
+);
+$ppc_lab_html = $renderer->render_section(
+    'price_per_carat_chart',
+    $ppc_lab_ctx,
+    array('price_per_carat_chart' => $ppc_payload),
+    'USD'
+);
+check(
+    strpos($ppc_lab_html, 'Lab-Grown diamond price per carat by weight') !== false,
+    'lab-grown page gets its own price-per-carat heading'
+);
+check(
+    strpos($ppc_lab_html, 'Large rough is genuinely scarce') === false
+        && strpos($ppc_lab_html, 'question of time rather than luck') !== false,
+    'lab-grown page uses lab-specific reasoning, not the natural-scarcity copy'
+);
+check(
+    $renderer->render_section('price_per_carat_chart', $ppc_nat_ctx, array(), 'USD') === '',
+    'price_per_carat_chart renders nothing when the chart artefact is absent'
+);
+check(
+    strpos($ppc_html, 'ldn-chart-fallback') === false,
+    'price-per-carat chart adds no text fallback (the carat table already lists the numbers)'
 );
 
 // --- 7. shapes_ranking_table_html links shape drill-down (all-shapes) -------
@@ -1469,6 +1818,288 @@ check(
 check(
     strpos($head, 'property="og:title" content="' . esc_attr($head_renderer->document_title($shape_ctx)) . '"') !== false,
     'og:title and the document title are the same string'
+);
+
+// --- Section bands ----------------------------------------------------------
+// Test intent: a section's band comes from what the profile declares for that
+// section id, so inserting or reordering a module cannot change the surface
+// colour of any other section.
+// Would fail if: banding were still inferred from DOM position, where adding a
+// module shifts every colour below it.
+
+check(
+    $renderer->apply_section_band('<section class="ldn-section ldn-color-clarity">x</section>', 'tint')
+        === '<section class="ldn-section ldn-section--tint ldn-color-clarity">x</section>',
+    'a declared band adds its modifier to the section class'
+);
+
+// Every section is tagged, plain included, so the stylesheet can address
+// adjacency (a rule between two plain bands) without :not() chains.
+check(
+    strpos($renderer->apply_section_band('<section class="ldn-section ldn-faq">x</section>', ''), 'ldn-section--plain') !== false,
+    'an undeclared section is explicitly tagged plain rather than left unclassed'
+);
+
+// A typo in config must not emit an inert class that silently styles nothing.
+check(
+    strpos($renderer->apply_section_band('<section class="ldn-section">x</section>', 'purple'), 'ldn-section--purple') === false,
+    'an unrecognised band name falls back to plain instead of emitting a dead class'
+);
+
+// One section id can render sibling sections (colour/clarity emits a table plus
+// a size card); both belong to the same declared band.
+$two = $renderer->apply_section_band(
+    '<section class="ldn-section a">1</section><section class="ldn-section b">2</section>',
+    'accent'
+);
+check(
+    substr_count($two, 'ldn-section--accent') === 2,
+    'sibling sections from one section id share that id\'s band'
+);
+
+check($renderer->apply_section_band('', 'tint') === '', 'an empty section stays empty');
+
+// The declared band must reach the rendered page: the section loop is the only
+// place that reads the map, so a profile declaring a band and the page ignoring
+// it is the failure mode that matters.
+if (!class_exists('LDN_Config_Declared_Bands')) {
+    class LDN_Config_Declared_Bands extends LDN_Config {
+        public function get_content_profile($site_id) {
+            return array('page_chrome' => array('hero_band' => true));
+        }
+
+        public function get_page_layout($site_id, $page_level, $country_code = null) {
+            return array(
+                'hero_component' => null,
+                // faq_static is declared second so a passing test cannot be
+                // explained by position: under the retired positional scheme
+                // neither of these two would have been coloured.
+                'sections'       => array('natural_vs_lab_analysis', 'faq_static'),
+                'ad_slots'       => array(),
+                'section_bands'  => array('faq_static' => 'tint'),
+            );
+        }
+    }
+}
+if (!class_exists('LDN_Fetcher_Banded_Copy')) {
+    class LDN_Fetcher_Banded_Copy extends LDN_Data_Fetcher {
+        public function fetch_artefact($artefact_id, $ctx) {
+            if ($artefact_id === 'static_content_json') {
+                return array(
+                    'natural_vs_lab_analysis' => 'Lab-grown stones trade at a discount.',
+                    'faq' => array(
+                        array('question' => 'How is this priced?', 'answer' => 'From live listings.'),
+                    ),
+                );
+            }
+            return null;
+        }
+    }
+}
+$banded_html = (new LDN_Renderer(new LDN_Fetcher_Banded_Copy(), new LDN_Config_Declared_Bands()))
+    ->render($type_ctx);
+check(
+    strpos($banded_html, 'ldn-section ldn-section--tint ldn-faq') !== false,
+    'a section declared as tint renders with the tint modifier'
+);
+check(
+    strpos($banded_html, 'ldn-section ldn-section--plain ldn-natural-vs-lab-analysis') !== false,
+    'a section the profile does not mention renders plain, whatever its position'
+);
+
+// --- price_calculator (CP 123) -----------------------------------------------
+// Test intent: the calculator answers only from the cell the reader's exact
+// specification names, always states how many diamonds that cell holds, and
+// takes its specification from the manifest rather than page context.
+// Would fail if: an absent cell were answered from the pooled-cut or a coarser
+// cell, the sample size were dropped from the answer, a cut control appeared for
+// a shape whose manifest carries no cut dimension, or the renderer read
+// $ctx->shape / $ctx->carat (which a context-free host cannot supply).
+if (!class_exists('LDN_Config_Price_Calculator')) {
+    class LDN_Config_Price_Calculator extends LDN_Config {
+        public function get_content_profile($site_id) {
+            return array();
+        }
+        public function get_bundle() {
+            return array('entitlements' => array('sites' => array(
+                'calcsite' => array('pages' => array(
+                    'shape' => array('wp_widgets' => array(
+                        'price_calculator' => array('presentation' => 'full'),
+                    )),
+                )),
+                'nocalcsite' => array('pages' => array(
+                    'shape' => array('wp_widgets' => array(
+                        'price_calculator' => array('presentation' => 'disabled'),
+                    )),
+                )),
+            )));
+        }
+    }
+}
+
+$calc_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Price_Calculator());
+$calc_ctx = new LDN_Page_Context('calcsite', 'shape', 'us', 'natural', '1', 'round');
+
+$calc_manifest = array(
+    'diamond_type'      => 'natural',
+    'shape'             => 'Round',
+    'carat_weight'      => '1',
+    'date'              => '2026-07-31',
+    'currency'          => 'USD',
+    'colour_groups'     => array(
+        array('key' => 'D_F', 'label' => 'D-F', 'members' => array('D', 'E', 'F')),
+        array('key' => 'G_H', 'label' => 'G-H', 'members' => array('G', 'H')),
+    ),
+    'clarity_groups'    => array(
+        array('key' => 'VVS', 'label' => 'VVS', 'members' => array('VVS1', 'VVS2')),
+        array('key' => 'VS', 'label' => 'VS', 'members' => array('VS1', 'VS2')),
+    ),
+    'cut_grades'        => array('Super Ideal', 'Excellent'),
+    'has_cut_dimension' => true,
+    'pooled_cut_key'    => 'ALL',
+    'default_cell'      => array(
+        'colour_group' => 'G_H',
+        'clarity_group' => 'VS',
+        'cut_grade' => 'ALL',
+    ),
+    'total_sample_size' => 26895,
+    'cells'             => array(
+        'G_H' => array('VS' => array(
+            'ALL' => array(
+                'sample_size' => 412,
+                'percentiles' => array(
+                    'p10' => 3900.4, 'p25' => 4400.0, 'p50' => 5010.5,
+                    'p75' => 5800.0, 'p90' => 6900.0,
+                ),
+            ),
+        )),
+    ),
+);
+
+$calc_html = $calc_renderer->price_calculator_html($calc_ctx, array(
+    'price_calculator' => $calc_manifest,
+));
+
+check(
+    strpos($calc_html, 'ldn-price-calculator') !== false
+        && strpos($calc_html, '1 ct Round diamond price calculator') !== false,
+    'calculator renders on an entitled shape page, heading naming the specification'
+);
+check(
+    strpos($calc_html, '$5,011') !== false,
+    'the default cell answer is server-rendered, so the page answers without JavaScript'
+);
+check(
+    strpos($calc_html, '$4,400') !== false && strpos($calc_html, '$5,800') !== false,
+    'the interquartile range is stated alongside the typical price'
+);
+check(
+    strpos($calc_html, '412 diamonds') !== false,
+    'the answer discloses how many diamonds the cell holds'
+);
+check(
+    strpos($calc_html, 'G-H colour, VS clarity, any cut') !== false,
+    'the answer names the exact specification it describes'
+);
+check(
+    strpos($calc_html, 'data-ldn-price-calculator-input="cut"') !== false,
+    'a manifest with a cut dimension offers the cut control'
+);
+check(
+    strpos($calc_html, 'ldn-price-calculator-manifest') !== false
+        && strpos($calc_html, '"labels"') !== false,
+    'the manifest reaches the browser with its reader-facing strings attached'
+);
+check(
+    strpos($calc_html, '26,895') !== false,
+    'the lead paragraph discloses the pool the comparison draws on'
+);
+check(
+    strpos($calc_html, '<noscript>') !== false,
+    'a reader without JavaScript is told why the selectors do nothing'
+);
+
+// A cut control for a shape whose cut grades are not comparable would invite a
+// choice the data cannot answer.
+$calc_fancy = $calc_manifest;
+$calc_fancy['shape'] = 'Oval';
+$calc_fancy['has_cut_dimension'] = false;
+$calc_fancy['cut_grades'] = array();
+$calc_fancy_html = $calc_renderer->price_calculator_html($calc_ctx, array(
+    'price_calculator' => $calc_fancy,
+));
+check(
+    strpos($calc_fancy_html, 'data-ldn-price-calculator-input="cut"') === false,
+    'a manifest without a cut dimension offers no cut control'
+);
+check(
+    strpos($calc_fancy_html, 'any cut') === false
+        && strpos($calc_fancy_html, 'G-H colour, VS clarity') !== false,
+    'the specification sentence drops cut entirely rather than claiming "any cut"'
+);
+check(
+    strpos($calc_fancy_html, 'not comparable across fancy shapes') !== false,
+    'the copy explains the missing cut control rather than leaving it unexplained'
+);
+
+// The heading and specification come from the manifest, not the page context:
+// this is what lets a calculator page with no shape or carat of its own host the
+// same module.
+$calc_other = $calc_manifest;
+$calc_other['shape'] = 'Emerald';
+$calc_other['carat_weight'] = '2';
+$calc_other_html = $calc_renderer->price_calculator_from_manifest($calc_ctx, $calc_other);
+check(
+    strpos($calc_other_html, '2 ct Emerald diamond price calculator') !== false
+        && strpos($calc_other_html, 'Round') === false,
+    'the module describes the manifest it was given, not the page it sits on'
+);
+
+// No fallback: a default_cell pointing at a cell that does not exist must not be
+// answered from a neighbouring cell.
+$calc_missing = $calc_manifest;
+$calc_missing['default_cell'] = array(
+    'colour_group' => 'D_F',
+    'clarity_group' => 'VVS',
+    'cut_grade' => 'Super Ideal',
+);
+check(
+    $calc_renderer->price_calculator_from_manifest($calc_ctx, $calc_missing) === '',
+    'a specification with no cell renders nothing rather than a coarser cell'
+);
+
+check(
+    $calc_renderer->price_calculator_html($calc_ctx, array('price_calculator' => array())) === '',
+    'no manifest renders no calculator'
+);
+
+// A profile can name a section the dispatcher does not know, and it would then
+// render nothing at all with no error. Go through render_section so the wiring is
+// covered rather than only the component.
+check(
+    strpos(
+        $calc_renderer->render_section('price_calculator', $calc_ctx, array(
+            'price_calculator' => $calc_manifest,
+        ), '$'),
+        'ldn-price-calculator'
+    ) !== false,
+    'the profile section id reaches the component through render_section'
+);
+
+$calc_off_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Price_Calculator());
+check(
+    $calc_off_renderer->price_calculator_html(
+        new LDN_Page_Context('nocalcsite', 'shape', 'us', 'natural', '1', 'round'),
+        array('price_calculator' => $calc_manifest)
+    ) === '',
+    'a site with the widget disabled renders no calculator even with a manifest'
+);
+check(
+    $calc_off_renderer->price_calculator_html(
+        new LDN_Page_Context('unlistedsite', 'shape', 'us', 'natural', '1', 'round'),
+        array('price_calculator' => $calc_manifest)
+    ) === '',
+    'a site with no entitlement block renders no calculator'
 );
 
 // --- Report -----------------------------------------------------------------

@@ -35,6 +35,22 @@ trait LDN_Trait_Chrome {
     );
 
     /**
+     * Allowed section band names → BEM modifier on .ldn-section.
+     *
+     * The band is what decides a section's surface colour. It is declared per
+     * section in `page_structure.{level}.section_bands` rather than inferred
+     * from DOM position, so inserting or reordering a module cannot reshuffle
+     * the colours of every section below it.
+     *
+     * @var array<string, bool>
+     */
+    private static $VALID_SECTION_BANDS = array(
+        'plain'  => true,
+        'tint'   => true,
+        'accent' => true,
+    );
+
+    /**
      * CP53: inject brand_tokens + page_chrome as scoped CSS custom properties.
      *
      * @param array $profile Resolved content profile.
@@ -59,6 +75,33 @@ trait LDN_Trait_Chrome {
      */
     public function brand_css_vars(array $profile) {
         return $this->theme_style_block($profile);
+    }
+
+    /**
+     * Tag a rendered section block with its band modifier.
+     *
+     * Every section carries an explicit band class — plain included — so the
+     * stylesheet can address adjacency (a rule between two plain sections)
+     * without :not() chains, and so a section's surface never depends on how
+     * many siblings precede it.
+     *
+     * @param string $html Rendered section HTML (may hold sibling sections).
+     * @param string $band Declared band name; unknown/empty falls back to plain.
+     * @return string
+     */
+    public function apply_section_band($html, $band) {
+        if (!is_string($html) || $html === '') {
+            return '';
+        }
+        $band = preg_replace('/[^a-z0-9]/', '', strtolower((string) $band));
+        if ($band === '' || !isset(self::$VALID_SECTION_BANDS[$band])) {
+            $band = 'plain';
+        }
+        return str_replace(
+            'class="ldn-section',
+            'class="ldn-section ldn-section--' . $band,
+            $html
+        );
     }
 
     /**
@@ -148,6 +191,8 @@ trait LDN_Trait_Chrome {
             'max_width'       => '--ldn-max-width',
             'content_padding' => '--ldn-padding',
             'section_spacing' => '--ldn-section-spacing',
+            'band_spacing'    => '--ldn-band-spacing',
+            'measure'         => '--ldn-measure',
             'title_size'      => '--ldn-title-size',
             'title_size_mobile' => '--ldn-title-size-mobile',
         );

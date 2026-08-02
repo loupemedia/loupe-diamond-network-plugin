@@ -112,6 +112,22 @@ final class LDN_Assets {
 			);
 		}
 
+		// Gated on the widget rather than the page level so an unentitled site
+		// never ships the file. The script exits on a missing manifest anyway,
+		// but a script that can do nothing should not be downloaded.
+		if (class_exists('LDN_Artefacts')) {
+			$artefacts = new LDN_Artefacts($config);
+			if ($artefacts->site_has_wp_widget($ctx->site_id, 'price_calculator', $ctx->page_level)) {
+				wp_enqueue_script(
+					'ldn-price-calculator',
+					$base_url . 'assets/js/price-calculator.js',
+					array(),
+					$version,
+					true
+				);
+			}
+		}
+
 		$deps = array('ldn-shared');
 		$webfont_url = self::google_fonts_url_for_site($ctx->site_id, $config);
 		if ($webfont_url !== null && apply_filters('ldn_enqueue_webfonts', true, $ctx)) {

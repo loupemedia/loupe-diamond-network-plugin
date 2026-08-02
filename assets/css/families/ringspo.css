@@ -40,8 +40,8 @@
    ===================================================================== */
 
 .ldn-chrome--ringspo-classic .ldn-hero-band {
-	padding-top: 1.5rem;
-	padding-bottom: 1.75rem;
+	padding-top: var(--ldn-space-5, 1.5rem);
+	padding-bottom: var(--ldn-space-6, 2rem);
 	background-color: var(--ringspo-green);
 }
 
@@ -79,8 +79,8 @@
 
 /* Hero chart sits on a white card so the brand line stays readable. */
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-chart {
-	margin: 0 0 1.25rem;
-	padding: 1rem;
+	margin: 0 0 var(--ldn-space-5, 1.5rem);
+	padding: var(--ldn-space-4, 1rem);
 	background-color: #fff;
 	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
@@ -98,15 +98,15 @@
 .ldn-chrome--ringspo-classic .ldn-hero-stats {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-	gap: 0.75rem;
+	gap: var(--ldn-space-3, 0.75rem);
 	margin: 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-hero-stat {
 	display: flex;
 	flex-direction: column;
-	gap: 0.3rem;
-	padding: 0.85rem 1rem;
+	gap: var(--ldn-space-1, 0.25rem);
+	padding: var(--ldn-space-3, 0.75rem) var(--ldn-space-4, 1rem);
 	background-color: #fff;
 	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
@@ -221,131 +221,111 @@
 }
 
 /* =====================================================================
-   Content sections: white, edge-to-edge, separated by a thin rule.
+   Content bands
+
+   A section's surface comes from the band declared for it in the content
+   profile (`page_structure.{level}.section_bands`), never from its position in
+   the DOM. Position-based banding meant inserting one module reshuffled the
+   colour of every section below it, and every new component needed its own
+   "put the text back to dark" override.
+
+   Bands own their vertical space with padding. A margin would render as a white
+   gutter above and below an edge-to-edge colour, which is what the retired
+   `margin-top: 0` patches were each individually working around.
    ===================================================================== */
 
 .ldn-chrome--ringspo-classic .ldn-section {
-	padding-top: 1.75rem;
-	padding-bottom: 1.75rem;
+	/* Longhands only: the full-bleed helper above sets negative left/right
+	   margins on the same selector, and a `margin` shorthand here would reset
+	   them, pulling every band back inside the readable column. */
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: var(--ldn-band-spacing, var(--ldn-space-7, 3rem));
+	padding-bottom: var(--ldn-band-spacing, var(--ldn-space-7, 3rem));
 	background-color: #fff;
 }
 
-/* Coloured content bands (edge-to-edge, same full-bleed as the hero). The first
-   two sections — Pricing context and Expert take — stay white; remaining odd
-   sections use solid signature purple with white text. */
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) {
+/* Two plain bands in a row would read as one undifferentiated wall of text. */
+.ldn-chrome--ringspo-classic .ldn-section--plain + .ldn-section--plain {
+	border-top: 1px solid rgba(26, 26, 46, 0.1);
+}
+
+/* Size pages still compose their sections inside LDN_Size_Renderer rather than
+   from `page_structure`, so they keep the legacy positional band. Every rule
+   that treats a band as coloured therefore matches both forms via the
+   `:is(...)` group below; when the size renderer is migrated to declared bands,
+   drop the third branch from each of these groups. */
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd)) {
 	background-color: var(--ringspo-purple);
 	color: #fff;
 }
 
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) h2,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) h3,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) p,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) li,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) dt,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) dd {
+.ldn-chrome--ringspo-classic .ldn-section--accent {
+	background-color: var(--ringspo-green);
 	color: #fff;
 }
 
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) a {
-	color: #fff;
-	text-decoration: underline;
+/* Text in a coloured band inherits the band's colour rather than the theme's.
+   A white-surfaced component then sets its own colour once (in the surface rule
+   below) and everything inside it follows, which is what removes the need for a
+   per-component override per band. */
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	:is(h2, h3, h4, p, li, dt, dd, span, th, td, label, figcaption, a) {
+	color: inherit;
 }
 
-/* Data tables, charts, size figures and price cards sit on white cards inside
-   purple bands so multi-colour SVGs and stat text stay readable. */
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-chart,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-figure,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-price-card,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-price-size-card,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-ideal-real {
+/* Components that own a white surface inside a coloured band. A new module that
+   carries its own background is added here — there is no second list. */
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	:is(table, .ldn-chart, .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
+		.ldn-size-ideal-real, .ldn-size-price-card, .ldn-price-size-card,
+		.ldn-size-matrix-scroll, .ldn-size-checker-panel, .ldn-size-checker-results,
+		.ldn-size-checker-card, .ldn-size-scale-controls, .ldn-size-checker-cta,
+		.ldn-faceup-callout, .ldn-price-calculator__result) {
 	background-color: #fff;
 	color: var(--ringspo-ink);
-}
-
-/* Colour/clarity heatmap: scroll wrapper stays transparent; only the table is carded. */
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-scroll {
-	background-color: transparent;
-	padding: 0.25rem 0;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-table {
-	border-radius: var(--ringspo-card-radius);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-	overflow: hidden;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table {
-	border-radius: var(--ringspo-card-radius);
-	overflow: hidden;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-figure p,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-figure figcaption,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-ideal-real p,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-price-card span {
-	color: var(--ringspo-ink);
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-price-size-card span {
-	color: var(--ringspo-ink);
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-price-card {
+	border-color: transparent;
 	text-decoration: none;
 }
 
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-price-size-card {
-	text-decoration: none;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-table thead th,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-cc-table tbody th {
-	color: var(--ringspo-ink);
-}
-
-/* Inside white tables on purple bands, cell text and links must stay dark —
-   the band-wide white-text rules above made carat links and SVG thumbnails
-   (currentColor) invisible on the white table background. */
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table th,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table td {
-	color: var(--ringspo-ink);
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table a {
+/* Links on a white surface need the brand colour back — inheriting the band's
+   white made carat links and currentColor SVG thumbnails invisible. */
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	:is(table, .ldn-shape-card, .ldn-type-nav-card, .ldn-size-checker-panel,
+		.ldn-size-checker-results) a {
 	color: var(--ringspo-purple);
 	text-decoration: none;
 }
 
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) table a:hover {
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	:is(table, .ldn-shape-card, .ldn-type-nav-card) a:hover {
 	text-decoration: underline;
 }
 
-/* New white-card components keep dark text when they land on a purple band:
-   size-checker panels/results, scale-explorer controls, matrix scroll wrapper
-   and the size-checker CTA box. */
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-matrix-scroll,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-panel,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-card,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-scale-controls,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-cta,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-faceup-callout {
-	color: var(--ringspo-ink);
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	:is(.ldn-shape-card__shape, .ldn-type-nav-card__title) {
+	color: var(--ringspo-purple);
 }
 
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-panel h3,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-panel p,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-panel label,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results h2,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results h3,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results p,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-results li,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-scale-controls label,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-cta h2,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-size-checker-cta p {
-	color: var(--ringspo-ink);
+/* Colour/clarity heatmap: the scroll wrapper stays transparent so only the
+   table itself reads as a card. */
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	.ldn-cc-scroll {
+	background-color: transparent;
+	padding: var(--ldn-space-1, 0.25rem) 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-shape-cards,
@@ -358,63 +338,8 @@
 	color: #fff;
 }
 
-/* All-shapes shape hub: purple band (not nested in the green hero). */
-.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards {
-	background-color: var(--ringspo-purple);
-	color: #fff;
-	margin-top: 0;
-	padding-top: 1.5rem;
-	padding-bottom: 1.5rem;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards h2,
-.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards p,
-.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards .ldn-shape-cards__hint {
-	color: #fff;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards h2 {
-	margin: 0 0 0.5rem;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards .ldn-shape-card {
-	background-color: #fff;
-	color: var(--ringspo-ink);
-	text-decoration: none;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section.ldn-shape-cards .ldn-shape-card__shape {
-	color: var(--ringspo-purple);
-}
-
-/* Top-level type nav: green band under the carat table (cards stay white). */
-.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav {
-	background-color: var(--ringspo-green);
-	color: #fff;
-	margin-top: 0;
-	margin-bottom: 0;
-	padding-top: 1.5rem;
-	padding-bottom: 1.75rem;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav h2 {
-	color: #fff;
-	margin: 0 0 0.85rem;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav .ldn-type-nav-card {
-	background-color: #fff;
-	color: var(--ringspo-ink);
-	border-color: transparent;
-	text-decoration: none;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav .ldn-type-nav-card__title {
-	color: var(--ringspo-purple);
-}
-
-.ldn-chrome--ringspo-classic .ldn-section.ldn-type-nav .ldn-type-nav-card__desc {
-	color: var(--ringspo-ink);
+.ldn-chrome--ringspo-classic .ldn-shape-cards h2 {
+	margin: 0 0 var(--ldn-space-2, 0.5rem);
 }
 
 .ldn-chrome--ringspo-classic .ldn-carat-price-table-intro {
@@ -422,26 +347,17 @@
 }
 
 .ldn-chrome--ringspo-classic .ldn-carat-price-table-intro + .ldn-carat-price-table-hint {
-	margin-top: 1.15rem;
+	margin-top: var(--ldn-space-4, 1rem);
 }
 
-/* Tighten the first body block after the hero (copy / editorial). */
+/* The hero band already carries bottom padding, so the first body band opens
+   tighter than the standing rhythm. */
 .ldn-chrome--ringspo-classic .ldn-hero-band + .ldn-section {
-	margin-top: 0;
-	padding-top: 1.25rem;
+	padding-top: var(--ldn-space-5, 1.5rem);
 }
 
 .ldn-chrome--ringspo-classic .ldn-section h2 {
-	margin-bottom: 0.65rem;
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card,
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card span {
-	color: var(--ringspo-ink);
-}
-
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card {
-	text-decoration: none;
+	margin-bottom: var(--ldn-space-3, 0.75rem);
 }
 
 .ldn-chrome--ringspo-classic .ldn-shape-card,
@@ -461,8 +377,13 @@
 	overflow: hidden;
 }
 
-.ldn-chrome--ringspo-classic .ldn-section:nth-of-type(n + 3):nth-of-type(odd) .ldn-shape-card__shape {
-	color: var(--ringspo-purple);
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	:is(table, .ldn-cc-table) {
+	border-radius: var(--ringspo-card-radius);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+	overflow: hidden;
 }
 
 /* Size-page intro inside the green hero band. */
@@ -539,8 +460,12 @@
 	margin-top: 0;
 }
 
+/* h3 sat at the shared 1.125rem against 1.05rem body copy, so sub-headings
+   barely separated from the paragraphs under them. */
 .ldn-chrome--ringspo-classic .ldn-section h3 {
 	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
+	font-size: 1.2rem;
+	margin: var(--ldn-space-5, 1.5rem) 0 var(--ldn-space-2, 0.5rem);
 }
 
 .ldn-chrome--ringspo-classic .ldn-section p,
@@ -569,5 +494,16 @@
 
 	.ldn-chrome--ringspo-classic .ldn-hero-stat .ldn-stat-value {
 		font-size: 1.25rem;
+	}
+
+	/* Band spacing steps down with the type — only the fonts used to scale, so
+	   bands kept desktop padding on a 375px screen. */
+	.ldn-chrome--ringspo-classic .ldn-section {
+		padding-top: var(--ldn-space-6, 2rem);
+		padding-bottom: var(--ldn-space-6, 2rem);
+	}
+
+	.ldn-chrome--ringspo-classic .ldn-hero-band + .ldn-section {
+		padding-top: var(--ldn-space-4, 1rem);
 	}
 }

@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.18.0] - 2026-07-31
+
+- **The price calculator ships on shape pages** (`price_calculator` section, entitlement-gated), reading the percentile cells C5.9 publishes as `price-calculator.json`. The reader picks colour group, clarity group and, on round pages, cut grade; leaving the price field blank answers "what should this cost", and entering a quoted price answers where that price sits against the same set of stones. **One widget, not two**: the checker is the calculator with the price field filled in, so there is no separate `price_checker` anything.
+- **The default cell is server-rendered as prose**, so the page answers a reader with JavaScript off and a crawler that runs none. Result states get no URLs of their own and are not indexable.
+- **The manifest is an argument, never fetched from page context.** `price_calculator_from_manifest()` takes the cell manifest and reads nothing from `$ctx->shape` or `$ctx->carat`, which is what lets a future calculator page with no shape or carat of its own host the same component instead of a second implementation. A guard test renders the module against a manifest that disagrees with its page context and asserts the manifest wins.
+- **No nearest-band fallback.** A specification with no cell says so and suggests a wider group; it never answers from the pooled-cut cell or a coarser colour/clarity band. The producer applies no sample floor either, so every answer states how many diamonds it rests on: "3 diamonds" tells the reader exactly how much to trust the figure, whereas withholding the cell tells them nothing.
+- **A quoted price gets a band, not a percentile.** The manifest publishes five percentiles (p10 to p90), which cannot support an interpolated integer percentile, so the verdict is one of six bands from "cheaper than almost every diamond at this specification" to its opposite.
+- The cut control is emitted only when the manifest sets `has_cut_dimension`, which is round-only: cut grading is not comparable across fancy shapes. On those pages the copy explains the absence rather than leaving a missing control unexplained, and the specification sentence drops cut entirely instead of claiming "any cut".
+- Every reader-facing string lives in PHP and travels to the browser inside the manifest's `labels`, so `assets/js/price-calculator.js` holds no English and translation stays where the `.po` files can reach it. Strings the page cannot use (the cut phrases on a fancy shape) are not shipped.
+- The section sits above the colour/clarity heatmap on Ringspo shape pages and stays on a plain band: two tinted sections in a row read as one, and white gives the form controls the most contrast.
+
+## [0.17.0] — 2026-07-31
+
+- **The diamond-type hub finally has a chart.** New `price_per_carat_chart` section renders C5.2's `price-per-carat-chart.json`: price per carat against carat weight for the page's own diamond type, with copy that explains why a carat costs more in a bigger stone and tells the reader to look for the step-ups at 1, 1.5 and 2 carats. Level 2 previously had no chart at all; its `comparison_chart` hero is a table despite the name.
+- The chart is derived from the same `carat_tiers` the hub's table renders, so the curve can never disagree with the table's price-per-carat column beside it. Unlike the pre-existing `type-comparison-chart` (which is written only to the natural prefix and is consumed solely by the legacy pricing plugin), it is written per diamond type, so the lab-grown hub gets one too.
+- No text fallback is emitted inside the chart target, because the table on the same page already lists every number the curve plots.
+- **The top-level lab-grown discount curve is switched on for Ringspo.** The chart, the fetch and the render path all already existed; no site had ever been entitled to `market_discount_chart`, so it had never been produced. It is a cross-section by carat rather than a time series, so it does not breach Ringspo's "Loupe owns history" rule.
+- **New `most_traded_table` section on the top-level hub**, from C5.3's `top-tables.json`: the ten most-traded natural and lab-grown shape/carat combinations, each row linking to that combination's shape page. This is the hub's internal-link block, putting the deepest pages one click from the top. It labels its figure **"Median price"** rather than "Typical price" because these rows are true per-combination medians (C3's p50 for one shape at one weight), unlike the carat table higher up the page whose figure combines every shape at that weight. Sample size is shown per row, as elsewhere. A group with no rows renders no heading, so a single-type site does not get an empty "Lab-grown" block.
+- The DPE/carat homepage keeps its own `popular_searches` section, which pairs the carat table with a flat list of shape links; the two presentations are deliberately separate rather than one widget with a presentation flag, since they sit on different page types.
+
+## [0.16.0] — 2026-07-31
+
+- **"About this data" closes every pricing level** (`data_methodology` widget, entitlement-gated, copy from the profile's `methodology` block). States the statistic, the number of diamonds behind it, that the figures are asking prices rather than sold prices, and the date. The statistic line is **per page level**, because the levels do not publish the same statistic: a shape page carries a true median (C3's p50 over stone prices) while every level above it combines per-shape medians weighted by sample size. A guard test refuses any profile whose upper-level copy calls that composite a median.
+- **Retailers are never named and the pool size is never stated.** Same posture as the size module, which withholds even the retailer count below `RETAILER_DISCLOSURE_THRESHOLD` (15); the pricing pool is smaller than that. Enforced by test against the real profiles, not just the render stub.
+- **Partial shape coverage is disclosed on the page.** When C5.1 reports `coverage_complete: false`, the block states how many of the tracked shapes the figure covers. It fires only on an explicit flag, so an older artefact without coverage fields never implies a gap.
+- Reworded the carat-table intros on the top-level and diamond-type hubs: clearer explanation of the weighting, and the thin-sample warning now points at the "Diamonds analysed" column. No em dashes in new reader-facing copy.
+
+## [0.15.0] — 2026-07-31
+
+- **The top-level carat table now discloses its sample size.** `carat_price_table` rows carry `natural_sample_size` / `lab_grown_sample_size` from C5.3, rendered as a "Diamonds analysed" column. The heaviest weights are traded far less often than 1 ct — 9 ct rested on 28 stones against 8 ct's 113 — which is how a heavier weight can read as cheaper than a lighter one. Thin rows are still published; the count is what makes them interpretable. Rows from artefacts written before C5.3 carried the field degrade to an em dash.
+- **"Median price" corrected to "Typical price" on the diamond-type carat table.** That figure is the sample-weighted mean of each shape's median at that weight, not a median of the stones — the per-shape carat ladder, which *is* a true median from C3's p50, keeps its original label. Ringspo's how-to-read copy and the top-level table intro now describe the actual calculation.
+- Known remaining instance: the L3 all-shapes stats block still labels the same composite figure "Median price", and does so in Schema.org output. It lives in three duplicated `stat_specs()` lists (renderer, schema, content trait) and needs level-aware labelling — logged, not fixed here.
+
+## [0.14.0] — 2026-07-31
+
+- **Section bands are declared, not positional.** A pricing section's surface colour now comes from `page_structure.{level}.section_bands` in the content profile, emitted as `ldn-section--tint` / `--accent` / `--plain`. Previously it came from `:nth-of-type(n+3):nth-of-type(odd)`, so inserting or reordering a module reshuffled the colour of every section below it, and each new white-surfaced component needed its own "restore dark text" override (there were 20+). Those are replaced by one text-inheritance rule plus one list of components that own a white surface.
+- **Bands own their vertical space with padding** (`page_chrome.band_spacing`, default 3rem) instead of margin. A margin on a coloured full-bleed band rendered as a white gutter above and below the colour, which the retired per-section `margin-top: 0` patches were each working around individually.
+- **Spacing scale** (`--ldn-space-1` … `--ldn-space-7`) in `shared.css`; Ringspo chrome now expresses its rhythm in those steps rather than a dozen unrelated literals.
+- **Reading measure** via `page_chrome.measure` (Ringspo: 68ch). Body copy previously ran the full content column at ~95 characters per line.
+- Ringspo: `h3` raised to 1.2rem so sub-headings separate from body copy; band padding now steps down under 768px (only type scaled before).
+- Size pages keep positional banding until `LDN_Size_Renderer` is migrated to declared bands; the shared band rules match both forms.
+
 ## [0.13.4] — 2026-07-29
 
 - **All-shapes SEO**: Ringspo H1/title is `{carat} {Type} Diamond Prices by Shape — {Country}`; meta/Dataset description leads with compare-by-shape + full country name; keywords are level-scoped so this hub does not share primary phrases with the type hub or named-shape pages.

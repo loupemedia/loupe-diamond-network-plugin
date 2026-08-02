@@ -516,6 +516,12 @@ final class LDN_Config {
             'sections' => isset($block['sections']) && is_array($block['sections'])
                 ? array_values($block['sections'])
                 : array(),
+            // Section id => band name. Declared per section so a profile's visual
+            // rhythm survives inserting or reordering modules; sections absent
+            // from the map render as plain bands.
+            'section_bands' => isset($block['section_bands']) && is_array($block['section_bands'])
+                ? $block['section_bands']
+                : array(),
             'ad_slots' => isset($block['ad_slots']) && is_array($block['ad_slots'])
                 ? array_values($block['ad_slots'])
                 : array(),

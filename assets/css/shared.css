@@ -8,6 +8,17 @@
  */
 
 .ldn-page-shell {
+	/* Spacing scale. Every rhythm value resolves to one of these steps — bespoke
+	   magnitudes at the call site are how this stylesheet drifted into a dozen
+	   unrelated values. If a space needs a size that isn't here, add a step. */
+	--ldn-space-1: 0.25rem;
+	--ldn-space-2: 0.5rem;
+	--ldn-space-3: 0.75rem;
+	--ldn-space-4: 1rem;
+	--ldn-space-5: 1.5rem;
+	--ldn-space-6: 2rem;
+	--ldn-space-7: 3rem;
+
 	width: 100%;
 	min-height: 100vh;
 	background-color: var(--ldn-background, transparent);
@@ -126,6 +137,109 @@
 	font-size: 0.9em;
 }
 
+/* ----- Most-traded combos (top-level internal-link block) ----- */
+
+/* auto-fit rather than 1fr 1fr: a single-type site (BDI is lab-grown only) renders
+   one group, which should fill the row instead of leaving a gap beside it. */
+.ldn-most-traded-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: var(--ldn-space-5, 1.5rem) var(--ldn-space-6, 2rem);
+}
+
+.ldn-most-traded-group > h3 {
+	margin-top: 0;
+	margin-bottom: var(--ldn-space-3, 0.75rem);
+}
+
+@media screen and (max-width: 768px) {
+	.ldn-most-traded-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ----- Price calculator / position checker (CP 123) ----- */
+
+/* auto-fit so the same grid serves a round page (colour, clarity, cut, price)
+   and a fancy shape (no cut control) without a second rule. */
+.ldn-price-calculator__controls {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: var(--ldn-space-3, 0.75rem) var(--ldn-space-4, 1rem);
+	margin: var(--ldn-space-5, 1.5rem) 0;
+}
+
+.ldn-price-calculator__field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--ldn-space-1, 0.25rem);
+	font-size: 0.9em;
+}
+
+.ldn-price-calculator__field > span {
+	font-weight: 600;
+}
+
+.ldn-price-calculator__field em {
+	color: var(--ldn-secondary-text, #666);
+	font-weight: 400;
+	font-style: normal;
+}
+
+.ldn-price-calculator__field select,
+.ldn-price-calculator__field input {
+	box-sizing: border-box;
+	width: 100%;
+	padding: var(--ldn-space-2, 0.5rem) var(--ldn-space-3, 0.75rem);
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 6px;
+	background-color: #fff;
+	color: inherit;
+	font-family: inherit;
+	/* 16px minimum: iOS Safari zooms the viewport on focus below it. */
+	font-size: 1rem;
+	line-height: 1.4;
+}
+
+.ldn-price-calculator__field select:focus,
+.ldn-price-calculator__field input:focus {
+	outline: 2px solid var(--ldn-primary, #333);
+	outline-offset: 1px;
+}
+
+.ldn-price-calculator__result {
+	padding: var(--ldn-space-5, 1.5rem);
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 8px;
+	/* Literal rather than a token: there is no tint brand token, and inventing
+	   one no profile can set would be a dead variable. */
+	background-color: #f8fafc;
+}
+
+.ldn-price-calculator__result > p {
+	margin: 0 0 var(--ldn-space-2, 0.5rem);
+}
+
+.ldn-price-calculator__result > p:last-child {
+	margin-bottom: 0;
+}
+
+.ldn-price-calculator__headline {
+	font-size: 1.5em;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.ldn-price-calculator__verdict {
+	font-weight: 600;
+}
+
+.ldn-price-calculator__basis,
+.ldn-price-calculator__noscript {
+	color: var(--ldn-secondary-text, #666);
+	font-size: 0.9em;
+}
+
 /* ----- Shape hub cards (CP53_08) ----- */
 
 .ldn-shape-cards__grid {
@@ -198,6 +312,24 @@
 
 .ldn-section:first-of-type {
 	margin-top: 1.25rem;
+}
+
+/* Only a top-level section owns band spacing. A section id may render sibling
+   or nested sections (e.g. colour/clarity emits a table plus a size card) and
+   they all inherit the band class, so nested ones must not double the padding. */
+.ldn-section .ldn-section {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+/* Reading measure. Inert until a profile sets page_chrome.measure — body copy
+   otherwise runs the full content width, which is ~110 characters per line on a
+   1000px column against a comfortable 65–75. */
+.ldn-section > p,
+.ldn-section > ul,
+.ldn-section > ol,
+.ldn-section > dl {
+	max-width: var(--ldn-measure, none);
 }
 
 .ldn-section h2 {

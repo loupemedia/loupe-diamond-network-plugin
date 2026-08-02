@@ -177,6 +177,7 @@ trait LDN_Trait_Data {
                 $bag['carat_ladder'] = $this->fetcher->fetch_artefact('carat_ladder_json', $ctx);
                 $bag['carat_ladder_chart'] = $this->fetcher->fetch_artefact('carat_ladder_chart', $ctx);
                 $bag['color_clarity'] = $this->fetcher->fetch_artefact('color_clarity_json', $ctx);
+                $bag['price_calculator'] = $this->fetcher->fetch_artefact('price_calculator_json', $ctx);
                 break;
             case 'all-shapes':
                 $bag['ranking'] = $this->fetcher->fetch_artefact('shapes_ranking_json', $ctx);
@@ -188,6 +189,10 @@ trait LDN_Trait_Data {
                 break;
             case 'diamond-type':
                 $bag['type_summary'] = $this->fetcher->fetch_artefact('type_summary_json', $ctx);
+                $bag['price_per_carat_chart'] = $this->fetcher->fetch_artefact(
+                    'type_price_per_carat_chart',
+                    $ctx
+                );
                 if (!is_array($bag['summary']) || empty($bag['summary'])) {
                     $bag['summary'] = is_array($bag['type_summary']) ? $bag['type_summary'] : array();
                 }

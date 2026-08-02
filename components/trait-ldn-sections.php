@@ -129,11 +129,23 @@ trait LDN_Trait_Sections {
         if ($section_id === 'hub_stats') {
             return $this->hub_stats_html($ctx, $bag);
         }
+        if ($section_id === 'data_methodology') {
+            return $this->data_methodology_html($ctx, $bag);
+        }
         if ($section_id === 'type_nav_links') {
             return $this->type_nav_links_html($ctx);
         }
         if ($section_id === 'market_overview_table' || $section_id === 'carat_price_table') {
             return $this->market_overview_table_html($ctx, $bag);
+        }
+        if ($section_id === 'most_traded_table') {
+            return $this->most_traded_table_html($ctx, $bag);
+        }
+        if ($section_id === 'price_calculator') {
+            return $this->price_calculator_html($ctx, $bag);
+        }
+        if ($section_id === 'price_per_carat_chart') {
+            return $this->price_per_carat_chart_html($ctx, $bag);
         }
         if ($section_id === 'price_trends_snapshot') {
             return $this->price_trends_snapshot_html($ctx, $bag);

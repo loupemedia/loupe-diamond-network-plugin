@@ -1,6 +1,6 @@
 {
-  "version": "2636c99",
-  "generated_at": "2026-07-29T12:28:27.785740+00:00",
+  "version": "5ede388",
+  "generated_at": "2026-07-31T10:44:12.602575+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8423,7 +8423,7 @@
         },
         "diamond_type": {
           "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index — from entry-level sizes to stones well above the 1 carat mark.\n{most_popular_carat} carat is the most listed weight, with a median of {currency_symbol}{most_popular_median_price:,.0f} across every shape at that weight ({most_popular_sample_size:,} stones).\n",
-          "buyer_context": "This page shows how {type_title_lower} diamond prices scale by carat weight {in_country}. Each figure is a weighted median across every shape in our index — use it to set a budget before you compare round, oval, and other shapes at the weight you have in mind.\n"
+          "buyer_context": "This page shows how {type_title_lower} diamond prices scale by carat weight {in_country}. Each figure combines every shape in our index at that weight, with shapes that have more diamonds on the market counting for more. Use it to set a budget before you compare round, oval, and other shapes at the weight you have in mind.\n"
         },
         "top_level": {
           "intro": "Our index tracks {total_diamonds_tracked:,} diamonds {in_country} — {natural_sample_size:,} natural stones and {lab_sample_size:,} lab-grown across every shape and carat weight we monitor.\nAt 1 carat, the typical natural diamond sits at {currency_symbol}{one_carat_natural:,.0f} versus {currency_symbol}{one_carat_lab:,.0f} for lab-grown — a {one_carat_discount:.0f}% price gap that generally widens at larger weights.\n",
@@ -8904,6 +8904,8 @@
         "max_width": "840px",
         "content_padding": "1.25rem",
         "section_spacing": "1.75rem",
+        "band_spacing": "2.5rem",
+        "measure": "68ch",
         "title_font": "\"Palatino Linotype\", Palatino, \"Book Antiqua\", Georgia, serif",
         "body_font": "\"Open Sans\", system-ui, -apple-system, sans-serif",
         "webfont_families": [
@@ -9068,11 +9070,17 @@
           "sections": [
             "pricing_context_static",
             "expert_take_static",
+            "price_calculator",
             "color_clarity",
             "buying_guidance_static",
             "faq_static",
-            "cross_site_comparison"
+            "cross_site_comparison",
+            "data_methodology"
           ],
+          "section_bands": {
+            "color_clarity": "tint",
+            "faq_static": "tint"
+          },
           "ad_slots": [
             "horizontal_mid_content",
             "mrec_sidebar"
@@ -9085,8 +9093,13 @@
             "overview_dynamic",
             "shape_breakdown_static",
             "expert_recommendations",
-            "cross_site_comparison"
+            "cross_site_comparison",
+            "data_methodology"
           ],
+          "section_bands": {
+            "shapes_at_carat": "tint",
+            "expert_recommendations": "tint"
+          },
           "ad_slots": [
             "horizontal_top",
             "dual_mrec_bottom"
@@ -9096,11 +9109,16 @@
           "hero_component": "comparison_chart",
           "sections": [
             "type_overview_dynamic",
+            "price_per_carat_chart",
             "natural_vs_lab_analysis",
             "buying_considerations",
             "partner_spotlight",
-            "cross_site_comparison"
+            "cross_site_comparison",
+            "data_methodology"
           ],
+          "section_bands": {
+            "buying_considerations": "tint"
+          },
           "ad_slots": [
             "horizontal_mid",
             "skyscraper_sidebar"
@@ -9112,9 +9130,16 @@
             "market_overview_dynamic",
             "market_overview_table",
             "type_nav_links",
+            "most_traded_table",
             "partner_spotlight",
-            "cross_site_comparison"
+            "cross_site_comparison",
+            "data_methodology"
           ],
+          "section_bands": {
+            "market_overview_table": "tint",
+            "type_nav_links": "accent",
+            "most_traded_table": "tint"
+          },
           "ad_slots": [
             "triple_horizontal"
           ]
@@ -9184,12 +9209,12 @@
           "market_size": "Our index tracks {total_diamonds_tracked:,} diamonds across {natural_combo_count} natural and {lab_combo_count} lab-grown shape and carat combinations, drawn from some of the largest diamond retailers in the world. Prices are updated every day.\n"
         },
         "diamond_type": {
-          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index. The most listed weight is {most_popular_carat} carat, with a median of {currency_symbol}{most_popular_median_price:,.0f} across {most_popular_sample_size:,} tracked stones.\n"
+          "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index. The most listed weight is {most_popular_carat} carat, typically {currency_symbol}{most_popular_median_price:,.0f}, combining every shape at that weight across {most_popular_sample_size:,} tracked stones.\n"
         },
         "all_shapes": {
-          "intro_text": "Right now a {carat} carat {type_label} diamond {in_country} runs {currency_symbol}{current_price:,.0f} — that's the median across the {num_diamonds:,} stones we track at this weight{intro_change_clause}.\nExpect anywhere from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} depending on shape, {color_word}, and clarity. The spread is wide, which means there's real room to shop smart.\n",
+          "intro_text": "Right now a {carat} carat {type_label} diamond {in_country} runs {currency_symbol}{current_price:,.0f}{intro_change_clause}. That is the typical price across the {num_diamonds:,} stones we track at this weight, with every shape combined.\nExpect anywhere from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} depending on shape, {color_word}, and clarity. The spread is wide, which means there's real room to shop smart.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "The {most_expensive_shape} is the most expensive cut at this weight ({currency_symbol}{most_expensive_price:,.0f}); the {least_expensive_shape} is the cheapest ({currency_symbol}{least_expensive_price:,.0f}) — roughly a {price_difference_pct:.1f}% premium ({currency_symbol}{price_difference:,.0f}).\nIf you're flexible on shape, that's money better spent on a higher cut grade. We track {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "The {most_expensive_shape} is the most expensive cut at this weight ({currency_symbol}{most_expensive_price:,.0f}); the {least_expensive_shape} is the cheapest ({currency_symbol}{least_expensive_price:,.0f}) — roughly {price_difference_article} {price_difference_pct:.1f}% premium ({currency_symbol}{price_difference:,.0f}).\nIf you're flexible on shape, that's money better spent on a higher cut grade. We track {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -9267,6 +9292,21 @@
           "sample_note": "Based on {count} diamonds"
         },
         "methodology_note": "Prices reflect the median across major online retailers. Each source uses a slightly different retailer mix and inclusion criteria, so small differences are expected."
+      },
+      "methodology": {
+        "heading": "About this data",
+        "source_line": "We track live listings from major online diamond retailers.",
+        "price_basis": "These are the prices retailers are asking today, not the prices stones finally sold for, so read them as what the market is asking rather than what buyers ended up paying.\n",
+        "approximate_weight": "Very few diamonds are cut to an exact weight, so stones of approximately this weight are grouped together and priced as one group.\n",
+        "update_line": "Prices are rebuilt daily. This page reflects {date}.",
+        "thin_sample_note": "Larger weights are bought and sold far less often, so we find fewer of them. The number of diamonds behind each row is shown in the table. A price drawn from a few dozen stones moves around a great deal more than a 1 carat price drawn from thousands.\n",
+        "partial_coverage_note": "Today's figure covers {shape_count} of the {shapes_expected} shapes we track at this weight, so it describes those shapes rather than the whole market.\n",
+        "statistic": {
+          "individual_shape": "These figures come from {sample_size} {shape} diamonds listed at around {carat} carat, as at {date}. The headline price is the median, so half the diamonds we found cost less and half cost more.\n",
+          "all_shapes": "This page combines every shape we track at around {carat} carat, covering {sample_size} diamonds across {shape_count} shapes as at {date}. Each shape counts in proportion to how many diamonds we found of it, so the shapes that sell in volume influence the figure most. That keeps it close to what is genuinely available rather than treating every shape as though it were equally common.\n",
+          "diamond_type": "Each row combines every shape we track at that weight, with each shape counting in proportion to how many diamonds we found of it. The figures cover {sample_size} diamonds as at {date}.\n",
+          "top_level": "Each price combines every shape we track at that weight, with each shape counting in proportion to how many diamonds we found of it. The figures cover {sample_size} diamonds as at {date}.\n"
+        }
       }
     },
     "section_prompts_base": {
@@ -10365,6 +10405,10 @@
         "full_heatmap": "Full grid (Ringspo)",
         "compact_table": "Smaller table presentation (future C-series)",
         "disabled": "Not shown"
+      },
+      "data_methodology": {
+        "full": "Statistic, sample size, price basis and date (Ringspo)",
+        "disabled": "Not shown"
       }
     },
     "consumer_advisory_profiles": {
@@ -10432,7 +10476,7 @@
         },
         "review_status": "approved",
         "family": "ringspo",
-        "differentiation": "Flagship expert guide: distribution snapshot (no time-series chart — Loupe owns history), color/clarity grid, buyer-side editorial; shape hub = linked cards on all-shapes pages; no carat ladder on shape pages.\n",
+        "differentiation": "Flagship expert guide: distribution snapshot (no time-series chart — Loupe owns history), color/clarity grid, buyer-side editorial; shape hub = linked cards on all-shapes pages; no carat ladder on shape pages. Top level carries the lab-grown discount curve, which is a cross-section by carat rather than history, so it does not breach the no-time-series rule.\n",
         "pages": {
           "shape": {
             "pipeline_artefacts": [
@@ -10444,6 +10488,7 @@
               "summary_data_json",
               "comparison_data_json",
               "color_clarity_json",
+              "price_calculator_json",
               "static_content_json"
             ],
             "wp_widgets": {
@@ -10455,7 +10500,13 @@
               "cross_site_comparison": {
                 "presentation": "disabled"
               },
-              "individual_listings": true
+              "individual_listings": true,
+              "price_calculator": {
+                "presentation": "full"
+              },
+              "data_methodology": {
+                "presentation": "full"
+              }
             }
           },
           "all-shapes": {
@@ -10472,12 +10523,16 @@
               },
               "cross_site_comparison": {
                 "presentation": "disabled"
+              },
+              "data_methodology": {
+                "presentation": "full"
               }
             }
           },
           "diamond-type": {
             "pipeline_artefacts": [
               "type_summary_json",
+              "type_price_per_carat_chart",
               "templated_copy_json",
               "static_content_json"
             ],
@@ -10485,18 +10540,26 @@
               "nat_lab_toggle": true,
               "cross_site_comparison": {
                 "presentation": "disabled"
+              },
+              "data_methodology": {
+                "presentation": "full"
               }
             }
           },
           "top-level": {
             "pipeline_artefacts": [
               "market_overview_json",
+              "market_discount_chart",
+              "top_tables_json",
               "templated_copy_json",
               "static_content_json"
             ],
             "wp_widgets": {
               "cross_site_comparison": {
                 "presentation": "disabled"
+              },
+              "data_methodology": {
+                "presentation": "full"
               }
             }
           },
@@ -12856,6 +12919,21 @@
         "related_artefacts": [],
         "runtime_note": "C3.2 writes one grid per retailer pool to ringspo.calc_data (pool_id); C5.7 consults should_produce and reads the pool named by the site's source_site_id. R4_color_clarity_db_json retired 2026-07-30."
       },
+      "price_calculator_json": {
+        "page_level": "shape",
+        "producing_script": "C5.9_price_calculator (data: C3.2_color_clarity_aggregate)",
+        "gate": "site_entitlement",
+        "status": "live",
+        "filename": "price-calculator.json",
+        "description": "Price-calculator cells — percentiles and sample size per colour group × clarity group × cut grade, for the interactive calculator/checker and its server-rendered default answer.",
+        "wp_widgets": [
+          "price_calculator"
+        ],
+        "related_artefacts": [
+          "color_clarity_json"
+        ],
+        "runtime_note": "C3.2 writes ringspo.price_benchmark_cells per retailer pool; C5.9 reads the pool named by the site's source_site_id and converts USD percentiles into the country's currency. A country with no exchange rate is skipped rather than published at USD values. Cut cells exist for round only, so has_cut_dimension is false on fancy-shape pages. NOT the same file as PRD-011's never-written calculator-data.json."
+      },
       "static_content_json": {
         "page_level": "all",
         "producing_script": "C1_generator",
@@ -12981,7 +13059,49 @@
         "wp_widgets": [
           "nat_lab_type_cards"
         ],
-        "related_artefacts": []
+        "related_artefacts": [
+          "type_price_per_carat_chart"
+        ]
+      },
+      "nat_vs_lab_json": {
+        "page_level": "diamond-type",
+        "producing_script": "C5.2_diamond_type_aggregate",
+        "gate": "site_entitlement",
+        "status": "live_legacy",
+        "filename": "nat-vs-lab.json",
+        "description": "Per-carat natural vs lab-grown median, gap, ratio and % difference. Written to the natural prefix only.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "type_comparison_chart",
+          "type_summary_json"
+        ],
+        "runtime_note": "Read by no LDN component; the legacy pricing plugin is its only consumer and its dynamic routes serve no live page. Entitled to no site, so it is no longer produced. Un-entitle-able cleanly: the L1 carat table already carries lab_grown_discount_pct."
+      },
+      "type_comparison_chart": {
+        "page_level": "diamond-type",
+        "producing_script": "C5.2_diamond_type_aggregate",
+        "gate": "site_entitlement",
+        "status": "live_legacy",
+        "filename": "type-comparison-chart.html (+ .json)",
+        "description": "Grouped bar chart of natural vs lab-grown median price by carat. Written to the natural prefix only.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "nat_vs_lab_json"
+        ],
+        "runtime_note": "Superseded for LDN by type_price_per_carat_chart, which is written per diamond type rather than natural only. Consumed solely by loupe-pricing-wp-plugin/templates/template-diamond-nat-lab.php via <iframe>, which serves no live page and would need inline conversion first (see TECH_DEBT)."
+      },
+      "type_price_per_carat_chart": {
+        "page_level": "diamond-type",
+        "producing_script": "C5.2_diamond_type_aggregate",
+        "gate": "site_entitlement",
+        "status": "live",
+        "filename": "price-per-carat-chart.html (+ .json)",
+        "description": "Line chart of price per carat by carat weight for one diamond type — shows the rising cost of size and the step-ups at milestone weights.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "type_summary_json"
+        ],
+        "runtime_note": "Derived from the same carat_tiers the L2 table renders, so chart and table agree. Written to each type's own prefix (unlike type-comparison-chart, which only exists on natural). Needs at least 3 priced weights."
       },
       "market_overview_json": {
         "page_level": "top-level",
@@ -13031,9 +13151,23 @@
         "description": "Top shape/carat combos by sample size — popular links on standalone pricing homepages.",
         "wp_widgets": [],
         "related_artefacts": [
-          "market_overview_json"
+          "market_overview_json",
+          "price_change_chart"
         ],
-        "runtime_note": "Uploaded alongside market-overview.json; not gated separately in C5.3."
+        "runtime_note": "Gated on its own id since 2026-07-31; it previously rode on market_overview_json, so every pricing site received it whether or not anything read it."
+      },
+      "price_change_chart": {
+        "page_level": "top-level",
+        "producing_script": "C5.3_top_level_aggregate",
+        "gate": "site_entitlement",
+        "status": "live_legacy",
+        "filename": "price-change-chart.html (+ .json)",
+        "description": "Bar chart of recent price change across the most-traded shape/carat combos.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "top_tables_json"
+        ],
+        "runtime_note": "Built from top_tables. Read by no LDN component; only loupe-pricing-wp-plugin/templates/template-diamond-prices-top.php embeds it, and that route serves no live page. Entitled to no site, so it is no longer produced."
       },
       "templated_copy_json": {
         "page_level": "all",
@@ -13165,6 +13299,16 @@
         "reads_artefacts": [
           "comparison_data_json"
         ],
+        "page_levels": [
+          "shape",
+          "all-shapes",
+          "diamond-type",
+          "top-level"
+        ]
+      },
+      "data_methodology": {
+        "description": "\"About this data\" block: where the listings come from, which statistic the page reports, how many diamonds are behind it and when it was last refreshed. Copy is per-level in the content profile's `methodology` block; live values (sample size, shape, date) come from the page's own summary artefact, so it reads no file of its own.\n",
+        "reads_artefacts": [],
         "page_levels": [
           "shape",
           "all-shapes",
@@ -13321,8 +13465,10 @@
         ]
       },
       "price_calculator": {
-        "description": "Interactive price calculator widget.",
-        "reads_artefacts": [],
+        "description": "Interactive price calculator / position checker (CP 123). The reader picks colour group, clarity group and, on round pages, cut grade; leaving the price blank answers \"what should this cost\", entering a quoted price answers where that price sits in the distribution for the same specification. The sample size is shown alongside either answer. The default cell is server-rendered so the page answers without JavaScript, and a specification with no cell says so rather than falling back to a coarser one. One widget, not two: the checker is the calculator with the price field filled in.\n",
+        "reads_artefacts": [
+          "price_calculator_json"
+        ],
         "page_levels": [
           "shape"
         ]

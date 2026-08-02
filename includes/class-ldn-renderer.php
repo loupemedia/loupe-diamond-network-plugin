@@ -40,6 +40,8 @@ require_once LDN_PLUGIN_DIR . 'components/trait-ldn-url.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-data.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-homepage.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-shapes-at-carat.php';
+require_once LDN_PLUGIN_DIR . 'components/trait-ldn-methodology.php';
+require_once LDN_PLUGIN_DIR . 'components/trait-ldn-price-calculator.php';
 
 final class LDN_Renderer {
     use LDN_Trait_Chrome;
@@ -51,6 +53,8 @@ final class LDN_Renderer {
     use LDN_Trait_Sections;
     use LDN_Trait_Homepage;
     use LDN_Trait_Shapes_At_Carat;
+    use LDN_Trait_Methodology;
+    use LDN_Trait_Price_Calculator;
     use LDN_Trait_SchemaBridge;
     use LDN_Trait_Url;
     use LDN_Trait_Data;
@@ -291,12 +295,18 @@ final class LDN_Renderer {
             }
         }
 
+        $section_bands = (isset($layout['section_bands']) && is_array($layout['section_bands']))
+            ? $layout['section_bands']
+            : array();
         foreach ($sections as $section_id) {
             if ((string) $section_id === 'hero') {
                 $out .= $hero_html;
                 continue;
             }
-            $out .= $this->render_section((string) $section_id, $ctx, $bag, $currency);
+            $out .= $this->apply_section_band(
+                $this->render_section((string) $section_id, $ctx, $bag, $currency),
+                isset($section_bands[(string) $section_id]) ? $section_bands[(string) $section_id] : ''
+            );
         }
 
         $out .= $this->future_feature_mounts($ctx);
