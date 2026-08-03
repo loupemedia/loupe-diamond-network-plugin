@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.19.0] - 2026-08-03
+
+- **Schema-aware staging diagnostics.** The panel now probes size-page JSON artefacts (not the pricing default list), shows a **Schema** column comparing each artefact's `_meta.schema_version` to the catalogue version in the config bundle, and lists drift in the notes. Unstamped or behind artefacts still render with their existing fallbacks — the page never 404s solely for schema drift — but the mismatch is no longer invisible. Fresh fetches also log drift when `WP_DEBUG_LOG` is on.
+- Config bundle rebuilt so every artefact carries `schema_version` for the plugin read path.
+
+## [0.18.2] - 2026-08-03
+
+- **Section band adjacency rules** enforced at render time: coloured bands (`tint` purple, `accent` green) never sit back-to-back — white separates them — and the last body section is never purple because the theme footer is already purple. Optional sections (empty FAQ, skipped hub intro) can change which modules render on shape pages; coercion applies after render so variable fourth-level content still obeys the rule.
+- **Top-level hub bands** updated: type-nav cards return to a plain band between the purple carat table and purple most-traded block (was green accent sandwiched between purple).
+
 ## [0.18.1] - 2026-08-02
 
 - **L/W segmentation table** on fancy-shape individual size pages when `size-summary.json` includes `lw_segments` (from Z2 `lw_stats`). Round pages keep the cut-grade table from Z2.1. Histogram charts are suppressed when the table is present or when bin counts do not cover enough of the sample.

@@ -105,6 +105,45 @@ trait LDN_Trait_Chrome {
     }
 
     /**
+     * Whether a band name paints a saturated full-bleed surface (not plain white).
+     *
+     * @param string $band
+     * @return bool
+     */
+    public function is_colored_section_band($band) {
+        $band = preg_replace('/[^a-z0-9]/', '', strtolower((string) $band));
+        return $band === 'tint' || $band === 'accent';
+    }
+
+    /**
+     * Resolve the band to apply, downgrading when adjacency or footer rules require.
+     *
+     * Coloured bands (tint / accent) must be separated by a plain band so green and
+     * purple never sit back-to-back. The last body section must not be purple (tint)
+     * because the theme footer is already purple on Ringspo.
+     *
+     * @param string $declared                  Band from profile, or '' for plain.
+     * @param string $previous_effective_band   Band applied to the prior rendered section.
+     * @param bool   $is_last_on_page           Whether this is the last section that renders.
+     * @return string Effective band (plain, tint, or accent).
+     */
+    public function coerce_section_band($declared, $previous_effective_band, $is_last_on_page) {
+        $band = preg_replace('/[^a-z0-9]/', '', strtolower((string) $declared));
+        if ($band === '' || !isset(self::$VALID_SECTION_BANDS[$band])) {
+            $band = 'plain';
+        }
+
+        if ($this->is_colored_section_band($band) && $this->is_colored_section_band($previous_effective_band)) {
+            $band = 'plain';
+        }
+        if ($is_last_on_page && $band === 'tint') {
+            $band = 'plain';
+        }
+
+        return $band;
+    }
+
+    /**
      * BEM modifier class from page_chrome.heading_style (default minimal).
      *
      * @param array $profile

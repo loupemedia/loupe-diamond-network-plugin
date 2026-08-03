@@ -14,6 +14,11 @@
  *     hammering S3 on every request).
  *   - Success                       → decoded array (JSON) cached for TTL.
  *
+ * Schema contracts (Stage 5): a successful fetch still returns the payload when
+ * `_meta.schema_version` is behind the catalogue — the page keeps its fallback
+ * rendering — but the mismatch is logged (WP_DEBUG_LOG) and surfaced on the
+ * staging diagnostics probe. Production never 404s solely for schema drift.
+ *
  * @package LoupeDiamondNetwork
  * @since   0.1.0
  */
@@ -96,6 +101,7 @@ final class LDN_Data_Fetcher {
             return null;
         }
 
+        $this->log_schema_mismatch($artefact_id, $decoded, $url);
         set_transient($key, $decoded, $this->ttl($artefact_id));
         return $decoded;
     }
@@ -132,9 +138,23 @@ final class LDN_Data_Fetcher {
     /**
      * Probe an artefact without reading/writing fetch transients (staging diagnostics).
      *
+     * Schema fields are always present so the diagnostics panel can render a
+     * Schema column without null-key checks. `schema_status` is empty until a
+     * body is available to compare; `n/a` covers non-JSON successes.
+     *
      * @param string           $artefact_id
      * @param LDN_Page_Context $ctx
-     * @return array{artefact_id: string, entitled: bool, url: string|null, http_code: int|null, ok: bool, reason: string}
+     * @return array{
+     *   artefact_id: string,
+     *   entitled: bool,
+     *   url: string|null,
+     *   http_code: int|null,
+     *   ok: bool,
+     *   reason: string,
+     *   expected_schema: int|null,
+     *   published_schema: int|null,
+     *   schema_status: string
+     * }
      */
     public function probe_artefact($artefact_id, LDN_Page_Context $ctx) {
         $report = array(
@@ -144,6 +164,9 @@ final class LDN_Data_Fetcher {
             'http_code' => null,
             'ok' => false,
             'reason' => '',
+            'expected_schema' => $this->artefacts->expected_schema_version($artefact_id),
+            'published_schema' => null,
+            'schema_status' => '',
         );
 
         if (!$report['entitled']) {
@@ -179,10 +202,17 @@ final class LDN_Data_Fetcher {
 
         $decoded = json_decode($body, true);
         if (!is_array($decoded)) {
-            $report['reason'] = 'not valid JSON';
+            // HTML/SVG/XML artefacts carry provenance in object metadata, which
+            // this probe does not yet read. Mark fetch ok, schema unknown.
+            $report['ok'] = true;
+            $report['reason'] = 'ok (non-JSON)';
+            $report['schema_status'] = 'n/a';
             return $report;
         }
 
+        $published = LDN_Artefacts::published_schema_version($decoded);
+        $report['published_schema'] = $published;
+        $report['schema_status'] = LDN_Artefacts::schema_verdict($published, $report['expected_schema']);
         $report['ok'] = true;
         $report['reason'] = 'ok';
         return $report;
@@ -269,6 +299,32 @@ final class LDN_Data_Fetcher {
      */
     private function ttl($artefact_id) {
         return (int) apply_filters('ldn_artefact_ttl', self::TTL_OK, $artefact_id);
+    }
+
+    /**
+     * Log when a freshly fetched JSON artefact is behind (or ahead of) the catalogue.
+     *
+     * Fail-open: the caller still receives the payload. This only makes the
+     * mismatch visible in WP_DEBUG_LOG so production leaves a trail even though
+     * the staging diagnostics panel is absent there.
+     *
+     * @param string     $artefact_id
+     * @param array      $payload
+     * @param string     $url
+     * @return void
+     */
+    private function log_schema_mismatch($artefact_id, array $payload, $url) {
+        $expected = $this->artefacts->expected_schema_version($artefact_id);
+        $published = LDN_Artefacts::published_schema_version($payload);
+        $verdict = LDN_Artefacts::schema_verdict($published, $expected);
+        if ($verdict === 'ok') {
+            return;
+        }
+        $pub_label = ($published === null) ? '∅' : (string) $published;
+        $exp_label = ($expected === null) ? '∅' : (string) $expected;
+        $this->log(
+            "schema {$verdict} for '{$artefact_id}': published={$pub_label} expected={$exp_label} url={$url}"
+        );
     }
 
     /**

@@ -298,15 +298,39 @@ final class LDN_Renderer {
         $section_bands = (isset($layout['section_bands']) && is_array($layout['section_bands']))
             ? $layout['section_bands']
             : array();
+
+        // Render first, then assign bands from what actually reached the page.
+        // Optional sections (empty FAQ, missing heatmap, skipped hub intro) must
+        // not leave two coloured bands adjacent or a purple band above the footer.
+        $rendered_sections = array();
         foreach ($sections as $section_id) {
             if ((string) $section_id === 'hero') {
                 $out .= $hero_html;
                 continue;
             }
-            $out .= $this->apply_section_band(
-                $this->render_section((string) $section_id, $ctx, $bag, $currency),
-                isset($section_bands[(string) $section_id]) ? $section_bands[(string) $section_id] : ''
+            $html = $this->render_section((string) $section_id, $ctx, $bag, $currency);
+            if ($html === '') {
+                continue;
+            }
+            $rendered_sections[] = array(
+                'html'     => $html,
+                'declared' => isset($section_bands[(string) $section_id])
+                    ? (string) $section_bands[(string) $section_id]
+                    : '',
             );
+        }
+
+        $rendered_count = count($rendered_sections);
+        $previous_band = '';
+        for ($i = 0; $i < $rendered_count; $i++) {
+            $is_last = ($i === $rendered_count - 1);
+            $band = $this->coerce_section_band(
+                $rendered_sections[$i]['declared'],
+                $previous_band,
+                $is_last
+            );
+            $out .= $this->apply_section_band($rendered_sections[$i]['html'], $band);
+            $previous_band = $band;
         }
 
         $out .= $this->future_feature_mounts($ctx);

@@ -65,6 +65,75 @@ final class LDN_Artefacts {
     }
 
     /**
+     * Declared contract version for *artefact_id*, from the deployed config bundle.
+     *
+     * Mirrors shared/config/artefacts.py::artefact_schema_version(). Null means the
+     * catalogue entry is missing or has no positive integer — a deploy that forgot
+     * to rebuild the bundle after a schema_version was added.
+     *
+     * @param string $artefact_id
+     * @return int|null
+     */
+    public function expected_schema_version($artefact_id) {
+        $entry = $this->get_artefact($artefact_id);
+        if ($entry === null || !isset($entry['schema_version'])) {
+            return null;
+        }
+        $version = $entry['schema_version'];
+        if (is_bool($version) || !is_int($version) || $version < 1) {
+            return null;
+        }
+        return $version;
+    }
+
+    /**
+     * Schema version stamped in a fetched JSON body, or null if unstamped.
+     *
+     * Null means the artefact predates provenance stamping. Callers must treat
+     * that as behind version 1, not as "unknown, assume fine" — that is the
+     * oval-page failure mode this exists to catch.
+     *
+     * Mirrors shared/ops/artefact_meta.py::published_schema_version().
+     *
+     * @param mixed $payload Decoded JSON (array) or anything else.
+     * @return int|null
+     */
+    public static function published_schema_version($payload) {
+        if (!is_array($payload)) {
+            return null;
+        }
+        $meta = isset($payload['_meta']) && is_array($payload['_meta']) ? $payload['_meta'] : null;
+        if ($meta === null || !isset($meta['schema_version'])) {
+            return null;
+        }
+        $version = $meta['schema_version'];
+        if (is_bool($version) || !is_int($version) || $version < 1) {
+            return null;
+        }
+        return $version;
+    }
+
+    /**
+     * Compare a published version against the catalogue expectation.
+     *
+     * @param int|null $published From published_schema_version(); null = unstamped.
+     * @param int|null $expected  From expected_schema_version(); null = undeclared.
+     * @return string One of: ok | behind | ahead | undeclared
+     */
+    public static function schema_verdict($published, $expected) {
+        if ($expected === null) {
+            return 'undeclared';
+        }
+        if ($published === null || $published < $expected) {
+            return 'behind';
+        }
+        if ($published > $expected) {
+            return 'ahead';
+        }
+        return 'ok';
+    }
+
+    /**
      * Entitlements block for a site, or null when the site isn't listed.
      *
      * @param string $site_id

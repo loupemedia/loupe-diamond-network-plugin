@@ -73,6 +73,7 @@ final class LDN_Diagnostics {
      */
     public static function artefact_ids_for_level($page_level) {
         $common = array('summary_data_json', 'price_graph_json', 'distribution_json', 'static_content_json', 'individual_content_json');
+        $size_json = array('size_summary_json', 'size_copy_json', 'size_distribution_json');
         switch ($page_level) {
             case 'shape':
                 return $common;
@@ -82,9 +83,56 @@ final class LDN_Diagnostics {
                 return array('type_summary_json', 'templated_copy_json', 'static_content_json');
             case 'top-level':
                 return array('market_overview_json', 'templated_copy_json', 'static_content_json');
+            case 'size-individual':
+            case 'size-shape-hub':
+            case 'size-carat-hub':
+            case 'size-mega-hub':
+            case 'size-comparison':
+            case 'size-comparison-tool':
+            case 'size-methodology':
+                return $size_json;
             default:
                 return $common;
         }
+    }
+
+    /**
+     * Primary artefact id for the current page level, pricing or size.
+     *
+     * @param string $page_level
+     * @return string|null
+     */
+    public static function primary_artefact_for_level($page_level) {
+        if (isset(LDN_Dispatcher::PRIMARY_ARTEFACT[$page_level])) {
+            return LDN_Dispatcher::PRIMARY_ARTEFACT[$page_level];
+        }
+        if (isset(LDN_Size_Dispatcher::PRIMARY_ARTEFACT[$page_level])) {
+            return LDN_Size_Dispatcher::PRIMARY_ARTEFACT[$page_level];
+        }
+        return null;
+    }
+
+    /**
+     * Human-readable schema cell for one probe row.
+     *
+     * @param array $row Probe report from LDN_Data_Fetcher::probe_artefact().
+     * @return array{0: string, 1: bool} Label and whether to highlight as a problem.
+     */
+    public static function schema_cell(array $row) {
+        $status = isset($row['schema_status']) ? (string) $row['schema_status'] : '';
+        if ($status === '' || $status === 'n/a') {
+            return array('—', false);
+        }
+        $pub = array_key_exists('published_schema', $row) && $row['published_schema'] !== null
+            ? (string) $row['published_schema']
+            : '∅';
+        $exp = array_key_exists('expected_schema', $row) && $row['expected_schema'] !== null
+            ? (string) $row['expected_schema']
+            : '∅';
+        if ($status === 'ok') {
+            return array("ok ({$pub}={$exp})", false);
+        }
+        return array("{$status} (pub={$pub} expect={$exp})", true);
     }
 
     /**
@@ -124,9 +172,21 @@ final class LDN_Diagnostics {
         $ctx = self::$context;
         $rollout = LDN_Plugin::instance()->rollout();
         $reports = self::artefact_reports();
-        $primary_id = isset(LDN_Dispatcher::PRIMARY_ARTEFACT[$ctx->page_level])
-            ? LDN_Dispatcher::PRIMARY_ARTEFACT[$ctx->page_level]
-            : null;
+        $primary_id = self::primary_artefact_for_level($ctx->page_level);
+
+        $display_notes = self::$notes;
+        $schema_behind = array();
+        foreach ($reports as $row) {
+            if (isset($row['schema_status']) && in_array($row['schema_status'], array('behind', 'undeclared', 'ahead'), true)) {
+                $schema_behind[] = $row['artefact_id'] . ' ' . $row['schema_status'];
+            }
+        }
+        if ($schema_behind !== array()) {
+            $display_notes[] = (
+                'Schema drift (page still renders; regenerate producer or bump plugin): '
+                . implode(', ', $schema_behind)
+            );
+        }
 
         $html = '<aside class="ldn-staging-diagnostics" style="margin:2rem 0;padding:1rem;border:2px dashed #d63638;background:#fff8f0;font:13px/1.5 monospace;">';
         $html .= '<p style="margin:0 0 .75rem;font:bold 14px sans-serif;">LDN staging diagnostics</p>';
@@ -153,9 +213,9 @@ final class LDN_Diagnostics {
         }
         $html .= '</p>';
 
-        if (self::$notes !== array()) {
+        if ($display_notes !== array()) {
             $html .= '<ul style="margin:0 0 .75rem;padding-left:1.2rem;">';
-            foreach (self::$notes as $note) {
+            foreach ($display_notes as $note) {
                 $html .= '<li>' . esc_html($note) . '</li>';
             }
             $html .= '</ul>';
@@ -164,14 +224,18 @@ final class LDN_Diagnostics {
         $html .= '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
         $html .= '<thead><tr><th style="text-align:left;border-bottom:1px solid #ccc;">Artefact</th>'
             . '<th style="text-align:left;border-bottom:1px solid #ccc;">Status</th>'
+            . '<th style="text-align:left;border-bottom:1px solid #ccc;">Schema</th>'
             . '<th style="text-align:left;border-bottom:1px solid #ccc;">URL</th></tr></thead><tbody>';
         foreach ($reports as $row) {
             $is_primary = ($primary_id !== null && $row['artefact_id'] === $primary_id);
             $label = $row['artefact_id'] . ($is_primary ? ' (primary)' : '');
-            $status = $row['ok'] ? 'ok' : (string) $row['reason'];
+            $status = (string) $row['reason'];
             $style = $row['ok'] ? '' : 'color:#b32d2e;font-weight:bold;';
+            list($schema_label, $schema_bad) = self::schema_cell($row);
+            $schema_style = $schema_bad ? 'color:#b32d2e;font-weight:bold;' : '';
             $html .= '<tr><td style="padding:4px 8px 4px 0;vertical-align:top;">' . esc_html($label) . '</td>';
             $html .= '<td style="padding:4px 8px 4px 0;vertical-align:top;' . esc_attr($style) . '">' . esc_html($status) . '</td>';
+            $html .= '<td style="padding:4px 8px 4px 0;vertical-align:top;' . esc_attr($schema_style) . '">' . esc_html($schema_label) . '</td>';
             $html .= '<td style="padding:4px 0;vertical-align:top;word-break:break-all;">';
             if (!empty($row['url'])) {
                 $html .= '<a href="' . esc_url($row['url']) . '" target="_blank" rel="noopener noreferrer">' . esc_html($row['url']) . '</a>';
@@ -181,7 +245,7 @@ final class LDN_Diagnostics {
             $html .= '</td></tr>';
         }
         $html .= '</tbody></table>';
-        $html .= '<p style="margin:.75rem 0 0;font-size:11px;color:#666;">Visible on staging only. Pull fresh rollout: wp-admin → Tools → Loupe Diamond Network.</p>';
+        $html .= '<p style="margin:.75rem 0 0;font-size:11px;color:#666;">Visible on staging only. Schema behind = S3 artefact predates the plugin contract — re-run the producer (or wait for schema catch-up). Pull fresh rollout: wp-admin → Tools → Loupe Diamond Network.</p>';
         $html .= '</aside>';
         return $html;
     }

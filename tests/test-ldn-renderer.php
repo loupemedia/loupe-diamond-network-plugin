@@ -1859,6 +1859,32 @@ check(
 
 check($renderer->apply_section_band('', 'tint') === '', 'an empty section stays empty');
 
+// Test intent: coloured bands must not stack, and the last body section must not
+// be purple (theme footer is purple). Runtime coercion handles optional sections
+// that skip; these tests lock the rule itself.
+// Would fail if: tint followed accent were left as declared, or tint were kept on
+// the last section.
+check(
+    $renderer->coerce_section_band('accent', 'tint', false) === 'plain',
+    'accent after tint coerces to plain'
+);
+check(
+    $renderer->coerce_section_band('tint', 'accent', false) === 'plain',
+    'tint after accent coerces to plain'
+);
+check(
+    $renderer->coerce_section_band('tint', 'plain', true) === 'plain',
+    'tint on the last section coerces to plain before the purple footer'
+);
+check(
+    $renderer->coerce_section_band('tint', 'plain', false) === 'tint',
+    'tint after plain stays tint when not last'
+);
+check(
+    $renderer->coerce_section_band('accent', 'plain', true) === 'accent',
+    'accent on the last section is allowed before the purple footer'
+);
+
 // The declared band must reach the rendered page: the section loop is the only
 // place that reads the map, so a profile declaring a band and the page ignoring
 // it is the failure mode that matters.
@@ -1873,8 +1899,13 @@ if (!class_exists('LDN_Config_Declared_Bands')) {
                 'hero_component' => null,
                 // faq_static is declared second so a passing test cannot be
                 // explained by position: under the retired positional scheme
-                // neither of these two would have been coloured.
-                'sections'       => array('natural_vs_lab_analysis', 'faq_static'),
+                // neither of these two would have been coloured. A trailing plain
+                // section lets tint render when it is not the page's last block.
+                'sections'       => array(
+                    'natural_vs_lab_analysis',
+                    'faq_static',
+                    'buying_considerations',
+                ),
                 'ad_slots'       => array(),
                 'section_bands'  => array('faq_static' => 'tint'),
             );
@@ -1887,6 +1918,7 @@ if (!class_exists('LDN_Fetcher_Banded_Copy')) {
             if ($artefact_id === 'static_content_json') {
                 return array(
                     'natural_vs_lab_analysis' => 'Lab-grown stones trade at a discount.',
+                    'buying_considerations'   => 'Compare loose-to-loose when budgeting.',
                     'faq' => array(
                         array('question' => 'How is this priced?', 'answer' => 'From live listings.'),
                     ),

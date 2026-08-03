@@ -1,6 +1,6 @@
 {
-  "version": "5ede388",
-  "generated_at": "2026-07-31T10:44:12.602575+00:00",
+  "version": "326eb68",
+  "generated_at": "2026-08-03T01:31:50.548758+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -9137,7 +9137,6 @@
           ],
           "section_bands": {
             "market_overview_table": "tint",
-            "type_nav_links": "accent",
             "most_traded_table": "tint"
           },
           "ad_slots": [
@@ -12778,6 +12777,7 @@
     },
     "artefacts": {
       "distribution_html": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5_market_index_graphs",
         "gate": "market_index_pipeline",
@@ -12793,6 +12793,7 @@
         "runtime_note": "Only written when the fat table has sample_size > 0 for the combo."
       },
       "distribution_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5_market_index_graphs",
         "gate": "market_index_pipeline",
@@ -12809,6 +12810,7 @@
         "runtime_note": "Only written when the fat table has sample_size > 0 for the combo."
       },
       "market_index_stats_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5_market_index_graphs",
         "gate": "market_index_pipeline",
@@ -12826,6 +12828,7 @@
         "runtime_note": "Only written when the fat table has sample_size > 0 for the combo."
       },
       "market_index_bins_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5_market_index_graphs",
         "gate": "market_index_pipeline",
@@ -12842,6 +12845,7 @@
         "runtime_note": "Only written when the fat table has sample_size > 0 for the combo."
       },
       "price_graph_html": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5_market_index_graphs",
         "gate": "time_series",
@@ -12855,6 +12859,7 @@
         "runtime_note": "Also requires >= 7 historical slim rows (MIN_TS_ROWS) at run time."
       },
       "price_graph_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5_market_index_graphs",
         "gate": "time_series",
@@ -12871,6 +12876,7 @@
         "runtime_note": "Also requires >= 7 historical slim rows (MIN_TS_ROWS) at run time."
       },
       "og_preview_png": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5_market_index_graphs",
         "gate": "market_index_pipeline",
@@ -12885,6 +12891,7 @@
         "runtime_note": "Written when distribution or time-series chart is generated; requires kaleido at build time."
       },
       "summary_data_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5_market_index_graphs",
         "gate": "market_index_pipeline",
@@ -12895,6 +12902,7 @@
         "related_artefacts": []
       },
       "comparison_data_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5.5_comparison_data",
         "gate": "market_index_pipeline",
@@ -12907,6 +12915,7 @@
         "related_artefacts": []
       },
       "color_clarity_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5.7_color_clarity_grid (data: C3.2_color_clarity_aggregate)",
         "gate": "color_clarity",
@@ -12920,6 +12929,7 @@
         "runtime_note": "C3.2 writes one grid per retailer pool to ringspo.calc_data (pool_id); C5.7 consults should_produce and reads the pool named by the site's source_site_id. R4_color_clarity_db_json retired 2026-07-30."
       },
       "price_calculator_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5.9_price_calculator (data: C3.2_color_clarity_aggregate)",
         "gate": "site_entitlement",
@@ -12935,6 +12945,7 @@
         "runtime_note": "C3.2 writes ringspo.price_benchmark_cells per retailer pool; C5.9 reads the pool named by the site's source_site_id and converts USD percentiles into the country's currency. A country with no exchange rate is skipped rather than published at USD values. Cut cells exist for round only, so has_cut_dimension is false on fancy-shape pages. NOT the same file as PRD-011's never-written calculator-data.json."
       },
       "static_content_json": {
+        "schema_version": 1,
         "page_level": "all",
         "producing_script": "C1_generator",
         "gate": "site_entitlement",
@@ -12945,6 +12956,7 @@
         "related_artefacts": []
       },
       "individual_content_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C1_generator (legacy Loupe/Ringspo paths)",
         "gate": "site_entitlement",
@@ -12957,6 +12969,7 @@
         ]
       },
       "carat_ladder_json": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5.4_carat_ladder",
         "gate": "site_entitlement",
@@ -12972,6 +12985,7 @@
         "runtime_note": "Same shape across carat weights; highlight page carat; optional % weight/price columns."
       },
       "carat_ladder_chart": {
+        "schema_version": 1,
         "page_level": "shape",
         "producing_script": "C5.4_carat_ladder",
         "gate": "site_entitlement",
@@ -12987,6 +13001,7 @@
         "runtime_note": "Rendered above the carat ladder table on shape pages when entitled."
       },
       "shapes_at_carat_chart": {
+        "schema_version": 1,
         "page_level": "all",
         "producing_script": "C5.1_all_shapes_aggregate; legacy L5/R5 shapes-price-graph.html",
         "gate": "site_entitlement",
@@ -13003,6 +13018,7 @@
         "runtime_note": "Bar/table comparing shapes at the page carat weight. Listed under pages.all-shapes on standard sites; pages.top-level on carat EMD sites (no all-shapes URL).\n"
       },
       "all_shapes_content_json": {
+        "schema_version": 1,
         "page_level": "all-shapes",
         "producing_script": "L7.2 / R7.2 (legacy editorial)",
         "gate": "site_entitlement",
@@ -13015,6 +13031,7 @@
         ]
       },
       "url_registry_rows": {
+        "schema_version": 1,
         "page_level": "all",
         "producing_script": "C4.5_url_registry",
         "gate": "always",
@@ -13025,6 +13042,7 @@
         "related_artefacts": []
       },
       "shapes_ranking_json": {
+        "schema_version": 1,
         "page_level": "all",
         "producing_script": "C5.1_all_shapes_aggregate",
         "gate": "site_entitlement",
@@ -13040,6 +13058,7 @@
         "runtime_note": "JSON successor to shapes_at_carat_chart HTML; same product intent."
       },
       "all_shapes_summary_json": {
+        "schema_version": 1,
         "page_level": "all",
         "producing_script": "C5.1_all_shapes_aggregate",
         "gate": "site_entitlement",
@@ -13050,6 +13069,7 @@
         "related_artefacts": []
       },
       "type_summary_json": {
+        "schema_version": 1,
         "page_level": "diamond-type",
         "producing_script": "C5.2_diamond_type_aggregate",
         "gate": "site_entitlement",
@@ -13064,6 +13084,7 @@
         ]
       },
       "nat_vs_lab_json": {
+        "schema_version": 1,
         "page_level": "diamond-type",
         "producing_script": "C5.2_diamond_type_aggregate",
         "gate": "site_entitlement",
@@ -13078,6 +13099,7 @@
         "runtime_note": "Read by no LDN component; the legacy pricing plugin is its only consumer and its dynamic routes serve no live page. Entitled to no site, so it is no longer produced. Un-entitle-able cleanly: the L1 carat table already carries lab_grown_discount_pct."
       },
       "type_comparison_chart": {
+        "schema_version": 1,
         "page_level": "diamond-type",
         "producing_script": "C5.2_diamond_type_aggregate",
         "gate": "site_entitlement",
@@ -13091,6 +13113,7 @@
         "runtime_note": "Superseded for LDN by type_price_per_carat_chart, which is written per diamond type rather than natural only. Consumed solely by loupe-pricing-wp-plugin/templates/template-diamond-nat-lab.php via <iframe>, which serves no live page and would need inline conversion first (see TECH_DEBT)."
       },
       "type_price_per_carat_chart": {
+        "schema_version": 1,
         "page_level": "diamond-type",
         "producing_script": "C5.2_diamond_type_aggregate",
         "gate": "site_entitlement",
@@ -13104,6 +13127,7 @@
         "runtime_note": "Derived from the same carat_tiers the L2 table renders, so chart and table agree. Written to each type's own prefix (unlike type-comparison-chart, which only exists on natural). Needs at least 3 priced weights."
       },
       "market_overview_json": {
+        "schema_version": 1,
         "page_level": "top-level",
         "producing_script": "C5.3_top_level_aggregate",
         "gate": "site_entitlement",
@@ -13117,6 +13141,7 @@
         ]
       },
       "market_discount_chart": {
+        "schema_version": 1,
         "page_level": "top-level",
         "producing_script": "C5.3_top_level_aggregate",
         "gate": "site_entitlement",
@@ -13130,6 +13155,7 @@
         "runtime_note": "Uses lab_grown_discount_pct from market-overview.json carat_price_table."
       },
       "market_trend_chart": {
+        "schema_version": 1,
         "page_level": "top-level",
         "producing_script": "C5.3_top_level_aggregate",
         "gate": "site_entitlement",
@@ -13143,6 +13169,7 @@
         "runtime_note": "Percent change from period start; sample-weighted type averages from market index daily history."
       },
       "top_tables_json": {
+        "schema_version": 1,
         "page_level": "top-level",
         "producing_script": "C5.3_top_level_aggregate",
         "gate": "site_entitlement",
@@ -13157,6 +13184,7 @@
         "runtime_note": "Gated on its own id since 2026-07-31; it previously rode on market_overview_json, so every pricing site received it whether or not anything read it."
       },
       "price_change_chart": {
+        "schema_version": 1,
         "page_level": "top-level",
         "producing_script": "C5.3_top_level_aggregate",
         "gate": "site_entitlement",
@@ -13170,6 +13198,7 @@
         "runtime_note": "Built from top_tables. Read by no LDN component; only loupe-pricing-wp-plugin/templates/template-diamond-prices-top.php embeds it, and that route serves no live page. Entitled to no site, so it is no longer produced."
       },
       "templated_copy_json": {
+        "schema_version": 1,
         "page_level": "all",
         "producing_script": "C5.8_templated_copy",
         "gate": "site_entitlement",
@@ -13182,6 +13211,7 @@
         ]
       },
       "size_summary_json": {
+        "schema_version": 1,
         "page_level": "size",
         "producing_script": "Z3_generate_artefacts",
         "gate": "site_entitlement",
@@ -13198,6 +13228,7 @@
         ]
       },
       "size_distribution_json": {
+        "schema_version": 1,
         "page_level": "size",
         "producing_script": "Z3_generate_artefacts",
         "gate": "site_entitlement",
@@ -13213,6 +13244,7 @@
         ]
       },
       "size_distribution_html": {
+        "schema_version": 1,
         "page_level": "size",
         "producing_script": "Z3_generate_artefacts",
         "gate": "site_entitlement",
@@ -13225,6 +13257,7 @@
         ]
       },
       "size_chart_html": {
+        "schema_version": 1,
         "page_level": "size",
         "producing_script": "Z3_generate_artefacts",
         "gate": "site_entitlement",
@@ -13238,6 +13271,7 @@
         ]
       },
       "shape_outline_svg": {
+        "schema_version": 1,
         "page_level": "size",
         "producing_script": "Z3_generate_artefacts",
         "gate": "site_entitlement",
@@ -13252,6 +13286,7 @@
         ]
       },
       "size_copy_json": {
+        "schema_version": 1,
         "page_level": "size",
         "producing_script": "Z3_generate_artefacts",
         "gate": "site_entitlement",
@@ -13262,6 +13297,7 @@
         "related_artefacts": []
       },
       "size_sitemap_xml": {
+        "schema_version": 1,
         "page_level": "size",
         "producing_script": "Z3_generate_artefacts",
         "gate": "site_entitlement",
