@@ -109,6 +109,8 @@ final class LDN_Renderer {
         'shape_preview'           => 'Comparing Diamond Shapes',
         'natural_vs_lab_analysis' => 'Natural vs Lab-Grown Diamonds',
         'price_factors'           => 'What Affects Diamond Prices',
+        'market_guidance'         => 'How to Use These Prices',
+        'quality_overview'        => 'Diamond Quality Basics',
     );
 
     /**

@@ -133,7 +133,16 @@ trait LDN_Trait_Sections {
             return $this->data_methodology_html($ctx, $bag);
         }
         if ($section_id === 'type_nav_links') {
-            return $this->type_nav_links_html($ctx);
+            return $this->type_nav_links_html($ctx, $bag);
+        }
+        if ($section_id === 'all_shapes_explore') {
+            return $this->all_shapes_explore_html($ctx);
+        }
+        if ($section_id === 'top_level_explore') {
+            return $this->top_level_explore_html($ctx);
+        }
+        if ($section_id === 'diamond_type_explore') {
+            return $this->diamond_type_explore_html($ctx);
         }
         if ($section_id === 'market_overview_table' || $section_id === 'carat_price_table') {
             return $this->market_overview_table_html($ctx, $bag);

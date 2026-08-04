@@ -293,9 +293,9 @@
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
 	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
-	:is(table, .ldn-chart, .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
+	:is(table, .ldn-chart, .ldn-chart-target, .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
 		.ldn-size-ideal-real, .ldn-size-price-card, .ldn-price-size-card,
-		.ldn-size-matrix-scroll, .ldn-size-checker-panel, .ldn-size-checker-results,
+		.ldn-size-matrix-scroll, .ldn-size-checker__surface, .ldn-size-checker-panel, .ldn-size-checker-results,
 		.ldn-size-checker-card, .ldn-size-scale-controls, .ldn-size-checker-cta,
 		.ldn-faceup-callout, .ldn-price-calculator__result, .ldn-size-table--segmentation) {
 	background-color: #fff;
@@ -309,7 +309,7 @@
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
 	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
-	:is(table, .ldn-shape-card, .ldn-type-nav-card, .ldn-size-checker-panel,
+	:is(table, .ldn-shape-card, .ldn-type-nav-card, .ldn-size-checker__surface, .ldn-size-checker-panel,
 		.ldn-size-checker-results) a {
 	color: var(--ringspo-purple);
 	text-decoration: none;
@@ -377,8 +377,8 @@
 .ldn-chrome--ringspo-classic .ldn-type-nav-card,
 .ldn-chrome--ringspo-classic .ldn-size-figure,
 .ldn-chrome--ringspo-classic .ldn-size-ideal-real,
-.ldn-chrome--ringspo-classic .ldn-size-matrix-scroll,
 .ldn-chrome--ringspo-classic .ldn-size-checker-panel,
+.ldn-chrome--ringspo-classic .ldn-size-checker__surface,
 .ldn-chrome--ringspo-classic .ldn-size-checker-results,
 .ldn-chrome--ringspo-classic .ldn-size-checker-card,
 .ldn-chrome--ringspo-classic .ldn-size-scale-controls,
@@ -388,10 +388,34 @@
 	overflow: hidden;
 }
 
+/* Matrix table: horizontal scroll + sticky header/column need overflow-x:auto,
+   not overflow:hidden (which clips sideways scroll and breaks position:sticky). */
+.ldn-chrome--ringspo-classic .ldn-size-matrix-scroll {
+	overflow-x: auto;
+	overflow-y: visible;
+	-webkit-overflow-scrolling: touch;
+	max-width: 100%;
+	border-radius: var(--ringspo-card-radius);
+}
+
+/* Primary CTA buttons must keep white label text — band-level `a { color: inherit }`
+   overrides `.ldn-btn--primary` and can paint purple-on-purple. */
+.ldn-chrome--ringspo-classic .ldn-size-checker-cta .ldn-btn--primary,
+.ldn-chrome--ringspo-classic .ldn-size-methodology-cta .ldn-btn--primary {
+	color: #fff;
+	background: var(--ringspo-purple, var(--ldn-primary));
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-checker-cta .ldn-btn--primary:hover,
+.ldn-chrome--ringspo-classic .ldn-size-methodology-cta .ldn-btn--primary:hover {
+	color: #fff;
+	opacity: 0.92;
+}
+
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
 	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
-	:is(table, .ldn-cc-table) {
+	:is(table:not(.ldn-size-matrix), .ldn-cc-table) {
 	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 	overflow: hidden;
@@ -416,6 +440,29 @@
 .ldn-chrome--ringspo-classic.ldn-size-page,
 .ldn-chrome--ringspo-classic.ldn-size-methodology-page {
 	padding-top: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-chart--on-purple {
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-chart--on-purple :is(h2, h3, p, li, .ldn-size-chart__lead) {
+	color: #fff;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-chart--on-purple .ldn-chart-target--on-purple {
+	background: transparent;
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-spread .ldn-size-chart__subheading {
+	margin-top: var(--ldn-space-6, 2rem);
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-spread .ldn-chart-target {
+	margin-top: var(--ldn-space-4, 1rem);
+	background-color: #fff;
+	border-radius: var(--ringspo-card-radius);
+	padding: 0.5rem 0.75rem;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple {

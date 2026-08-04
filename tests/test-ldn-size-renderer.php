@@ -407,6 +407,17 @@ check(strpos($hub_table, 'ldn-size-table-thumb') !== false, 'hub table includes 
 $ctx_shape_hub = new LDN_Page_Context('ringspo', 'size-shape-hub', 'us', null, null, 'round', 'size');
 $shape_table = $renderer->hub_table_html($ctx_shape_hub, $hub_summary);
 check(strpos($shape_table, 'Round diamond size chart by carat weight') !== false, 'shape hub table heading names the shape');
+check(strpos($shape_table, '>1 ct</a>') !== false || strpos($shape_table, '>1 ct<') !== false, 'shape hub table lists carat weights');
+
+$shape_hub_summary = array(
+    'type' => 'shape_hub',
+    'shape' => 'oval',
+    'total_n' => 502181,
+    'rows' => $hub_summary['rows'],
+);
+$shape_intro = $renderer->factual_fallback($shape_hub_summary);
+check(strpos($shape_intro, '502,181') !== false, 'shape hub intro cites total real diamond count');
+check(strpos($shape_intro, 'Median') !== false, 'shape hub intro names median sizing');
 
 $cta = $renderer->size_checker_cta_html('ringspo');
 check(strpos($cta, 'ldn-size-checker-cta') !== false, 'size checker CTA block renders');
@@ -472,6 +483,7 @@ check(strpos($checker_html, 'ldn-size-compare-popular') !== false, 'full tool li
 $widget_renderer = new LDN_Size_Renderer(new LDN_Data_Fetcher(), $config);
 $widget_html = $widget_renderer->size_checker_body_html($ctx_checker, $checker_summary, true);
 check(strpos($widget_html, 'ldn-size-checker--widget') !== false, 'widget variant renders compact class');
+check(strpos($widget_html, 'ldn-size-checker__surface') !== false, 'widget wraps form and results in a white surface');
 check(strpos($widget_html, 'ldn-size-checker-full-link') !== false, 'widget links to the full checker');
 check(strpos($widget_html, 'ldn-size-compare-popular') === false, 'widget omits the popular comparisons list');
 
@@ -536,12 +548,16 @@ check(strpos($labels, 'face-up') !== false, 'spread labels show face-up areas');
 // Test intent: the ideal-vs-real callout and depth↔face-up narrative merge into
 // ONE section with a single heading (Chart numbers vs real stones).
 // Would fail if: the two blocks rendered as separate sections again.
-$merged = $renderer->chart_vs_real_html($summary);
+$merged = $renderer->chart_vs_real_html($summary, 'ringspo');
 check(strpos($merged, 'Chart numbers vs real stones') !== false, 'merged section has the combined heading');
 check(strpos($merged, 'ldn-size-ideal-real') !== false && strpos($merged, 'ldn-size-proportions') !== false,
     'merged section contains both the ideal callout and the depth narrative');
+check(strpos($merged, 'About this data') !== false, 'about-this-data strip lives in chart-vs-real section');
+check(strpos($merged, 'Other websites that publish diamond size charts') !== false,
+    'ideal copy refers to published size charts');
+check(strpos($merged, 'Chart sites') === false, 'ideal copy no longer says chart sites');
 check(substr_count($merged, '<h2>') === 1, 'merged section has exactly one h2');
-check(substr_count($merged, '<h3>') === 2, 'merged section splits ideal vs depth into two subsections');
+check(substr_count($merged, '<h3>') >= 2, 'merged section splits ideal vs depth into subsections');
 check(substr_count($merged, '<section') === 1, 'merged block is a single section');
 
 // Test intent: the price block embeds live figures from the pricing summary
@@ -606,6 +622,69 @@ $lw_html = $renderer->size_segmentation_html($summary_with_lw);
 check(strpos($lw_html, 'How does length-to-width ratio affect size?') !== false, 'L/W segmentation heading renders');
 check(strpos($lw_html, 'Classic (L/W 1.40–1.50)') !== false && strpos($lw_html, '5.58') !== false, 'L/W table shows segment stats');
 check($renderer->size_segmentation_html(array_merge($summary, array('shape' => 'emerald'))) === '', 'L/W segmentation omitted without lw_segments');
+
+// Test intent: elongated fancy shapes split distribution charts — length (or diameter
+// for near-round) under the spread silhouettes; L/W ratio on a purple band with white bars.
+// Would fail if: both charts still rendered in one white section or bars stayed purple on purple.
+class LDN_Fetcher_Oval_Distribution extends LDN_Data_Fetcher {
+    public function fetch_artefact($id, $ctx) {
+        if ($id === 'size_distribution_json') {
+            return array(
+                'charts' => array(
+                    array(
+                        'key' => 'length',
+                        'title' => 'How spread out are 1 carat Oval lengths?',
+                        'figure' => array(
+                            'data' => array(array(
+                                'type' => 'bar',
+                                'y' => array(100),
+                                'marker' => array('color' => '#706cc8'),
+                            )),
+                            'layout' => array(),
+                        ),
+                    ),
+                    array(
+                        'key' => 'lw_ratio',
+                        'title' => 'How elongated are 1 carat Oval diamonds?',
+                        'figure' => array(
+                            'data' => array(array(
+                                'type' => 'bar',
+                                'y' => array(80),
+                                'marker' => array('color' => '#706cc8'),
+                            )),
+                            'layout' => array(),
+                        ),
+                    ),
+                ),
+            );
+        }
+        return parent::fetch_artefact($id, $ctx);
+    }
+}
+$oval_ctx = new LDN_Page_Context('ringspo', 'size-individual', 'us', null, '1', 'oval', 'size');
+$oval_summary = array_merge($summary, array(
+    'shape' => 'oval',
+    'lw_ratio' => array('median' => 1.35, 'p25' => 1.3, 'p75' => 1.4),
+    'visuals' => array(
+        'spread_svg' => '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+    ),
+));
+$oval_renderer = new LDN_Size_Renderer(new LDN_Fetcher_Oval_Distribution(), $config);
+$oval_reflect = new ReflectionMethod($oval_renderer, 'individual_body_html');
+$oval_reflect->setAccessible(true);
+$oval_body = $oval_reflect->invoke($oval_renderer, $oval_ctx, $oval_summary, $copy);
+check(
+    strpos($oval_body, 'ldn-size-spread') !== false
+    && strpos($oval_body, 'How spread out are 1 carat Oval lengths?') !== false,
+    'length histogram renders inside the spread section'
+);
+check(strpos($oval_body, 'ldn-size-chart--on-purple') !== false, 'L/W section uses explicit purple band');
+check(strpos($oval_body, '#ffffff') !== false, 'L/W chart bars are recoloured white on purple');
+check(
+    strpos($oval_body, 'Do all 1 carat oval diamonds look the same size?') === false,
+    'legacy combined distribution heading removed for elongated shapes'
+);
+check(strpos($oval_body, 'Length-to-width ratio compares') !== false, 'L/W explainer copy renders');
 
 // Test intent: diamondchart full_range presentation uses min–max copy and two spread labels.
 // Would fail if: renderer still showed p10–p90 percentile rows when range_presentation is full_range.

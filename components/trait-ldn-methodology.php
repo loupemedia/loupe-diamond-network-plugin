@@ -33,6 +33,35 @@ trait LDN_Trait_Methodology {
     private static $METHODOLOGY_TABLE_LEVELS = array('diamond-type', 'top-level');
 
     /**
+     * Prominent notice when C5.1 reported incomplete shape coverage (staging
+     * test combos, partial pipeline runs). Renders above the shape hub when the
+     * aggregate explicitly sets coverage_complete to false.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @return string
+     */
+    public function partial_coverage_banner_html(LDN_Page_Context $ctx, array $bag) {
+        if (!$this->methodology_coverage_is_partial($bag)) {
+            return '';
+        }
+        $copy = $this->methodology_copy($ctx);
+        if (empty($copy['partial_coverage_note'])) {
+            return '';
+        }
+        $values = $this->methodology_values($ctx, $bag);
+        $text = trim(preg_replace(
+            '/\s+/',
+            ' ',
+            $this->fill_methodology_tokens((string) $copy['partial_coverage_note'], $values)
+        ));
+        if ($text === '') {
+            return '';
+        }
+        return '<aside class="ldn-partial-coverage" role="note"><p>' . esc_html($text) . '</p></aside>';
+    }
+
+    /**
      * "About this data" block, or '' when the widget is off for this site/level
      * or the profile carries no methodology copy.
      *

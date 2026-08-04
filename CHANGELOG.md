@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.19.8] - 2026-08-04
+
+- **Size mega hub (Ringspo):** restore horizontal scroll on the matrix table (`overflow-x: auto` on `.ldn-size-matrix-scroll`; `width: max-content` on the table so columns do not compress). Ringspo card-radius rules had set `overflow: hidden`, which blocked sideways scroll and broke sticky header/shape cells.
+- **Size checker CTA:** primary button label visible again — Ringspo band `color: inherit` on links was overriding `.ldn-btn--primary` (purple text on purple button).
+
+## [0.19.7] - 2026-08-04
+
+- **Diamond-type hub (Ringspo):** hero stat cards from `type-summary.json` (carat weights, diamonds tracked, 1 ct typical price, 1 ct sample size); section cleanup drops redundant `type_overview_dynamic`; adds `diamond_type_explore` and `faq_static` (C1 prompt in `section_prompts_base.yaml`).
+- **Diamond-type polish:** 1 ct row highlighted in the carat tiers table; stacked mobile table; price-per-carat chart gets a no-JS crawler fallback (1 ct + 2 ct PPC).
+
+## [0.19.6] - 2026-08-04
+
+- **Top-level hub polish:** 1 ct row highlighted in the carat table; type-nav cards show typical 1 ct prices from `market-overview.json`; lab-grown discount chart gets a no-JS crawler fallback (1 ct + 2 ct); most-traded tables stack as cards on narrow viewports.
+
+## [0.19.5] - 2026-08-04
+
+- **Top-level hub (Ringspo):** section list cleanup — removed unimplemented `partner_spotlight` and redundant `market_overview_dynamic` / `cross_site_comparison`; added `market_guidance_static`, `quality_overview_static`, `shape_preview`, `top_level_explore`, and `faq_static` (C1 prompts in `section_prompts_base.yaml`). Same cleanup on `diamond_type` (drop monetisation placeholders).
+
+## [0.19.4] - 2026-08-04
+
+- **Top-level hub hero stats (Ringspo):** the green hero band now shows market-scale cards from `market-overview.json` — diamonds tracked, combination counts, 1 ct natural typical price, and 1 ct lab-grown discount — instead of leaving the band prose-only.
+
+## [0.19.3] - 2026-08-04
+
+- **All-shapes hub (Ringspo):** shape cards show rank, sample size, and price range; optional size-chart link when the size module is rolled out; partial-coverage banner when C5.1 reports incomplete shape coverage (staging-safe); bar chart and extended ranking table below the card grid; hero stat cards use "Typical price (median)" and include "Shapes compared".
+- **All-shapes page structure:** split overview into analysis + detail sections; FAQ and explore links (adjacent carats, natural ↔ lab-grown); C1 `faq_static` prompt for all-shapes in `section_prompts_base.yaml`.
+
+## [0.19.2] - 2026-08-04
+
+- **Shape hub table:** carat column shows linked weights on per-shape hubs; lead copy explains medians and click-through; missing depth % shows an em dash.
+- **Shape hub intro:** cites total real-diamond count when `total_n` is in the shape-hub summary (Z3 now emits it).
+- **Scale explorer:** US quarter stays a fixed on-screen size while the stone grows (fixed SVG viewBox width).
+- **Diamond Size Checker:** fixes `undefined carat` in percentile copy; manual entry ranks against the entered carat (face-up knots scaled by carat^(2/3)); widget form + results sit in one white surface; panel titles no longer overlap the card border.
+
+## [0.19.1] - 2026-08-04
+
+- **Size-page distribution layout (elongated shapes):** length histogram moves under the three-tier spread silhouettes; L/W ratio histogram sits in its own purple band with an explainer and **white bars** (bars were invisible when purple-on-purple).
+- **About this data** moves from the chart section into **Chart numbers vs real stones**.
+- **Chart-vs-real copy** replaces “Chart sites” with “Other websites that publish diamond size charts”.
+- **Footer gap** on size pages: drop `min-height: 100vh` phantom whitespace above the theme footer.
+
 ## [0.19.0] - 2026-08-03
 
 - **Schema-aware staging diagnostics.** The panel now probes size-page JSON artefacts (not the pricing default list), shows a **Schema** column comparing each artefact's `_meta.schema_version` to the catalogue version in the config bundle, and lists drift in the notes. Unstamped or behind artefacts still render with their existing fallbacks — the page never 404s solely for schema drift — but the mismatch is no longer invisible. Fresh fetches also log drift when `WP_DEBUG_LOG` is on.

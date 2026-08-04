@@ -132,12 +132,46 @@
         return null;
     }
 
-    function sizeQualityLabel(pct, band, shape) {
+    function formatCaratLabel(carat) {
+        var c = parseFloat(carat);
+        if (!isFinite(c)) {
+            return String(carat);
+        }
+        if (Math.abs(c - Math.round(c)) < 0.001) {
+            return String(Math.round(c));
+        }
+        return String(Math.round(c * 100) / 100);
+    }
+
+    function scaleFaceupDistribution(dist, carat, refBandCarat) {
+        if (!dist || !carat || !refBandCarat) {
+            return dist;
+        }
+        var ref = parseFloat(refBandCarat);
+        if (!isFinite(ref) || ref <= 0) {
+            return dist;
+        }
+        var ratio = Math.pow(carat / ref, 2 / 3);
+        if (Math.abs(ratio - 1) < 0.001) {
+            return dist;
+        }
+        var scaled = {};
+        var i;
+        for (i = 0; i < PERCENTILE_KNOTS.length; i++) {
+            var key = PERCENTILE_KNOTS[i][1];
+            if (dist[key] !== undefined && dist[key] !== null) {
+                scaled[key] = parseFloat(dist[key]) * ratio;
+            }
+        }
+        return scaled;
+    }
+
+    function sizeQualityLabel(pct, carat, shape) {
         if (pct === null) {
             return 'Insufficient market data';
         }
         var shapeLbl = shapeLabel(shape);
-        var ctx = band + ' carat ' + shapeLbl + 's';
+        var ctx = formatCaratLabel(carat) + ' carat ' + shapeLbl + 's';
         if (pct >= 99) {
             return 'Top 1% for ' + ctx;
         }
@@ -322,14 +356,13 @@
             var refBand = resolveReferenceBand(carat, ranges);
             var market = entryFor(shape, refBand);
             var faceup = faceupArea(shape, length, width, geo);
-            var pct = (market && faceup !== null)
-                ? percentileRank(faceup, market.faceup_area_mm2)
+            var refCarat = refBand !== null ? parseFloat(refBand) : null;
+            var faceupDist = (market && market.faceup_area_mm2)
+                ? scaleFaceupDistribution(market.faceup_area_mm2, carat, refCarat)
                 : null;
-            var bandNote = '';
-            if (assignCaratBand(carat, ranges) === null && refBand !== null) {
-                bandNote = carat + ' ct compared against ' + refBand + ' ct '
-                    + shapeLabel(shape) + ' market data.';
-            }
+            var pct = (faceupDist && faceup !== null)
+                ? percentileRank(faceup, faceupDist)
+                : null;
             return {
                 mode: 'manual',
                 shape: shape,
@@ -341,10 +374,10 @@
                 faceup: faceup,
                 perCarat: faceup !== null ? faceup / carat : null,
                 percentile: pct,
-                quality: sizeQualityLabel(pct, band, shape),
+                quality: sizeQualityLabel(pct, carat, shape),
                 n: market ? (market.n || 0) : 0,
                 marketDepth: market ? median(market.depth_mm) : null,
-                bandNote: bandNote
+                bandNote: ''
             };
         }
 
@@ -374,7 +407,7 @@
             }
             if (stone.mode === 'manual' && stone.percentile !== null) {
                 html += '<li>Size rank: <strong>'
-                    + escapeHtml(sizeQualityLabel(stone.percentile, stone.band, stone.shape))
+                    + escapeHtml(sizeQualityLabel(stone.percentile, stone.carat, stone.shape))
                     + '</strong></li>';
             }
             if (stone.mode === 'manual' && stone.depth !== null && stone.marketDepth !== null) {
@@ -515,6 +548,24 @@
             return;
         }
 
+        var fixedCanvasWmm = QUARTER_MM + 4;
+        var shapeIdx;
+        for (shapeIdx = 0; shapeIdx < shapes.length; shapeIdx++) {
+            var shapeBands = bandsForShape(shapes[shapeIdx]);
+            var bandIdx;
+            for (bandIdx = 0; bandIdx < shapeBands.length; bandIdx++) {
+                var probe = entryFor(shapes[shapeIdx], shapeBands[bandIdx]);
+                if (!probe) {
+                    continue;
+                }
+                var probeWidth = median(probe.width_mm);
+                if (probeWidth !== null) {
+                    fixedCanvasWmm = Math.max(fixedCanvasWmm, QUARTER_MM + 4 + probeWidth);
+                }
+            }
+        }
+        fixedCanvasWmm += 2;
+
         for (var i = 0; i < shapes.length; i++) {
             var opt = document.createElement('option');
             opt.value = shapes[i];
@@ -567,7 +618,7 @@
             var pxPerMm = 7;
             var gapMm = 4;
             var coinD = QUARTER_MM;
-            var canvasWmm = coinD + gapMm + width;
+            var canvasWmm = fixedCanvasWmm;
             var canvasHmm = Math.max(coinD, length) + 2;
             var qy = (canvasHmm - coinD) / 2;
             var dy = (canvasHmm - length) / 2;

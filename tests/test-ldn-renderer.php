@@ -352,7 +352,7 @@ check(
     'carat table renders the lab-grown discount percentage'
 );
 check(
-    substr_count($carat_html, '<tr>') === 3, // header + 2 carat rows
+    substr_count($carat_html, '<tr') === 3, // header + 2 carat rows
     'carat table renders one row per carat weight'
 );
 check(
@@ -617,6 +617,86 @@ check(
     'Ringspo top-level does not inline C1 type_comparison under the table'
 );
 
+// Test intent: top-level hub hero stats use market-overview scale figures, not a
+// single-stone median. Would fail if: hero_stats_html returned '' on top-level.
+$top_overview = array(
+    'currency' => 'USD',
+    'total_diamonds_tracked' => 735764,
+    'natural' => array('combo_count' => 167),
+    'lab_grown' => array('combo_count' => 209),
+    'carat_price_table' => array(
+        array(
+            'carat_weight' => '1',
+            'natural_median_price' => 3093,
+            'lab_grown_discount_pct' => 69.0,
+        ),
+    ),
+);
+$top_hero_stats = $renderer->hero_stats_html($ringspo_top, $top_overview, 'USD');
+check(strpos($top_hero_stats, 'ldn-hero-stats') !== false, 'top-level hero stats render the card grid');
+check(strpos($top_hero_stats, '735,764') !== false, 'top-level hero stats show diamonds tracked');
+check(strpos($top_hero_stats, '167 natural') !== false && strpos($top_hero_stats, '209 lab-grown') !== false,
+    'top-level hero stats show natural and lab-grown combination counts');
+check(strpos($top_hero_stats, '$3,093') !== false, 'top-level hero stats show 1 ct natural typical price');
+check(strpos($top_hero_stats, '69.0%') !== false, 'top-level hero stats show 1 ct lab-grown discount');
+
+$top_explore = $renderer->top_level_explore_html($ringspo_top);
+check(strpos($top_explore, 'ldn-top-level-explore') !== false, 'top_level_explore renders the explore section');
+check(
+    strpos($top_explore, 'natural') !== false && strpos($top_explore, 'lab-grown') !== false,
+    'top_level_explore links to both diamond-type hubs and shape comparison entry points'
+);
+
+$guidance_block = $renderer->text_block(
+    'market_guidance_static',
+    'Start with the carat table, then drill into a weight.'
+);
+check(
+    strpos($guidance_block, 'How to Use These Prices') !== false,
+    'market_guidance_static uses the hub guidance heading'
+);
+
+// Test intent: P3 hub polish — 1 ct row highlight, type-nav prices, discount fallback, stacked most-traded.
+// Would fail if: carat table treated every row equally or discount chart had no crawler text.
+$market_bag['market_overview']['carat_price_table'] = array(
+    array(
+        'carat_weight' => '1',
+        'natural_median_price' => 3093,
+        'lab_grown_median_price' => 958,
+        'lab_grown_discount_pct' => 69.0,
+    ),
+    array(
+        'carat_weight' => '2',
+        'natural_median_price' => 14518,
+        'lab_grown_median_price' => 2625,
+        'lab_grown_discount_pct' => 81.9,
+    ),
+);
+$carat_table_html = $renderer->carat_price_table_html($ringspo_top, $market_bag['market_overview'], '$', '');
+check(
+    strpos($carat_table_html, 'ldn-row-highlight') !== false,
+    'top-level carat table highlights the 1 ct anchor row'
+);
+
+$type_nav_html = $renderer->type_nav_links_html($ringspo_top, $market_bag);
+check(
+    strpos($type_nav_html, '$3,093') !== false && strpos($type_nav_html, '$958') !== false,
+    'type nav cards cite 1 ct typical prices from the carat table'
+);
+
+$discount_bag = array_merge($market_bag, array(
+    'market_discount_chart' => array(
+        'data' => array(array('x' => array('1 ct'), 'y' => array(69.0), 'type' => 'bar')),
+        'layout' => array(),
+    ),
+));
+$discount_block_html = $renderer->market_overview_table_html($ringspo_top, $discount_bag);
+check(
+    strpos($discount_block_html, 'ldn-chart-fallback') !== false
+        && strpos($discount_block_html, '69.0%') !== false,
+    'lab-grown discount chart carries a no-JS fallback from the carat table'
+);
+
 // --- 6a. most_traded_table section (top-level, C5.3 top-tables.json) --------
 // Test intent: the hub's most-traded block renders one linked row per combo in
 // natural_top / lab_grown_top, links each row to that combination's shape page
@@ -676,6 +756,11 @@ check(
 check(
     strpos($most_traded_html, '5,120') !== false,
     'most-traded table discloses the sample size behind each median'
+);
+check(
+    strpos($most_traded_html, 'ldn-data-table--stacked') !== false
+        && strpos($most_traded_html, 'data-label=') !== false,
+    'most-traded tables use stacked mobile layout hooks'
 );
 check(
     $renderer->render_section('most_traded_table', $ringspo_top, array(), 'USD') === '',
@@ -1235,6 +1320,65 @@ check(
         && strpos($tiers_html, 'Click a carat') !== false,
     'Ringspo carat tiers table includes how-to-read and PPC commentary'
 );
+check(
+    strpos($tiers_html, 'ldn-row-highlight') !== false,
+    'carat_tiers_table_html highlights the anchor carat row'
+);
+check(
+    strpos($tiers_html, 'ldn-data-table--stacked') !== false
+        && strpos($tiers_html, 'data-label=') !== false,
+    'carat_tiers_table_html uses stacked mobile labels'
+);
+
+// Test intent: diamond-type hero stats use type-summary scale figures, not a
+// single-shape median. Would fail if: hero_stats_html returned '' on diamond-type.
+$type_summary_bag['summary'] = $type_summary_bag['type_summary'];
+$type_hero_stats = $renderer->hero_stats_html($type_ctx, $type_summary_bag['type_summary'], 'USD');
+check(
+    strpos($type_hero_stats, 'ldn-hero-stats') !== false,
+    'diamond-type hero stats render the card grid'
+);
+check(
+    strpos($type_hero_stats, '2') !== false && strpos($type_hero_stats, 'Carat weights') !== false,
+    'diamond-type hero stats show carat weight count'
+);
+check(
+    strpos($type_hero_stats, '456,637') !== false,
+    'diamond-type hero stats show total diamonds tracked'
+);
+check(
+    strpos($type_hero_stats, '$3,107') !== false,
+    'diamond-type hero stats show anchor-carat typical price'
+);
+check(
+    strpos($type_hero_stats, '91,399') !== false,
+    'diamond-type hero stats show anchor-carat sample size'
+);
+
+$type_explore = $renderer->diamond_type_explore_html($ringspo_type_ctx);
+check(
+    strpos($type_explore, 'ldn-diamond-type-explore') !== false,
+    'diamond_type_explore renders the explore section'
+);
+check(
+    strpos($type_explore, 'lab-grown') !== false && strpos($type_explore, 'compare shapes') !== false,
+    'diamond_type_explore links to the opposite type hub and all-shapes entry'
+);
+
+$ppc_bag = array(
+    'type_summary' => $type_summary_bag['type_summary'],
+    'price_per_carat_chart' => array(
+        'data' => array(array('x' => array(1), 'y' => array(3107), 'type' => 'scatter')),
+    ),
+);
+$ppc_html = $renderer->price_per_carat_chart_html($ringspo_type_ctx, $ppc_bag);
+check(
+    strpos($ppc_html, 'Price per carat —') !== false
+        && strpos($ppc_html, '$3,107') !== false
+        && strpos($ppc_html, '$7,277') !== false,
+    'price_per_carat_chart_html includes no-JS fallback for anchor weights'
+);
+
 $intro_flag->setValue($renderer, false);
 
 if (!class_exists('LDN_Config_Type_Hero_Render')) {
@@ -1582,6 +1726,76 @@ $hub_html = $ringspo_renderer->shapes_at_carat_html($all_shapes_ctx, $shape_hub_
 check(
     strpos($hub_html, 'ldn-shape-cards') !== false,
     'shapes_at_carat dispatches to shape_cards when entitled on all-shapes'
+);
+
+// Test intent: all-shapes shape cards expose rank, sample size, range, chart, and
+// extended ranking table; partial coverage surfaces above the grid on staging.
+// Would fail if: cards stayed price-only or partial coverage never rendered in the hub.
+$rich_hub_bag = array(
+    'ranking' => array(
+        'currency_symbol' => '$',
+        'change_period'   => '1_month',
+        'shapes' => array(
+            array(
+                'shape' => 'Round',
+                'rank' => 1,
+                'median_price' => 3510,
+                'price_change' => -5.39,
+                'sample_size' => 45000,
+                'price_min' => 1800,
+                'price_max' => 8900,
+            ),
+            array(
+                'shape' => 'Oval',
+                'rank' => 2,
+                'median_price' => 3200,
+                'price_change' => 1.2,
+                'sample_size' => 12000,
+                'price_min' => 1500,
+                'price_max' => 7200,
+            ),
+        ),
+    ),
+    'ranking_chart' => array(
+        'data' => array(array('x' => array('Round', 'Oval'), 'y' => array(3510, 3200), 'type' => 'bar')),
+        'layout' => array(),
+    ),
+    'summary' => array(
+        'aggregate' => array(
+            'shape_count' => 2,
+            'shapes_expected' => 10,
+            'coverage_complete' => false,
+        ),
+    ),
+);
+$rich_cards = $ringspo_renderer->shape_cards_html($all_shapes_ctx, $rich_hub_bag);
+check(strpos($rich_cards, '#1') !== false, 'shape_cards show rank on each card');
+check(strpos($rich_cards, '45,000 diamonds') !== false, 'shape_cards show sample size');
+check(strpos($rich_cards, '$1,800–$8,900') !== false, 'shape_cards show price range');
+check(strpos($rich_cards, 'ldn-shapes-ranking-chart') !== false, 'shape_cards append the ranking bar chart');
+check(strpos($rich_cards, 'ldn-shapes-ranking-table--extended') !== false, 'shape_cards append the extended ranking table');
+$partial_banner = $method_renderer->shape_cards_html($method_all_ctx, $rich_hub_bag);
+check(strpos($partial_banner, 'ldn-partial-coverage') !== false, 'shape_cards show partial-coverage banner when flagged');
+
+$all_shapes_summary = array(
+    'distribution' => array('median_price' => 3350, 'sample_size' => 57000),
+    'aggregate' => array('shape_count' => 2),
+);
+$hero_all_stats = $ringspo_renderer->hero_stats_html($all_shapes_ctx, $all_shapes_summary, 'USD');
+check(
+    strpos($hero_all_stats, 'Typical price (median)') !== false,
+    'all-shapes hero stats label the composite figure as typical median price'
+);
+check(
+    strpos($hero_all_stats, 'Shapes compared') !== false && strpos($hero_all_stats, '2') !== false,
+    'all-shapes hero stats include shapes compared count'
+);
+
+$explore_html = $ringspo_renderer->all_shapes_explore_html($all_shapes_ctx);
+check(strpos($explore_html, 'ldn-all-shapes-explore') !== false, 'all_shapes_explore renders explore section');
+check(
+    strpos($explore_html, 'lab-grown') !== false,
+    'all_shapes_explore links natural hub to lab-grown at the same carat'
 );
 
 // --- 13. summary_cards hero + breadcrumb order --------------------------------

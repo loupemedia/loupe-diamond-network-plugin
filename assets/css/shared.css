@@ -27,7 +27,9 @@
 /* Aggregate hubs are content-length, not viewport-length — avoid a phantom gap
    above the theme footer once the last body section ends. */
 .ldn-page-shell:has(.ldn-top-level-page),
-.ldn-page-shell:has(.ldn-diamond-type-page) {
+.ldn-page-shell:has(.ldn-diamond-type-page),
+.ldn-page-shell:has(.ldn-size-page),
+.ldn-page-shell:has(.ldn-size-methodology-page) {
 	min-height: 0;
 }
 
@@ -158,6 +160,48 @@
 	}
 }
 
+/* Stacked data tables on narrow viewports (most-traded block). */
+@media screen and (max-width: 640px) {
+	.ldn-data-table--stacked thead {
+		display: none;
+	}
+
+	.ldn-data-table--stacked tbody tr {
+		display: block;
+		margin-bottom: 0.75rem;
+		padding: 0.85rem 1rem;
+		border: 1px solid var(--ldn-table-border, #ddd);
+		border-radius: 4px;
+		background: #fff;
+	}
+
+	.ldn-data-table--stacked tbody td {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0.35rem 0;
+		border: none;
+		text-align: right;
+	}
+
+	.ldn-data-table--stacked tbody td::before {
+		content: attr(data-label);
+		font-weight: 600;
+		text-align: left;
+		color: var(--ldn-secondary-text, inherit);
+	}
+}
+
+.ldn-carat-price-table .ldn-row-highlight {
+	background: rgba(112, 108, 200, 0.08);
+	font-weight: 600;
+}
+
+.ldn-carat-price-table .ldn-row-highlight td:first-child::after {
+	content: " ★";
+	font-size: 0.85em;
+}
+
 /* ----- Price calculator / position checker (CP 123) ----- */
 
 /* auto-fit so the same grid serves a round page (colour, clarity, cut, price)
@@ -244,7 +288,7 @@
 
 .ldn-shape-cards__grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 	gap: 0.75rem;
 	margin-top: 1rem;
 }
@@ -252,27 +296,46 @@
 .ldn-shape-card {
 	display: flex;
 	flex-direction: column;
-	gap: 0.35rem;
-	padding: 1rem 1.1rem;
 	border: 1px solid var(--ldn-border, #e2e2e8);
 	border-radius: 4px;
 	background: #fff;
 	color: var(--ldn-text, #1a1a2e);
+	overflow: hidden;
+}
+
+.ldn-shape-card__main {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	flex: 1;
+	padding: 1rem 1.1rem;
+	color: var(--ldn-text, #1a1a2e);
 	text-decoration: none;
-	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	transition: background 0.15s ease;
 }
 
 .ldn-shape-card:hover,
-.ldn-shape-card:focus-visible {
+.ldn-shape-card:focus-within {
 	border-color: var(--ldn-primary, #333);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ldn-shape-card__main:hover,
+.ldn-shape-card__main:focus-visible {
 	text-decoration: none;
+	background: rgba(0, 0, 0, 0.02);
 }
 
 .ldn-shape-card__shape {
 	font-weight: 600;
 	font-size: 1rem;
 	color: var(--ldn-primary, #333);
+}
+
+.ldn-shape-card__meta {
+	font-size: 0.8125rem;
+	color: var(--ldn-secondary-text, #666);
+	line-height: 1.35;
 }
 
 .ldn-shape-card__price {
@@ -302,6 +365,54 @@
 	margin: 0 0 0.5rem;
 	font-size: 0.9375rem;
 	color: var(--ldn-secondary-text, inherit);
+}
+
+.ldn-shape-card__size-link {
+	display: block;
+	padding: 0.5rem 1.1rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	border-top: 1px solid var(--ldn-border, #e2e2e8);
+	color: var(--ldn-primary, #333);
+	text-decoration: none;
+}
+
+.ldn-shape-card__size-link:hover,
+.ldn-shape-card__size-link:focus-visible {
+	text-decoration: underline;
+	background: rgba(0, 0, 0, 0.02);
+}
+
+.ldn-partial-coverage {
+	margin: 0 0 1rem;
+	padding: 0.75rem 1rem;
+	border-left: 3px solid var(--ldn-accent, #706cc8);
+	background: rgba(112, 108, 200, 0.08);
+	font-size: 0.9375rem;
+}
+
+.ldn-partial-coverage p {
+	margin: 0;
+}
+
+.ldn-explore-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem 1.25rem;
+}
+
+.ldn-explore-link {
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.ldn-explore-link:hover,
+.ldn-explore-link:focus-visible {
+	text-decoration: underline;
+}
+
+.ldn-shapes-ranking-table--extended .ldn-data-table {
+	margin-top: 0.5rem;
 }
 
 /* ----- Sections ----- */
@@ -974,9 +1085,18 @@
 
 .ldn-size-checker--widget {
 	padding: 1.25rem 1.5rem;
+}
+
+.ldn-size-checker__surface {
+	padding: 1.25rem 1.5rem;
 	border: 1px solid var(--ldn-border, #e5e7eb);
 	border-radius: 12px;
-	background: var(--ldn-surface-muted, #f8f7fc);
+	background: #fff;
+	color: var(--ldn-text, #1a1a2e);
+}
+
+.ldn-size-checker--widget .ldn-size-chart__lead {
+	margin-bottom: 1rem;
 }
 
 .ldn-size-checker-panels {
@@ -1009,11 +1129,21 @@
 
 .ldn-size-checker-panel {
 	margin: 0;
-	padding: 1rem 1.25rem 1.25rem;
+	padding: 1.5rem 1.25rem 1.25rem;
 	border: 2px solid var(--ldn-primary, #706cc8);
 	border-radius: 12px;
 	background: #fff;
 	box-shadow: 0 1px 3px rgba(26, 26, 46, 0.08);
+}
+
+.ldn-size-checker-panel legend.ldn-size-checker-panel__title {
+	float: left;
+	width: auto;
+	margin: 0 0 0.75rem;
+	padding: 0;
+	font-size: 1.05rem;
+	font-weight: 700;
+	line-height: 1.3;
 }
 
 .ldn-size-checker-panel--b {
@@ -1023,7 +1153,7 @@
 .ldn-size-checker-panel__title {
 	font-size: 1.05rem;
 	font-weight: 700;
-	padding: 0 0.35rem;
+	padding: 0;
 }
 
 .ldn-size-checker-panel label {
@@ -1097,9 +1227,10 @@
 /* Results are a clearly separated section below the form. */
 .ldn-size-checker-results {
 	margin: 1.75rem 0 0;
-	padding: 1.5rem;
-	border-radius: 12px;
-	background: var(--ldn-surface-muted, #f8f7fc);
+	padding: 1.25rem 0 0;
+	border-top: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 0;
+	background: transparent;
 }
 
 .ldn-size-checker-results__title {
@@ -1391,13 +1522,16 @@
    ------------------------------------------------------------------ */
 .ldn-size-matrix-scroll {
 	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	max-width: 100%;
 	border: 1px solid var(--ldn-border, #e5e7eb);
 	border-radius: 10px;
 	background: #fff;
 }
 
 .ldn-size-matrix {
-	width: 100%;
+	width: max-content;
+	min-width: 100%;
 	border-collapse: separate;
 	border-spacing: 0;
 }

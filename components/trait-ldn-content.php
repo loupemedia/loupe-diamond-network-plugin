@@ -27,6 +27,8 @@ trait LDN_Trait_Content {
         'shape_preview'           => 'Comparing Diamond Shapes',
         'natural_vs_lab_analysis' => 'Natural vs Lab-Grown Diamonds',
         'price_factors'           => 'What Affects Diamond Prices',
+        'market_guidance'         => 'How to Use These Prices',
+        'quality_overview'        => 'Diamond Quality Basics',
     );
 
     /**
@@ -516,7 +518,7 @@ trait LDN_Trait_Content {
         $carat_count = isset($aggregate['carat_count']) ? (int) $aggregate['carat_count'] : 0;
         $popular = isset($aggregate['most_popular_carat']) ? (string) $aggregate['most_popular_carat'] : '';
         // Cite the popular tier's own median/sample — never type-wide weighted_median.
-        $popular_tier = $this->popular_carat_tier($payload, $popular);
+        $popular_tier = $this->type_summary_carat_tier($payload, $popular);
         $median = isset($popular_tier['median_price']) ? $popular_tier['median_price'] : null;
         $samples = isset($popular_tier['sample_size']) ? (int) $popular_tier['sample_size'] : 0;
         if ($carat_count <= 0) {
@@ -569,9 +571,16 @@ trait LDN_Trait_Content {
      * @param string $popular Carat weight label from aggregate.most_popular_carat
      * @return array
      */
-    private function popular_carat_tier(array $payload, $popular) {
-        $popular = (string) $popular;
-        if ($popular === '') {
+    /**
+     * One carat-tier row from a type-summary payload.
+     *
+     * @param array  $payload type-summary.json body
+     * @param string $carat   Carat weight label
+     * @return array
+     */
+    protected function type_summary_carat_tier(array $payload, $carat) {
+        $carat = (string) $carat;
+        if ($carat === '') {
             return array();
         }
         $tiers = isset($payload['carat_tiers']) && is_array($payload['carat_tiers'])
@@ -581,7 +590,7 @@ trait LDN_Trait_Content {
             if (!is_array($tier)) {
                 continue;
             }
-            if ((string) (isset($tier['carat_weight']) ? $tier['carat_weight'] : '') === $popular) {
+            if ((string) (isset($tier['carat_weight']) ? $tier['carat_weight'] : '') === $carat) {
                 return $tier;
             }
         }
@@ -614,9 +623,12 @@ trait LDN_Trait_Content {
         ));
 
         $cells = array();
+        $price_label = $ctx->page_level === 'all-shapes'
+            ? __('Typical price (median)', 'loupe-diamond-network')
+            : __('Current price', 'loupe-diamond-network');
         if ($current !== null && is_scalar($current) && !is_bool($current)) {
             $cells[] = array(
-                'label' => __('Current price', 'loupe-diamond-network'),
+                'label' => $price_label,
                 'value' => $this->format_stat($current, 'currency', $currency),
             );
         }
@@ -625,6 +637,18 @@ trait LDN_Trait_Content {
                 'label' => __('Diamonds analysed', 'loupe-diamond-network'),
                 'value' => $this->format_stat($samples, 'integer', $currency),
             );
+        }
+        if ($ctx->page_level === 'all-shapes') {
+            $aggregate = isset($summary['aggregate']) && is_array($summary['aggregate'])
+                ? $summary['aggregate']
+                : array();
+            $shape_count = isset($aggregate['shape_count']) ? (int) $aggregate['shape_count'] : 0;
+            if ($shape_count > 0) {
+                $cells[] = array(
+                    'label' => __('Shapes compared', 'loupe-diamond-network'),
+                    'value' => number_format($shape_count),
+                );
+            }
         }
         if ($low !== null && is_scalar($low) && !is_bool($low)) {
             $cells[] = array(
@@ -675,6 +699,13 @@ trait LDN_Trait_Content {
      * @return string
      */
     public function hero_stats_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
+        if ($ctx->page_level === 'top-level') {
+            return $this->top_level_hero_stats_html($ctx, $summary, $currency);
+        }
+        if ($ctx->page_level === 'diamond-type') {
+            return $this->diamond_type_hero_stats_html($ctx, $summary, $currency);
+        }
+
         $current = $this->dig_first($summary, array(
             array('distribution', 'median_price'),
             array('distribution', 'percentiles', 'p50'),
@@ -703,9 +734,13 @@ trait LDN_Trait_Content {
 
         $symbol = $this->currency_symbol($currency);
 
+        $price_label = $ctx->page_level === 'all-shapes'
+            ? __('Typical price (median)', 'loupe-diamond-network')
+            : __('Current price', 'loupe-diamond-network');
+
         $cards = array();
         $cards[] = array(
-            'label' => __('Current price', 'loupe-diamond-network'),
+            'label' => $price_label,
             'value' => $this->format_stat($current, 'currency', $currency),
         );
         if ($samples !== null && is_numeric($samples)) {
@@ -713,6 +748,18 @@ trait LDN_Trait_Content {
                 'label' => __('Diamonds analysed', 'loupe-diamond-network'),
                 'value' => $this->format_stat($samples, 'integer', $currency),
             );
+        }
+        if ($ctx->page_level === 'all-shapes') {
+            $aggregate = isset($summary['aggregate']) && is_array($summary['aggregate'])
+                ? $summary['aggregate']
+                : array();
+            $shape_count = isset($aggregate['shape_count']) ? (int) $aggregate['shape_count'] : 0;
+            if ($shape_count > 0) {
+                $cards[] = array(
+                    'label' => __('Shapes compared', 'loupe-diamond-network'),
+                    'value' => number_format($shape_count),
+                );
+            }
         }
         if (is_numeric($low) && is_numeric($high) && (float) $high > 0) {
             $cards[] = array(
@@ -765,6 +812,222 @@ trait LDN_Trait_Content {
         $html .= '</div>';
 
         return $html;
+    }
+
+    /**
+     * Hero stat cards for the top-level market hub (page_chrome.hero_band).
+     *
+     * Uses market-overview.json fields — not a single-stone median — so the
+     * green band matches shape/all-shapes pages without mislabelling a weighted
+     * composite as one diamond's price.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $overview market-overview payload (also in $bag['summary'])
+     * @param string|null      $currency
+     * @return string
+     */
+    /**
+     * Hero stat cards for diamond-type hubs (page_chrome.hero_band).
+     *
+     * Uses type-summary aggregate + anchor-carat tier — not a single shape median.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $payload type-summary payload (also in $bag['summary'])
+     * @param string|null      $currency
+     * @return string
+     */
+    private function diamond_type_hero_stats_html(LDN_Page_Context $ctx, array $payload, $currency = null) {
+        $aggregate = isset($payload['aggregate']) && is_array($payload['aggregate'])
+            ? $payload['aggregate']
+            : array();
+        $carat_count = isset($aggregate['carat_count']) ? (int) $aggregate['carat_count'] : 0;
+        $total = isset($aggregate['total_sample_size']) ? (int) $aggregate['total_sample_size'] : 0;
+        if ($carat_count <= 0 && $total <= 0) {
+            return '';
+        }
+
+        $symbol = $this->currency_symbol(
+            isset($payload['currency']) ? (string) $payload['currency'] : $currency
+        );
+
+        $cards = array();
+        if ($carat_count > 0) {
+            $cards[] = array(
+                'label' => __('Carat weights', 'loupe-diamond-network'),
+                'value' => number_format($carat_count),
+            );
+        }
+        if ($total > 0) {
+            $cards[] = array(
+                'label' => __('Diamonds tracked', 'loupe-diamond-network'),
+                'value' => number_format($total),
+            );
+        }
+
+        $anchor_carat = $this->hub_anchor_carat();
+        $tier = $this->type_summary_carat_tier($payload, $anchor_carat);
+        $median = isset($tier['median_price']) ? $tier['median_price'] : null;
+        $samples = isset($tier['sample_size']) ? (int) $tier['sample_size'] : 0;
+        $anchor_label = $this->format_carat_label($anchor_carat);
+        $type_phrase = $ctx->diamond_type === 'lab-grown'
+            ? __('lab-grown', 'loupe-diamond-network')
+            : __('natural', 'loupe-diamond-network');
+
+        if (is_numeric($median)) {
+            $cards[] = array(
+                'label' => sprintf(
+                    /* translators: 1: carat label, 2: natural or lab-grown */
+                    __('%1$s ct %2$s (typical)', 'loupe-diamond-network'),
+                    $anchor_label,
+                    $type_phrase
+                ),
+                'value' => $symbol . number_format((float) $median, 0),
+            );
+        }
+        if ($samples > 0) {
+            $cards[] = array(
+                'label' => sprintf(
+                    /* translators: %s: carat label */
+                    __('%s ct diamonds', 'loupe-diamond-network'),
+                    $anchor_label
+                ),
+                'value' => number_format($samples),
+            );
+        }
+
+        if (empty($cards)) {
+            return '';
+        }
+
+        $html = '<div class="ldn-hero-stats">';
+        foreach ($cards as $card) {
+            $html .= '<div class="ldn-stat ldn-hero-stat">'
+                . '<span class="ldn-stat-label">' . esc_html($card['label']) . '</span>'
+                . '<span class="ldn-stat-value">' . esc_html($card['value']) . '</span>'
+                . '</div>';
+        }
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    private function top_level_hero_stats_html(LDN_Page_Context $ctx, array $overview, $currency = null) {
+        $total = isset($overview['total_diamonds_tracked'])
+            ? (int) $overview['total_diamonds_tracked']
+            : 0;
+        if ($total <= 0) {
+            return '';
+        }
+
+        $natural = isset($overview['natural']) && is_array($overview['natural'])
+            ? $overview['natural']
+            : array();
+        $lab = isset($overview['lab_grown']) && is_array($overview['lab_grown'])
+            ? $overview['lab_grown']
+            : array();
+        $nat_combos = isset($natural['combo_count']) ? (int) $natural['combo_count'] : 0;
+        $lab_combos = isset($lab['combo_count']) ? (int) $lab['combo_count'] : 0;
+
+        $symbol = $this->currency_symbol(
+            isset($overview['currency']) ? (string) $overview['currency'] : $currency
+        );
+
+        $cards = array();
+        $cards[] = array(
+            'label' => __('Diamonds tracked', 'loupe-diamond-network'),
+            'value' => number_format($total),
+        );
+
+        if ($nat_combos > 0 || $lab_combos > 0) {
+            $combo_parts = array();
+            if ($nat_combos > 0) {
+                $combo_parts[] = sprintf(
+                    /* translators: %d: combination count */
+                    __('%d natural', 'loupe-diamond-network'),
+                    $nat_combos
+                );
+            }
+            if ($lab_combos > 0) {
+                $combo_parts[] = sprintf(
+                    /* translators: %d: combination count */
+                    __('%d lab-grown', 'loupe-diamond-network'),
+                    $lab_combos
+                );
+            }
+            $cards[] = array(
+                'label' => __('Shape & carat combinations', 'loupe-diamond-network'),
+                'value' => implode(' · ', $combo_parts),
+            );
+        }
+
+        $anchor_carat = $this->hub_anchor_carat();
+        $row = $this->hub_carat_table_row($overview, $anchor_carat);
+        $nat_price = isset($row['natural_median_price']) ? $row['natural_median_price'] : null;
+        if (is_numeric($nat_price)) {
+            $cards[] = array(
+                'label' => sprintf(
+                    /* translators: %s: carat label */
+                    __('%s ct natural (typical)', 'loupe-diamond-network'),
+                    $this->format_carat_label($anchor_carat)
+                ),
+                'value' => $symbol . number_format((float) $nat_price, 0),
+            );
+        }
+
+        $discount = isset($row['lab_grown_discount_pct']) ? $row['lab_grown_discount_pct'] : null;
+        if (is_numeric($discount)) {
+            $cards[] = array(
+                'label' => sprintf(
+                    /* translators: %s: carat label */
+                    __('%s ct lab-grown discount', 'loupe-diamond-network'),
+                    $this->format_carat_label($anchor_carat)
+                ),
+                'value' => sprintf('%.1f%%', (float) $discount),
+            );
+        }
+
+        $html = '<div class="ldn-hero-stats">';
+        foreach ($cards as $card) {
+            $html .= '<div class="ldn-stat ldn-hero-stat">'
+                . '<span class="ldn-stat-label">' . esc_html($card['label']) . '</span>'
+                . '<span class="ldn-stat-value">' . esc_html($card['value']) . '</span>'
+                . '</div>';
+        }
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Anchor carat for hub entry points (hero stats, type nav, table highlight).
+     *
+     * @return string
+     */
+    protected function hub_anchor_carat() {
+        return '1';
+    }
+
+    /**
+     * One row from market-overview's carat_price_table by carat weight.
+     *
+     * @param array  $overview
+     * @param string $carat
+     * @return array
+     */
+    protected function hub_carat_table_row(array $overview, $carat) {
+        $rows = isset($overview['carat_price_table']) && is_array($overview['carat_price_table'])
+            ? $overview['carat_price_table']
+            : array();
+        $target = (float) $carat;
+        foreach ($rows as $row) {
+            if (!is_array($row) || !isset($row['carat_weight'])) {
+                continue;
+            }
+            if ((float) $row['carat_weight'] === $target) {
+                return $row;
+            }
+        }
+        return array();
     }
 
     /**

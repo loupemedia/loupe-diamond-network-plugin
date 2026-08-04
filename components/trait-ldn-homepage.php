@@ -110,19 +110,34 @@ trait LDN_Trait_Homepage {
      * Prominent natural / lab-grown entry links.
      *
      * @param LDN_Page_Context $ctx
+     * @param array            $bag
      * @return string
      */
-    public function type_nav_links_html(LDN_Page_Context $ctx) {
+    public function type_nav_links_html(LDN_Page_Context $ctx, array $bag = array()) {
+        $overview = isset($bag['market_overview']) && is_array($bag['market_overview'])
+            ? $bag['market_overview']
+            : array();
+        $currency = $this->currency_symbol(
+            isset($overview['currency'])
+                ? (string) $overview['currency']
+                : $this->config->get_currency($ctx->site_id, $ctx->country_code)
+        );
+        $anchor_carat = $this->hub_anchor_carat();
+        $anchor_row = $this->hub_carat_table_row($overview, $anchor_carat);
+        $anchor_label = $this->format_carat_label($anchor_carat);
+
         $links = array(
             array(
                 'type'  => 'natural',
                 'label' => __('Natural diamond prices', 'loupe-diamond-network'),
                 'desc'  => __('Mined diamonds — median prices by carat and shape', 'loupe-diamond-network'),
+                'price' => isset($anchor_row['natural_median_price']) ? $anchor_row['natural_median_price'] : null,
             ),
             array(
                 'type'  => 'lab-grown',
                 'label' => __('Lab-grown diamond prices', 'loupe-diamond-network'),
                 'desc'  => __('Laboratory-grown diamonds — typically lower than natural', 'loupe-diamond-network'),
+                'price' => isset($anchor_row['lab_grown_median_price']) ? $anchor_row['lab_grown_median_price'] : null,
             ),
         );
 
@@ -132,9 +147,18 @@ trait LDN_Trait_Homepage {
             if ($url === '') {
                 continue;
             }
+            $desc = (string) $link['desc'];
+            if (is_numeric($link['price'])) {
+                $desc = sprintf(
+                    /* translators: 1: carat label, 2: formatted price */
+                    __('From %2$s at %1$s ct (typical, all shapes)', 'loupe-diamond-network'),
+                    $anchor_label,
+                    $currency . number_format((float) $link['price'], 0)
+                );
+            }
             $items .= '<a class="ldn-type-nav-card" href="' . esc_url($url) . '">'
                 . '<span class="ldn-type-nav-card__title">' . esc_html($link['label']) . '</span>'
-                . '<span class="ldn-type-nav-card__desc">' . esc_html($link['desc']) . '</span>'
+                . '<span class="ldn-type-nav-card__desc">' . esc_html($desc) . '</span>'
                 . '</a>';
         }
         if ($items === '') {
