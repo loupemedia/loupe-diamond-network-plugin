@@ -208,6 +208,7 @@ final class LDN_Config {
             'entitlements'     => array(),
             'artefacts'        => array(),
             'network_consumer' => array(),
+            'ad_slots'         => array(),
         );
     }
 
@@ -318,6 +319,99 @@ final class LDN_Config {
             ? trim((string) $consumer['network_sitemap_index'])
             : '/sitemaps/network.xml';
         return $path !== '' ? $path : '/sitemaps/network.xml';
+    }
+
+    /**
+     * Public HTTPS URL for ads.json (network_consumer.ads.manifest_url).
+     *
+     * @return string
+     */
+    public function ads_manifest_url() {
+        $consumer = $this->network_consumer();
+        $ads = isset($consumer['ads']) && is_array($consumer['ads']) ? $consumer['ads'] : array();
+        return isset($ads['manifest_url']) ? trim((string) $ads['manifest_url']) : '';
+    }
+
+    /**
+     * Hub REST base for ad tracking (network_consumer.ads.track_base_url).
+     *
+     * @return string
+     */
+    public function ads_track_base_url() {
+        $consumer = $this->network_consumer();
+        $ads = isset($consumer['ads']) && is_array($consumer['ads']) ? $consumer['ads'] : array();
+        return isset($ads['track_base_url']) ? trim((string) $ads['track_base_url']) : '';
+    }
+
+    /**
+     * ad_slots.yaml slice from the bundle.
+     *
+     * @return array
+     */
+    public function ad_slots_config() {
+        $bundle = $this->get_bundle();
+        return isset($bundle['ad_slots']) && is_array($bundle['ad_slots'])
+            ? $bundle['ad_slots']
+            : array();
+    }
+
+    /**
+     * @param string $layout_slot_id
+     * @return array<string, mixed>|null
+     */
+    public function get_layout_slot_definition($layout_slot_id) {
+        $config = $this->ad_slots_config();
+        $slots = isset($config['layout_slots']) && is_array($config['layout_slots'])
+            ? $config['layout_slots']
+            : array();
+        if (!isset($slots[$layout_slot_id]) || !is_array($slots[$layout_slot_id])) {
+            return null;
+        }
+        return $slots[$layout_slot_id];
+    }
+
+    /**
+     * @param string $layout_slot_id
+     * @param string $page_level
+     * @return array{mode: string, section_id?: string}|null
+     */
+    public function get_layout_slot_placement($layout_slot_id, $page_level) {
+        $def = $this->get_layout_slot_definition($layout_slot_id);
+        if ($def === null || !isset($def['placement']) || !is_array($def['placement'])) {
+            return null;
+        }
+        $placement = $def['placement'];
+        if (isset($placement['by_page_level'][$page_level]) && is_array($placement['by_page_level'][$page_level])) {
+            return $placement['by_page_level'][$page_level];
+        }
+        if (isset($placement['default']) && is_array($placement['default'])) {
+            return $placement['default'];
+        }
+        return null;
+    }
+
+    /**
+     * @param string $image_size
+     * @return array{width: int, height: int, css_class: string}
+     */
+    public function get_ad_image_dimensions($image_size) {
+        $config = $this->ad_slots_config();
+        $sizes = isset($config['image_sizes']) && is_array($config['image_sizes'])
+            ? $config['image_sizes']
+            : array();
+        if (!isset($sizes[$image_size]) || !is_array($sizes[$image_size])) {
+            return array(
+                'width' => 728,
+                'height' => 90,
+                'css_class' => 'ldn-ad--horizontal',
+            );
+        }
+        $row = $sizes[$image_size];
+        return array(
+            'width' => isset($row['width']) ? (int) $row['width'] : 728,
+            'height' => isset($row['height']) ? (int) $row['height'] : 90,
+            'css_class' => isset($row['css_class']) ? (string) $row['css_class'] : 'ldn-ad--horizontal',
+        );
     }
 
     /**

@@ -237,6 +237,8 @@ final class LDN_Renderer {
         $bag = $this->prefetch($ctx);
         $currency = $this->config->get_currency($ctx->site_id, $ctx->country_code);
 
+        $ad_injections = $this->ad_injection_map($ctx, $layout);
+
         $profile = $this->profile($ctx);
 
         $out = '<div class="ldn-page-shell">';
@@ -288,6 +290,7 @@ final class LDN_Renderer {
             }
             $out .= $this->hero_stats_html($ctx, $summary, $currency);
             $out .= '</header>';
+            $out .= $this->ad_injection_html($ad_injections, 'after_hero');
         } else {
             $out .= $breadcrumb_html;
             $out .= $title_html;
@@ -295,6 +298,7 @@ final class LDN_Renderer {
             if (!$hero_inline) {
                 $out .= $hero_html;
             }
+            $out .= $this->ad_injection_html($ad_injections, 'after_hero');
         }
 
         $section_bands = (isset($layout['section_bands']) && is_array($layout['section_bands']))
@@ -315,6 +319,7 @@ final class LDN_Renderer {
                 continue;
             }
             $rendered_sections[] = array(
+                'id'       => (string) $section_id,
                 'html'     => $html,
                 'declared' => isset($section_bands[(string) $section_id])
                     ? (string) $section_bands[(string) $section_id]
@@ -332,8 +337,14 @@ final class LDN_Renderer {
                 $is_last
             );
             $out .= $this->apply_section_band($rendered_sections[$i]['html'], $band);
+            $out .= $this->ad_injection_html(
+                $ad_injections,
+                'after_section:' . $rendered_sections[$i]['id']
+            );
             $previous_band = $band;
         }
+
+        $out .= $this->ad_injection_html($ad_injections, 'after_last_section');
 
         $out .= $this->future_feature_mounts($ctx);
 
@@ -409,6 +420,34 @@ final class LDN_Renderer {
         'ringspo_classic' => true,
         'editorial'       => true,
     );
+
+    /**
+     * @param LDN_Page_Context     $ctx
+     * @param array<string, mixed> $layout
+     * @return array<string, array<int, string>>
+     */
+    private function ad_injection_map(LDN_Page_Context $ctx, array $layout) {
+        if (!class_exists('LDN_Plugin')) {
+            return array();
+        }
+        $ad_system = LDN_Plugin::instance()->ad_system();
+        if ($ad_system === null) {
+            return array();
+        }
+        return $ad_system->build_injection_map($ctx, $layout);
+    }
+
+    /**
+     * @param array<string, array<int, string>> $map
+     * @param string                            $key
+     * @return string
+     */
+    private function ad_injection_html(array $map, $key) {
+        if (!isset($map[$key]) || !is_array($map[$key])) {
+            return '';
+        }
+        return implode('', $map[$key]);
+    }
 
     /**
      * Inert mount points for future PRD-006/008 features (gated by ops dashboard).

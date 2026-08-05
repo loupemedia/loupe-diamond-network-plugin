@@ -67,6 +67,29 @@ final class LDN_Assets {
 			true
 		);
 
+		wp_enqueue_script(
+			'ldn-ad-tracking',
+			$base_url . 'assets/js/ad-tracking.js',
+			array(),
+			$version,
+			true
+		);
+
+		$track_url = '';
+		if (class_exists('LDN_Plugin')) {
+			$ad_system = LDN_Plugin::instance()->ad_system();
+			if ($ad_system !== null) {
+				$track_url = $ad_system->tracker()->track_endpoint_url();
+			}
+		}
+		wp_localize_script(
+			'ldn-ad-tracking',
+			'ldnAdTracking',
+			array(
+				'trackUrl' => $track_url,
+			)
+		);
+
 		if ($config->size_url_layout($ctx->site_id) === 'shape_first'
 			&& in_array($ctx->page_level, array('size-comparison-tool', 'size-shape-hub'), true)
 		) {

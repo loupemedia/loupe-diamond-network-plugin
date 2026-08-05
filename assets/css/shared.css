@@ -1721,7 +1721,43 @@
 	text-decoration: none;
 }
 
-@media screen and (max-width: 768px) {
+/* Display ads (CP 55) */
+.ldn-ad-row {
+	margin: 1.25rem 0;
+	text-align: center;
+}
+
+.ldn-ad-row--multi {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	justify-content: center;
+}
+
+.ldn-ad-slot {
+	display: block;
+	margin: 1rem auto;
+	max-width: 100%;
+}
+
+.ldn-ad-link {
+	display: block;
+	line-height: 0;
+}
+
+.ldn-ad-image {
+	max-width: 100%;
+	height: auto;
+}
+
+.ldn-ad-label {
+	display: block;
+	font-size: 0.75rem;
+	color: var(--ldn-muted-text, #666);
+	margin-top: 0.25rem;
+}
+
+@media screen and (max-width: 768px) { {
 	.ldn-size-hero {
 		grid-template-columns: 1fr;
 	}

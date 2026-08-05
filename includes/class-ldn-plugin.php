@@ -112,6 +112,11 @@ final class LDN_Plugin {
     private $dashboard = null;
 
     /**
+     * @var LDN_Ad_System|null|false
+     */
+    private $ad_system = false;
+
+    /**
      * Memoised resolution of the current request's site_id.
      *
      * Uses a sentinel (false) to distinguish "not yet resolved" from the
@@ -397,6 +402,25 @@ final class LDN_Plugin {
             $this->dispatcher = new LDN_Dispatcher($this->site_id(), $this->config(), $this->data_fetcher());
         }
         return $this->dispatcher;
+    }
+
+    /**
+     * Display ad system (CP 55) — manifest fetch, resolve, render, track.
+     *
+     * @return LDN_Ad_System|null Null when core classes are absent.
+     */
+    public function ad_system() {
+        if ($this->ad_system === false) {
+            if (!class_exists('LDN_Ad_System') || !class_exists('LDN_Ad_Manifest')) {
+                $this->ad_system = null;
+            } else {
+                $this->ad_system = new LDN_Ad_System(
+                    $this->config(),
+                    new LDN_Ad_Manifest($this->config())
+                );
+            }
+        }
+        return $this->ad_system;
     }
 
     /**

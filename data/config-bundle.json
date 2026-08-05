@@ -1,6 +1,6 @@
 {
-  "version": "9d0061f",
-  "generated_at": "2026-08-04T04:27:41.969097+00:00",
+  "version": "8a0bb13",
+  "generated_at": "2026-08-04T11:05:23.483339+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -10403,7 +10403,7 @@
   },
   "entitlements": {
     "version": "1.0.0",
-    "last_updated": "2026-06-02",
+    "last_updated": "2026-08-04",
     "review_notes": "Draft v1 — standalone sites (Ringspo, DPG, DA, BDI, DHUK) may differ for\ncontent-uniqueness (see docs/architecture/content-uniqueness-audit.md).\nTranslation / network families (Loupe, Diamond Price Exact, carat) MUST share\nidentical pipeline_artefacts and wp_widgets keys (and presentation) at each page\nlevel — run scripts/sync_entitlements_families.py after family template changes.\n\nShape hub presentations (shapes_at_carat widget) — standalone sites differ by design:\nshape_cards = Ringspo, Diamond Advisors, BDI; bar_chart_links = Loupe + DPE families;\ntable_ranked = DPG, Diamond Hunt UK; carat network = table_ranked on top-level only\n(no all-shapes page — carat is fixed per domain).\n\nPipeline lists use artefact_id keys from config/artefacts.yaml. WP widgets\nare presentation-only; a widget may be on while its artefact is still planned\n(placeholder) or legacy path.\n\nLAUNCH: All sites ship with market INDEX / pricing content only (Product 1).\nconsumer_advisory profiles below are Phase 8 POLICY — not live at launch.\nWidgets like individual_listings are planned for Phase 8; plugin must not\nrender them until consumer_features_live in country_markets.yaml.\n\nDECISION 2026-06-14 — NO CROSS-SITE PRICING COMPARISON. The cross_site_comparison\nwidget is NOT proceeding (network-graph exposure + price-contradiction risk; see\ndocs/architecture/content-uniqueness-audit.md § 0 and PRD-005 Epic CP56 ON HOLD).\nAll per-site cross_site_comparison values below are now set to `disabled`. The\nplugin MUST NOT render this widget. Internal same-domain links (Ringspo\nsize<->price) are separate and allowed (PRD-015 Decision 5).\nFUTURE (uncommitted): comparison MAY be revisited for a small number of pages using\nTHIRD-PARTY benchmarks (e.g. caratradar.com, stonealgo.com — sites that publish\nprice graphs), NOT reciprocal links between our own owned sites.\n",
     "widget_vocabulary": {
       "cross_site_comparison": {
@@ -10463,6 +10463,26 @@
           }
         }
       },
+      "us_only": {
+        "description": "Phase 8 dogfood — US consumer guidance only on multi-country sites. UK/AU/CA/NZ stay index-only (+ display ads) until explicitly enabled. Ringspo wave-1 tenant.\n",
+        "countries": {
+          "us": {
+            "enabled": true
+          },
+          "uk": {
+            "enabled": false
+          },
+          "au": {
+            "enabled": false
+          },
+          "ca": {
+            "enabled": false
+          },
+          "nz": {
+            "enabled": false
+          }
+        }
+      },
       "single_us": {
         "description": "Single-country US domain (Diamond Price Exact family).",
         "countries": {
@@ -10495,7 +10515,7 @@
     "sites": {
       "ringspo": {
         "consumer_advisory": {
-          "profile": "core_five"
+          "profile": "us_only"
         },
         "review_status": "approved",
         "family": "ringspo",
@@ -13822,6 +13842,150 @@
     "pipeline_config": {
       "url": "https://d2koztl50p0h8w.cloudfront.net/pipeline-config/pipeline-config.json"
     },
+    "ads": {
+      "manifest_url": "https://loupemedia-ads.s3.amazonaws.com/ads.json",
+      "track_base_url": "https://loupemedianetwork.com/wp-json/ldn-ops/v1"
+    },
     "network_sitemap_index": "/sitemaps/network.xml"
+  },
+  "ad_slots": {
+    "version": "1.0.0",
+    "last_updated": "2026-08-04",
+    "commercial_slot_types": [
+      "retailer",
+      "lab",
+      "supplementary",
+      "exit_intent"
+    ],
+    "image_sizes": {
+      "horizontal": {
+        "width": 728,
+        "height": 90,
+        "css_class": "ldn-ad--horizontal"
+      },
+      "leaderboard": {
+        "width": 728,
+        "height": 90,
+        "css_class": "ldn-ad--leaderboard"
+      },
+      "mrec": {
+        "width": 300,
+        "height": 250,
+        "css_class": "ldn-ad--mrec"
+      },
+      "skyscraper": {
+        "width": 160,
+        "height": 600,
+        "css_class": "ldn-ad--skyscraper"
+      },
+      "parallax": {
+        "width": 0,
+        "height": 0,
+        "css_class": "ldn-ad--parallax"
+      },
+      "popup": {
+        "width": 0,
+        "height": 0,
+        "css_class": "ldn-ad--popup"
+      }
+    },
+    "layout_slots": {
+      "horizontal_top": {
+        "commercial_slot_type": "retailer",
+        "image_size": "horizontal",
+        "max_ads": 1,
+        "placement": {
+          "default": {
+            "mode": "after_hero"
+          },
+          "by_page_level": {
+            "top-level": {
+              "mode": "after_section",
+              "section_id": "market_overview_table"
+            }
+          }
+        }
+      },
+      "horizontal_mid": {
+        "commercial_slot_type": "retailer",
+        "image_size": "horizontal",
+        "max_ads": 1,
+        "placement": {
+          "default": {
+            "mode": "after_section",
+            "section_id": "natural_vs_lab_analysis"
+          }
+        }
+      },
+      "horizontal_mid_content": {
+        "commercial_slot_type": "retailer",
+        "image_size": "horizontal",
+        "max_ads": 1,
+        "placement": {
+          "default": {
+            "mode": "after_section",
+            "section_id": "color_clarity"
+          },
+          "by_page_level": {
+            "all-shapes": {
+              "mode": "after_section",
+              "section_id": "shapes_at_carat"
+            },
+            "diamond-type": {
+              "mode": "after_section",
+              "section_id": "price_per_carat_chart"
+            }
+          }
+        }
+      },
+      "mrec_sidebar": {
+        "commercial_slot_type": "supplementary",
+        "image_size": "mrec",
+        "max_ads": 1,
+        "placement": {
+          "default": {
+            "mode": "after_section",
+            "section_id": "intro_dynamic"
+          }
+        }
+      },
+      "skyscraper_sidebar": {
+        "commercial_slot_type": "supplementary",
+        "image_size": "skyscraper",
+        "max_ads": 1,
+        "placement": {
+          "default": {
+            "mode": "after_section",
+            "section_id": "intro_dynamic"
+          }
+        }
+      },
+      "dual_mrec_bottom": {
+        "commercial_slot_type": "retailer",
+        "image_size": "mrec",
+        "max_ads": 2,
+        "placement": {
+          "default": {
+            "mode": "after_last_section"
+          }
+        }
+      },
+      "triple_horizontal": {
+        "commercial_slot_type": "retailer",
+        "image_size": "horizontal",
+        "max_ads": 3,
+        "placement": {
+          "default": {
+            "mode": "after_hero"
+          },
+          "by_page_level": {
+            "top-level": {
+              "mode": "after_section",
+              "section_id": "type_nav_links"
+            }
+          }
+        }
+      }
+    }
   }
 }

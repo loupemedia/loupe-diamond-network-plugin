@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.20.0] - 2026-08-04
+
+- **Display ads (CP 55):** config-driven ad slots — `config/ad_slots.yaml` maps layout slot ids to commercial types, placements, and image sizes; manifest from `network_consumer.ads.manifest_url`; resolve by `site_id`, `country_code`, and `diamond_type`; server-side impressions + client click tracking to hub `ldn-ops/v1/track`; staging suppresses events. Works across all sites/countries that declare `ad_slots` in content profiles.
+
 ## [0.19.8] - 2026-08-04
 
 - **Size mega hub (Ringspo):** restore horizontal scroll on the matrix table (`overflow-x: auto` on `.ldn-size-matrix-scroll`; `width: max-content` on the table so columns do not compress). Ringspo card-radius rules had set `overflow: hidden`, which blocked sideways scroll and broke sticky header/shape cells.
