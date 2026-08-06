@@ -91,7 +91,7 @@ final class LDN_Assets {
 		);
 
 		if ($config->size_url_layout($ctx->site_id) === 'shape_first'
-			&& in_array($ctx->page_level, array('size-comparison-tool', 'size-shape-hub'), true)
+			&& in_array($ctx->page_level, array('size-comparison', 'size-comparison-tool', 'size-shape-hub'), true)
 		) {
 			wp_enqueue_script(
 				'ldn-size-faceted-overlay',
@@ -100,20 +100,31 @@ final class LDN_Assets {
 				$version,
 				true
 			);
-			wp_enqueue_script(
-				'ldn-size-checker',
-				$base_url . 'assets/js/size-checker.js',
-				array('ldn-size-faceted-overlay'),
-				$version,
-				true
-			);
-			wp_localize_script(
-				'ldn-size-checker',
-				'ldnSizeChecker',
-				array(
-					'quarterImgUrl' => self::us_quarter_image_url(),
-				)
-			);
+			if ($ctx->page_level === 'size-comparison') {
+				wp_enqueue_script(
+					'ldn-size-comparison-page',
+					$base_url . 'assets/js/size-comparison-page.js',
+					array('ldn-size-faceted-overlay'),
+					$version,
+					true
+				);
+			}
+			if (in_array($ctx->page_level, array('size-comparison-tool', 'size-shape-hub'), true)) {
+				wp_enqueue_script(
+					'ldn-size-checker',
+					$base_url . 'assets/js/size-checker.js',
+					array('ldn-size-faceted-overlay'),
+					$version,
+					true
+				);
+				wp_localize_script(
+					'ldn-size-checker',
+					'ldnSizeChecker',
+					array(
+						'quarterImgUrl' => self::us_quarter_image_url(),
+					)
+				);
+			}
 		}
 
 		if ($config->size_url_layout($ctx->site_id) === 'carat_first'
@@ -144,6 +155,15 @@ final class LDN_Assets {
 				wp_enqueue_script(
 					'ldn-price-calculator',
 					$base_url . 'assets/js/price-calculator.js',
+					array(),
+					$version,
+					true
+				);
+			}
+			if ($ctx->page_level === 'diamond-type') {
+				wp_enqueue_script(
+					'ldn-type-carat-lookup',
+					$base_url . 'assets/js/type-carat-lookup.js',
 					array(),
 					$version,
 					true

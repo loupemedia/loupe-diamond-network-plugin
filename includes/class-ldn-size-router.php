@@ -122,20 +122,23 @@ final class LDN_Size_Router {
 
         $rules = array(
             $this->pattern_to_regex($methodology) => $this->pattern_to_query($methodology, 'methodology'),
-            $this->pattern_to_regex($level3) => $this->pattern_to_query($level3, 'individual'),
-            $this->pattern_to_regex($level2) => $this->pattern_to_query(
-                $level2,
-                $this->hub_level_from_pattern($level2)
-            ),
-            $this->pattern_to_regex($level1) => 'index.php?ldn_route=size&ldn_size_level=mega',
         );
 
+        // Compare pair + tool hub MUST register before level-2 shape hubs. Otherwise
+        // /diamond-size/{shape} captures /diamond-size/compare/ as shape=compare.
         if (is_array($structure) && !empty($structure['size_level_compare'])) {
             $compare = (string) $structure['size_level_compare'];
             $compare_tool = (string) preg_replace('#/\\{compare\\}.*$#', '', $compare);
             $rules[$this->pattern_to_regex($compare)] = $this->pattern_to_query($compare, 'compare');
             $rules[$this->pattern_to_regex($compare_tool)] = 'index.php?ldn_route=size&ldn_size_level=compare-tool';
         }
+
+        $rules[$this->pattern_to_regex($level3)] = $this->pattern_to_query($level3, 'individual');
+        $rules[$this->pattern_to_regex($level2)] = $this->pattern_to_query(
+            $level2,
+            $this->hub_level_from_pattern($level2)
+        );
+        $rules[$this->pattern_to_regex($level1)] = 'index.php?ldn_route=size&ldn_size_level=mega';
 
         if (is_array($structure) && !empty($structure['size_level_spread_checker'])) {
             $spread_checker = (string) $structure['size_level_spread_checker'];

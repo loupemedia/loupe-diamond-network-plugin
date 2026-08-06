@@ -53,7 +53,117 @@ trait LDN_Trait_Price_Calculator {
             ? $bag['price_calculator']
             : array();
 
-        return $this->price_calculator_from_manifest($ctx, $manifest);
+        return $this->price_calculator_from_manifest($ctx, $manifest, 'shape');
+    }
+
+    /**
+     * Shape-switching calculator hub for all-shapes pages.
+     *
+     * Fetches a price-calculator.json manifest per ranked shape and renders the
+     * default shape inline with pills to switch between shapes on the same page.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @return string
+     */
+    public function all_shapes_calculator_html(LDN_Page_Context $ctx, array $bag) {
+        $artefacts = new LDN_Artefacts($this->config);
+        if (!$artefacts->site_has_wp_widget($ctx->site_id, 'price_calculator', 'all-shapes')) {
+            return '';
+        }
+        $presentation = $artefacts->wp_widget_presentation(
+            $ctx->site_id,
+            'price_calculator',
+            'all-shapes'
+        );
+        if ($presentation === null || $presentation === '' || $presentation === 'disabled') {
+            return '';
+        }
+        if (!$artefacts->site_has_wp_widget($ctx->site_id, 'price_calculator', 'shape')) {
+            return '';
+        }
+
+        $payload = is_array($bag['ranking']) ? $bag['ranking'] : array();
+        $rows = isset($payload['shapes']) && is_array($payload['shapes']) ? $payload['shapes'] : array();
+        if (empty($rows)) {
+            return '';
+        }
+
+        $carat_label = $this->format_carat_label($ctx->carat);
+        $type_label = isset(self::$TYPE_LABELS[$ctx->diamond_type])
+            ? self::$TYPE_LABELS[$ctx->diamond_type]
+            : ucwords(str_replace('-', ' ', (string) $ctx->diamond_type));
+
+        $heading = sprintf(
+            /* translators: 1: carat label, 2: diamond type label */
+            __('%1$s carat %2$s diamond price calculator', 'loupe-diamond-network'),
+            $carat_label !== '' ? $carat_label : '1',
+            strtolower($type_label)
+        );
+
+        $pills = '';
+        $panels = '';
+        $first_shape = null;
+
+        foreach ($rows as $row) {
+            if (!is_array($row) || empty($row['shape'])) {
+                continue;
+            }
+            $shape = (string) $row['shape'];
+            $shape_ctx = new LDN_Page_Context(
+                $ctx->site_id,
+                'shape',
+                $ctx->country_code,
+                $ctx->diamond_type,
+                $ctx->carat,
+                $shape,
+                $ctx->module
+            );
+            $manifest = $this->fetcher->fetch_artefact('price_calculator_json', $shape_ctx);
+            if (!is_array($manifest) || empty($manifest)) {
+                continue;
+            }
+
+            $panel = $this->price_calculator_panel_from_manifest($ctx, $manifest);
+            if ($panel === '') {
+                continue;
+            }
+
+            $shape_slug = sanitize_title($shape);
+            if ($first_shape === null) {
+                $first_shape = $shape_slug;
+            }
+            $active = $shape_slug === $first_shape;
+            $pills .= '<button type="button" class="ldn-shape-calc-pill'
+                . ($active ? ' ldn-shape-calc-pill--active' : '')
+                . '" data-ldn-shape-calc-pill="' . esc_attr($shape_slug) . '">'
+                . esc_html($shape) . '</button>';
+
+            $panels .= '<div class="ldn-shape-calc-panel'
+                . ($active ? ' ldn-shape-calc-panel--active' : '')
+                . '" data-ldn-shape-calc-panel="' . esc_attr($shape_slug) . '"'
+                . ($active ? '' : ' hidden')
+                . '>' . $panel . '</div>';
+        }
+
+        if ($pills === '' || $panels === '') {
+            return '';
+        }
+
+        return '<section class="ldn-section ldn-all-shapes-calculator" data-ldn-price-calculator-hub="1">'
+            . '<h2>' . esc_html($heading) . '</h2>'
+            . '<p class="ldn-all-shapes-calculator__lead">'
+            . esc_html__(
+                'Pick a shape, then choose colour and clarity to see typical prices or check a quote.',
+                'loupe-diamond-network'
+            )
+            . '</p>'
+            . '<nav class="ldn-shape-calc-pills" aria-label="'
+            . esc_attr__('Calculator shape', 'loupe-diamond-network') . '">'
+            . $pills
+            . '</nav>'
+            . '<div class="ldn-shape-calc-panels">' . $panels . '</div>'
+            . '</section>';
     }
 
     /**
@@ -67,9 +177,9 @@ trait LDN_Trait_Price_Calculator {
      * @param array            $manifest price-calculator.json payload
      * @return string
      */
-    public function price_calculator_from_manifest(LDN_Page_Context $ctx, array $manifest) {
+    public function price_calculator_from_manifest(LDN_Page_Context $ctx, array $manifest, $page_level = null) {
         $artefacts = new LDN_Artefacts($this->config);
-        $page_level = (string) $ctx->page_level;
+        $page_level = $page_level !== null ? (string) $page_level : (string) $ctx->page_level;
         if (!$artefacts->site_has_wp_widget($ctx->site_id, 'price_calculator', $page_level)) {
             return '';
         }
@@ -82,14 +192,10 @@ trait LDN_Trait_Price_Calculator {
             return '';
         }
 
-        $default = $this->price_calculator_default_cell($manifest);
-        if ($default === null) {
+        $panel = $this->price_calculator_panel_from_manifest($ctx, $manifest);
+        if ($panel === '') {
             return '';
         }
-
-        $labels = $this->price_calculator_labels($manifest);
-        $payload = $manifest;
-        $payload['labels'] = $labels;
 
         $shape_label = $this->price_calculator_shape_label($manifest);
         $carat = isset($manifest['carat_weight']) ? (string) $manifest['carat_weight'] : '';
@@ -103,9 +209,31 @@ trait LDN_Trait_Price_Calculator {
             )
             : __('Diamond price calculator', 'loupe-diamond-network');
 
-        $out = '<section class="ldn-section ldn-price-calculator"'
+        return '<section class="ldn-section ldn-price-calculator"'
             . ' data-ldn-price-calculator="1">'
             . '<h2>' . esc_html($heading) . '</h2>'
+            . $panel
+            . '</section>';
+    }
+
+    /**
+     * Calculator controls + result block (no outer section wrapper).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $manifest
+     * @return string
+     */
+    private function price_calculator_panel_from_manifest(LDN_Page_Context $ctx, array $manifest) {
+        $default = $this->price_calculator_default_cell($manifest);
+        if ($default === null) {
+            return '';
+        }
+
+        $labels = $this->price_calculator_labels($manifest);
+        $payload = $manifest;
+        $payload['labels'] = $labels;
+
+        return '<div class="ldn-price-calculator" data-ldn-price-calculator="1">'
             . $this->format_prose_html($this->price_calculator_intro($manifest))
             . $this->price_calculator_controls_html($manifest, $labels)
             . $this->price_calculator_result_html($manifest, $default, $labels)
@@ -117,9 +245,7 @@ trait LDN_Trait_Price_Calculator {
             )
             . '</p></noscript>'
             . $this->price_calculator_manifest_script($payload)
-            . '</section>';
-
-        return $out;
+            . '</div>';
     }
 
     /**
@@ -193,6 +319,13 @@ trait LDN_Trait_Price_Calculator {
                 number_format($total)
             );
         }
+
+        $what .= ' ' . __(
+            'The median at the top of this page covers every colour and clarity grade. '
+            . 'Use the selectors below to narrow that to the specification you are '
+            . 'actually shopping for.',
+            'loupe-diamond-network'
+        );
 
         if (!$has_cut) {
             $what .= ' ' . __(
@@ -366,7 +499,7 @@ trait LDN_Trait_Price_Calculator {
             $lines[] = '<p class="ldn-price-calculator__headline">'
                 . esc_html(sprintf(
                     /* translators: %s: formatted price */
-                    __('Typically %s', 'loupe-diamond-network'),
+                    __('Typical for this spec: %s', 'loupe-diamond-network'),
                     $this->price_calculator_money($typical, $currency)
                 ))
                 . '</p>';
@@ -532,7 +665,7 @@ trait LDN_Trait_Price_Calculator {
 
         $labels = array(
             'currency' => $currency,
-            'typical'  => __('Typically %price%', 'loupe-diamond-network'),
+            'typical'  => __('Typical for this spec: %price%', 'loupe-diamond-network'),
             'halfBetween' => __('Half of them sell between %low% and %high%.', 'loupe-diamond-network'),
             'basedOn'  => __('Based on %count% diamonds at %spec%.', 'loupe-diamond-network'),
             'basedOnOne' => __('Based on %count% diamond at %spec%.', 'loupe-diamond-network'),
@@ -582,7 +715,7 @@ trait LDN_Trait_Price_Calculator {
         if (!is_string($json) || $json === '') {
             return '';
         }
-        return '<script type="application/json" id="ldn-price-calculator-manifest">'
+        return '<script type="application/json" class="ldn-price-calculator-manifest">'
             . str_replace('</', '<\/', $json) . '</script>';
     }
 }

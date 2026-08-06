@@ -29,6 +29,8 @@ trait LDN_Trait_Content {
         'price_factors'           => 'What Affects Diamond Prices',
         'market_guidance'         => 'How to Use These Prices',
         'quality_overview'        => 'Diamond Quality Basics',
+        'buying_advice'           => 'Buying advice',
+        'pricing_context'         => 'Why this shape is priced this way',
     );
 
     /**
@@ -598,7 +600,7 @@ trait LDN_Trait_Content {
     }
 
     public function stats_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
-        // Prefer the median (p50) so the "Current price" stat matches the carat
+        // Prefer the median (p50) so the headline stat matches the carat
         // ladder table and intro sentence; fall back to current_price (avg).
         $current = $this->dig_first($summary, array(
             array('distribution', 'median_price'),
@@ -625,7 +627,7 @@ trait LDN_Trait_Content {
         $cells = array();
         $price_label = $ctx->page_level === 'all-shapes'
             ? __('Typical price (median)', 'loupe-diamond-network')
-            : __('Current price', 'loupe-diamond-network');
+            : __('Median (all qualities)', 'loupe-diamond-network');
         if ($current !== null && is_scalar($current) && !is_bool($current)) {
             $cells[] = array(
                 'label' => $price_label,
@@ -736,7 +738,7 @@ trait LDN_Trait_Content {
 
         $price_label = $ctx->page_level === 'all-shapes'
             ? __('Typical price (median)', 'loupe-diamond-network')
-            : __('Current price', 'loupe-diamond-network');
+            : __('Median (all qualities)', 'loupe-diamond-network');
 
         $cards = array();
         $cards[] = array(
@@ -864,37 +866,6 @@ trait LDN_Trait_Content {
             );
         }
 
-        $anchor_carat = $this->hub_anchor_carat();
-        $tier = $this->type_summary_carat_tier($payload, $anchor_carat);
-        $median = isset($tier['median_price']) ? $tier['median_price'] : null;
-        $samples = isset($tier['sample_size']) ? (int) $tier['sample_size'] : 0;
-        $anchor_label = $this->format_carat_label($anchor_carat);
-        $type_phrase = $ctx->diamond_type === 'lab-grown'
-            ? __('lab-grown', 'loupe-diamond-network')
-            : __('natural', 'loupe-diamond-network');
-
-        if (is_numeric($median)) {
-            $cards[] = array(
-                'label' => sprintf(
-                    /* translators: 1: carat label, 2: natural or lab-grown */
-                    __('%1$s ct %2$s (typical)', 'loupe-diamond-network'),
-                    $anchor_label,
-                    $type_phrase
-                ),
-                'value' => $symbol . number_format((float) $median, 0),
-            );
-        }
-        if ($samples > 0) {
-            $cards[] = array(
-                'label' => sprintf(
-                    /* translators: %s: carat label */
-                    __('%s ct diamonds', 'loupe-diamond-network'),
-                    $anchor_label
-                ),
-                'value' => number_format($samples),
-            );
-        }
-
         if (empty($cards)) {
             return '';
         }
@@ -1003,8 +974,44 @@ trait LDN_Trait_Content {
      *
      * @return string
      */
-    protected function hub_anchor_carat() {
+    protected function hub_anchor_carat(?LDN_Page_Context $ctx = null, array $bag = array()) {
+        if ($ctx !== null && $ctx->page_level === 'diamond-type') {
+            $payload = isset($bag['type_summary']) && is_array($bag['type_summary'])
+                ? $bag['type_summary']
+                : array();
+            $aggregate = isset($payload['aggregate']) && is_array($payload['aggregate'])
+                ? $payload['aggregate']
+                : array();
+            $popular = isset($aggregate['most_popular_carat'])
+                ? (string) $aggregate['most_popular_carat']
+                : '';
+            if ($popular !== '') {
+                return $popular;
+            }
+        }
         return '1';
+    }
+
+    /**
+     * Nat/lab toggle and type-level carat lookup in the diamond-type hero band.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @param string|null      $currency
+     * @return string
+     */
+    public function diamond_type_hero_tools_html(LDN_Page_Context $ctx, array $bag, $currency = null) {
+        if ($ctx->page_level !== 'diamond-type') {
+            return '';
+        }
+
+        $toggle = $this->nat_lab_toggle_html($ctx);
+        $lookup = $this->type_carat_lookup_html($ctx, $bag, $currency);
+        if ($toggle === '' && $lookup === '') {
+            return '';
+        }
+
+        return '<div class="ldn-diamond-type-hero-tools">' . $toggle . $lookup . '</div>';
     }
 
     /**
@@ -1139,15 +1146,20 @@ trait LDN_Trait_Content {
 
         $sections = $this->copy_sections(is_array($bag['copy']) ? $bag['copy'] : array());
         $html = '';
+        $paragraphs = '';
         foreach ($keys as $key) {
             if (!isset($sections[$key]) || !is_scalar($sections[$key]) || (string) $sections[$key] === '') {
                 continue;
             }
-            $html .= '<section class="ldn-section ldn-copy-' . esc_attr($key) . '">'
-                . $this->format_prose_html((string) $sections[$key])
-                . '</section>';
+            $paragraphs .= $this->format_prose_html((string) $sections[$key]);
         }
-        return $html;
+        if ($paragraphs === '') {
+            return '';
+        }
+        $section_class = strpos($section_id, '_combined_') !== false
+            ? 'ldn-copy-overview'
+            : 'ldn-copy-' . esc_attr($keys[0]);
+        return '<section class="ldn-section ' . $section_class . '">' . $paragraphs . '</section>';
     }
 
     /**

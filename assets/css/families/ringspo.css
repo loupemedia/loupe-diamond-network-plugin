@@ -87,11 +87,10 @@
 	overflow: hidden;
 }
 
-.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-chart figcaption {
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-chart__title {
 	font-family: var(--ldn-font-body, "Open Sans", sans-serif);
-	font-style: italic;
-	color: var(--ringspo-muted);
-	margin-bottom: 0.5rem;
+	color: var(--ringspo-text, #333);
+	margin-bottom: 0.75rem;
 }
 
 /* Headline stat cards (white) under the chart. */
@@ -213,22 +212,40 @@
 }
 
 /* Size-page chart sections inherit the positional purple band on odd sections;
-   force a white surface on the section itself (not only descendants). */
-.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section.ldn-chart {
+   force a white surface on the section itself (not only descendants). The L/W
+   ratio band is an exception — it stays purple with white Plotly bars. */
+.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section.ldn-chart:not(.ldn-size-chart--on-purple) {
 	background-color: #fff;
 	color: var(--ringspo-ink);
 }
 
-.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section.ldn-chart :is(h2, h3, h4, p, li, figcaption) {
+.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section.ldn-chart:not(.ldn-size-chart--on-purple) :is(h2, h3, h4, p, li, figcaption) {
 	color: var(--ringspo-ink);
 }
 
 /* Hero-band data tables (carat tiers, market overview) as white cards. */
-.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table {
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table,
+.ldn-chrome--ringspo-classic .ldn-carat-tiers-table .ldn-table-scroll {
 	background-color: #fff;
 	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table {
 	overflow: hidden;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-diamond-type-hero-tools {
+	margin-top: var(--ldn-space-4, 1rem);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-type-carat-lookup__link {
+	color: var(--ringspo-purple);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-type-carat-lookup__link:hover,
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-type-carat-lookup__link:focus-visible {
+	color: var(--ringspo-secondary, #5249a3);
 }
 
 /* =====================================================================
@@ -293,7 +310,7 @@
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
 	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
-	:is(table, .ldn-chart, .ldn-chart-target, .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
+	:is(table, .ldn-chart, .ldn-chart-target:not(.ldn-chart-target--on-purple), .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
 		.ldn-size-ideal-real, .ldn-size-price-card, .ldn-price-size-card,
 		.ldn-size-matrix-scroll, .ldn-size-checker__surface, .ldn-size-checker-panel, .ldn-size-checker-results,
 		.ldn-size-checker-card, .ldn-size-scale-controls, .ldn-size-checker-cta,
@@ -440,6 +457,7 @@
 .ldn-chrome--ringspo-classic.ldn-size-page,
 .ldn-chrome--ringspo-classic.ldn-size-methodology-page {
 	padding-top: 0;
+	padding-bottom: 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-chart--on-purple {
@@ -478,6 +496,7 @@
 .ldn-chrome--ringspo-classic.ldn-size-page > .ldn-section:last-of-type,
 .ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-section:last-of-type {
 	margin-bottom: 0;
+	padding-bottom: 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-intro p {

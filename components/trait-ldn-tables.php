@@ -419,7 +419,7 @@ trait LDN_Trait_Tables {
         }
 
         $currency = $this->currency_symbol(isset($payload['currency']) ? $payload['currency'] : null);
-        $anchor_carat = (float) $this->hub_anchor_carat();
+        $anchor_carat = (float) $this->hub_anchor_carat($ctx, $bag);
         $body = '';
         foreach ($tiers as $tier) {
             if (!is_array($tier) || empty($tier['carat_weight'])) {
@@ -458,15 +458,129 @@ trait LDN_Trait_Tables {
             $table_intro = $this->ringspo_carat_tiers_intro_html($ctx);
         }
 
+        $chart_block = $this->build_price_per_carat_chart_block($ctx, $bag);
+
         return '<section class="ldn-section ldn-carat-tiers-table">'
             . '<h2>' . esc_html($title) . '</h2>'
             . $table_intro
+            . '<div class="ldn-table-scroll">'
             . '<table class="ldn-data-table ldn-data-table--stacked"><thead><tr>'
             . '<th>' . esc_html__('Carat', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Typical price', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Price per carat', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Diamonds analysed', 'loupe-diamond-network') . '</th>'
-            . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
+            . '</tr></thead><tbody>' . $body . '</tbody></table>'
+            . '</div>'
+            . $chart_block
+            . '</section>';
+    }
+
+    /**
+     * Type-level carat price lookup (snaps to published tier medians).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @param string|null      $currency
+     * @return string
+     */
+    public function type_carat_lookup_html(LDN_Page_Context $ctx, array $bag, $currency = null) {
+        if ($ctx->page_level !== 'diamond-type') {
+            return '';
+        }
+
+        $payload = isset($bag['type_summary']) && is_array($bag['type_summary'])
+            ? $bag['type_summary']
+            : array();
+        $tiers = isset($payload['carat_tiers']) && is_array($payload['carat_tiers'])
+            ? $payload['carat_tiers']
+            : array();
+        if (empty($tiers)) {
+            return '';
+        }
+
+        $manifest_tiers = array();
+        foreach ($tiers as $tier) {
+            if (!is_array($tier) || empty($tier['carat_weight'])) {
+                continue;
+            }
+            $carat = (string) $tier['carat_weight'];
+            $price = isset($tier['median_price']) ? $tier['median_price'] : null;
+            if (!is_numeric($price) || (float) $carat <= 0) {
+                continue;
+            }
+            $url = !empty($tier['page_url'])
+                ? (string) $tier['page_url']
+                : $this->build_price_page_url($ctx, 'all-shapes', array('carat' => $carat));
+            $manifest_tiers[] = array(
+                'carat'  => $carat,
+                'label'  => $this->format_carat_label($carat),
+                'price'  => (float) $price,
+                'ppc'    => (float) $price / (float) $carat,
+                'url'    => $url,
+            );
+        }
+        if (empty($manifest_tiers)) {
+            return '';
+        }
+
+        $symbol = $this->currency_symbol(
+            isset($payload['currency']) ? (string) $payload['currency'] : $currency
+        );
+        $anchor = $this->hub_anchor_carat($ctx, $bag);
+        $default_idx = 0;
+        foreach ($manifest_tiers as $idx => $tier_row) {
+            if ((string) $tier_row['carat'] === (string) $anchor) {
+                $default_idx = $idx;
+                break;
+            }
+        }
+        $manifest = array(
+            'currency_symbol' => $symbol,
+            'default_carat'   => $anchor,
+            'tiers'           => $manifest_tiers,
+            'labels'          => array(
+                'carat'         => __('Carat weight', 'loupe-diamond-network'),
+                'typical_price' => __('Typical price', 'loupe-diamond-network'),
+                'price_per_carat' => __('Price per carat', 'loupe-diamond-network'),
+                'compare_shapes' => __('Compare shapes at this weight', 'loupe-diamond-network'),
+                'footnote'      => __(
+                    'Typical price across all shapes at this weight. Open a shape page for colour, clarity and cut.',
+                    'loupe-diamond-network'
+                ),
+            ),
+        );
+
+        $manifest_json = wp_json_encode($manifest, self::JSON_SCRIPT_FLAGS);
+
+        return '<div class="ldn-type-carat-lookup" data-ldn-type-carat-lookup>'
+            . '<script type="application/json" id="ldn-type-carat-lookup-manifest">'
+            . $manifest_json
+            . '</script>'
+            . '<div class="ldn-type-carat-lookup__fields">'
+            . '<label class="ldn-type-carat-lookup__field">'
+            . '<span class="ldn-type-carat-lookup__label">' . esc_html__('Carat weight', 'loupe-diamond-network') . '</span>'
+            . '<input type="range" class="ldn-type-carat-lookup__input" data-ldn-tier-slider '
+            . 'min="0" max="' . esc_attr((string) (count($manifest_tiers) - 1)) . '" value="'
+            . esc_attr((string) $default_idx) . '" step="1">'
+            . '<output class="ldn-type-carat-lookup__carat" data-ldn-tier-carat></output>'
+            . '</label>'
+            . '<div class="ldn-type-carat-lookup__outputs">'
+            . '<div class="ldn-type-carat-lookup__output">'
+            . '<span class="ldn-type-carat-lookup__label">' . esc_html__('Typical price', 'loupe-diamond-network') . '</span>'
+            . '<span class="ldn-type-carat-lookup__value" data-ldn-tier-price></span>'
+            . '</div>'
+            . '<div class="ldn-type-carat-lookup__output">'
+            . '<span class="ldn-type-carat-lookup__label">' . esc_html__('Price per carat', 'loupe-diamond-network') . '</span>'
+            . '<span class="ldn-type-carat-lookup__value" data-ldn-tier-ppc></span>'
+            . '</div>'
+            . '</div>'
+            . '</div>'
+            . '<p class="ldn-type-carat-lookup__footnote" data-ldn-tier-footnote></p>'
+            . '<p class="ldn-type-carat-lookup__link-wrap">'
+            . '<a class="ldn-type-carat-lookup__link" data-ldn-tier-link href="#">'
+            . esc_html__('Compare shapes at this weight', 'loupe-diamond-network')
+            . '</a></p>'
+            . '</div>';
     }
 
     /**
@@ -484,23 +598,7 @@ trait LDN_Trait_Tables {
             . 'to see how colour, clarity and cut affect what you pay.',
             'loupe-diamond-network'
         );
-        if ($ctx->diamond_type === 'lab-grown') {
-            $ppc = __(
-                'Lab-grown diamond prices do not increase proportionally with weight. '
-                . 'Larger stones typically cost more per carat, and prices can also jump '
-                . 'around popular milestone weights such as 1, 1.5 and 2 carats.',
-                'loupe-diamond-network'
-            );
-        } else {
-            $ppc = __(
-                'Natural diamond prices do not increase proportionally with weight. '
-                . 'Larger diamonds are rarer, so the price per carat generally increases '
-                . 'as diamonds get bigger. Prices can also jump around popular milestone '
-                . 'weights such as 1, 1.5 and 2 carats.',
-                'loupe-diamond-network'
-            );
-        }
-        return $this->format_prose_html($how_to_read . "\n\n" . $ppc);
+        return $this->format_prose_html($how_to_read);
     }
 
     /**
@@ -552,7 +650,7 @@ trait LDN_Trait_Tables {
                 }
                 $dtype = isset($row['diamond_type']) ? (string) $row['diamond_type'] : 'natural';
                 $label = $this->format_carat_label($carat) . ' ct '
-                    . ucwords(str_replace('-', ' ', $shape));
+                    . $this->compact_shape_label($shape);
                 $url = $this->build_price_page_url(
                     $ctx,
                     'shape',
@@ -609,22 +707,57 @@ trait LDN_Trait_Tables {
      * @return string
      */
     public function price_per_carat_chart_html(LDN_Page_Context $ctx, array $bag) {
-        $fallback = $this->price_per_carat_chart_fallback($ctx, $bag);
-        $chart = $this->chart_html(
-            isset($bag['price_per_carat_chart']) && is_array($bag['price_per_carat_chart'])
-                ? $bag['price_per_carat_chart']
-                : array(),
-            'ldn-price-per-carat-chart',
-            __('Price per carat by weight', 'loupe-diamond-network'),
-            $fallback
-        );
-        if ($chart === '') {
+        $block = $this->build_price_per_carat_chart_block($ctx, $bag, true);
+        if ($block === '') {
             return '';
         }
 
         $type_label = isset(self::$TYPE_LABELS[$ctx->diamond_type])
             ? self::$TYPE_LABELS[$ctx->diamond_type]
             : ucfirst(str_replace('-', ' ', $ctx->diamond_type));
+
+        return '<section class="ldn-section ldn-price-per-carat">'
+            . '<h2>' . esc_html(
+                sprintf(
+                    /* translators: %s: diamond type label (Natural / Lab-Grown) */
+                    __('%s diamond price per carat by weight', 'loupe-diamond-network'),
+                    $type_label
+                )
+            ) . '</h2>'
+            . $block
+            . '</section>';
+    }
+
+    /**
+     * Price-per-carat curve nested under the carat tiers table (C5.2).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @param bool             $standalone When true, include the h3 heading (legacy section).
+     * @return string
+     */
+    private function build_price_per_carat_chart_block(LDN_Page_Context $ctx, array $bag, $standalone = false) {
+        $fallback = $this->price_per_carat_chart_fallback($ctx, $bag);
+        $type_label = isset(self::$TYPE_LABELS[$ctx->diamond_type])
+            ? self::$TYPE_LABELS[$ctx->diamond_type]
+            : ucfirst(str_replace('-', ' ', (string) $ctx->diamond_type));
+        $chart_title = sprintf(
+            /* translators: %s: diamond type label (Natural / Lab-Grown) */
+            __('%s diamond price per carat by carat weight', 'loupe-diamond-network'),
+            $type_label
+        );
+        $chart = $this->chart_html(
+            isset($bag['price_per_carat_chart']) && is_array($bag['price_per_carat_chart'])
+                ? $bag['price_per_carat_chart']
+                : array(),
+            'ldn-price-per-carat-chart',
+            $chart_title,
+            $fallback,
+            'ldn-chart-fallback ldn-chart-fallback--sr'
+        );
+        if ($chart === '') {
+            return '';
+        }
 
         if ($ctx->diamond_type === 'lab-grown') {
             $intro = __(
@@ -650,17 +783,18 @@ trait LDN_Trait_Tables {
             'loupe-diamond-network'
         );
 
-        return '<section class="ldn-section ldn-price-per-carat">'
-            . '<h2>' . esc_html(
-                sprintf(
-                    /* translators: %s: diamond type label (Natural / Lab-Grown) */
-                    __('%s diamond price per carat by weight', 'loupe-diamond-network'),
-                    $type_label
-                )
-            ) . '</h2>'
+        $heading = '';
+        if (!$standalone) {
+            $heading = '<h3 class="ldn-price-per-carat__heading">'
+                . esc_html__('How price per carat changes with weight', 'loupe-diamond-network')
+                . '</h3>';
+        }
+
+        return '<div class="ldn-price-per-carat-block">'
+            . $heading
             . $this->format_prose_html($intro . "\n\n" . $milestone)
             . $chart
-            . '</section>';
+            . '</div>';
     }
 
     /**
@@ -693,13 +827,9 @@ trait LDN_Trait_Tables {
         if ($ctx->site_id === 'ringspo' && $ctx->page_level === 'top-level') {
             $table_intro = $this->format_prose_html(
                 __(
-                    "Both natural and lab-grown diamond prices are constantly changing, as is the relationship between the two.\n\n"
-                    . 'Each price below combines every shape we track at that weight, with shapes that have more '
-                    . 'diamonds on the market counting for more. Within those figures there is considerable variation '
-                    . 'depending on shape and quality, so the price you can expect to pay for your diamond may be very '
-                    . 'different depending on what you are looking for. The number of diamonds behind each row is shown '
-                    . 'on the right. Larger weights are bought and sold far less often, so we find fewer of them and '
-                    . 'their prices move around more.',
+                    'Each row combines every shape we track at that weight, weighted toward shapes with more '
+                    . 'diamonds on the market. Shape and quality move the price a lot. Sample sizes are on the '
+                    . 'right — heavier weights are thinner and more volatile.',
                     'loupe-diamond-network'
                 )
             );
@@ -709,33 +839,17 @@ trait LDN_Trait_Tables {
 
         $table_html = $this->carat_price_table_html($ctx, $overview, $currency, $table_intro);
 
-        $discount_intro = sprintf(
-            /* translators: %s: country name */
-            __(
-                'Lab-grown diamonds typically cost less than natural at every carat weight. '
-                . 'This chart shows how wide that gap is across sizes in %s.',
-                'loupe-diamond-network'
-            ),
-            $this->country_full_name($ctx)
-        );
-        $discount_fallback = $this->lab_grown_discount_chart_fallback($overview);
-        $discount_chart = $this->chart_html(
-            isset($bag['market_discount_chart']) && is_array($bag['market_discount_chart'])
-                ? $bag['market_discount_chart']
-                : array(),
-            'ldn-market-discount-chart',
-            __('Lab-grown discount vs natural', 'loupe-diamond-network'),
-            $discount_fallback
-        );
-        $discount_block = '';
-        if ($discount_chart !== '') {
-            $discount_block = '<section class="ldn-section ldn-discount-chart">'
-                . '<p class="ldn-discount-chart-intro">' . esc_html($discount_intro) . '</p>'
-                . $discount_chart
-                . '</section>';
+        $discount_chart = $this->build_lab_grown_discount_chart_block($ctx, $overview, $bag);
+        if ($discount_chart !== '' && strpos($table_html, '</section>') !== false) {
+            $table_html = preg_replace(
+                '/<\/section>\s*$/',
+                $discount_chart . '</section>',
+                $table_html,
+                1
+            );
         }
 
-        return $trend_chart . $table_html . $discount_block;
+        return $trend_chart . $table_html;
     }
 
     /**
@@ -911,5 +1025,73 @@ trait LDN_Trait_Tables {
             __('Lab-grown discount vs natural — %s.', 'loupe-diamond-network'),
             implode('; ', $parts)
         );
+    }
+
+    /**
+     * Lab-grown discount chart block for the top-level carat table section.
+     *
+     * Nested inside the carat table section so the purple band does not stack
+     * padding between the table and the chart.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $overview market-overview payload
+     * @param array            $bag
+     * @return string
+     */
+    private function build_lab_grown_discount_chart_block(LDN_Page_Context $ctx, array $overview, array $bag) {
+        $discount_fallback = $this->lab_grown_discount_chart_fallback($overview);
+        $discount_chart = $this->chart_html(
+            isset($bag['market_discount_chart']) && is_array($bag['market_discount_chart'])
+                ? $bag['market_discount_chart']
+                : array(),
+            'ldn-market-discount-chart',
+            __('Lab-grown discount vs natural by carat weight', 'loupe-diamond-network'),
+            $discount_fallback
+        );
+        if ($discount_chart === '') {
+            return '';
+        }
+
+        $anchor_discount = '';
+        $anchor_row = $this->hub_carat_table_row($overview, $this->hub_anchor_carat());
+        $anchor_pct = isset($anchor_row['lab_grown_discount_pct']) ? $anchor_row['lab_grown_discount_pct'] : null;
+        if (is_numeric($anchor_pct)) {
+            $anchor_discount = sprintf(
+                /* translators: 1: carat label, 2: discount percentage */
+                __('At %1$s ct, lab-grown is typically about %2$s%% cheaper than natural.', 'loupe-diamond-network'),
+                $this->format_carat_label($this->hub_anchor_carat()),
+                number_format((float) $anchor_pct, 1)
+            );
+        }
+
+        $intro = sprintf(
+            /* translators: %s: country name */
+            __(
+                'Lab-grown diamonds cost less than natural at every weight we track in %s. '
+                . 'The chart shows how wide that gap is at each carat size.',
+                'loupe-diamond-network'
+            ),
+            $this->country_full_name($ctx)
+        );
+        if ($anchor_discount !== '') {
+            $intro .= ' ' . $anchor_discount;
+        }
+
+        return '<div class="ldn-discount-chart">'
+            . '<h2>' . esc_html__('Natural vs lab-grown price gap', 'loupe-diamond-network') . '</h2>'
+            . $this->format_prose_html($intro)
+            . $discount_chart
+            . '</div>';
+    }
+
+    /**
+     * Compact shape label for tight table columns (drops a trailing " Cut").
+     *
+     * @param string $shape shape slug
+     * @return string
+     */
+    private function compact_shape_label($shape) {
+        $label = ucwords(str_replace('-', ' ', (string) $shape));
+        return preg_replace('/\s+Cut$/', '', $label);
     }
 }

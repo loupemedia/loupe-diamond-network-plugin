@@ -73,7 +73,7 @@ final class LDN_Diagnostics {
      */
     public static function artefact_ids_for_level($page_level) {
         $common = array('summary_data_json', 'price_graph_json', 'distribution_json', 'static_content_json', 'individual_content_json');
-        $size_json = array('size_summary_json', 'size_copy_json', 'size_distribution_json');
+        $size_core = array('size_summary_json', 'size_copy_json');
         switch ($page_level) {
             case 'shape':
                 return $common;
@@ -84,13 +84,14 @@ final class LDN_Diagnostics {
             case 'top-level':
                 return array('market_overview_json', 'templated_copy_json', 'static_content_json');
             case 'size-individual':
+                return array_merge($size_core, array('size_distribution_json'));
             case 'size-shape-hub':
             case 'size-carat-hub':
             case 'size-mega-hub':
             case 'size-comparison':
             case 'size-comparison-tool':
             case 'size-methodology':
-                return $size_json;
+                return $size_core;
             default:
                 return $common;
         }

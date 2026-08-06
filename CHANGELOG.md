@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.20.8] — 2026-08-06
+
+- **Staging diagnostics:** only probe `size_distribution_json` on `size-individual` pages — Z3 publishes it per shape×carat folder, not on hubs, comparison pages, or the Size Checker tool (fixes spurious HTTP 403 on `/diamond-size/compare/`).
+- **Size comparison pages:** long-tail comparisons now carry full side fields (depth %, table %, L/W, ideal delta, sample size, quarter-scale SVGs) from individual summaries; face-up overlay renders client-side when no curated `overlay_svg` exists; delta narrative, side-by-side table, and face-up bars always show; market price cards with per-carat figures for both stones.
+
+## [0.20.7] — 2026-08-06
+
+- **Size Checker routing:** register `/diamond-size/compare/` as `compare-tool` before the shape-hub rule so it no longer resolves as shape=`compare` (wrong H1, widget layout, self-link).
+- **Diamond Size Checker page:** add how-it-works steps, a default true-scale example preview in Results, popular comparisons + explore links (size chart, methodology). Widget embed on shape hubs unchanged.
+
+## [0.20.6] — 2026-08-06
+
+- **Shape hub table:** carat ladder uses the mega-hub matrix styling (purple header, alternating rows, larger true-to-scale outlines). Z3 now emits matrix-scale SVGs for shape-hub rows — re-run Z3 (or wait for pipeline) to refresh S3 `size-summary.json`.
+- **Size Checker widget:** drop the redundant "Your diamond" panel legend and "Your diamond vs the market" results heading; fix legend float so panel titles no longer collide with the Shape field.
+
+## [0.20.5] — 2026-08-06
+
+- **Size-page L/W histogram on purple band:** keep the elongated-shape L/W section purple (white Plotly bars) — a white-surface override on `.ldn-section.ldn-chart` had painted the whole band white, hiding white bars; chart targets on purple skip the white-card rule.
+- **Size-page footer gap:** drop bottom padding on `main.ldn-size-page` and the last section so the purple FAQ band meets the theme footer without a white strip.
+- **Size distribution histograms (Z2/Z3):** length / diameter / L/W charts use 30 bins over the typical p10–p90 window (not 12 bins across full min–max); chart x-axis zooms to the binned range. Re-run Z2 + Z3 (or wait for pipeline) to refresh S3 `size-distribution.json`.
+
+## [0.20.4] — 2026-08-06
+
+- **All-shapes hub (Ringspo):** chart titles render as H3 from the Plotly payload; drop redundant ranking table from shape cards; merge trend + shape copy into one block; remove generic Shape Breakdown / Expert Recommendations; explore links use card grid; shape-switching price calculator hub (`presentation: hub`).
+
+## [0.20.3] — 2026-08-06
+
+- **Diamond-type hub (Ringspo):** lighter green hero — intro, aggregate stat cards (carat weights + diamonds tracked), natural/lab toggle, and type-level carat price lookup; carat table and price-per-carat chart combined in one white section with sticky table header (desktop); milestone copy lives only under the chart; explore links use type-nav cards.
+- **Anchor carat** on diamond-type pages follows `most_popular_carat` from type-summary (not hardcoded 1 ct).
+- **Ops:** regenerate lab-grown `static-content.json` via C1 (`--force`) if staging diagnostics show schema behind.
+
+## [0.20.2] — 2026-08-06
+
+- **Ringspo shape-page IA:** reorder sections (colour/clarity heatmap before calculator; merged buying advice after tools); chart data summary is screen-reader/crawler-only (`ldn-chart-fallback--sr`); hero stat label clarifies page median is across all qualities; calculator copy distinguishes spec-level price from page median; size cross-link moves to a compact `size_explore_link` block after FAQ (no longer appended under the heatmap).
+
+## [0.20.1] — 2026-08-05
+
+- **Ringspo top-level hub polish:** shorter carat-table intro; lab-grown discount chart nested under the table with a proper heading and intro (removes the band-padding gap); drop `quality_overview_static` and `top_level_explore` from the section list; most-traded table labels drop a trailing "Cut" and use nowrap to avoid two-line rows.
+- **Section bands:** the first body section after a green hero band coerces from purple (`tint`) to white (`plain`) so green and purple never sit back-to-back.
+
 ## [0.20.0] - 2026-08-04
 
 - **Display ads (CP 55):** config-driven ad slots — `config/ad_slots.yaml` maps layout slot ids to commercial types, placements, and image sizes; manifest from `network_consumer.ads.manifest_url`; resolve by `site_id`, `country_code`, and `diamond_type`; server-side impressions + client click tracking to hub `ldn-ops/v1/track`; staging suppresses events. Works across all sites/countries that declare `ad_slots` in content profiles.

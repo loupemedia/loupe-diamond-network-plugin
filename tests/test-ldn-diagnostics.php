@@ -140,6 +140,20 @@ check(
     'shape primary remains summary_data_json'
 );
 
+$checker_ids = LDN_Diagnostics::artefact_ids_for_level('size-comparison-tool');
+check(
+    in_array('size_summary_json', $checker_ids, true),
+    'size-comparison-tool probes size_summary_json'
+);
+check(
+    !in_array('size_distribution_json', $checker_ids, true),
+    'size-comparison-tool does not probe size_distribution_json (Z3 only publishes it on individual pages)'
+);
+check(
+    in_array('size_distribution_json', LDN_Diagnostics::artefact_ids_for_level('size-individual'), true),
+    'size-individual still probes size_distribution_json'
+);
+
 // ---------------------------------------------------------------------------
 // Schema cell formatting for the panel
 // ---------------------------------------------------------------------------

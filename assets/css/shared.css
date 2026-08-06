@@ -145,8 +145,20 @@
    one group, which should fill the row instead of leaving a gap beside it. */
 .ldn-most-traded-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 	gap: var(--ldn-space-5, 1.5rem) var(--ldn-space-6, 2rem);
+}
+
+.ldn-most-traded .ldn-data-table td:first-child {
+	white-space: nowrap;
+}
+
+.ldn-carat-price-table .ldn-discount-chart {
+	margin-top: var(--ldn-space-6, 2rem);
+}
+
+.ldn-carat-price-table .ldn-discount-chart > h2 {
+	margin-top: 0;
 }
 
 .ldn-most-traded-group > h3 {
@@ -411,6 +423,215 @@
 	text-decoration: underline;
 }
 
+.ldn-explore-card-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 1rem;
+}
+
+.ldn-explore-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 1rem 1.15rem;
+	border: 1px solid var(--ldn-table-border, #ddd);
+	border-radius: 4px;
+	text-decoration: none;
+	color: var(--ldn-text, #333);
+	background: var(--ldn-background, transparent);
+	transition: border-color 0.15s ease;
+}
+
+.ldn-explore-card:hover,
+.ldn-explore-card:focus-visible {
+	border-color: var(--ldn-primary, #333);
+}
+
+.ldn-explore-card__title {
+	font-weight: 600;
+	color: var(--ldn-primary, #333);
+}
+
+.ldn-explore-card__desc {
+	font-size: 0.9375rem;
+	line-height: 1.45;
+	color: var(--ldn-secondary-text, var(--ldn-text, #333));
+}
+
+.ldn-shape-calc-pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0 0 1rem;
+}
+
+.ldn-shape-calc-pill {
+	padding: 0.4rem 0.85rem;
+	border: 1px solid var(--ldn-table-border, #ddd);
+	border-radius: 999px;
+	background: transparent;
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+	color: var(--ldn-text, #333);
+}
+
+.ldn-shape-calc-pill--active,
+.ldn-shape-calc-pill:hover,
+.ldn-shape-calc-pill:focus-visible {
+	border-color: var(--ldn-primary, #333);
+}
+
+.ldn-all-shapes-calculator__lead {
+	margin: 0 0 1rem;
+	color: var(--ldn-secondary-text, #475569);
+}
+
+/* Visually hidden chart fallback for crawlers (CP54_04). */
+.ldn-chart-fallback--sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Sticky table header inside scroll container (desktop/tablet). */
+@media screen and (min-width: 641px) {
+	.ldn-table-scroll {
+		max-height: min(70vh, 32rem);
+		overflow: auto;
+		margin: 0 0 1.25rem;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.ldn-table-scroll .ldn-data-table thead th {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		background: #fff;
+		box-shadow: 0 1px 0 var(--ldn-table-border, #ddd);
+	}
+}
+
+.ldn-nat-lab-toggle {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	margin: 0 0 1rem;
+	padding: 0.25rem;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.22);
+}
+
+.ldn-nat-lab-toggle__pill {
+	display: inline-block;
+	padding: 0.45rem 1rem;
+	border-radius: 999px;
+	font-weight: 600;
+	font-size: 0.9rem;
+	text-decoration: none;
+	color: #fff;
+	background: transparent;
+}
+
+.ldn-nat-lab-toggle__pill:hover,
+.ldn-nat-lab-toggle__pill:focus-visible {
+	background: rgba(255, 255, 255, 0.18);
+	color: #fff;
+	text-decoration: none;
+}
+
+.ldn-nat-lab-toggle__pill--active {
+	background: #fff;
+	color: var(--ldn-primary, #706cc8);
+}
+
+.ldn-diamond-type-hero-tools {
+	margin-top: 0.5rem;
+}
+
+.ldn-type-carat-lookup {
+	margin: 0 0 0.5rem;
+	padding: 1rem 1.1rem;
+	border-radius: var(--ldn-card-radius, 12px);
+	background: rgba(255, 255, 255, 0.95);
+	color: var(--ldn-ink, #1a1a2e);
+}
+
+.ldn-type-carat-lookup__fields {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem 1.25rem;
+	align-items: end;
+}
+
+@media screen and (max-width: 640px) {
+	.ldn-type-carat-lookup__fields {
+		grid-template-columns: 1fr;
+	}
+}
+
+.ldn-type-carat-lookup__label {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 600;
+	margin-bottom: 0.35rem;
+	color: var(--ldn-muted, #4a4a68);
+}
+
+.ldn-type-carat-lookup__input {
+	width: 100%;
+}
+
+.ldn-type-carat-lookup__carat {
+	display: block;
+	margin-top: 0.35rem;
+	font-size: 1.1rem;
+	font-weight: 700;
+}
+
+.ldn-type-carat-lookup__outputs {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.ldn-type-carat-lookup__value {
+	display: block;
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+
+.ldn-type-carat-lookup__footnote {
+	margin: 0.75rem 0 0;
+	font-size: 0.85rem;
+	color: var(--ldn-muted, #4a4a68);
+}
+
+.ldn-type-carat-lookup__link-wrap {
+	margin: 0.5rem 0 0;
+}
+
+.ldn-type-carat-lookup__link {
+	font-weight: 600;
+}
+
+.ldn-price-per-carat-block {
+	margin-top: 2rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid rgba(26, 26, 46, 0.1);
+}
+
+.ldn-price-per-carat__heading {
+	margin: 0 0 0.75rem;
+	font-size: 1.15rem;
+	font-weight: 600;
+}
+
 .ldn-shapes-ranking-table--extended .ldn-data-table {
 	margin-top: 0.5rem;
 }
@@ -507,6 +728,14 @@
 	margin: 1.5rem 0;
 	padding: 0;
 	border: 0;
+}
+
+.ldn-chart__title {
+	margin: 0 0 0.75rem;
+	font-size: 1.125rem;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--ldn-text, #333);
 }
 
 .ldn-chart figcaption {
@@ -905,6 +1134,14 @@
 	color: var(--ldn-primary, #706cc8);
 }
 
+.ldn-size-explore-link {
+	margin-top: 0;
+}
+
+.ldn-size-explore-link__anchor {
+	font-weight: 600;
+}
+
 @media screen and (max-width: 600px) {
 	.ldn-size-spread-labels {
 		grid-template-columns: 1fr;
@@ -1065,6 +1302,8 @@
 .ldn-size-comparison-visual,
 .ldn-size-comparison-table,
 .ldn-size-comparison-delta,
+.ldn-size-comparison-callout,
+.ldn-size-comparison-prices,
 .ldn-size-comparison-links {
 	margin-bottom: 1.5rem;
 }
@@ -1137,8 +1376,9 @@
 }
 
 .ldn-size-checker-panel legend.ldn-size-checker-panel__title {
-	float: left;
-	width: auto;
+	float: none;
+	display: block;
+	width: 100%;
 	margin: 0 0 0.75rem;
 	padding: 0;
 	font-size: 1.05rem;
@@ -1314,6 +1554,28 @@
 	margin-bottom: 1rem;
 }
 
+.ldn-size-comparison-prices__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+	gap: 1.5rem;
+}
+
+.ldn-size-comparison-prices__stone h3 {
+	margin: 0 0 0.75rem;
+	font-size: 1.05rem;
+}
+
+.ldn-size-price-card__per-carat {
+	display: block;
+	font-size: 0.9rem;
+	opacity: 0.9;
+	margin-top: 0.15rem;
+}
+
+.ldn-size-comparison-callout .ldn-faceup-callout {
+	margin-bottom: 0;
+}
+
 .ldn-size-chart__subheading {
 	font-size: 1.1rem;
 	margin: 1.5rem 0 0.75rem;
@@ -1333,6 +1595,85 @@
 .ldn-size-checker-full-link {
 	margin: 1rem 0 0;
 	font-weight: 600;
+}
+
+.ldn-size-checker-how {
+	margin-bottom: 1.25rem;
+	padding-bottom: 1.25rem;
+	border-bottom: 1px solid var(--ldn-border, #e5e7eb);
+}
+
+.ldn-size-checker-how__title {
+	margin: 0 0 0.75rem;
+	font-size: 1.1rem;
+}
+
+.ldn-size-checker-steps {
+	margin: 0;
+	padding-left: 1.25rem;
+	display: grid;
+	gap: 0.5rem;
+}
+
+.ldn-size-checker-steps li {
+	line-height: 1.45;
+}
+
+.ldn-size-checker-empty {
+	margin-bottom: 1.25rem;
+	padding: 1rem 1.25rem;
+	border-radius: 10px;
+	background: var(--ldn-surface-muted, #f8f9fc);
+}
+
+.ldn-size-checker-empty__lead {
+	margin: 0 0 1rem;
+	color: var(--ldn-text-muted, #4b5563);
+}
+
+.ldn-size-checker-empty__preview .ldn-size-compare-svg {
+	margin: 0 auto;
+}
+
+.ldn-size-checker-explore ul {
+	margin: 0;
+	padding-left: 1.25rem;
+}
+
+.ldn-size-checker-explore li + li {
+	margin-top: 0.35rem;
+}
+
+@media (min-width: 768px) {
+	.ldn-size-checker-steps {
+		grid-template-columns: repeat(3, 1fr);
+		padding-left: 0;
+		list-style: none;
+		counter-reset: ldn-checker-step;
+	}
+
+	.ldn-size-checker-steps li {
+		counter-increment: ldn-checker-step;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--ldn-border, #e5e7eb);
+		border-radius: 10px;
+		background: #fff;
+	}
+
+	.ldn-size-checker-steps li::before {
+		content: counter(ldn-checker-step);
+		display: block;
+		width: 1.75rem;
+		height: 1.75rem;
+		margin-bottom: 0.5rem;
+		border-radius: 50%;
+		background: var(--ldn-primary, #706cc8);
+		color: #fff;
+		font-weight: 700;
+		font-size: 0.9rem;
+		line-height: 1.75rem;
+		text-align: center;
+	}
 }
 
 @media (max-width: 700px) {
@@ -1625,6 +1966,21 @@
 .ldn-size-matrix__lead {
 	margin: 0 0 1rem;
 	line-height: 1.55;
+}
+
+/* Shape-hub carat ladder: same matrix look as the mega hub (purple header,
+   alternating rows, true-to-scale outlines). */
+.ldn-size-hub-table--ladder .ldn-size-matrix-scroll {
+	margin-top: 0.5rem;
+}
+
+.ldn-size-hub-table--ladder .ldn-size-matrix th,
+.ldn-size-hub-table--ladder .ldn-size-matrix td {
+	text-align: center;
+}
+
+.ldn-size-hub-table--ladder .ldn-size-matrix td:not(.ldn-size-matrix__cell) {
+	font-variant-numeric: tabular-nums;
 }
 
 /* ------------------------------------------------------------------

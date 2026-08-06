@@ -119,12 +119,20 @@ trait LDN_Trait_Sections {
             return $this->carat_ladder_html($ctx, $bag, $currency);
         }
         if ($section_id === 'color_clarity') {
-            $html = $this->color_clarity_table_html(
+            return $this->color_clarity_table_html(
                 $ctx,
                 isset($bag['color_clarity']) ? $bag['color_clarity'] : array(),
                 $currency
             );
-            return $html . $this->size_dimensions_card_html($ctx, $currency);
+        }
+        if ($section_id === 'size_explore_link') {
+            return $this->size_explore_link_html($ctx, $currency);
+        }
+        if ($section_id === 'buying_advice_static') {
+            return $this->text_block(
+                $section_id,
+                $this->buying_advice_value($ctx, $bag)
+            );
         }
         if ($section_id === 'hub_stats') {
             return $this->hub_stats_html($ctx, $bag);
@@ -142,7 +150,7 @@ trait LDN_Trait_Sections {
             return $this->top_level_explore_html($ctx);
         }
         if ($section_id === 'diamond_type_explore') {
-            return $this->diamond_type_explore_html($ctx);
+            return $this->diamond_type_explore_html($ctx, $bag);
         }
         if ($section_id === 'market_overview_table' || $section_id === 'carat_price_table') {
             return $this->market_overview_table_html($ctx, $bag);
@@ -151,10 +159,27 @@ trait LDN_Trait_Sections {
             return $this->most_traded_table_html($ctx, $bag);
         }
         if ($section_id === 'price_calculator') {
+            if ($ctx->page_level === 'all-shapes') {
+                return $this->all_shapes_calculator_html($ctx, $bag);
+            }
             return $this->price_calculator_html($ctx, $bag);
         }
         if ($section_id === 'price_per_carat_chart') {
             return $this->price_per_carat_chart_html($ctx, $bag);
+        }
+        if ($section_id === 'comparison_chart') {
+            $type_label = isset(self::$TYPE_LABELS[$ctx->diamond_type])
+                ? self::$TYPE_LABELS[$ctx->diamond_type]
+                : ucfirst(str_replace('-', ' ', (string) $ctx->diamond_type));
+            return $this->carat_tiers_table_html(
+                $ctx,
+                $bag,
+                sprintf(
+                    /* translators: %s: diamond type label (Natural / Lab-Grown) */
+                    __('%s diamond prices by carat weight', 'loupe-diamond-network'),
+                    $type_label
+                )
+            );
         }
         if ($section_id === 'price_trends_snapshot') {
             return $this->price_trends_snapshot_html($ctx, $bag);
@@ -232,5 +257,41 @@ trait LDN_Trait_Sections {
             }
         }
         return null;
+    }
+
+    /**
+     * Merged buying advice: prefers the new `buying_advice` C1 key and falls
+     * back to concatenating legacy `expert_take` + `buying_guidance` until C1
+     * regenerates static content for the site.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @return mixed scalar | null
+     */
+    private function buying_advice_value(LDN_Page_Context $ctx, array $bag) {
+        $direct = $this->section_value('buying_advice_static', $ctx, $bag);
+        if (is_scalar($direct) && (string) $direct !== '') {
+            return $direct;
+        }
+
+        $parts = array();
+        foreach (array('expert_take', 'buying_guidance') as $legacy_key) {
+            $raw = isset($bag['static']) && is_array($bag['static']) ? $bag['static'] : array();
+            $payload = is_array($raw) ? $raw : array();
+            $value = null;
+            if (isset($payload[$legacy_key])) {
+                $value = $payload[$legacy_key];
+            } elseif (isset($payload['sections'][$legacy_key])) {
+                $value = $payload['sections'][$legacy_key];
+            }
+            if (is_array($value)) {
+                $value = implode("\n\n", array_filter($value, 'is_scalar'));
+            }
+            if (is_scalar($value) && (string) $value !== '') {
+                $parts[] = (string) $value;
+            }
+        }
+
+        return $parts === array() ? null : implode("\n\n", $parts);
     }
 }

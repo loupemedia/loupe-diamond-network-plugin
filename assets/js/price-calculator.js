@@ -13,8 +13,10 @@
 
 	var PERCENTILES = ['p10', 'p25', 'p50', 'p75', 'p90'];
 
-	function readManifest() {
-		var node = document.getElementById('ldn-price-calculator-manifest');
+	function readManifest(root) {
+		var node = root
+			? root.querySelector('script.ldn-price-calculator-manifest')
+			: document.querySelector('script.ldn-price-calculator-manifest');
 		if (!node) {
 			return null;
 		}
@@ -198,12 +200,11 @@
 		}
 	}
 
-	function init() {
-		var manifest = readManifest();
+	function initCalculator(root) {
+		var manifest = readManifest(root);
 		if (!manifest || !manifest.labels || !manifest.cells) {
 			return;
 		}
-		var root = document.querySelector('[data-ldn-price-calculator]');
 		if (!root) {
 			return;
 		}
@@ -243,6 +244,40 @@
 		if (quoteField) {
 			quoteField.addEventListener('input', update);
 		}
+	}
+
+	function initHub() {
+		var hub = document.querySelector('[data-ldn-price-calculator-hub]');
+		if (!hub) {
+			return;
+		}
+		var pills = hub.querySelectorAll('[data-ldn-shape-calc-pill]');
+		var panels = hub.querySelectorAll('[data-ldn-shape-calc-panel]');
+		pills.forEach(function (pill) {
+			pill.addEventListener('click', function () {
+				var shape = pill.getAttribute('data-ldn-shape-calc-pill');
+				if (!shape) {
+					return;
+				}
+				pills.forEach(function (other) {
+					other.classList.toggle('ldn-shape-calc-pill--active', other === pill);
+				});
+				panels.forEach(function (panel) {
+					var active = panel.getAttribute('data-ldn-shape-calc-panel') === shape;
+					panel.classList.toggle('ldn-shape-calc-panel--active', active);
+					if (active) {
+						panel.removeAttribute('hidden');
+					} else {
+						panel.setAttribute('hidden', 'hidden');
+					}
+				});
+			});
+		});
+	}
+
+	function init() {
+		document.querySelectorAll('[data-ldn-price-calculator]').forEach(initCalculator);
+		initHub();
 	}
 
 	if (document.readyState === 'loading') {

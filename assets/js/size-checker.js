@@ -307,6 +307,35 @@
             return el ? el.value : '';
         }
 
+        function evaluateReference(shape, band) {
+            if (!shape || !band) {
+                return null;
+            }
+            var refEntry = entryFor(shape, band);
+            if (!refEntry) {
+                return null;
+            }
+            var refLength = median(refEntry.length_mm);
+            var refWidth = median(refEntry.width_mm);
+            var refFaceup = median(refEntry.faceup_area_mm2);
+            var refCarat = parseFloat(band);
+            return {
+                mode: 'reference',
+                shape: shape,
+                carat: refCarat,
+                band: String(band),
+                length: refLength,
+                width: refWidth,
+                depth: median(refEntry.depth_mm),
+                faceup: refFaceup,
+                perCarat: (refFaceup !== null && refCarat > 0) ? refFaceup / refCarat : null,
+                percentile: 50,
+                quality: 'Typical market size (median)',
+                n: refEntry.n || 0,
+                bandNote: ''
+            };
+        }
+
         /**
          * Evaluate one stone panel. Returns null when required inputs are
          * missing; { error: ... } when inputs are present but unusable.
@@ -383,10 +412,14 @@
 
         function stoneCardHtml(stone, title) {
             if (stone.error) {
-                return '<div class="ldn-size-checker-card ldn-size-checker-card--error"><h3>'
-                    + escapeHtml(title) + '</h3><p>' + escapeHtml(stone.error) + '</p></div>';
+                var errTitle = title ? '<h3>' + escapeHtml(title) + '</h3>' : '';
+                return '<div class="ldn-size-checker-card ldn-size-checker-card--error">'
+                    + errTitle + '<p>' + escapeHtml(stone.error) + '</p></div>';
             }
-            var html = '<div class="ldn-size-checker-card"><h3>' + escapeHtml(title) + '</h3>';
+            var html = '<div class="ldn-size-checker-card">';
+            if (title) {
+                html += '<h3>' + escapeHtml(title) + '</h3>';
+            }
             html += '<p class="ldn-size-checker-card__stone">'
                 + escapeHtml(stone.carat + ' carat ' + shapeLabel(stone.shape)) + '</p>';
             html += '<p class="ldn-size-checker-card__quality"><strong>'
@@ -499,7 +532,13 @@
             var compareOn = enableB && enableB.checked;
             var b = compareOn ? evaluateStone('b') : null;
 
-            var cards = stoneCardHtml(a, compareOn ? 'Your diamond' : 'Your diamond vs the market');
+            var emptyEl = document.getElementById('ldn-size-checker-empty');
+            if (emptyEl) {
+                emptyEl.hidden = true;
+                emptyEl.setAttribute('aria-hidden', 'true');
+            }
+
+            var cards = stoneCardHtml(a, '');
             if (b !== null) {
                 cards += stoneCardHtml(b, 'Second diamond');
             }
@@ -524,6 +563,22 @@
             evt.preventDefault();
             runCheck();
         });
+
+        if (!root.classList.contains('ldn-size-checker--widget')) {
+            var previewEl = document.getElementById('ldn-size-checker-empty-preview');
+            if (previewEl) {
+                var da = manifest.default_a || {};
+                var db = manifest.default_b || {};
+                var exampleA = evaluateReference(da.shape, da.carat);
+                var exampleB = evaluateReference(db.shape, db.carat);
+                if (exampleA && exampleB) {
+                    var previewHtml = comparisonHtml(exampleA, exampleB);
+                    if (previewHtml) {
+                        previewEl.innerHTML = previewHtml;
+                    }
+                }
+            }
+        }
     }
 
     // ------------------------------------------------------------------

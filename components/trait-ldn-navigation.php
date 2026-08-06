@@ -177,7 +177,7 @@ trait LDN_Trait_Navigation {
         }
 
         $size_renderer = new LDN_Size_Renderer($this->fetcher, $this->config);
-        $links = '';
+        $cards = array();
 
         foreach ($size_renderer->adjacent_carat_bands($ctx->carat) as $adj) {
             $url = $this->build_price_page_url($ctx, 'all-shapes', array('carat' => $adj));
@@ -185,40 +185,78 @@ trait LDN_Trait_Navigation {
                 continue;
             }
             $adj_label = $this->format_carat_label($adj);
-            $links .= '<a class="ldn-explore-link" href="' . esc_url($url) . '">'
-                . esc_html(sprintf(
+            $cards[] = array(
+                'url'   => $url,
+                'title' => sprintf(
                     /* translators: %s: carat weight label */
                     __('%s carat — all shapes', 'loupe-diamond-network'),
                     $adj_label
-                ))
-                . '</a>';
+                ),
+                'desc'  => __('Compare median prices across every shape at this weight.', 'loupe-diamond-network'),
+            );
         }
 
         if ($ctx->diamond_type === 'natural') {
             $other_type = 'lab-grown';
-            $type_label = __('Lab-grown prices at this carat', 'loupe-diamond-network');
+            $type_label = __('Lab-grown at this carat', 'loupe-diamond-network');
+            $type_desc = __('See how lab-grown prices compare at the same weight.', 'loupe-diamond-network');
         } elseif ($ctx->diamond_type === 'lab-grown') {
             $other_type = 'natural';
-            $type_label = __('Natural prices at this carat', 'loupe-diamond-network');
+            $type_label = __('Natural at this carat', 'loupe-diamond-network');
+            $type_desc = __('See how natural diamond prices compare at the same weight.', 'loupe-diamond-network');
         } else {
             $other_type = null;
             $type_label = '';
+            $type_desc = '';
         }
         if ($other_type !== null) {
             $type_url = $this->build_price_page_url($ctx, 'all-shapes', array('type' => $other_type));
             if ($type_url !== '') {
-                $links .= '<a class="ldn-explore-link" href="' . esc_url($type_url) . '">'
-                    . esc_html($type_label) . '</a>';
+                $cards[] = array(
+                    'url'   => $type_url,
+                    'title' => $type_label,
+                    'desc'  => $type_desc,
+                );
             }
         }
 
-        if ($links === '') {
+        return $this->explore_cards_section_html(
+            'ldn-all-shapes-explore',
+            __('Explore nearby weights and types', 'loupe-diamond-network'),
+            $cards
+        );
+    }
+
+    /**
+     * Card-grid explore section shared by hub navigation blocks.
+     *
+     * @param string               $section_class
+     * @param string               $heading
+     * @param array<int, array>    $cards Each: url, title, desc (desc optional).
+     * @return string
+     */
+    public function explore_cards_section_html($section_class, $heading, array $cards) {
+        $items = '';
+        foreach ($cards as $card) {
+            if (!is_array($card) || empty($card['url']) || empty($card['title'])) {
+                continue;
+            }
+            $desc = isset($card['desc']) ? (string) $card['desc'] : '';
+            $items .= '<a class="ldn-explore-card" href="' . esc_url((string) $card['url']) . '">'
+                . '<span class="ldn-explore-card__title">' . esc_html((string) $card['title']) . '</span>';
+            if ($desc !== '') {
+                $items .= '<span class="ldn-explore-card__desc">' . esc_html($desc) . '</span>';
+            }
+            $items .= '</a>';
+        }
+
+        if ($items === '') {
             return '';
         }
 
-        return '<section class="ldn-section ldn-all-shapes-explore">'
-            . '<h2>' . esc_html__('Explore nearby weights and types', 'loupe-diamond-network') . '</h2>'
-            . '<div class="ldn-explore-links">' . $links . '</div>'
+        return '<section class="ldn-section ' . esc_attr($section_class) . '">'
+            . '<h2>' . esc_html($heading) . '</h2>'
+            . '<div class="ldn-explore-card-grid">' . $items . '</div>'
             . '</section>';
     }
 
@@ -300,80 +338,154 @@ trait LDN_Trait_Navigation {
     }
 
     /**
+     * Compact natural / lab-grown switcher for diamond-type hub pages.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    public function nat_lab_toggle_html(LDN_Page_Context $ctx) {
+        if ($ctx->page_level !== 'diamond-type' || $ctx->diamond_type === null) {
+            return '';
+        }
+
+        if (!class_exists('LDN_Artefacts')) {
+            return '';
+        }
+        $artefacts = new LDN_Artefacts($this->config);
+        if (!$artefacts->site_has_wp_widget($ctx->site_id, 'nat_lab_toggle', $ctx->page_level)) {
+            return '';
+        }
+
+        $types = array(
+            array(
+                'type'  => 'natural',
+                'label' => __('Natural', 'loupe-diamond-network'),
+            ),
+            array(
+                'type'  => 'lab-grown',
+                'label' => __('Lab-grown', 'loupe-diamond-network'),
+            ),
+        );
+
+        $pills = '';
+        foreach ($types as $entry) {
+            $url = $this->build_price_page_url($ctx, 'diamond-type', array('type' => $entry['type']));
+            if ($url === '') {
+                continue;
+            }
+            $active = strtolower($ctx->diamond_type) === $entry['type']
+                ? ' ldn-nat-lab-toggle__pill--active'
+                : '';
+            $pills .= '<a class="ldn-nat-lab-toggle__pill' . esc_attr($active) . '" href="'
+                . esc_url($url) . '">' . esc_html($entry['label']) . '</a>';
+        }
+        if ($pills === '') {
+            return '';
+        }
+
+        return '<nav class="ldn-nat-lab-toggle" aria-label="'
+            . esc_attr__('Diamond type', 'loupe-diamond-network') . '">'
+            . $pills
+            . '</nav>';
+    }
+
+    /**
      * Curated drill-down links for diamond-type hubs (natural / lab-grown).
      *
      * @param LDN_Page_Context $ctx
      * @return string
      */
-    public function diamond_type_explore_html(LDN_Page_Context $ctx) {
+    public function diamond_type_explore_html(LDN_Page_Context $ctx, array $bag = array()) {
         if ($ctx->page_level !== 'diamond-type' || $ctx->diamond_type === null) {
             return '';
         }
 
-        $anchor_carat = $this->hub_anchor_carat();
+        $anchor_carat = $this->hub_anchor_carat($ctx, $bag);
         $carat_label = $this->format_carat_label($anchor_carat);
         $specs = array();
 
         if ($ctx->diamond_type === 'natural') {
             $other_type = 'lab-grown';
-            $other_label = __('Lab-grown diamond prices by carat', 'loupe-diamond-network');
+            $other_label = __('Lab-grown diamond prices', 'loupe-diamond-network');
+            $other_desc = __('Browse lab-grown prices by carat weight', 'loupe-diamond-network');
         } elseif ($ctx->diamond_type === 'lab-grown') {
             $other_type = 'natural';
-            $other_label = __('Natural diamond prices by carat', 'loupe-diamond-network');
+            $other_label = __('Natural diamond prices', 'loupe-diamond-network');
+            $other_desc = __('Browse natural prices by carat weight', 'loupe-diamond-network');
         } else {
             $other_type = null;
             $other_label = '';
+            $other_desc = '';
         }
         if ($other_type !== null) {
+            $other_url = $this->build_price_page_url($ctx, 'diamond-type', array('type' => $other_type));
+            if ($other_url !== '') {
+                $specs[] = array(
+                    'url'   => $other_url,
+                    'label' => $other_label,
+                    'desc'  => $other_desc,
+                );
+            }
+        }
+
+        $top_url = $this->build_price_page_url($ctx, 'top-level');
+        if ($top_url !== '') {
             $specs[] = array(
-                'url'   => $this->build_price_page_url($ctx, 'diamond-type', array('type' => $other_type)),
-                'label' => $other_label,
+                'url'   => $top_url,
+                'label' => __('All diamond prices', 'loupe-diamond-network'),
+                'desc'  => __('Natural and lab-grown on one hub', 'loupe-diamond-network'),
             );
         }
 
-        $specs[] = array(
-            'url'   => $this->build_price_page_url($ctx, 'top-level'),
-            'label' => __('All diamond prices (natural & lab-grown)', 'loupe-diamond-network'),
+        $shapes_url = $this->build_price_page_url(
+            $ctx,
+            'all-shapes',
+            array('type' => $ctx->diamond_type, 'carat' => $anchor_carat)
         );
-        $specs[] = array(
-            'url'   => $this->build_price_page_url(
-                $ctx,
-                'all-shapes',
-                array('type' => $ctx->diamond_type, 'carat' => $anchor_carat)
-            ),
-            'label' => sprintf(
-                /* translators: %s: carat label */
-                __('%s carat — compare shapes', 'loupe-diamond-network'),
-                $carat_label
-            ),
-        );
+        if ($shapes_url !== '') {
+            $specs[] = array(
+                'url'   => $shapes_url,
+                'label' => sprintf(
+                    /* translators: %s: carat label */
+                    __('%s carat — compare shapes', 'loupe-diamond-network'),
+                    $carat_label
+                ),
+                'desc'  => __('See how round, oval and other cuts compare at this weight', 'loupe-diamond-network'),
+            );
+        }
 
-        $links = '';
+        $items = '';
         foreach ($specs as $spec) {
             if ($spec['url'] === '') {
                 continue;
             }
-            $links .= '<a class="ldn-explore-link" href="' . esc_url($spec['url']) . '">'
-                . esc_html($spec['label']) . '</a>';
+            $items .= '<a class="ldn-type-nav-card" href="' . esc_url($spec['url']) . '">'
+                . '<span class="ldn-type-nav-card__title">' . esc_html($spec['label']) . '</span>'
+                . '<span class="ldn-type-nav-card__desc">' . esc_html($spec['desc']) . '</span>'
+                . '</a>';
         }
 
         if ($this->size_module_explore_eligible($ctx)) {
             $size_renderer = new LDN_Size_Renderer($this->fetcher, $this->config);
             $size_url = $size_renderer->build_size_mega_hub_url($ctx->site_id);
             if ($size_url !== '') {
-                $links .= '<a class="ldn-explore-link" href="' . esc_url($size_url) . '">'
-                    . esc_html__('Diamond size charts (mm dimensions)', 'loupe-diamond-network')
-                    . '</a>';
+                $items .= '<a class="ldn-type-nav-card" href="' . esc_url($size_url) . '">'
+                    . '<span class="ldn-type-nav-card__title">'
+                    . esc_html__('Diamond size charts', 'loupe-diamond-network')
+                    . '</span>'
+                    . '<span class="ldn-type-nav-card__desc">'
+                    . esc_html__('Millimetre dimensions by shape and carat', 'loupe-diamond-network')
+                    . '</span></a>';
             }
         }
 
-        if ($links === '') {
+        if ($items === '') {
             return '';
         }
 
         return '<section class="ldn-section ldn-diamond-type-explore">'
             . '<h2>' . esc_html__('Where to go next', 'loupe-diamond-network') . '</h2>'
-            . '<div class="ldn-explore-links">' . $links . '</div>'
+            . '<div class="ldn-type-nav-grid">' . $items . '</div>'
             . '</section>';
     }
 
@@ -451,6 +563,63 @@ trait LDN_Trait_Navigation {
 
         return '<section class="ldn-section ldn-price-size-link"><h2>' . esc_html($heading) . '</h2>'
             . '<div class="ldn-price-size-cards">' . $card . '</div></section>';
+    }
+
+    /**
+     * Compact pricing → size cross-link for shape pages (no standalone H2).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param string|null      $currency
+     * @return string
+     */
+    public function size_explore_link_html(LDN_Page_Context $ctx, $currency = null) {
+        if (!$this->size_price_link_eligible($ctx)) {
+            return '';
+        }
+
+        $size_renderer = new LDN_Size_Renderer($this->fetcher, $this->config);
+        $url = $size_renderer->build_size_individual_url($ctx->site_id, $ctx->shape, $ctx->carat);
+        if ($url === '') {
+            return '';
+        }
+
+        $size_ctx = new LDN_Page_Context(
+            $ctx->site_id,
+            'size-individual',
+            $ctx->country_code,
+            null,
+            $ctx->carat,
+            $ctx->shape,
+            'size'
+        );
+        $summary = $this->fetcher->fetch_artefact('size_summary_json', $size_ctx);
+        $summary = is_array($summary) ? $summary : array();
+
+        $shape_label = ucwords(str_replace('-', ' ', $ctx->shape));
+        $carat_label = $this->format_carat_label($ctx->carat);
+        $primary = $this->size_card_primary_dimension($size_renderer, $summary);
+
+        $dimension = $primary !== ''
+            ? $primary
+            : __('millimetre dimensions', 'loupe-diamond-network');
+
+        $text = sprintf(
+            /* translators: 1: carat weight, 2: shape, 3: dimension summary */
+            __(
+                'Wondering how big a %1$s carat %2$s looks on the finger? '
+                . 'Our size data shows %3$s for stones at this weight.',
+                'loupe-diamond-network'
+            ),
+            $carat_label,
+            $shape_label,
+            $dimension
+        );
+
+        return '<aside class="ldn-section ldn-size-explore-link"><p>'
+            . esc_html($text) . ' '
+            . '<a class="ldn-size-explore-link__anchor" href="' . esc_url($url) . '">'
+            . esc_html__('View size chart and mm dimensions', 'loupe-diamond-network')
+            . ' →</a></p></aside>';
     }
 
     /**

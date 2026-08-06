@@ -125,11 +125,16 @@ trait LDN_Trait_Chrome {
      * @param string $declared                  Band from profile, or '' for plain.
      * @param string $previous_effective_band   Band applied to the prior rendered section.
      * @param bool   $is_last_on_page           Whether this is the last section that renders.
+     * @param bool   $follows_hero_band         True when this is the first body section after a green hero band.
      * @return string Effective band (plain, tint, or accent).
      */
-    public function coerce_section_band($declared, $previous_effective_band, $is_last_on_page) {
+    public function coerce_section_band($declared, $previous_effective_band, $is_last_on_page, $follows_hero_band = false) {
         $band = preg_replace('/[^a-z0-9]/', '', strtolower((string) $declared));
         if ($band === '' || !isset(self::$VALID_SECTION_BANDS[$band])) {
+            $band = 'plain';
+        }
+
+        if ($follows_hero_band && $band === 'tint') {
             $band = 'plain';
         }
 

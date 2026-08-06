@@ -609,8 +609,13 @@ check(
     'Ringspo top-level uses the shortened carat-table H2'
 );
 check(
-    strpos($ringspo_market, 'constantly changing') !== false,
-    'Ringspo top-level uses the fixed median-variation comparison copy'
+    strpos($ringspo_market, 'weighted toward shapes') !== false,
+    'Ringspo top-level uses the concise carat-table intro copy'
+);
+check(
+    strpos($ringspo_market, 'ldn-discount-chart') !== false
+        && strpos($ringspo_market, 'Natural vs lab-grown price gap') !== false,
+    'Ringspo discount chart is nested in the carat table with a visible heading'
 );
 check(
     strpos($ringspo_market, 'Natural and lab-grown stones differ') === false,
@@ -1001,7 +1006,7 @@ check(
 $median_stats = $renderer->stats_html($shape_ctx, $median_summary, 'USD');
 check(
     strpos($median_stats, '$3,711') !== false && strpos($median_stats, '$4,281') === false,
-    'stats_html "Current price" uses the median ($3,711), not the mean'
+    'stats_html headline stat uses the median ($3,711), not the mean'
 );
 
 // p50 fallback path when median_price is absent but percentiles exist.
@@ -1036,8 +1041,8 @@ check(
     'hero_stats_html renders the hero stat card grid'
 );
 check(
-    strpos($hero_cards, '$3,510') !== false && strpos($hero_cards, 'Current price') !== false,
-    'hero_stats_html leads with the median current price'
+    strpos($hero_cards, '$3,510') !== false && strpos($hero_cards, 'Median (all qualities)') !== false,
+    'hero_stats_html leads with the page median across all quality grades'
 );
 check(
     strpos($hero_cards, '27,523') !== false,
@@ -1221,6 +1226,13 @@ check(
     strpos($detail_copy, 'Legacy duplicate') === false,
     'overview_detail_dynamic ignores legacy intro/ranking_summary keys'
 );
+$combined_copy = $renderer->copy_dynamic_html('overview_combined_dynamic', $all_shapes_ctx, $copy_bag);
+check(
+    strpos($combined_copy, 'Oval leads') !== false
+        && strpos($combined_copy, 'Trend paragraph') !== false
+        && strpos($combined_copy, 'ldn-copy-overview') !== false,
+    'overview_combined_dynamic merges shape_analysis then analysis in one section'
+);
 
 // --- 16. diamond-type intro from type_summary fallback (CP3) -----------------
 // Test intent: type_overview_dynamic leads with the most-listed carat tier's own
@@ -1299,7 +1311,11 @@ check(
 $ringspo_type_ctx = new LDN_Page_Context('ringspo', 'diamond-type', 'us', 'natural');
 $tiers_html = $renderer->carat_tiers_table_html(
     $ringspo_type_ctx,
-    $type_summary_bag,
+    array_merge($type_summary_bag, array(
+        'price_per_carat_chart' => array(
+            'data' => array(array('x' => array('1 ct'), 'y' => array(3107), 'type' => 'scatter')),
+        ),
+    )),
     'Natural diamond prices by carat weight'
 );
 check(
@@ -1316,9 +1332,20 @@ check(
     'carat_tiers_table_html shows price-per-carat equal to median at 1ct'
 );
 check(
-    strpos($tiers_html, 'do not increase proportionally') !== false
-        && strpos($tiers_html, 'Click a carat') !== false,
-    'Ringspo carat tiers table includes how-to-read and PPC commentary'
+    strpos($tiers_html, 'Click a carat') !== false,
+    'Ringspo carat tiers table includes how-to-read copy'
+);
+check(
+    strpos($tiers_html, 'do not increase proportionally') === false,
+    'Ringspo carat tiers table omits milestone copy (lives under the chart)'
+);
+check(
+    strpos($tiers_html, 'ldn-table-scroll') !== false,
+    'carat_tiers_table_html wraps the table in a scroll container'
+);
+check(
+    strpos($tiers_html, 'ldn-price-per-carat-block') !== false,
+    'carat_tiers_table_html nests the price-per-carat chart block'
 );
 check(
     strpos($tiers_html, 'ldn-row-highlight') !== false,
@@ -1347,21 +1374,76 @@ check(
     'diamond-type hero stats show total diamonds tracked'
 );
 check(
-    strpos($type_hero_stats, '$3,107') !== false,
-    'diamond-type hero stats show anchor-carat typical price'
-);
-check(
-    strpos($type_hero_stats, '91,399') !== false,
-    'diamond-type hero stats show anchor-carat sample size'
+    strpos($type_hero_stats, '$3,107') === false,
+    'diamond-type hero stats omit anchor-carat price (covered by intro + lookup)'
 );
 
-$type_explore = $renderer->diamond_type_explore_html($ringspo_type_ctx);
-check(
-    strpos($type_explore, 'ldn-diamond-type-explore') !== false,
-    'diamond_type_explore renders the explore section'
+$combined_section = $renderer->render_section(
+    'comparison_chart',
+    $ringspo_type_ctx,
+    array_merge($type_summary_bag, array(
+        'price_per_carat_chart' => array(
+            'data' => array(array('x' => array('1 ct'), 'y' => array(3107), 'type' => 'scatter')),
+        ),
+    )),
+    'USD'
 );
 check(
-    strpos($type_explore, 'lab-grown') !== false && strpos($type_explore, 'compare shapes') !== false,
+    strpos($combined_section, 'ldn-carat-tiers-table') !== false,
+    'comparison_chart section renders the combined carat tiers section'
+);
+
+$toggle_html = $renderer->nat_lab_toggle_html($ringspo_type_ctx);
+check(
+    $toggle_html === '',
+    'nat_lab_toggle returns empty when site entitlements are absent from the bundle'
+);
+
+if (!class_exists('LDN_Config_Ringspo_Toggle')) {
+    class LDN_Config_Ringspo_Toggle extends LDN_Config {
+        public function get_bundle() {
+            return array(
+                'entitlements' => array(
+                    'sites' => array(
+                        'ringspo' => array(
+                            'pages' => array(
+                                'diamond-type' => array(
+                                    'wp_widgets' => array(
+                                        'nat_lab_toggle' => true,
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            );
+        }
+    }
+}
+$ringspo_toggle_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Ringspo_Toggle());
+$toggle_html = $ringspo_toggle_renderer->nat_lab_toggle_html($ringspo_type_ctx);
+check(
+    strpos($toggle_html, 'ldn-nat-lab-toggle__pill--active') !== false,
+    'nat_lab_toggle marks the current diamond type active when entitled'
+);
+check(
+    strpos($toggle_html, 'lab-grown') !== false,
+    'nat_lab_toggle links to the sibling diamond type when entitled'
+);
+
+$lookup_html = $renderer->type_carat_lookup_html($ringspo_type_ctx, $type_summary_bag, 'USD');
+check(
+    strpos($lookup_html, 'ldn-type-carat-lookup-manifest') !== false,
+    'type_carat_lookup embeds tier manifest JSON'
+);
+
+$explore_html = $renderer->diamond_type_explore_html($ringspo_type_ctx, $type_summary_bag);
+check(
+    strpos($explore_html, 'ldn-type-nav-card') !== false,
+    'diamond_type_explore renders navigation cards'
+);
+check(
+    strpos($explore_html, 'lab-grown') !== false && strpos($explore_html, 'compare shapes') !== false,
     'diamond_type_explore links to the opposite type hub and all-shapes entry'
 );
 
@@ -1526,8 +1608,49 @@ $cc_with_size = $size_card_renderer->render_section(
 );
 check(
     strpos($cc_with_size, 'ldn-color-clarity') !== false
-        && strpos($cc_with_size, 'ldn-price-size-card') !== false,
-    'color_clarity section appends the size dimensions card after the heatmap'
+        && strpos($cc_with_size, 'ldn-price-size-card') === false,
+    'color_clarity section no longer appends the size dimensions card'
+);
+$size_explore = $size_card_renderer->render_section(
+    'size_explore_link',
+    $ringspo_shape_ctx,
+    array(),
+    'USD'
+);
+check(
+    strpos($size_explore, 'ldn-size-explore-link') !== false
+        && strpos($size_explore, 'View size chart') !== false,
+    'size_explore_link renders the compact pricing→size cross-link'
+);
+
+// --- buying_advice_static legacy merge ---------------------------------------
+// Test intent: merged buying advice prefers buying_advice and falls back to
+// concatenating legacy expert_take + buying_guidance until C1 regenerates.
+// Would fail if: only the first legacy key rendered or keys were skipped.
+if (!class_exists('LDN_Fetcher_Buying_Advice')) {
+    class LDN_Fetcher_Buying_Advice extends LDN_Data_Fetcher {
+        public function fetch_artefact($artefact_id, $ctx) {
+            return null;
+        }
+    }
+}
+$advice_renderer = new LDN_Renderer(new LDN_Fetcher_Buying_Advice(), new LDN_Config_Size_Link());
+$legacy_advice = $advice_renderer->render_section(
+    'buying_advice_static',
+    $ringspo_shape_ctx,
+    array(
+        'static' => array(
+            'expert_take' => 'Lead with cut.',
+            'buying_guidance' => 'VS2 is the sweet spot.',
+        ),
+    ),
+    'USD'
+);
+check(
+    strpos($legacy_advice, 'Buying advice') !== false
+        && strpos($legacy_advice, 'Lead with cut.') !== false
+        && strpos($legacy_advice, 'VS2 is the sweet spot.') !== false,
+    'buying_advice_static merges legacy expert_take and buying_guidance'
 );
 check(
     strpos($cc_html, '<th scope="col">D</th>') < strpos($cc_html, '<th scope="col">H</th>'),
@@ -1728,9 +1851,9 @@ check(
     'shapes_at_carat dispatches to shape_cards when entitled on all-shapes'
 );
 
-// Test intent: all-shapes shape cards expose rank, sample size, range, chart, and
-// extended ranking table; partial coverage surfaces above the grid on staging.
-// Would fail if: cards stayed price-only or partial coverage never rendered in the hub.
+// Test intent: all-shapes shape cards expose rank, sample size, range, and chart;
+// partial coverage surfaces above the grid on staging.
+// Would fail if: cards stayed price-only or the ranking table were still appended.
 $rich_hub_bag = array(
     'ranking' => array(
         'currency_symbol' => '$',
@@ -1758,7 +1881,7 @@ $rich_hub_bag = array(
     ),
     'ranking_chart' => array(
         'data' => array(array('x' => array('Round', 'Oval'), 'y' => array(3510, 3200), 'type' => 'bar')),
-        'layout' => array(),
+        'layout' => array('title' => array('text' => 'United States 1 Carat Natural Diamond Prices by Shape')),
     ),
     'summary' => array(
         'aggregate' => array(
@@ -1773,7 +1896,9 @@ check(strpos($rich_cards, '#1') !== false, 'shape_cards show rank on each card')
 check(strpos($rich_cards, '45,000 diamonds') !== false, 'shape_cards show sample size');
 check(strpos($rich_cards, '$1,800–$8,900') !== false, 'shape_cards show price range');
 check(strpos($rich_cards, 'ldn-shapes-ranking-chart') !== false, 'shape_cards append the ranking bar chart');
-check(strpos($rich_cards, 'ldn-shapes-ranking-table--extended') !== false, 'shape_cards append the extended ranking table');
+check(strpos($rich_cards, 'ldn-chart__title') !== false, 'shape_cards chart uses an H3 title from the Plotly payload');
+check(strpos($rich_cards, 'United States 1 Carat Natural Diamond Prices by Shape') !== false, 'shape_cards chart title comes from layout.title.text');
+check(strpos($rich_cards, 'ldn-shapes-ranking-table--extended') === false, 'shape_cards no longer append the extended ranking table');
 $partial_banner = $method_renderer->shape_cards_html($method_all_ctx, $rich_hub_bag);
 check(strpos($partial_banner, 'ldn-partial-coverage') !== false, 'shape_cards show partial-coverage banner when flagged');
 
@@ -1793,6 +1918,7 @@ check(
 
 $explore_html = $ringspo_renderer->all_shapes_explore_html($all_shapes_ctx);
 check(strpos($explore_html, 'ldn-all-shapes-explore') !== false, 'all_shapes_explore renders explore section');
+check(strpos($explore_html, 'ldn-explore-card') !== false, 'all_shapes_explore uses explore cards');
 check(
     strpos($explore_html, 'lab-grown') !== false,
     'all_shapes_explore links natural hub to lab-grown at the same carat'
@@ -1838,13 +1964,9 @@ check(
 );
 
 // --- 14. CP54_04 chart text fallback ----------------------------------------
-// Test intent: a summary-backed chart carries its factual statement INSIDE the
-// Plotly target div, so the data is in the HTML source for anything that does not
-// run JavaScript, and Plotly.newPlot() wipes it when the chart draws (no visible
-// duplication of intro_html / freshness_html for ordinary readers).
-// Would fail if: the fallback were emitted as a sibling of the target div or its
-// own <section> (permanently visible, duplicating the intro), if it were omitted
-// entirely (empty div — the CP54_04 gap), or if it were injected unescaped.
+// Test intent: chart fallback is screen-reader/crawler-only so sighted readers
+// are not shown a second median line under the hero stats.
+// Would fail if: ldn-chart-fallback--sr were omitted (visible duplicate copy).
 $cp5404_summary = array(
     'analysis_date' => '2026-07-27',
     'distribution'  => array('median_price' => 5200, 'sample_size' => 1842),
@@ -1875,6 +1997,10 @@ $target_pos = strpos($chart_with_fallback, 'class="ldn-chart-target"');
 $fallback_pos = strpos($chart_with_fallback, 'ldn-chart-fallback');
 $close_pos = strpos($chart_with_fallback, '</div>');
 check($fallback_pos !== false, 'chart renders the text fallback');
+check(
+    strpos($chart_with_fallback, 'ldn-chart-fallback--sr') !== false,
+    'chart fallback is visually hidden for sighted readers'
+);
 check(
     $target_pos !== false && $fallback_pos > $target_pos && $fallback_pos < $close_pos,
     'fallback sits INSIDE the Plotly target div so newPlot() replaces it'
@@ -2098,6 +2224,10 @@ check(
     $renderer->coerce_section_band('accent', 'plain', true) === 'accent',
     'accent on the last section is allowed before the purple footer'
 );
+check(
+    $renderer->coerce_section_band('tint', '', false, true) === 'plain',
+    'tint immediately after the green hero band coerces to plain'
+);
 
 // The declared band must reach the rendered page: the section loop is the only
 // place that reads the map, so a profile declaring a band and the page ignoring
@@ -2259,6 +2389,14 @@ check(
 check(
     strpos($calc_html, '26,895') !== false,
     'the lead paragraph discloses the pool the comparison draws on'
+);
+check(
+    strpos($calc_html, 'Typical for this spec') !== false,
+    'calculator headline distinguishes spec-level price from the page median'
+);
+check(
+    strpos($calc_html, 'median at the top of this page') !== false,
+    'calculator intro explains the page median vs spec-level answer'
 );
 check(
     strpos($calc_html, '<noscript>') !== false,

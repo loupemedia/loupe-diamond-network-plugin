@@ -274,23 +274,44 @@ $parsed = $renderer->parse_compare_slug('round-1-carat-vs-princess-1-carat', 'ri
 check($parsed !== null && $parsed['a']['shape'] === 'round' && $parsed['b']['shape'] === 'princess', 'parse_compare_slug splits round vs princess');
 
 $ind_a = array(
-    'shape' => 'round', 'carat_band' => '1', 'source' => 'real',
+    'shape' => 'round', 'carat_band' => '1', 'source' => 'real', 'n' => 12000,
     'dimensions_mm' => array(
         'length' => array('median' => 6.37),
         'width' => array('median' => 6.41),
     ),
     'faceup_area_mm2' => array('median' => 32.0),
+    'depth_percent' => array('mean' => 61.5),
+    'table_percent' => array('mean' => 57.0),
+    'lw_ratio' => array('median' => 1.0),
+    'ideal' => array(
+        'length_mm' => 6.5,
+        'width_mm' => 6.5,
+        'faceup_area_mm2' => 33.18,
+    ),
+    'visuals' => array('scale_reference_svg' => '<svg id="scale-a"></svg>'),
 );
 $ind_b = array(
-    'shape' => 'princess', 'carat_band' => '1', 'source' => 'real',
+    'shape' => 'princess', 'carat_band' => '1', 'source' => 'real', 'n' => 8000,
     'dimensions_mm' => array(
         'length' => array('median' => 5.5),
         'width' => array('median' => 5.5),
     ),
     'faceup_area_mm2' => array('median' => 28.0),
+    'depth_percent' => array('mean' => 74.0),
+    'visuals' => array('scale_reference_svg' => '<svg id="scale-b"></svg>'),
 );
 $comp = $renderer->build_comparison_summary($ind_a, $ind_b);
 check(isset($comp['type']) && $comp['type'] === 'comparison' && $comp['bigger'] === 'a', 'build_comparison_summary marks larger face-up stone');
+check(isset($comp['a']['depth_percent']) && $comp['a']['depth_percent'] == 61.5, 'build_comparison_summary copies depth % from individual summary');
+check(isset($comp['visuals']['scale_reference_a_svg']) && strpos($comp['visuals']['scale_reference_a_svg'], 'scale-a') !== false,
+    'build_comparison_summary copies quarter-scale SVG from individual summary');
+check(isset($comp['a']['faceup_delta_pct']), 'build_comparison_summary computes ideal face-up delta');
+
+$delta_html = $renderer->comparison_delta_html($comp);
+check(strpos($delta_html, 'ldn-size-comparison-delta') !== false, 'comparison delta section renders');
+
+$table_html = $renderer->comparison_table_html($comp);
+check(strpos($table_html, 'Side-by-side measurements') !== false, 'comparison table section renders');
 
 $ctx_cmp = new LDN_Page_Context('ringspo', 'size-comparison', 'us', null, null, null, 'size', 'round-1-carat-vs-princess-1-carat');
 $head_longtail = $renderer->render_head_content($ctx_cmp, $comp, false);
@@ -407,6 +428,9 @@ check(strpos($hub_table, 'ldn-size-table-thumb') !== false, 'hub table includes 
 $ctx_shape_hub = new LDN_Page_Context('ringspo', 'size-shape-hub', 'us', null, null, 'round', 'size');
 $shape_table = $renderer->hub_table_html($ctx_shape_hub, $hub_summary);
 check(strpos($shape_table, 'Round diamond size chart by carat weight') !== false, 'shape hub table heading names the shape');
+check(strpos($shape_table, 'ldn-size-hub-table--ladder') !== false, 'shape hub table uses matrix ladder styling');
+check(strpos($shape_table, 'ldn-size-matrix-scroll') !== false, 'shape hub table wraps in matrix scroll');
+check(strpos($shape_table, 'ldn-size-matrix__outline') !== false, 'shape hub table uses matrix outline class');
 check(strpos($shape_table, '>1 ct</a>') !== false || strpos($shape_table, '>1 ct<') !== false, 'shape hub table lists carat weights');
 
 $shape_hub_summary = array(
@@ -475,8 +499,13 @@ check(strpos($checker_html, 'mode_a') !== false, 'panel A has reference/manual m
 check(strpos($checker_html, 'ldn-checker-enable-b') !== false, 'second diamond is opt-in via checkbox');
 check(strpos($checker_html, 'id="ldn-checker-panel-b-wrap" hidden') !== false, 'panel B is hidden until enabled');
 check(strpos($checker_html, 'ldn-checker-submit') !== false, 'checker has an explicit Check button');
-check(strpos($checker_html, 'id="ldn-size-checker-results" aria-live="polite" hidden') !== false, 'results section is separate and initially hidden');
+check(strpos($checker_html, 'id="ldn-size-checker-results" aria-live="polite"') !== false, 'full tool results section is visible on load');
+check(strpos($checker_html, 'ldn-size-checker-empty') !== false, 'full tool includes example empty state');
+check(strpos($checker_html, 'ldn-size-checker-how') !== false, 'full tool includes how-it-works steps');
+check(strpos($checker_html, 'ldn-size-checker-explore') !== false, 'full tool includes explore links');
+check(strpos($checker_html, 'ldn-size-checker--full') !== false, 'full tool variant class is set');
 check(strpos($checker_html, 'ldn-checker-depth-a') !== false, 'manual entry offers optional depth input');
+check(strpos($checker_html, 'Your diamond') === false, 'checker panel A omits the Your diamond legend');
 check(strpos($checker_html, 'ldn-size-compare-popular') !== false, 'full tool lists crawlable popular comparisons');
 
 // Widget mode: compact heading + link to the full tool, no popular list.
@@ -485,6 +514,8 @@ $widget_html = $widget_renderer->size_checker_body_html($ctx_checker, $checker_s
 check(strpos($widget_html, 'ldn-size-checker--widget') !== false, 'widget variant renders compact class');
 check(strpos($widget_html, 'ldn-size-checker__surface') !== false, 'widget wraps form and results in a white surface');
 check(strpos($widget_html, 'ldn-size-checker-full-link') !== false, 'widget links to the full checker');
+check(strpos($widget_html, 'id="ldn-size-checker-results" aria-live="polite" hidden') !== false, 'widget keeps results hidden until submit');
+check(strpos($widget_html, 'ldn-size-checker-how') === false, 'widget omits how-it-works block');
 check(strpos($widget_html, 'ldn-size-compare-popular') === false, 'widget omits the popular comparisons list');
 
 // Test intent: methodology page renders dataset stat cards and templated
@@ -578,6 +609,10 @@ check(strpos($price_html, '$3,510') !== false, 'price block embeds the live medi
 check(strpos($price_html, '27,523') !== false, 'price block embeds the sample count');
 check(strpos($price_html, '$1,030') !== false && strpos($price_html, '$19,270') !== false, 'price block embeds the price range');
 check(strpos($price_html, 'diamond-prices/natural/1-carat/round') !== false, 'price card links to the pricing page');
+
+$cmp_price_html = $renderer_price->comparison_price_links_html($ctx_cmp, $comp);
+check(strpos($cmp_price_html, 'per carat') !== false, 'comparison price block shows per-carat figures');
+check(strpos($cmp_price_html, 'What do these diamonds cost?') !== false, 'comparison price block has section heading');
 
 $renderer_fallback = new LDN_Size_Renderer(new LDN_Data_Fetcher(), $config);
 $fallback_html = $renderer_fallback->price_links_html($ctx);

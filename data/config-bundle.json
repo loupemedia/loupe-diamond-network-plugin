@@ -1,6 +1,6 @@
 {
-  "version": "8a0bb13",
-  "generated_at": "2026-08-04T11:05:23.483339+00:00",
+  "version": "635415d",
+  "generated_at": "2026-08-06T12:24:52.913720+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -9012,20 +9012,15 @@
         "Focus on loose diamond vs ring framing — what changes when the same {carat}-carat {shape} is purchased as a loose stone versus set."
       ],
       "section_prompts": {
-        "expert_take_static": {
-          "json_key": "expert_take",
-          "instruction": "Write in the Ringspo voice: direct, opinionated, plainspoken, buyer-side. Lead with the single most useful thing someone buying a {carat}-carat {shape} needs to hear — not an observation about the market, but a practical opinion that shapes how they should approach this purchase. Sound like a knowledgeable friend giving honest advice, not an analyst summarising a category. Skip preambles. No market commentary as an opener. Get straight to what matters for this specific shape and size.\n",
-          "length": "3-4 sentences"
-        },
         "pricing_context_static": {
           "json_key": "pricing_context",
           "instruction": "Write in the Ringspo voice: plain, direct, matter-of-fact. Explain the structural reasons why {carat}-carat {shape} diamonds are priced the way they are — the manufacturing, cutting, or demand factors that are built into the price regardless of market conditions. This is durable context that the price graph cannot show. Keep it positive and practical: frame each pricing factor as useful knowledge that helps the buyer understand what they are paying for and shop confidently. Do not comment on price levels or market movements — the graph handles that. Do not mention resale or investment value.\n",
           "length": "2-3 sentences"
         },
-        "buying_guidance_static": {
-          "json_key": "buying_guidance",
-          "instruction": "Write in the Ringspo voice: blunt recommendations, clear priorities, plain explanations of why. Give specific guidance on cut grade, color, and clarity for {carat}-carat {shape} diamonds — what to prioritise, where to save without losing visible quality, and the most common mistake buyers make here. Every watch-out must be immediately paired with a clear positive action. Sound like someone who has seen a lot of buyers make avoidable mistakes and wants to help this buyer avoid them. Lead with the most important recommendation, not with a structure of topics.\n",
-          "length": "4-5 sentences"
+        "buying_advice_static": {
+          "json_key": "buying_advice",
+          "instruction": "Write in the Ringspo voice: direct, opinionated, plainspoken, buyer-side. Combine the sharp opening opinion a knowledgeable friend would give with specific cut, colour and clarity guidance for {carat}-carat {shape} diamonds. Lead with the single most useful thing someone needs to hear, then spell out what to prioritise, where to save without losing visible quality, and the most common mistake buyers make at this shape and weight. Every watch-out must be immediately paired with a clear positive action. No market commentary as an opener and no preamble — get straight to what matters for this purchase.\n",
+          "length": "6-8 sentences"
         },
         "faq_static": {
           "json_key": "faq",
@@ -9069,11 +9064,11 @@
           "hero_component": "distribution_chart",
           "sections": [
             "pricing_context_static",
-            "expert_take_static",
-            "price_calculator",
             "color_clarity",
-            "buying_guidance_static",
+            "price_calculator",
+            "buying_advice_static",
             "faq_static",
+            "size_explore_link",
             "cross_site_comparison",
             "data_methodology"
           ],
@@ -9090,17 +9085,15 @@
           "hero_component": null,
           "sections": [
             "shapes_at_carat",
-            "overview_analysis_dynamic",
-            "overview_detail_dynamic",
-            "shape_breakdown_static",
-            "expert_recommendations",
+            "overview_combined_dynamic",
+            "price_calculator",
             "all_shapes_explore",
             "faq_static",
             "data_methodology"
           ],
           "section_bands": {
             "shapes_at_carat": "tint",
-            "expert_recommendations": "tint",
+            "price_calculator": "tint",
             "faq_static": "tint"
           },
           "ad_slots": [
@@ -9109,9 +9102,9 @@
           ]
         },
         "diamond_type": {
-          "hero_component": "comparison_chart",
+          "hero_component": null,
           "sections": [
-            "price_per_carat_chart",
+            "comparison_chart",
             "natural_vs_lab_analysis",
             "buying_considerations",
             "diamond_type_explore",
@@ -9133,10 +9126,8 @@
             "market_overview_table",
             "type_nav_links",
             "market_guidance_static",
-            "quality_overview_static",
             "shape_preview",
             "most_traded_table",
-            "top_level_explore",
             "faq_static",
             "data_methodology"
           ],
@@ -10563,6 +10554,9 @@
             "wp_widgets": {
               "shapes_at_carat": {
                 "presentation": "shape_cards"
+              },
+              "price_calculator": {
+                "presentation": "hub"
               },
               "cross_site_comparison": {
                 "presentation": "disabled"
@@ -13550,7 +13544,8 @@
           "price_calculator_json"
         ],
         "page_levels": [
-          "shape"
+          "shape",
+          "all-shapes"
         ]
       },
       "impact_dashboard": {

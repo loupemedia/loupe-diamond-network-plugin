@@ -98,22 +98,6 @@ final class LDN_Renderer {
     );
 
     /**
-     * Display headings for static editorial sections whose auto-generated
-     * title (from the section id) would read poorly. Falls back to the
-     * title-cased section id when a key is absent.
-     *
-     * @var array<string, string>
-     */
-    private static $SECTION_HEADINGS = array(
-        'type_comparison'         => 'Natural vs Lab-Grown',
-        'shape_preview'           => 'Comparing Diamond Shapes',
-        'natural_vs_lab_analysis' => 'Natural vs Lab-Grown Diamonds',
-        'price_factors'           => 'What Affects Diamond Prices',
-        'market_guidance'         => 'How to Use These Prices',
-        'quality_overview'        => 'Diamond Quality Basics',
-    );
-
-    /**
      * Dynamic section id → copy.json section keys per page level.
      *
      * @var array<string, array<string, string[]>>
@@ -125,6 +109,7 @@ final class LDN_Renderer {
             'overview_intro_dynamic' => array('intro_text'),
             'overview_analysis_dynamic' => array('analysis'),
             'overview_detail_dynamic' => array('shape_analysis'),
+            'overview_combined_dynamic' => array('shape_analysis', 'analysis'),
         ),
         'diamond-type' => array(
             'type_overview_dynamic' => array('intro'),
@@ -285,10 +270,15 @@ final class LDN_Renderer {
             if ($hub_intro !== '') {
                 $out .= $hub_intro;
             }
-            if (!$hero_inline) {
-                $out .= $hero_html;
+            if ($ctx->page_level === 'diamond-type') {
+                $out .= $this->hero_stats_html($ctx, $summary, $currency);
+                $out .= $this->diamond_type_hero_tools_html($ctx, $bag, $currency);
+            } else {
+                if (!$hero_inline) {
+                    $out .= $hero_html;
+                }
+                $out .= $this->hero_stats_html($ctx, $summary, $currency);
             }
-            $out .= $this->hero_stats_html($ctx, $summary, $currency);
             $out .= '</header>';
             $out .= $this->ad_injection_html($ad_injections, 'after_hero');
         } else {
@@ -334,7 +324,8 @@ final class LDN_Renderer {
             $band = $this->coerce_section_band(
                 $rendered_sections[$i]['declared'],
                 $previous_band,
-                $is_last
+                $is_last,
+                $hero_band && $i === 0
             );
             $out .= $this->apply_section_band($rendered_sections[$i]['html'], $band);
             $out .= $this->ad_injection_html(

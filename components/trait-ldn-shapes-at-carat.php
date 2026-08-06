@@ -48,8 +48,7 @@ trait LDN_Trait_Shapes_At_Carat {
     /**
      * Linked shape cards grid for all-shapes hubs (Ringspo, DA, BDI).
      *
-     * When ranking chart data is present, appends the bar chart and an extended
-     * comparison table below the card grid (same pattern as bar_chart_links).
+     * When ranking chart data is present, appends the bar chart below the card grid.
      *
      * @param LDN_Page_Context $ctx
      * @param array            $bag
@@ -196,15 +195,24 @@ trait LDN_Trait_Shapes_At_Carat {
             . '<div class="ldn-shape-cards__grid">' . $cards . '</div>'
             . '</section>';
 
+        $type_label = isset(self::$TYPE_LABELS[$ctx->diamond_type])
+            ? self::$TYPE_LABELS[$ctx->diamond_type]
+            : ucwords(str_replace('-', ' ', (string) $ctx->diamond_type));
+        $chart_fallback_title = sprintf(
+            /* translators: 1: carat label, 2: diamond type label, 3: country name */
+            __('%1$s Carat %2$s Diamond Prices by Shape — %3$s', 'loupe-diamond-network'),
+            $carat_label !== '' ? $carat_label : '1',
+            $type_label,
+            $this->country_full_name($ctx)
+        );
+
         $chart = $this->chart_html(
             isset($bag['ranking_chart']) && is_array($bag['ranking_chart']) ? $bag['ranking_chart'] : array(),
             'ldn-shapes-ranking-chart',
-            __('Prices by shape', 'loupe-diamond-network')
+            $chart_fallback_title
         );
 
-        $table = $this->shapes_ranking_table_html($ctx, $bag, true);
-
-        return $section . $chart . $table;
+        return $section . $chart;
     }
 
     /**

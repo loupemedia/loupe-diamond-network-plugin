@@ -134,19 +134,12 @@ final class LDN_Size_Dispatcher {
             }
         }
 
-        $primary = isset(self::PRIMARY_ARTEFACT[$ctx->page_level])
-            ? self::PRIMARY_ARTEFACT[$ctx->page_level]
-            : null;
-        $data = null;
-        $this->comparison_indexable = true;
-
-        if ($ctx->page_level === 'size-comparison') {
-            $data = $this->load_comparison_data($ctx, $primary);
-        } elseif ($primary !== null) {
-            $data = $this->fetcher->fetch_artefact($primary, $ctx);
-        }
+        $data = $this->fetch_primary_data($ctx);
 
         if ($data === null) {
+            $primary = isset(self::PRIMARY_ARTEFACT[$ctx->page_level])
+                ? self::PRIMARY_ARTEFACT[$ctx->page_level]
+                : null;
             LDN_Diagnostics::note(
                 $primary !== null
                     ? "Primary size artefact missing or failed: {$primary}."
@@ -242,6 +235,29 @@ final class LDN_Size_Dispatcher {
             'size',
             $compare_slug
         );
+    }
+
+    /**
+     * Load the primary size-summary payload for a resolved page context.
+     *
+     * Used by the WP dispatcher and the local preview harness.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return array|null
+     */
+    public function fetch_primary_data(LDN_Page_Context $ctx) {
+        $primary = isset(self::PRIMARY_ARTEFACT[$ctx->page_level])
+            ? self::PRIMARY_ARTEFACT[$ctx->page_level]
+            : null;
+        $this->comparison_indexable = true;
+
+        if ($ctx->page_level === 'size-comparison') {
+            return $this->load_comparison_data($ctx, $primary);
+        }
+        if ($primary !== null) {
+            return $this->fetcher->fetch_artefact($primary, $ctx);
+        }
+        return null;
     }
 
     /**
