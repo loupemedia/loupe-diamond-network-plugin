@@ -61,17 +61,38 @@
 		return String(template || '').replace('%s', value);
 	}
 
-	function groupLabel(manifest, key, groupKey) {
-		var groups = manifest[key];
-		if (!Array.isArray(groups)) {
-			return groupKey;
+	function gradeOptions(manifest, key) {
+		if (Array.isArray(manifest[key]) && manifest[key].length) {
+			return manifest[key];
 		}
-		for (var i = 0; i < groups.length; i += 1) {
-			if (groups[i] && String(groups[i].key) === String(groupKey)) {
-				return groups[i].label || groupKey;
+		var legacyKey = key === 'colours' ? 'colour_groups' : (key === 'clarities' ? 'clarity_groups' : '');
+		return legacyKey && Array.isArray(manifest[legacyKey]) ? manifest[legacyKey] : [];
+	}
+
+	function gradeLabel(manifest, key, gradeKey) {
+		var grades = gradeOptions(manifest, key);
+		for (var i = 0; i < grades.length; i += 1) {
+			if (grades[i] && String(grades[i].key) === String(gradeKey)) {
+				return grades[i].label || gradeKey;
 			}
 		}
-		return groupKey;
+		return gradeKey;
+	}
+
+	function gradeValueAtIndex(manifest, key, index) {
+		var grades = gradeOptions(manifest, key);
+		var entry = grades[index];
+		return entry && entry.key ? String(entry.key) : '';
+	}
+
+	function gradeIndexForValue(manifest, key, value) {
+		var grades = gradeOptions(manifest, key);
+		for (var i = 0; i < grades.length; i += 1) {
+			if (grades[i] && String(grades[i].key) === String(value)) {
+				return i;
+			}
+		}
+		return 0;
 	}
 
 	function pooledKey(manifest) {
@@ -81,8 +102,8 @@
 	function specLabel(manifest, selection) {
 		var labels = manifest.labels;
 		var parts = [];
-		parts.push(sprintfOne(labels.colour, groupLabel(manifest, 'colour_groups', selection.colour)));
-		parts.push(sprintfOne(labels.clarity, groupLabel(manifest, 'clarity_groups', selection.clarity)));
+		parts.push(sprintfOne(labels.colour, gradeLabel(manifest, 'colours', selection.colour)));
+		parts.push(sprintfOne(labels.clarity, gradeLabel(manifest, 'clarities', selection.clarity)));
 		if (manifest.has_cut_dimension) {
 			parts.push(
 				selection.cut === pooledKey(manifest)
@@ -110,9 +131,11 @@
 	}
 
 	/**
-	 * Which band a quoted price falls in. Bands, not an interpolated percentile:
-	 * five published points cannot support that precision.
-	 */
+ * Which band a quoted price falls in. Bands, not an interpolated percentile:
+ * five published points cannot support that precision.
+ *
+ * Canonical implementation: sparklescore/scoring/verdict_band.py — keep in sync.
+ */
 	function verdictKey(percentiles, quote) {
 		var values = PERCENTILES.map(function (key) {
 			return typeof percentiles[key] === 'number' ? percentiles[key] : null;
@@ -134,6 +157,45 @@
 		return null;
 	}
 
+	/**
+	 * Hybrid slot: percentile band (p10–p25 … p75–p90) plus sub-position 0–3 within
+	 * the band. Eighteen interior slots + below/above extremes.
+	 */
+	function quoteAnalysisKey(percentiles, quote) {
+		var knots = ['p10', 'p25', 'p50', 'p75', 'p90'];
+		var values = knots.map(function (key) {
+			return typeof percentiles[key] === 'number' ? percentiles[key] : null;
+		});
+		if (values.indexOf(null) !== -1) {
+			return null;
+		}
+		if (quote < values[0]) {
+			return 'below_p10';
+		}
+		if (quote > values[4]) {
+			return 'above_p90';
+		}
+		var bands = ['p10_p25', 'p25_p50', 'p50_p75', 'p75_p90'];
+		for (var i = 0; i < bands.length; i += 1) {
+			var lower = values[i];
+			var upper = values[i + 1];
+			if (quote >= lower && quote <= upper) {
+				var ratio = (quote - lower) / (upper - lower);
+				var sub = Math.min(3, Math.floor(ratio * 4));
+				return bands[i] + '_' + sub;
+			}
+		}
+		return null;
+	}
+
+	function quoteAnalysisText(labels, percentiles, quote) {
+		if (quote === null || !labels || !labels.quoteAnalysis) {
+			return '';
+		}
+		var key = quoteAnalysisKey(percentiles, quote);
+		return key && labels.quoteAnalysis[key] ? labels.quoteAnalysis[key] : '';
+	}
+
 	function paragraph(text, className) {
 		var p = document.createElement('p');
 		if (className) {
@@ -143,10 +205,71 @@
 		return p;
 	}
 
-	function render(manifest, region, selection, quote) {
+	function labelledPrice(className, label, value) {
+		var node = document.createElement('span');
+		node.className = className;
+		var labelNode = document.createElement('span');
+		labelNode.className = 'ldn-price-calculator__bound-label';
+		labelNode.textContent = label;
+		var valueNode = document.createElement('span');
+		valueNode.className = className.indexOf('headline') !== -1
+			? 'ldn-price-calculator__headline-value'
+			: 'ldn-price-calculator__bound-value';
+		valueNode.textContent = value;
+		node.appendChild(labelNode);
+		node.appendChild(valueNode);
+		return node;
+	}
+
+	function priceRow(labels, low, centre, high) {
+		var row = document.createElement('div');
+		row.className = 'ldn-price-calculator__price-row';
+		if (low) {
+			row.appendChild(labelledPrice(
+				'ldn-price-calculator__bound ldn-price-calculator__bound--low',
+				labels.boundLow || 'Lower end',
+				low
+			));
+		}
+		if (centre) {
+			row.appendChild(labelledPrice(
+				'ldn-price-calculator__headline',
+				labels.boundTypical || 'Typical',
+				centre
+			));
+		}
+		if (high) {
+			row.appendChild(labelledPrice(
+				'ldn-price-calculator__bound ldn-price-calculator__bound--high',
+				labels.boundHigh || 'Higher end',
+				high
+			));
+		}
+		return row;
+	}
+
+	function sampleSentence(manifest, selection, cell) {
+		var labels = manifest.labels || {};
+		var n = cell && typeof cell.sample_size === 'number' ? cell.sample_size : 0;
+		if (n < 1) {
+			return '';
+		}
+		var count = n.toLocaleString();
+		var spec = specLabel(manifest, selection);
+		var template;
+		if (spec) {
+			template = n === 1 ? labels.basedOnOne : labels.basedOnMany;
+			return fill(template || '', { count: count, spec: spec });
+		}
+		template = n === 1 ? labels.basedOnOneBare : labels.basedOnManyBare;
+		return fill(template || '', { count: count });
+	}
+
+	function render(manifest, region, selection, quote, root) {
 		var labels = manifest.labels;
 		var symbol = labels.currency || '';
 		var cell = findCell(manifest, selection);
+		var onDestination = root && root.closest('[data-ldn-calculator-destination]');
 
 		region.textContent = '';
 
@@ -158,46 +281,67 @@
 		var p = cell.percentiles;
 
 		if (typeof p.p50 === 'number') {
-			region.appendChild(
-				paragraph(
-					fill(labels.typical, { price: money(p.p50, symbol) }),
-					'ldn-price-calculator__headline'
-				)
-			);
+			var low = typeof p.p10 === 'number' ? money(p.p10, symbol) : '';
+			var high = typeof p.p90 === 'number' ? money(p.p90, symbol) : '';
+			region.appendChild(priceRow(labels, low, money(p.p50, symbol), high));
 		}
 
-		if (quote !== null) {
-			var key = verdictKey(p, quote);
-			if (key && labels.verdicts && labels.verdicts[key]) {
-				region.appendChild(paragraph(labels.verdicts[key], 'ldn-price-calculator__verdict'));
+		var sample = sampleSentence(manifest, selection, cell);
+		if (sample) {
+			region.appendChild(paragraph(sample, 'ldn-price-calculator__sample'));
+		}
+
+		// Destination page renders quote analysis below the spectrum bar instead.
+		if (quote !== null && !onDestination) {
+			var analysis = quoteAnalysisText(labels, p, quote);
+			if (analysis) {
+				region.appendChild(paragraph(analysis, 'ldn-price-calculator__analysis'));
 			}
 		}
+	}
 
-		if (typeof p.p25 === 'number' && typeof p.p75 === 'number') {
-			region.appendChild(
-				paragraph(
-					fill(labels.halfBetween, {
-						low: money(p.p25, symbol),
-						high: money(p.p75, symbol)
-					})
-				)
-			);
+	function syncGradeSliderStops(sliderRoot, index) {
+		var stops = sliderRoot.querySelectorAll('.ldn-grade-slider__stop');
+		stops.forEach(function (stop, stopIndex) {
+			stop.classList.toggle('ldn-grade-slider__stop--active', stopIndex === index);
+		});
+	}
+
+	function initGradeSlider(root, manifest, name, manifestKey, onChange) {
+		var sliderRoot = root.querySelector('[data-ldn-grade-slider="' + name + '"]');
+		if (!sliderRoot) {
+			return null;
+		}
+		var input = sliderRoot.querySelector('[data-ldn-price-calculator-input="' + name + '"]');
+		if (!input) {
+			return null;
 		}
 
-		if (typeof cell.sample_size === 'number' && cell.sample_size > 0) {
-			var basis = cell.sample_size === 1 && labels.basedOnOne
-				? labels.basedOnOne
-				: labels.basedOn;
-			region.appendChild(
-				paragraph(
-					fill(basis, {
-						count: cell.sample_size.toLocaleString(),
-						spec: specLabel(manifest, selection)
-					}),
-					'ldn-price-calculator__basis'
-				)
-			);
+		function setIndex(index) {
+			var value = gradeValueAtIndex(manifest, manifestKey, index);
+			if (!value) {
+				return;
+			}
+			input.value = String(index);
+			syncGradeSliderStops(sliderRoot, index);
+			onChange(value);
 		}
+
+		input.addEventListener('input', function () {
+			setIndex(parseInt(input.value, 10) || 0);
+		});
+
+		sliderRoot.querySelectorAll('.ldn-grade-slider__stop').forEach(function (stop) {
+			stop.addEventListener('click', function () {
+				var value = stop.getAttribute('data-grade-value');
+				if (!value) {
+					return;
+				}
+				setIndex(gradeIndexForValue(manifest, manifestKey, value));
+			});
+		});
+
+		return input;
 	}
 
 	function initCalculator(root) {
@@ -213,34 +357,51 @@
 			return;
 		}
 
-		var inputs = {};
-		['colour', 'clarity', 'cut'].forEach(function (name) {
-			inputs[name] = root.querySelector('[data-ldn-price-calculator-input="' + name + '"]');
-		});
-		var quoteField = root.querySelector('[data-ldn-price-calculator-quote]');
+		var state = {
+			colour: manifest.default_cell && manifest.default_cell.color
+				? manifest.default_cell.color
+				: gradeValueAtIndex(manifest, 'colours', 0),
+			clarity: manifest.default_cell && manifest.default_cell.clarity
+				? manifest.default_cell.clarity
+				: gradeValueAtIndex(manifest, 'clarities', 0),
+			cut: manifest.default_cell && manifest.default_cell.cut_grade
+				? manifest.default_cell.cut_grade
+				: pooledKey(manifest)
+		};
 
-		function selection() {
-			return {
-				colour: inputs.colour ? inputs.colour.value : '',
-				clarity: inputs.clarity ? inputs.clarity.value : '',
-				cut: inputs.cut ? inputs.cut.value : pooledKey(manifest)
-			};
-		}
+		var cutInput = root.querySelector('[data-ldn-price-calculator-input="cut"]');
+		var quoteField = root.querySelector('[data-ldn-price-calculator-quote]');
 
 		function update() {
 			render(
 				manifest,
 				region,
-				selection(),
-				quoteField ? parseQuote(quoteField.value) : null
+				state,
+				quoteField ? parseQuote(quoteField.value) : null,
+				root
 			);
 		}
 
-		Object.keys(inputs).forEach(function (name) {
-			if (inputs[name]) {
-				inputs[name].addEventListener('change', update);
-			}
+		initGradeSlider(root, manifest, 'colour', 'colours', function (value) {
+			state.colour = value;
+			update();
 		});
+		initGradeSlider(root, manifest, 'clarity', 'clarities', function (value) {
+			state.clarity = value;
+			update();
+		});
+		initGradeSlider(root, manifest, 'cut', 'cuts', function (value) {
+			state.cut = value;
+			update();
+		});
+
+		// Legacy select (pre-slider markup) if a cached panel still ships one.
+		if (cutInput && cutInput.tagName === 'SELECT') {
+			cutInput.addEventListener('change', function () {
+				state.cut = cutInput.value;
+				update();
+			});
+		}
 		if (quoteField) {
 			quoteField.addEventListener('input', update);
 		}
@@ -279,6 +440,10 @@
 		document.querySelectorAll('[data-ldn-price-calculator]').forEach(initCalculator);
 		initHub();
 	}
+
+	window.ldnInitPriceCalculator = initCalculator;
+	window.ldnQuoteAnalysisKey = quoteAnalysisKey;
+	window.ldnQuoteAnalysisText = quoteAnalysisText;
 
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', init);

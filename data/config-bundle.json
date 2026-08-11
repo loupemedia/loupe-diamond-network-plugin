@@ -1,6 +1,6 @@
 {
-  "version": "635415d",
-  "generated_at": "2026-08-06T12:24:52.913720+00:00",
+  "version": "9095b47",
+  "generated_at": "2026-08-08T00:56:09.194981+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -9140,6 +9140,15 @@
             "triple_horizontal"
           ]
         },
+        "calculator": {
+          "hero_component": null,
+          "sections": [
+            "calculator_tool",
+            "how_it_works",
+            "what_drives_price"
+          ],
+          "ad_slots": []
+        },
         "size_individual": {
           "hero_component": "shape_outline",
           "sections": [
@@ -9658,6 +9667,7 @@
         "level_3": "/{country}/diamond-prices/{type}/{carat}",
         "level_4": "/{country}/diamond-prices/{type}/{carat}/{shape}",
         "level_5": "/{country}/diamond-prices/{type}/{carat}/{shape}/{lab}/{cert}",
+        "calculator_level": "/{country}/diamond-prices/calculator",
         "price_level_sitemap": "/{country}/diamond-prices/sitemap.xml",
         "type_natural": "natural",
         "type_lab": "lab-grown",
@@ -10598,6 +10608,14 @@
               "data_methodology": {
                 "presentation": "full"
               }
+            }
+          },
+          "calculator": {
+            "wp_widgets": {
+              "price_calculator": {
+                "presentation": "destination"
+              },
+              "individual_listings": false
             }
           },
           "size": {
@@ -13982,5 +14000,11 @@
         }
       }
     }
+  },
+  "launch_sequence": {
+    "current_phase": "product_1_market_index",
+    "next_phase": "phase_8_consumer_advisory",
+    "consumer_features_live": false,
+    "notes": "All network sites launch with diamond pricing / market index content only. Set consumer_features_live true when CP 46–49 ship and ops approves go-live. Until then, WP plugin and pipelines must not render consumer widgets or routes.\n"
   }
 }

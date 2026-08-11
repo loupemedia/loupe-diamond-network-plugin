@@ -160,6 +160,22 @@ final class LDN_Assets {
 					true
 				);
 			}
+			if ($ctx->page_level === 'calculator') {
+				wp_enqueue_script(
+					'ldn-price-calculator-destination',
+					$base_url . 'assets/js/price-calculator-destination.js',
+					array('ldn-price-calculator'),
+					$version,
+					true
+				);
+				wp_localize_script(
+					'ldn-price-calculator-destination',
+					'ldnCalculatorDestination',
+					array(
+						'restUrl' => esc_url_raw(rest_url('ldn/v1/')),
+					)
+				);
+			}
 			if ($ctx->page_level === 'diamond-type') {
 				wp_enqueue_script(
 					'ldn-type-carat-lookup',

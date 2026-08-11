@@ -1,5 +1,107 @@
 # Changelog
 
+## [0.20.28] — 2026-08-08
+
+- **Price-module i18n:** locale switch on all `LDN_Dispatcher` pricing routes; automatic locale restore on `shutdown`.
+- **Translation template:** `scripts/ldn_extract_pot.sh` generates `languages/loupe-diamond-network.pot` (391 strings).
+
+## [0.20.27] — 2026-08-08
+
+- **Calculator i18n:** `LDN_Locale` switches WordPress locale per country on calculator page + panel REST; `get_locale()` and consumer-advisory gates on `LDN_Config`.
+- **Driver copy:** price-driver sentences ship in `manifest.labels` (`driverIncrease` / `driverDecrease`); JS interpolates tokens only.
+- **Consumer guidance slot:** optional `consumer_guidance` section (Phase 8 listings shell), gated by `consumer_advisory_enabled()` + calculator `individual_listings` widget.
+- **Docs:** `docs/architecture/calculator-i18n.md` — locale hooks, rollout checklist, consumer guidance extension.
+
+## [0.20.26] — 2026-08-08
+
+- **Sample line spacing:** more room above the “Based on N diamonds…” line under the price row.
+- **Quote analysis (hybrid):** eighteen interior slots (four percentile bands × four sub-positions) plus below-p10 / above-p90 extremes.
+- **Calculator content:** `how_it_works` and `what_drives_price` sections under the tool (Ringspo profile); driver percentages refresh when selectors change.
+
+## [0.20.25] — 2026-08-08
+
+- **Slider outline fix:** range inputs no longer inherit the text-field border (`input:not([type="range"])`).
+- **Quote analysis:** twelve position slots with natural US copy; each reminds readers that cut, certification, and seller terms matter — not price alone.
+- **No duplicate analysis:** destination page shows commentary once, below the spectrum bar (not above and below the prices).
+
+## [0.20.24] — 2026-08-08
+
+- **Grade slider tracks:** no outline ring (transparent input shell; grey on the track only).
+- **US spelling:** Color (not Colour) on US calculator pages.
+- **Quote spectrum:** solid purple rail (no centre fade); more space under the bar; verdict analysis under “Your quote”.
+- **Sample line** under the price row has more top margin.
+
+## [0.20.23] — 2026-08-08
+
+- **All calculator sliders** match carat: soft grey track, purple thumb, no progress fill.
+- **Lead count** uses `market_overview_json.total_diamonds_tracked` (country-wide inventory), not the default shape-page sample.
+- **Quoted price** hint is shorter and sits under the input; result sample line has no divider rule.
+
+## [0.20.22] — 2026-08-08
+
+- **Brand range control:** native-looking chunky purple thumb + fill, soft grey unfilled track (grade and carat). Drops the bordered “custom UI” thumb.
+- **Calculator lead:** cites diamond pool size and “Prices last updated …” from the manifest date instead of “Compared like-for-like…”.
+
+## [0.20.21] — 2026-08-08
+
+- **Grade slider track:** soft grey unfilled rail with purple fill behind the thumb (custom track/thumb; `--ldn-grade-fill` updated as the value moves).
+
+## [0.20.20] — 2026-08-08
+
+- **Grade slider stops** sit at the same `i/max` positions as the native range thumb (was equal-width flex cells, so end grades looked off).
+- **Result sample line** (“Based on …”) gets more space above it and a light rule so it does not crowd the price row.
+
+## [0.20.19] — 2026-08-08
+
+- **Calculator brand tokens:** destination page wraps in `ldn-page-shell` / `ldn-price-page` and emits `theme_style_block()`, so grade sliders use Ringspo purple instead of the browser's black range thumb.
+- **Quoted price:** narrower field plus a one-line hint on how to use the optional quote check.
+
+## [0.20.18] — 2026-08-08
+
+- **Calculator controls layout:** colour/clarity and cut/quote sit in two columns on desktop (stack on mobile).
+- **Fancy-shape cut:** greyed slider with an explanation instead of removing the control.
+- **Field help:** `?` affordances (details/summary, works with JS off) on colour, clarity, cut, and quoted price.
+
+## [0.20.17] — 2026-08-08
+
+- **Destination pickers:** diamond type is a Natural / Lab-grown segmented control; carat is a range slider paired with a number input (0.3–12, matching the calculator band grid).
+- **Cut stop labels:** long grades abbreviate on the slider (VG / Ex / Ideal) so six stops no longer truncate into each other; full names stay in `aria-label`.
+
+## [0.20.16] — 2026-08-08
+
+- **Calculator answer surface:** cut is a point slider (worst→best, “Any” first); the result labels Lower end / Typical / Higher end and cites “Based on N diamonds at …”.
+- **Destination lead** is a short claim under the H1 (with pool size when known). Shape-page intro about the page median stays on shape pages only — it no longer appears inside the shared panel.
+
+## [0.20.15] — 2026-08-08
+
+- **Shape picker icons keep their aspect ratio:** plugin SVGs are letterboxed in a square viewBox with a uniform scale, so oval no longer collapses to a circle. Size-pipeline unit-box snippets still stretch (required for true millimetre length/width).
+
+## [0.20.14] — 2026-08-08
+
+- **Calculator shape chooser is an icon row:** shape moves from a `<select>` to a keyboard-navigable radio group carrying the faceted outline for each of the ten shapes. Icons are painted as CSS masks so the line-art takes the site's brand colour when selected.
+- Artwork is generated, not hand-drawn: `Sizing/build_shape_svgs.py` now also writes `assets/img/shapes/{shape}.svg` from the same source geometry the size pipeline uses, so the plugin and the size pages cannot drift.
+- Fixed a crash when switching to a shape with no published cells — the quote spectrum assumed the calculator panel was always present.
+
+## [0.20.13] — 2026-08-08
+
+- **Calculator page composition is config-driven:** the destination page renders the section list from `page_structure.calculator.sections` (with `section_bands` adjacency/footer coercion, as pricing pages do) instead of a hardcoded body, so another site adds or reorders blocks in its profile with no PHP change.
+
+## [0.20.12] — 2026-08-08
+
+- **Calculator destination:** read legacy grouped manifests on S3 (`colour_group`/`clarity_group`) until C5.9 re-publishes individual grades; destination page shows pickers even when the initial panel is empty.
+
+## [0.20.11] — 2026-08-08
+
+- **Calculator destination page:** standalone `/diamond-prices/calculator/` route with free type/carat/shape pickers, REST panel refresh, and quote-position spectrum (embedded shape-page calculators unchanged).
+
+## [0.20.10] — 2026-08-07
+
+- **Price calculator:** result shows p10 and p90 on the wings with the median price large in the centre.
+
+## [0.20.9] — 2026-08-07
+
+- **Price calculator:** individual colour and clarity grades (point sliders) replace grouped dropdowns; result shows the price directly with an optional IQR range; quote verdict leads when a price is entered.
+
 ## [0.20.8] — 2026-08-06
 
 - **Staging diagnostics:** only probe `size_distribution_json` on `size-individual` pages — Z3 publishes it per shape×carat folder, not on hubs, comparison pages, or the Size Checker tool (fixes spurious HTTP 403 on `/diamond-size/compare/`).

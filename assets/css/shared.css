@@ -24,6 +24,20 @@
 	background-color: var(--ldn-background, transparent);
 }
 
+/* WordPress-compatible visually-hidden text (preview has no theme CSS). */
+.screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
 /* Aggregate hubs are content-length, not viewport-length — avoid a phantom gap
    above the theme footer once the last body section ends. */
 .ldn-page-shell:has(.ldn-top-level-page),
@@ -216,13 +230,25 @@
 
 /* ----- Price calculator / position checker (CP 123) ----- */
 
-/* auto-fit so the same grid serves a round page (colour, clarity, cut, price)
-   and a fancy shape (no cut control) without a second rule. */
+/* Two columns on desktop (colour/clarity | cut/quote); one column on phone. */
 .ldn-price-calculator__controls {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-	gap: var(--ldn-space-3, 0.75rem) var(--ldn-space-4, 1rem);
+	grid-template-columns: 1fr 1fr;
+	gap: var(--ldn-space-4, 1rem) var(--ldn-space-5, 1.5rem);
 	margin: var(--ldn-space-5, 1.5rem) 0;
+}
+
+@media (max-width: 640px) {
+	.ldn-price-calculator__controls {
+		grid-template-columns: 1fr;
+	}
+}
+
+.ldn-price-calculator__col {
+	display: flex;
+	flex-direction: column;
+	gap: var(--ldn-space-4, 1rem);
+	min-width: 0;
 }
 
 .ldn-price-calculator__field {
@@ -232,7 +258,15 @@
 	font-size: 0.9em;
 }
 
-.ldn-price-calculator__field > span {
+.ldn-price-calculator__field-label,
+.ldn-grade-slider__label {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	font-weight: 600;
+}
+
+.ldn-price-calculator__field-title {
 	font-weight: 600;
 }
 
@@ -242,8 +276,224 @@
 	font-style: normal;
 }
 
+.ldn-price-calculator__field--disabled {
+	opacity: 0.72;
+}
+
+.ldn-price-calculator__field--disabled .ldn-grade-slider__input {
+	cursor: not-allowed;
+}
+
+.ldn-price-calculator__disabled-note {
+	margin: 0;
+	font-size: 0.85em;
+	line-height: 1.35;
+	color: var(--ldn-secondary-text, #666);
+}
+
+.ldn-field-help {
+	position: relative;
+	display: inline-block;
+	margin: 0;
+	font-weight: 400;
+}
+
+.ldn-field-help__summary {
+	list-style: none;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.15rem;
+	height: 1.15rem;
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 50%;
+	color: var(--ldn-secondary-text, #666);
+	font-size: 0.7rem;
+	font-weight: 700;
+	line-height: 1;
+	user: 0;
+}
+
+.ldn-field-help__summary::-webkit-details-marker {
+	display: none;
+}
+
+.ldn-field-help__summary:focus-visible {
+	outline: 2px solid var(--ldn-accent, #706cc8);
+	outline-offset: 1px;
+}
+
+.ldn-field-help__tip {
+	position: absolute;
+	z-index: 2;
+	left: 0;
+	top: calc(100% + 0.35rem);
+	width: min(16rem, 70vw);
+	margin: 0;
+	padding: var(--ldn-space-2, 0.5rem) var(--ldn-space-3, 0.75rem);
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 6px;
+	background: #fff;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+	color: var(--ldn-secondary-text, #444);
+	font-size: 0.8rem;
+	font-weight: 400;
+	line-height: 1.4;
+}
+
+.ldn-grade-slider {
+	display: flex;
+	flex-direction: column;
+	gap: var(--ldn-space-2, 0.5rem);
+}
+
+.ldn-grade-slider__label {
+	font-size: 0.9em;
+}
+
+/*
+ * Brand range: soft grey track + purple thumb, no progress fill.
+ * Input background stays transparent so WebKit does not draw a second rail
+ * (which read as a dark outline around the grey bar).
+ */
+.ldn-brand-range {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 100%;
+	height: 1.25rem;
+	margin: 0.35rem 0;
+	border: 0;
+	border-radius: 999px;
+	background: transparent;
+	outline: none;
+	cursor: pointer;
+}
+
+.ldn-brand-range:focus-visible {
+	outline: 2px solid var(--ldn-accent, var(--ldn-primary, #706cc8));
+	outline-offset: 2px;
+}
+
+.ldn-brand-range::-webkit-slider-runnable-track {
+	height: 0.5rem;
+	border: 0;
+	border-radius: 999px;
+	background: #d8dce3;
+	box-shadow: none;
+}
+
+.ldn-brand-range::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 1.25rem;
+	height: 1.25rem;
+	margin-top: calc((0.5rem - 1.25rem) / 2);
+	border: 0;
+	border-radius: 50%;
+	background: var(--ldn-accent, var(--ldn-primary, #706cc8));
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.ldn-brand-range::-moz-range-track {
+	height: 0.5rem;
+	border: 0;
+	border-radius: 999px;
+	background: #d8dce3;
+	box-shadow: none;
+}
+
+.ldn-brand-range::-moz-range-progress {
+	/* No fill — keep the whole rail grey like the carat control. */
+	height: 0.5rem;
+	border: 0;
+	border-radius: 999px;
+	background: #d8dce3;
+}
+
+.ldn-brand-range::-moz-range-thumb {
+	width: 1.25rem;
+	height: 1.25rem;
+	border: 0;
+	border-radius: 50%;
+	background: var(--ldn-accent, var(--ldn-primary, #706cc8));
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.ldn-price-calculator__field--disabled .ldn-brand-range {
+	cursor: not-allowed;
+}
+
+.ldn-price-calculator__field--disabled .ldn-brand-range::-webkit-slider-thumb,
+.ldn-price-calculator__field--disabled .ldn-brand-range::-moz-range-thumb {
+	background: #94a3b8;
+}
+
+.ldn-grade-slider__stops {
+	/* Absolute stops at i/max % so labels sit under native range thumbs. */
+	position: relative;
+	min-height: 1.35em;
+	margin-top: 0.15rem;
+}
+
+.ldn-grade-slider__stop {
+	position: absolute;
+	top: 0;
+	transform: translateX(-50%);
+	max-width: 4.5rem;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: var(--ldn-secondary-text, #94a3b8);
+	font: inherit;
+	font-size: 0.7rem;
+	line-height: 1.15;
+	/* Never ellipsize: adjacent stops were reading as "Fair G…" / "Id…". */
+	white-space: normal;
+	overflow: visible;
+	cursor: pointer;
+	text-align: center;
+	hyphens: manual;
+}
+
+/* Keep end labels inside the track rather than hanging past the page edge. */
+.ldn-grade-slider__stop:first-child {
+	transform: translateX(0);
+	text-align: left;
+}
+
+.ldn-grade-slider__stop:last-child {
+	transform: translateX(-100%);
+	text-align: right;
+}
+
+.ldn-grade-slider__stop:only-child {
+	transform: translateX(-50%);
+	text-align: center;
+}
+
+.ldn-grade-slider__stop--active {
+	color: var(--ldn-accent, var(--ldn-primary, #706cc8));
+	font-weight: 700;
+}
+
+.ldn-price-calculator__field--quote {
+	/* Sit with cut in the right column; do not stretch edge-to-edge. */
+	max-width: 16rem;
+}
+
+.ldn-price-calculator__quote-hint {
+	margin: var(--ldn-space-1, 0.25rem) 0 0;
+	font-size: 0.85em;
+	line-height: 1.35;
+	font-weight: 400;
+	color: var(--ldn-secondary-text, #666);
+}
+
 .ldn-price-calculator__field select,
-.ldn-price-calculator__field input {
+.ldn-price-calculator__field input:not([type="range"]) {
 	box-sizing: border-box;
 	width: 100%;
 	padding: var(--ldn-space-2, 0.5rem) var(--ldn-space-3, 0.75rem);
@@ -258,12 +508,21 @@
 }
 
 .ldn-price-calculator__field select:focus,
-.ldn-price-calculator__field input:focus {
+.ldn-price-calculator__field input:not([type="range"]):focus {
 	outline: 2px solid var(--ldn-primary, #333);
 	outline-offset: 1px;
 }
 
+.ldn-grade-slider__input.ldn-brand-range,
+.ldn-carat-picker__slider.ldn-brand-range {
+	padding: 0;
+	border: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
 .ldn-price-calculator__result {
+	margin-top: var(--ldn-space-6, 2rem);
 	padding: var(--ldn-space-5, 1.5rem);
 	border: 1px solid var(--ldn-border, #e5e7eb);
 	border-radius: 8px;
@@ -281,13 +540,339 @@
 }
 
 .ldn-price-calculator__headline {
-	font-size: 1.5em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.2rem;
+	line-height: 1.1;
+}
+
+.ldn-price-calculator__headline-value {
+	font-size: 2.25em;
 	font-weight: 700;
+}
+
+.ldn-price-calculator__price-row {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: end;
+	gap: var(--ldn-space-3, 0.75rem);
+	margin-top: var(--ldn-space-2, 0.5rem);
+}
+
+.ldn-price-calculator__bound {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	color: var(--ldn-secondary-text, #666);
+	font-size: 0.95em;
+	font-weight: 600;
 	line-height: 1.2;
 }
 
-.ldn-price-calculator__verdict {
+.ldn-price-calculator__bound-label {
+	font-size: 0.75em;
 	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: var(--ldn-secondary-text, #666);
+}
+
+.ldn-price-calculator__sample {
+	margin-top: 2.25rem;
+	padding-top: 0.35rem;
+	color: var(--ldn-secondary-text, #666);
+	font-size: 0.95em;
+}
+
+.ldn-calculator-how__steps {
+	margin: 0;
+	padding-left: 1.25rem;
+	display: grid;
+	gap: 0.65rem;
+}
+
+.ldn-calculator-how__steps li {
+	line-height: 1.45;
+}
+
+.ldn-calculator-drivers__list {
+	margin: 0.75rem 0 0;
+	padding-left: 1.25rem;
+	display: grid;
+	gap: 0.5rem;
+}
+
+.ldn-calculator-drivers__list li {
+	line-height: 1.45;
+}
+
+.ldn-calculator-drivers__note {
+	margin: 0.75rem 0 0;
+	font-size: 0.9em;
+	color: var(--ldn-secondary-text, #666);
+}
+
+.ldn-price-calculator__bound--low {
+	text-align: left;
+	align-items: flex-start;
+}
+
+.ldn-price-calculator__bound--high {
+	text-align: right;
+	align-items: flex-end;
+}
+
+.ldn-price-calculator__price-row .ldn-price-calculator__headline {
+	justify-self: center;
+	text-align: center;
+}
+
+.ldn-calculator-destination__pickers {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: var(--ldn-space-3, 0.75rem) var(--ldn-space-4, 1rem);
+	margin-bottom: var(--ldn-space-4, 1rem);
+	align-items: end;
+}
+
+.ldn-seg-toggle {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+
+.ldn-seg-toggle__legend,
+.ldn-carat-picker__label {
+	display: block;
+	padding: 0;
+	margin: 0 0 var(--ldn-space-2, 0.5rem);
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--ldn-secondary-text, #666);
+}
+
+.ldn-seg-toggle__options {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0;
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: var(--ldn-radius, 6px);
+	overflow: hidden;
+	background: #fff;
+}
+
+.ldn-seg-toggle__option {
+	display: block;
+	margin: 0;
+	cursor: pointer;
+	text-align: center;
+}
+
+.ldn-seg-toggle__option input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+.ldn-seg-toggle__label {
+	display: block;
+	padding: var(--ldn-space-2, 0.5rem) var(--ldn-space-3, 0.75rem);
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--ldn-secondary-text, #666);
+	background: #fff;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ldn-seg-toggle__option:focus-within .ldn-seg-toggle__label {
+	outline: 2px solid var(--ldn-accent, #706cc8);
+	outline-offset: -2px;
+}
+
+.ldn-seg-toggle__option:has(input:checked) .ldn-seg-toggle__label {
+	background: var(--ldn-accent, #706cc8);
+	color: #fff;
+}
+
+.ldn-carat-picker__controls {
+	display: grid;
+	grid-template-columns: 1fr 5.5rem;
+	gap: var(--ldn-space-3, 0.75rem);
+	align-items: center;
+}
+
+.ldn-carat-picker__slider {
+	/* Track/thumb: .ldn-brand-range */
+	width: 100%;
+}
+
+.ldn-carat-picker__number {
+	box-sizing: border-box;
+	width: 100%;
+	padding: var(--ldn-space-2, 0.5rem) var(--ldn-space-3, 0.75rem);
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 6px;
+	background-color: #fff;
+	font-family: inherit;
+	font-size: 1rem;
+	line-height: 1.4;
+}
+
+.ldn-shape-picker {
+	border: 0;
+	margin: 0 0 var(--ldn-space-4, 1rem);
+	padding: 0;
+	min-width: 0;
+}
+
+.ldn-shape-picker__legend {
+	padding: 0;
+	margin-bottom: var(--ldn-space-2, 0.5rem);
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--ldn-secondary-text, #666);
+}
+
+.ldn-shape-picker__options {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+	gap: var(--ldn-space-2, 0.5rem);
+}
+
+.ldn-shape-picker__option {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.35rem;
+	padding: var(--ldn-space-2, 0.5rem) 0.25rem;
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: var(--ldn-radius, 6px);
+	cursor: pointer;
+	color: var(--ldn-secondary-text, #666);
+	background: #fff;
+	transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ldn-shape-picker__option:hover {
+	border-color: var(--ldn-primary, #333);
+	color: var(--ldn-primary, #333);
+}
+
+/* Radio stays in the accessibility tree and keeps keyboard behaviour; the
+   visible selected state is drawn on the surrounding label. */
+.ldn-shape-picker__option input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+.ldn-shape-picker__option:focus-within {
+	box-shadow: 0 0 0 2px var(--ldn-accent, #706cc8);
+}
+
+.ldn-shape-picker__option:has(input:checked) {
+	border-color: var(--ldn-accent, #706cc8);
+	color: var(--ldn-accent, #706cc8);
+	box-shadow: inset 0 0 0 1px var(--ldn-accent, #706cc8);
+}
+
+/* Mask rather than <img> so the facet line-art inherits the brand colour,
+   including the selected and hover states above. */
+.ldn-shape-picker__icon {
+	width: 1.9rem;
+	height: 1.9rem;
+	background-color: currentColor;
+	-webkit-mask-image: var(--ldn-shape-icon);
+	mask-image: var(--ldn-shape-icon);
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+}
+
+.ldn-shape-picker__label {
+	font-size: 0.75rem;
+	line-height: 1.2;
+	text-align: center;
+}
+
+.ldn-calculator-destination__lead {
+	margin: 0 0 var(--ldn-space-4, 1rem);
+	color: var(--ldn-secondary-text, #666);
+}
+
+.ldn-price-calculator__spectrum {
+	margin-top: var(--ldn-space-4, 1rem);
+}
+
+.ldn-price-calculator__spectrum-track {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: var(--ldn-space-3, 0.75rem);
+}
+
+.ldn-price-calculator__spectrum-line {
+	position: relative;
+	height: 0.35rem;
+	border-radius: 999px;
+	background: var(--ldn-accent, var(--ldn-primary, #706cc8));
+}
+
+.ldn-price-calculator__spectrum-marker {
+	position: absolute;
+	top: 50%;
+	width: 0.85rem;
+	height: 0.85rem;
+	border-radius: 50%;
+	background: var(--ldn-accent, #706cc8);
+	border: 2px solid #fff;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+	transform: translate(-50%, -50%);
+}
+
+.ldn-price-calculator__spectrum-bound {
+	color: var(--ldn-secondary-text, #666);
+	font-size: 0.9em;
+	font-weight: 600;
+}
+
+.ldn-price-calculator__spectrum-quote {
+	margin: var(--ldn-space-4, 1rem) 0 0;
+	text-align: center;
+}
+
+.ldn-price-calculator__spectrum-analysis {
+	margin: var(--ldn-space-3, 0.75rem) 0 0;
+	text-align: left;
+	font-size: 0.95em;
+	line-height: 1.45;
+	color: var(--ldn-secondary-text, #444);
+}
+
+.ldn-price-calculator__analysis {
+	margin: var(--ldn-space-4, 1rem) 0 0;
+	font-size: 0.95em;
+	line-height: 1.45;
+	color: var(--ldn-secondary-text, #444);
 }
 
 .ldn-price-calculator__basis,

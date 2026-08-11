@@ -2322,25 +2322,25 @@ $calc_manifest = array(
     'carat_weight'      => '1',
     'date'              => '2026-07-31',
     'currency'          => 'USD',
-    'colour_groups'     => array(
-        array('key' => 'D_F', 'label' => 'D-F', 'members' => array('D', 'E', 'F')),
-        array('key' => 'G_H', 'label' => 'G-H', 'members' => array('G', 'H')),
+    'colours'           => array(
+        array('key' => 'D', 'label' => 'D'),
+        array('key' => 'G', 'label' => 'G'),
     ),
-    'clarity_groups'    => array(
-        array('key' => 'VVS', 'label' => 'VVS', 'members' => array('VVS1', 'VVS2')),
-        array('key' => 'VS', 'label' => 'VS', 'members' => array('VS1', 'VS2')),
+    'clarities'         => array(
+        array('key' => 'VVS1', 'label' => 'VVS1'),
+        array('key' => 'VS1', 'label' => 'VS1'),
     ),
     'cut_grades'        => array('Super Ideal', 'Excellent'),
     'has_cut_dimension' => true,
     'pooled_cut_key'    => 'ALL',
     'default_cell'      => array(
-        'colour_group' => 'G_H',
-        'clarity_group' => 'VS',
+        'color' => 'G',
+        'clarity' => 'VS1',
         'cut_grade' => 'ALL',
     ),
     'total_sample_size' => 26895,
     'cells'             => array(
-        'G_H' => array('VS' => array(
+        'G' => array('VS1' => array(
             'ALL' => array(
                 'sample_size' => 412,
                 'percentiles' => array(
@@ -2366,20 +2366,34 @@ check(
     'the default cell answer is server-rendered, so the page answers without JavaScript'
 );
 check(
-    strpos($calc_html, '$4,400') !== false && strpos($calc_html, '$5,800') !== false,
-    'the interquartile range is stated alongside the typical price'
+    strpos($calc_html, '$3,900') !== false && strpos($calc_html, '$6,900') !== false,
+    'the p10 and p90 wings flank the median price'
 );
 check(
-    strpos($calc_html, '412 diamonds') !== false,
-    'the answer discloses how many diamonds the cell holds'
+    strpos($calc_html, 'ldn-price-calculator__price-row') !== false,
+    'the result uses a three-column price row'
 );
 check(
-    strpos($calc_html, 'G-H colour, VS clarity, any cut') !== false,
-    'the answer names the exact specification it describes'
+    strpos($calc_html, 'ldn-grade-slider') !== false,
+    'colour and clarity use point sliders rather than grouped dropdowns'
+);
+check(
+    strpos($calc_html, 'data-ldn-grade-slider="cut"') !== false,
+    'cut uses a point slider like colour and clarity, not a dropdown'
 );
 check(
     strpos($calc_html, 'data-ldn-price-calculator-input="cut"') !== false,
     'a manifest with a cut dimension offers the cut control'
+);
+check(
+    strpos($calc_html, 'Lower end') !== false
+        && strpos($calc_html, 'Typical') !== false
+        && strpos($calc_html, 'Higher end') !== false,
+    'the three price figures are labelled, not anonymous numbers'
+);
+check(
+    strpos($calc_html, 'Based on 412 diamonds at') !== false,
+    'the answer states how many diamonds the cell rests on'
 );
 check(
     strpos($calc_html, 'ldn-price-calculator-manifest') !== false
@@ -2391,8 +2405,8 @@ check(
     'the lead paragraph discloses the pool the comparison draws on'
 );
 check(
-    strpos($calc_html, 'Typical for this spec') !== false,
-    'calculator headline distinguishes spec-level price from the page median'
+    strpos($calc_html, '$5,011') !== false,
+    'calculator headline shows the spec-level price directly'
 );
 check(
     strpos($calc_html, 'median at the top of this page') !== false,
@@ -2414,16 +2428,30 @@ $calc_fancy_html = $calc_renderer->price_calculator_html($calc_ctx, array(
 ));
 check(
     strpos($calc_fancy_html, 'data-ldn-price-calculator-input="cut"') === false,
-    'a manifest without a cut dimension offers no cut control'
+    'a fancy-shape manifest does not expose an interactive cut input'
 );
 check(
-    strpos($calc_fancy_html, 'any cut') === false
-        && strpos($calc_fancy_html, 'G-H colour, VS clarity') !== false,
+    strpos($calc_fancy_html, 'ldn-price-calculator__field--disabled') !== false
+        && strpos($calc_fancy_html, 'disabled') !== false,
+    'fancy shapes keep a greyed cut control rather than hiding it'
+);
+check(
+    strpos($calc_fancy_html, 'any cut') === false,
     'the specification sentence drops cut entirely rather than claiming "any cut"'
 );
 check(
     strpos($calc_fancy_html, 'not comparable across fancy shapes') !== false,
-    'the copy explains the missing cut control rather than leaving it unexplained'
+    'the disabled cut control explains why cut is unavailable'
+);
+check(
+    strpos($calc_html, 'ldn-price-calculator__col') !== false
+        && substr_count($calc_html, 'ldn-price-calculator__col') === 2,
+    'controls sit in a two-column layout'
+);
+check(
+    strpos($calc_html, 'ldn-field-help') !== false
+        && strpos($calc_html, 'How colourless the diamond looks') !== false,
+    'each grade field has a ? help affordance with a short definition'
 );
 
 // The heading and specification come from the manifest, not the page context:
@@ -2443,8 +2471,8 @@ check(
 // answered from a neighbouring cell.
 $calc_missing = $calc_manifest;
 $calc_missing['default_cell'] = array(
-    'colour_group' => 'D_F',
-    'clarity_group' => 'VVS',
+    'color' => 'D',
+    'clarity' => 'VVS1',
     'cut_grade' => 'Super Ideal',
 );
 check(
@@ -2484,6 +2512,49 @@ check(
         array('price_calculator' => $calc_manifest)
     ) === '',
     'a site with no entitlement block renders no calculator'
+);
+
+// Legacy grouped manifest (pre-migration 017 S3 payloads) must still render until
+// C5.9 re-publishes individual-grade cells.
+$calc_legacy = array(
+    'diamond_type'      => 'natural',
+    'shape'             => 'Round',
+    'carat_weight'      => '1',
+    'currency'          => 'USD',
+    'colour_groups'     => array(
+        array('key' => 'D_F', 'label' => 'D-F', 'members' => array('D', 'E', 'F')),
+        array('key' => 'G_H', 'label' => 'G-H', 'members' => array('G', 'H')),
+    ),
+    'clarity_groups'    => array(
+        array('key' => 'SI', 'label' => 'SI', 'members' => array('SI1', 'SI2')),
+    ),
+    'cut_grades'        => array('Excellent'),
+    'has_cut_dimension' => true,
+    'pooled_cut_key'    => 'ALL',
+    'default_cell'      => array(
+        'colour_group'  => 'D_F',
+        'clarity_group' => 'SI',
+        'cut_grade'     => 'ALL',
+    ),
+    'cells'             => array(
+        'D_F' => array(
+            'SI' => array(
+                'ALL' => array(
+                    'sample_size' => 120,
+                    'percentiles' => array('p10' => 3000, 'p50' => 4000, 'p90' => 5000),
+                ),
+            ),
+        ),
+    ),
+);
+$calc_legacy_html = $calc_renderer->price_calculator_from_manifest($calc_ctx, $calc_legacy);
+check(
+    strpos($calc_legacy_html, 'ldn-price-calculator') !== false,
+    'legacy grouped manifest still renders the calculator panel'
+);
+check(
+    strpos($calc_legacy_html, '$4,000') !== false || strpos($calc_legacy_html, '4,000') !== false,
+    'legacy grouped manifest resolves default_cell colour_group/clarity_group'
 );
 
 // --- Report -----------------------------------------------------------------

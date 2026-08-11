@@ -152,6 +152,8 @@ final class LDN_Dispatcher {
         $this->context = $ctx;
         $this->primary_data = $data;
 
+        LDN_Locale::switch_for_context($ctx, $this->config);
+
         LDN_Assets::register_enqueue($ctx, $this->config);
 
         // Registered here (template_include) so it fires when the template later

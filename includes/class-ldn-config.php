@@ -82,6 +82,7 @@ final class LDN_Config {
         'all-shapes'   => 'all_shapes',
         'diamond-type' => 'diamond_type',
         'top-level'    => 'top_level',
+        'calculator'   => 'calculator',
     );
 
     /**
@@ -631,16 +632,115 @@ final class LDN_Config {
      * @return string|null
      */
     public function get_currency($site_id, $country_code) {
+        $entry = $this->get_country_entry($site_id, $country_code);
+        if ($entry === null || empty($entry['currency'])) {
+            return null;
+        }
+        return (string) $entry['currency'];
+    }
+
+    /**
+     * Country config row from the site bundle (locale, currency, table_prefix, …).
+     *
+     * @param string $site_id
+     * @param string $country_code
+     * @return array<string, mixed>|null
+     */
+    public function get_country_entry($site_id, $country_code) {
         $site = $this->get_site($site_id);
+        $code = strtolower((string) $country_code);
         if (!is_array($site) || empty($site['countries']) || !is_array($site['countries'])) {
             return null;
         }
         foreach ($site['countries'] as $entry) {
-            if (is_array($entry) && isset($entry['code']) && $entry['code'] === $country_code) {
-                return isset($entry['currency']) ? (string) $entry['currency'] : null;
+            if (is_array($entry) && isset($entry['code']) && (string) $entry['code'] === $code) {
+                return $entry;
             }
         }
         return null;
+    }
+
+    /**
+     * BCP-47 locale for a site's country (e.g. fr-FR), or null when unknown.
+     *
+     * @param string $site_id
+     * @param string $country_code
+     * @return string|null
+     */
+    public function get_locale($site_id, $country_code) {
+        $entry = $this->get_country_entry($site_id, $country_code);
+        if ($entry === null || empty($entry['locale'])) {
+            return null;
+        }
+        return (string) $entry['locale'];
+    }
+
+    /**
+     * Whether Phase 8 consumer features are globally live (launch_sequence flag).
+     *
+     * Mirrors shared/config/country_markets.py::consumer_features_live().
+     *
+     * @return bool
+     */
+    public function consumer_features_live() {
+        $bundle = $this->get_bundle();
+        $launch = isset($bundle['launch_sequence']) && is_array($bundle['launch_sequence'])
+            ? $bundle['launch_sequence']
+            : array();
+        return !empty($launch['consumer_features_live']);
+    }
+
+    /**
+     * Site × country consumer-advisory policy from entitlements (ignores go-live flag).
+     *
+     * @param string $site_id
+     * @param string $country_code
+     * @return bool
+     */
+    public function consumer_advisory_policy_enabled($site_id, $country_code) {
+        $bundle = $this->get_bundle();
+        $ent = isset($bundle['entitlements']) && is_array($bundle['entitlements'])
+            ? $bundle['entitlements']
+            : array();
+        $sites = isset($ent['sites']) && is_array($ent['sites']) ? $ent['sites'] : array();
+        if (!isset($sites[$site_id]) || !is_array($sites[$site_id])) {
+            return false;
+        }
+        $site_ent = $sites[$site_id];
+        $profile_name = isset($site_ent['consumer_advisory']['profile'])
+            ? (string) $site_ent['consumer_advisory']['profile']
+            : 'none';
+        $profiles = isset($ent['consumer_advisory_profiles']) && is_array($ent['consumer_advisory_profiles'])
+            ? $ent['consumer_advisory_profiles']
+            : array();
+        if (!isset($profiles[$profile_name]['countries']) || !is_array($profiles[$profile_name]['countries'])) {
+            return false;
+        }
+        $countries = $profiles[$profile_name]['countries'];
+        $code = strtolower((string) $country_code);
+        if (!isset($countries[$code])) {
+            return false;
+        }
+        $entry = $countries[$code];
+        if ($entry === true) {
+            return true;
+        }
+        if (is_array($entry)) {
+            return !isset($entry['enabled']) || $entry['enabled'] !== false;
+        }
+        return false;
+    }
+
+    /**
+     * Whether consumer advisory may render for site × country (policy + go-live).
+     *
+     * @param string $site_id
+     * @param string $country_code
+     * @return bool
+     */
+    public function consumer_advisory_enabled($site_id, $country_code) {
+        return $this->consumer_features_live()
+            && $this->consumer_advisory_policy_enabled($site_id, $country_code);
     }
 
     // =========================================================================
