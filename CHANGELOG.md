@@ -1,5 +1,99 @@
 # Changelog
 
+## [0.20.46] — 2026-08-13
+
+- **SEO titles on SEOPress sites:** replace `seopress_titles_title` on routed LDN pages so the HTML `<title>` matches `og:title` (e.g. `Diamond Prices - Modern Jeweler` instead of the bare site name). `pre_get_document_title` alone did not win when SEOPress owned the title tag.
+
+## [0.20.45] — 2026-08-13
+
+- **Share cards:** emit `og:image:alt` with the page title so Open Graph previews stay readable when the PNG is the chart card.
+
+## [0.20.44] — 2026-08-12
+
+- **Nat/lab toggle:** preserve the carat slider weight across Natural ↔ Lab-grown via `?carat=` (inactive pill + page load preference over most-listed default).
+
+## [0.20.43] — 2026-08-12
+
+- **Price calculator:** wrap controls in a white surface so tint/accent bands keep heading + lead on the coloured background while fields stay readable.
+- **All-shapes calculator:** use destination-style shape picker icons (faceted outlines) instead of text pills.
+
+## [0.20.42] — 2026-08-12
+
+- **Calculator UI:** field-help tips show on hover/focus (click still works on touch); smaller grade-slider stop labels; wrap How it works / What drives the price in `ldn-section` so band spacing separates them; cut stop shows Super Ideal (not Ideal).
+
+## [0.20.41] — 2026-08-12
+
+- **Nat/lab toggle:** prefetch the sibling diamond-type page (`rel=prefetch` + Speculation Rules); flip the active pill immediately on click while navigation continues.
+
+## [0.20.40] — 2026-08-12
+
+- **Price→size explore CTA:** separate copy from the link; style as an explore-style text CTA so the arrow no longer orphans on wrap.
+
+## [0.20.39] — 2026-08-12
+
+- **Diamond-type carat table:** show all rows in a full-height card (no inner scrollbar); Ringspo card chrome aligned with size-matrix tables.
+- **Where to go next:** drop the “compare shapes” card so three cards fit one row; slightly tighter card styling on Ringspo.
+
+## [0.20.38] — 2026-08-12
+
+- **Face-up callout:** drop “on the finger” from the comparison result line (avoid diamdb-style phrasing).
+
+## [0.20.37] — 2026-08-12
+
+- **Methodology page:** engaging hero intro (not factual dump); dataset stats as cards in the green header; Explore links as cards; tighter section spacing; plain bands so positional purple does not paint prose sections.
+
+## [0.20.36] — 2026-08-12
+
+- **Face-up overlay / bars:** white surface on purple bands so overlay strokes and area bars stay visible.
+- **Comparison side links:** “Individual size pages” uses the shared explore-card grid instead of a bullet list.
+
+## [0.20.35] — 2026-08-12
+
+- **Size checker results:** drop divider above Results; result cards no longer show a “Second diamond” heading (A/B stay aligned).
+- **Compare by shape:** rename hub link list (was “Popular comparisons”); multi-column layout. Pair order comes from Z3 hub priority (engagement sizes).
+- **Explore the data:** card grid (size chart + methodology) matching other LDN hubs.
+
+## [0.20.34] — 2026-08-12
+
+- **Size matrix:** rounded corners without outer stroke — scroll wrapper uses `overflow: auto` so radius clips the purple header; Ringspo cell radii match `--ringspo-card-radius`.
+
+## [0.20.33] — 2026-08-12
+
+- **Methodology page:** purple “drawbacks” H2 stays white (ink rule no longer overrides); oval spread example + face-up fill sketch; FAQ rewritten for buyer utility; copy notes natural and lab-grown are pooled.
+- **Size checker CTA:** keep primary button labels free of theme link underlines.
+- **PHP 8.4:** explicit nullable `$ctx` on size segmentation helpers (deprecation noise in local preview).
+
+## [0.20.32] — 2026-08-12
+
+- **Size checker compare:** align A/B panels when “Second diamond” is shown (legend no longer shifts fields).
+- **Face-up callout:** remove the mint outline on the comparison result line (plain text, no card).
+- **Comparison page:** drop the duplicate delta paragraph under the callout.
+- **Comparison scale wells:** white surface + equal-height columns so purple diamonds read on purple bands and the two tables align.
+- **Face-up overlay:** cap SVG size so the overlay fits the viewport.
+- **Size ladder:** no card border around the shape-hub / mega-hub matrix table (header + row rules only).
+- **Size checker results:** drop the duplicate “Size rank” list item (same copy as the quality headline).
+- **Size FAQ / footer:** FAQ is forced `ldn-section--plain` (and excluded from positional purple bands) so it is not purple against the theme footer; theme `#content` bottom padding is zeroed on LDN pages so no white gutter above the footer.
+- **Size JSON-LD:** stop emitting a duplicate `WebSite` node; keep `WebPage.isPartOf` → `#website` (SEOPress / theme owns WebSite).
+- **Size matrix:** drop the gray border around the mega-hub / shape-hub scroll wrapper.
+
+## [0.20.31] — 2026-08-12
+
+- **Size FAQ / footer:** FAQ is forced `ldn-section--plain` (and excluded from positional purple bands) so it is not purple against the theme footer; theme `#content` bottom padding is zeroed on LDN pages so no white gutter above the footer.
+- **Size JSON-LD:** stop emitting a duplicate `WebSite` node; keep `WebPage.isPartOf` → `#website` (SEOPress / theme owns WebSite).
+- **Size matrix:** drop the gray border around the mega-hub / shape-hub scroll wrapper.
+
+## [0.20.30] — 2026-08-12
+
+- **WP Rocket / Plotly:** `chart-init.js` (~1 KB, excluded from Delay JS) queues `Plotly.newPlot` until the delayed Plotly CDN loads; Plotly itself stays in Rocket's deferred queue for performance.
+- **Size charts:** same deferred-init pattern as pricing distribution charts.
+
+## [0.20.29] — 2026-08-12
+
+- **WP Rocket:** exclude calculator (and size interactive) scripts from Delay JS / defer / minify so grade sliders wire on load.
+- **Tooltips:** field-help `?` panels close on outside click or Escape.
+- **Calculator speed:** cache REST panels by type/carat/shape, abort in-flight fetches, refresh shape/type immediately and debounce carat while dragging.
+- **Cut slider:** do not offer Fair (even on stale manifests); Fair stays in pooled Any/ALL only.
+
 ## [0.20.28] — 2026-08-08
 
 - **Price-module i18n:** locale switch on all `LDN_Dispatcher` pricing routes; automatic locale restore on `shutdown`.

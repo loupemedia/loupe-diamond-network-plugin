@@ -20,6 +20,12 @@
  *   - **An empty `og:image` ahead of the real one**, plus duplicate `og:url`,
  *     `og:type` and `og:site_name`. Scrapers generally take the first
  *     occurrence, so the chart preview never won.
+ *   - **`<title>` stuck on the site name.** SEOPress owns the HTML title via
+ *     `seopress_titles_title`, deriving it from WordPress's blog-index query
+ *     state on LDN routes. `LDN_Query_Signals` hooks `pre_get_document_title`,
+ *     but SEOPress does not use that path when it is active — so the tab and
+ *     SERP link showed "Modern Jeweler" while `og:title` carried the real page
+ *     title from LDN's head block.
  *
  * The fix is ownership, not detection: on an LDN route the competing tags are
  * suppressed at source and LDN emits the full set from the page context. SEOPress
@@ -66,6 +72,12 @@ final class LDN_Seo_Bridge {
     );
 
     /**
+     * SEOPress filter for the HTML `<title>` string. Unlike the tags above,
+     * LDN replaces the value rather than suppressing it.
+     */
+    const SEOPRESS_TITLE_FILTER = 'seopress_titles_title';
+
+    /**
      * Hook the suppression filters.
      *
      * Registered unconditionally for the site; each callback decides per request
@@ -83,6 +95,18 @@ final class LDN_Seo_Bridge {
             // is then discarded along with SEOPress's own value.
             add_filter($filter, array($this, 'suppress_on_ldn_route'), 99);
         }
+        add_filter(self::SEOPRESS_TITLE_FILTER, array($this, 'replace_title_on_ldn_route'), 99);
+    }
+
+    /**
+     * Supply the LDN page title to SEOPress on routed pages.
+     *
+     * @param string $title SEOPress's derived title (often the bare site name).
+     * @return string
+     */
+    public function replace_title_on_ldn_route($title) {
+        $ldn_title = LDN_Query_Signals::resolved_document_title();
+        return $ldn_title !== null ? $ldn_title : $title;
     }
 
     /**

@@ -438,11 +438,6 @@
             if (stone.perCarat !== null) {
                 html += '<li>Per carat: <strong>' + stone.perCarat.toFixed(2) + ' mm²/ct</strong></li>';
             }
-            if (stone.mode === 'manual' && stone.percentile !== null) {
-                html += '<li>Size rank: <strong>'
-                    + escapeHtml(sizeQualityLabel(stone.percentile, stone.carat, stone.shape))
-                    + '</strong></li>';
-            }
             if (stone.mode === 'manual' && stone.depth !== null && stone.marketDepth !== null) {
                 html += '<li>Depth: <strong>' + stone.depth.toFixed(2)
                     + ' mm</strong> (market median ' + stone.marketDepth.toFixed(2) + ' mm)</li>';
@@ -538,9 +533,10 @@
                 emptyEl.setAttribute('aria-hidden', 'true');
             }
 
+            // No per-card titles — stone labels (carat + shape) already distinguish A/B.
             var cards = stoneCardHtml(a, '');
             if (b !== null) {
-                cards += stoneCardHtml(b, 'Second diamond');
+                cards += stoneCardHtml(b, '');
             }
             cardsEl.innerHTML = cards;
             comparisonEl.innerHTML = (b !== null) ? comparisonHtml(a, b) : '';

@@ -17,6 +17,108 @@ if (!defined('ABSPATH')) {
 final class LDN_Assets {
 
 	/**
+	 * Script handles that must not be delayed/minified by WP Rocket.
+	 *
+	 * Delay JS wraps these as type=rocketlazyloadscript until first interaction,
+	 * so grade sliders never receive input handlers while shape/carat REST still
+	 * appears to "work" after Rocket finally loads the file.
+	 *
+	 * @var string[]
+	 */
+	const INTERACTIVE_SCRIPT_HANDLES = array(
+		'ldn-chart-init',
+		'ldn-price-calculator',
+		'ldn-price-calculator-destination',
+		'ldn-size-checker',
+		'ldn-size-carat-explorer',
+		'ldn-type-carat-lookup',
+		'ldn-nat-lab-toggle',
+	);
+
+	/**
+	 * Register WP Rocket / optimizers compat once (plugins_loaded).
+	 *
+	 * @return void
+	 */
+	public static function register_performance_compat() {
+		static $done = false;
+		if ($done) {
+			return;
+		}
+		$done = true;
+
+		add_filter('rocket_delay_js_exclusions', array(__CLASS__, 'exclude_interactive_scripts_from_rocket'));
+		add_filter('rocket_exclude_defer_js', array(__CLASS__, 'exclude_interactive_scripts_from_rocket'));
+		add_filter('rocket_exclude_js', array(__CLASS__, 'exclude_interactive_script_paths_from_rocket'));
+		add_filter('script_loader_tag', array(__CLASS__, 'mark_interactive_scripts_no_minify'), 10, 2);
+	}
+
+	/**
+	 * Patterns matched against script URLs / handles for Delay + Defer exclusions.
+	 *
+	 * @param string[] $excluded
+	 * @return string[]
+	 */
+	public static function exclude_interactive_scripts_from_rocket($excluded) {
+		if (!is_array($excluded)) {
+			$excluded = array();
+		}
+		$excluded[] = 'ldn-chart-init';
+		$excluded[] = 'chart-init';
+		$excluded[] = 'ldn-price-calculator';
+		$excluded[] = 'price-calculator';
+		$excluded[] = 'ldn-size-checker';
+		$excluded[] = 'ldn-size-carat-explorer';
+		$excluded[] = 'ldn-type-carat-lookup';
+		$excluded[] = 'ldn-nat-lab-toggle';
+		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/price-calculator';
+		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/size-';
+		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/type-carat-lookup';
+		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/nat-lab-toggle';
+		return $excluded;
+	}
+
+	/**
+	 * Absolute-ish path patterns for rocket_exclude_js (minify).
+	 *
+	 * @param string[] $excluded
+	 * @return string[]
+	 */
+	public static function exclude_interactive_script_paths_from_rocket($excluded) {
+		if (!is_array($excluded)) {
+			$excluded = array();
+		}
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/chart-init.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/chart-init.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/price-calculator(.*).js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/price-calculator(.*).js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/size-(.*).js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/size-(.*).js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/type-carat-lookup.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/type-carat-lookup.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/nat-lab-toggle.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/nat-lab-toggle.js';
+		return $excluded;
+	}
+
+	/**
+	 * data-no-minify so WP Rocket leaves calculator/size scripts as-is.
+	 *
+	 * @param string $tag
+	 * @param string $handle
+	 * @return string
+	 */
+	public static function mark_interactive_scripts_no_minify($tag, $handle) {
+		if (!in_array($handle, self::INTERACTIVE_SCRIPT_HANDLES, true)) {
+			return $tag;
+		}
+		if (strpos($tag, 'data-no-minify=') !== false) {
+			return $tag;
+		}
+		return str_replace('<script ', '<script data-no-minify="1" ', $tag);
+	}
+
+	/**
 	 * Schedule styles for the current LDN request (call from template_include).
 	 *
 	 * @param LDN_Page_Context $ctx
@@ -60,9 +162,17 @@ final class LDN_Assets {
 		);
 
 		wp_enqueue_script(
+			'ldn-chart-init',
+			$base_url . 'assets/js/chart-init.js',
+			array(),
+			$version,
+			false
+		);
+
+		wp_enqueue_script(
 			'ldn-chart-errors',
 			$base_url . 'assets/js/chart-errors.js',
-			array(),
+			array('ldn-chart-init'),
 			$version,
 			true
 		);
@@ -184,6 +294,15 @@ final class LDN_Assets {
 					$version,
 					true
 				);
+				if ($artefacts->site_has_wp_widget($ctx->site_id, 'nat_lab_toggle', $ctx->page_level)) {
+					wp_enqueue_script(
+						'ldn-nat-lab-toggle',
+						$base_url . 'assets/js/nat-lab-toggle.js',
+						array(),
+						$version,
+						true
+					);
+				}
 			}
 		}
 

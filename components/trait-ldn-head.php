@@ -60,6 +60,7 @@ trait LDN_Trait_Head {
             $tags .= '<meta property="og:image:width" content="1200" />' . "\n";
             $tags .= '<meta property="og:image:height" content="630" />' . "\n";
             $tags .= '<meta property="og:image:type" content="image/png" />' . "\n";
+            $tags .= '<meta property="og:image:alt" content="' . esc_attr($title) . '" />' . "\n";
         }
 
         return $tags;

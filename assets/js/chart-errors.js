@@ -25,7 +25,13 @@
 		}
 	});
 
-	if (window.Plotly && typeof window.Plotly.newPlot === 'function') {
+	function wrapPlotlyNewPlot() {
+		if (!window.Plotly || typeof window.Plotly.newPlot !== 'function') {
+			return false;
+		}
+		if (window.Plotly.newPlot.__ldnWrapped) {
+			return true;
+		}
 		var original = window.Plotly.newPlot;
 		window.Plotly.newPlot = function () {
 			try {
@@ -35,11 +41,24 @@
 				throw err;
 			}
 		};
-	} else {
-		document.addEventListener('DOMContentLoaded', function () {
-			if (!window.Plotly) {
+		window.Plotly.newPlot.__ldnWrapped = true;
+		return true;
+	}
+
+	if (wrapPlotlyNewPlot()) {
+		return;
+	}
+	if (window.LDN && typeof window.LDN.whenPlotlyReady === 'function') {
+		window.LDN.whenPlotlyReady(function () {
+			if (!wrapPlotlyNewPlot()) {
 				report('plotly.missing', 'Plotly.js did not load from CDN');
 			}
 		});
+		return;
 	}
+	document.addEventListener('DOMContentLoaded', function () {
+		if (!wrapPlotlyNewPlot()) {
+			report('plotly.missing', 'Plotly.js did not load from CDN');
+		}
+	});
 })();

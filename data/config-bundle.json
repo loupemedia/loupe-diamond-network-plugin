@@ -1,6 +1,6 @@
 {
-  "version": "9095b47",
-  "generated_at": "2026-08-08T00:56:09.194981+00:00",
+  "version": "83d25d9",
+  "generated_at": "2026-08-13T02:37:30.822179+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -10404,7 +10404,7 @@
   },
   "entitlements": {
     "version": "1.0.0",
-    "last_updated": "2026-08-04",
+    "last_updated": "2026-08-13",
     "review_notes": "Draft v1 — standalone sites (Ringspo, DPG, DA, BDI, DHUK) may differ for\ncontent-uniqueness (see docs/architecture/content-uniqueness-audit.md).\nTranslation / network families (Loupe, Diamond Price Exact, carat) MUST share\nidentical pipeline_artefacts and wp_widgets keys (and presentation) at each page\nlevel — run scripts/sync_entitlements_families.py after family template changes.\n\nShape hub presentations (shapes_at_carat widget) — standalone sites differ by design:\nshape_cards = Ringspo, Diamond Advisors, BDI; bar_chart_links = Loupe + DPE families;\ntable_ranked = DPG, Diamond Hunt UK; carat network = table_ranked on top-level only\n(no all-shapes page — carat is fixed per domain).\n\nPipeline lists use artefact_id keys from config/artefacts.yaml. WP widgets\nare presentation-only; a widget may be on while its artefact is still planned\n(placeholder) or legacy path.\n\nLAUNCH: All sites ship with market INDEX / pricing content only (Product 1).\nconsumer_advisory profiles below are Phase 8 POLICY — not live at launch.\nWidgets like individual_listings are planned for Phase 8; plugin must not\nrender them until consumer_features_live in country_markets.yaml.\n\nDECISION 2026-06-14 — NO CROSS-SITE PRICING COMPARISON. The cross_site_comparison\nwidget is NOT proceeding (network-graph exposure + price-contradiction risk; see\ndocs/architecture/content-uniqueness-audit.md § 0 and PRD-005 Epic CP56 ON HOLD).\nAll per-site cross_site_comparison values below are now set to `disabled`. The\nplugin MUST NOT render this widget. Internal same-domain links (Ringspo\nsize<->price) are separate and allowed (PRD-015 Decision 5).\nFUTURE (uncommitted): comparison MAY be revisited for a small number of pages using\nTHIRD-PARTY benchmarks (e.g. caratradar.com, stonealgo.com — sites that publish\nprice graphs), NOT reciprocal links between our own owned sites.\n",
     "widget_vocabulary": {
       "cross_site_comparison": {
@@ -10675,6 +10675,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "market_index_bins_json",
               "summary_data_json",
@@ -10744,6 +10745,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "comparison_data_json",
@@ -10839,6 +10841,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "comparison_data_json",
@@ -10892,6 +10895,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "comparison_data_json",
@@ -10947,6 +10951,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11012,6 +11017,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11077,6 +11083,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11142,6 +11149,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11207,6 +11215,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11272,6 +11281,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11337,6 +11347,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11402,6 +11413,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11467,6 +11479,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11533,6 +11546,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11596,6 +11610,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11659,6 +11674,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11722,6 +11738,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11785,6 +11802,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11848,6 +11866,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11911,6 +11930,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -11974,6 +11994,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12037,6 +12058,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12100,6 +12122,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12163,6 +12186,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12225,6 +12249,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12286,6 +12311,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12347,6 +12373,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12408,6 +12435,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12469,6 +12497,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12530,6 +12559,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12591,6 +12621,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12652,6 +12683,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12713,6 +12745,7 @@
             "pipeline_artefacts": [
               "distribution_html",
               "distribution_json",
+              "og_preview_png",
               "market_index_stats_json",
               "summary_data_json",
               "price_graph_html",
@@ -12938,13 +12971,13 @@
         "gate": "market_index_pipeline",
         "status": "live",
         "filename": "og-preview.png",
-        "description": "1200×630 PNG chart preview for Open Graph / social sharing (hero distribution or time-series chart).",
+        "description": "1200×630 branded PNG social card (site name + page title + chart) for Open Graph / sharing.",
         "wp_widgets": [],
         "related_artefacts": [
           "distribution_json",
           "price_graph_json"
         ],
-        "runtime_note": "Written when distribution or time-series chart is generated; requires kaleido at build time."
+        "runtime_note": "Written when a distribution or time-series chart is generated; Kaleido needs Chromium in the runtime image."
       },
       "summary_data_json": {
         "schema_version": 1,

@@ -11,17 +11,41 @@
 		return '/wp-json/ldn/v1/';
 	}
 
+	var panelCache = Object.create(null);
+	var panelAbort = null;
+
+	function panelCacheKey(country, type, carat, shape) {
+		return [country, type, carat, shape].join('|');
+	}
+
 	function fetchPanel(country, type, carat, shape) {
+		var key = panelCacheKey(country, type, carat, shape);
+		if (panelCache[key]) {
+			return Promise.resolve(panelCache[key]);
+		}
+		if (panelAbort) {
+			panelAbort.abort();
+		}
+		panelAbort = typeof AbortController !== 'undefined' ? new AbortController() : null;
 		var url = apiBase() + 'price-calculator-panel'
 			+ '?country=' + encodeURIComponent(country)
 			+ '&type=' + encodeURIComponent(type)
 			+ '&carat=' + encodeURIComponent(carat)
 			+ '&shape=' + encodeURIComponent(shape);
-		return fetch(url, { credentials: 'same-origin' }).then(function (response) {
+		var opts = { credentials: 'same-origin' };
+		if (panelAbort) {
+			opts.signal = panelAbort.signal;
+		}
+		return fetch(url, opts).then(function (response) {
 			if (!response.ok) {
 				throw new Error('panel unavailable');
 			}
 			return response.json();
+		}).then(function (payload) {
+			if (payload && payload.html) {
+				panelCache[key] = payload;
+			}
+			return payload;
 		});
 	}
 
@@ -441,6 +465,11 @@
 	}
 
 	function initDestination(root) {
+		if (root.getAttribute('data-ldn-destination-wired') === '1') {
+			return;
+		}
+		root.setAttribute('data-ldn-destination-wired', '1');
+
 		var country = root.getAttribute('data-ldn-calculator-country') || 'us';
 		var typeInputs = root.querySelectorAll('[data-ldn-calculator-type]');
 		var caratField = root.querySelector('[data-ldn-calculator-carat]');
@@ -496,46 +525,78 @@
 		refreshDrivers(calcRoot);
 
 		var timer = null;
-		function scheduleRefresh() {
+		var lastKey = null;
+
+		function refreshNow() {
+			var carat = clampCarat(caratField.value);
+			if (carat === null) {
+				return;
+			}
+			var type = currentType();
+			var shape = currentShape();
+			var caratStr = String(carat);
+			var key = panelCacheKey(country, type, caratStr, shape);
+			if (key === lastKey && root.querySelector('[data-ldn-price-calculator]')) {
+				return;
+			}
+			fetchPanel(country, type, caratStr, shape)
+				.then(function (payload) {
+					if (!payload || !payload.html) {
+						throw new Error('empty panel');
+					}
+					lastKey = key;
+					mountPanel(root, payload.html);
+				})
+				.catch(function (err) {
+					if (err && err.name === 'AbortError') {
+						return;
+					}
+					var tool = root.querySelector('[data-ldn-calculator-tool]');
+					if (tool) {
+						tool.innerHTML = '<p class="ldn-price-calculator__unavailable">'
+							+ 'We do not have calculator data for that specification yet.</p>';
+					}
+				});
+		}
+
+		function scheduleRefresh(delayMs) {
 			if (timer) {
 				clearTimeout(timer);
 			}
-			timer = setTimeout(function () {
-				var carat = clampCarat(caratField.value);
-				if (carat === null) {
-					return;
-				}
-				fetchPanel(country, currentType(), String(carat), currentShape())
-					.then(function (payload) {
-						if (!payload || !payload.html) {
-							throw new Error('empty panel');
-						}
-						mountPanel(root, payload.html);
-					})
-					.catch(function () {
-						var tool = root.querySelector('[data-ldn-calculator-tool]');
-						if (tool) {
-							tool.innerHTML = '<p class="ldn-price-calculator__unavailable">'
-								+ 'We do not have calculator data for that specification yet.</p>';
-						}
-					});
-			}, 300);
+			var wait = typeof delayMs === 'number' ? delayMs : 120;
+			timer = setTimeout(refreshNow, wait);
 		}
 
 		for (var t = 0; t < typeInputs.length; t++) {
-			typeInputs[t].addEventListener('change', scheduleRefresh);
+			typeInputs[t].addEventListener('change', function () {
+				scheduleRefresh(0);
+			});
 		}
 		for (var i = 0; i < shapeInputs.length; i++) {
-			shapeInputs[i].addEventListener('change', scheduleRefresh);
+			shapeInputs[i].addEventListener('change', function () {
+				scheduleRefresh(0);
+			});
 		}
 		caratField.addEventListener('input', function () {
 			syncCaratControls(caratField);
-			scheduleRefresh();
+			scheduleRefresh(180);
+		});
+		caratField.addEventListener('change', function () {
+			syncCaratControls(caratField);
+			scheduleRefresh(0);
 		});
 		if (caratSlider) {
 			caratSlider.addEventListener('input', function () {
 				syncCaratControls(caratSlider);
-				scheduleRefresh();
+				scheduleRefresh(220);
+			});
+			caratSlider.addEventListener('change', function () {
+				syncCaratControls(caratSlider);
+				scheduleRefresh(0);
+			});
+			caratSlider.addEventListener('pointerup', function () {
+				syncCaratControls(caratSlider);
+				scheduleRefresh(0);
 			});
 		}
 	}
@@ -549,4 +610,5 @@
 	} else {
 		init();
 	}
+	window.addEventListener('rocket-allScriptsLoaded', init);
 })();

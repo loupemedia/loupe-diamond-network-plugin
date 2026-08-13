@@ -51,11 +51,13 @@ trait LDN_Trait_Charts {
             : '';
         $html .= '<div id="' . esc_attr($dom_id) . '" class="ldn-chart-target">'
             . $fallback_html . '</div>';
-        $html .= '<script>(function(){function d(){Plotly.newPlot('
+        $html .= '<script>(function(){var run=function(){if(!window.LDN||!window.LDN.plotChart){return false;}'
+            . 'window.LDN.plotChart('
             . wp_json_encode($dom_id)
-            . ',' . $data . ',' . $layout_json . ',' . $cfg . ');}'
-            . 'if(window.Plotly){d();}else{document.addEventListener("DOMContentLoaded",function(){'
-            . 'if(window.Plotly){d();}});}})();</script>';
+            . ',' . $data . ',' . $layout_json . ',' . $cfg . ');return true;};'
+            . 'if(!run()){var boot=function(){run();};'
+            . 'document.addEventListener("DOMContentLoaded",boot);'
+            . 'window.addEventListener("load",boot);}})();</script>';
         $html .= '</figure>';
 
         return $html;

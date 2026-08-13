@@ -198,6 +198,11 @@ check(
     'a price page title comes from the renderer with the site name appended'
 );
 check(
+    LDN_Query_Signals::resolved_document_title()
+        === '1 Carat Round Natural Diamond Prices (US) - Ringspo',
+    'resolved_document_title() matches the pre_get_document_title output'
+);
+check(
     strpos($signals->document_title('Ringspo'), 'Round') !== false,
     'the title describes the page rather than the site'
 );

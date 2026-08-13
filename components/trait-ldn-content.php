@@ -972,10 +972,20 @@ trait LDN_Trait_Content {
     /**
      * Anchor carat for hub entry points (hero stats, type nav, table highlight).
      *
+     * On diamond-type pages, prefer an explicit `?carat=` query (so Natural ↔
+     * Lab-grown preserves the slider weight) when it matches a published tier;
+     * otherwise fall back to the type's most-listed carat, then 1 ct.
+     *
+     * @param LDN_Page_Context|null $ctx
+     * @param array                 $bag
      * @return string
      */
     protected function hub_anchor_carat(?LDN_Page_Context $ctx = null, array $bag = array()) {
         if ($ctx !== null && $ctx->page_level === 'diamond-type') {
+            $requested = $this->requested_type_carat($bag);
+            if ($requested !== '') {
+                return $requested;
+            }
             $payload = isset($bag['type_summary']) && is_array($bag['type_summary'])
                 ? $bag['type_summary']
                 : array();
@@ -993,6 +1003,70 @@ trait LDN_Trait_Content {
     }
 
     /**
+     * Validated `?carat=` for diamond-type hubs, or '' when absent / unknown.
+     *
+     * @param array $bag Prefetch bag (type_summary.carat_tiers used when present)
+     * @return string
+     */
+    protected function requested_type_carat(array $bag = array()) {
+        if (!isset($_GET['carat'])) {
+            return '';
+        }
+        $raw = $_GET['carat'];
+        if (is_array($raw)) {
+            return '';
+        }
+        $raw = function_exists('wp_unslash') ? wp_unslash((string) $raw) : (string) $raw;
+        $raw = trim($raw);
+        if ($raw === '' || !is_numeric($raw)) {
+            return '';
+        }
+
+        $payload = isset($bag['type_summary']) && is_array($bag['type_summary'])
+            ? $bag['type_summary']
+            : array();
+        $tiers = isset($payload['carat_tiers']) && is_array($payload['carat_tiers'])
+            ? $payload['carat_tiers']
+            : array();
+        if (empty($tiers)) {
+            // No tier list yet — accept the numeric value so toggle URLs can
+            // still carry the selection from the current page's anchor.
+            return $raw;
+        }
+
+        $target = (float) $raw;
+        foreach ($tiers as $tier) {
+            if (!is_array($tier) || !isset($tier['carat_weight'])) {
+                continue;
+            }
+            if ((float) $tier['carat_weight'] === $target) {
+                return (string) $tier['carat_weight'];
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Append `carat=` to a diamond-type hub URL for nat/lab toggle continuity.
+     *
+     * @param string $url
+     * @param string $carat
+     * @return string
+     */
+    protected function append_hub_carat_query($url, $carat) {
+        $url = (string) $url;
+        $carat = (string) $carat;
+        if ($url === '' || $carat === '' || !is_numeric($carat)) {
+            return $url;
+        }
+        if (function_exists('add_query_arg')) {
+            return (string) add_query_arg('carat', $carat, $url);
+        }
+        $sep = strpos($url, '?') === false ? '?' : '&';
+        return $url . $sep . 'carat=' . rawurlencode($carat);
+    }
+
+    /**
      * Nat/lab toggle and type-level carat lookup in the diamond-type hero band.
      *
      * @param LDN_Page_Context $ctx
@@ -1005,7 +1079,7 @@ trait LDN_Trait_Content {
             return '';
         }
 
-        $toggle = $this->nat_lab_toggle_html($ctx);
+        $toggle = $this->nat_lab_toggle_html($ctx, $bag);
         $lookup = $this->type_carat_lookup_html($ctx, $bag, $currency);
         if ($toggle === '' && $lookup === '') {
             return '';

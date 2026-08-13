@@ -47,6 +47,20 @@
 	min-height: 0;
 }
 
+/* Theme shells (GeneratePress etc.) pad/margin #content below the LDN shell,
+   which shows as a white strip above a coloured footer. Flush LDN pages. */
+body:has(.ldn-page-shell) #page,
+body:has(.ldn-page-shell) #content,
+body:has(.ldn-page-shell) .site-content {
+	margin-bottom: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+body:has(.ldn-page-shell) #content > *:last-child,
+body:has(.ldn-page-shell) .site-content > *:last-child {
+	margin-bottom: 0 !important;
+}
+
 .ldn-price-page {
 	--ldn-table-border: #ddd;
 	--ldn-table-header-bg: #f2f2f2;
@@ -101,6 +115,17 @@
 	gap: 1rem;
 }
 
+/* Diamond-type hubs: three cards in one row on desktop. */
+.ldn-diamond-type-explore .ldn-type-nav-grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media screen and (max-width: 768px) {
+	.ldn-diamond-type-explore .ldn-type-nav-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 .ldn-type-nav-card {
 	display: flex;
 	flex-direction: column;
@@ -112,6 +137,12 @@
 	color: var(--ldn-text, #333);
 	background: var(--ldn-background, transparent);
 	transition: border-color 0.15s ease;
+}
+
+/* Full-height price table shell (no inner scrollport). */
+.ldn-table-card {
+	margin: 0 0 1.25rem;
+	overflow: hidden;
 }
 
 .ldn-type-nav-card:hover,
@@ -230,6 +261,20 @@
 
 /* ----- Price calculator / position checker (CP 123) ----- */
 
+/* White card for interactive controls. On Ringspo tint/accent bands the heading
+   and lead stay on the coloured band; this surface keeps fields readable. */
+.ldn-price-calculator__surface {
+	padding: 1.25rem 1.5rem;
+	border: 1px solid var(--ldn-border, #e5e7eb);
+	border-radius: 12px;
+	background: #fff;
+	color: var(--ldn-text, #1a1a2e);
+}
+
+.ldn-price-calculator__surface .ldn-shape-picker {
+	margin-bottom: var(--ldn-space-4, 1rem);
+}
+
 /* Two columns on desktop (colour/clarity | cut/quote); one column on phone. */
 .ldn-price-calculator__controls {
 	display: grid;
@@ -300,7 +345,7 @@
 
 .ldn-field-help__summary {
 	list-style: none;
-	cursor: pointer;
+	cursor: help;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -312,7 +357,7 @@
 	font-size: 0.7rem;
 	font-weight: 700;
 	line-height: 1;
-	user: 0;
+	user-select: none;
 }
 
 .ldn-field-help__summary::-webkit-details-marker {
@@ -340,6 +385,14 @@
 	font-size: 0.8rem;
 	font-weight: 400;
 	line-height: 1.4;
+	/* Closed <details> hide non-summary children; override so hover/focus work. */
+	display: none;
+}
+
+details.ldn-field-help:hover > .ldn-field-help__tip,
+details.ldn-field-help:focus-within > .ldn-field-help__tip,
+details.ldn-field-help[open] > .ldn-field-help__tip {
+	display: block;
 }
 
 .ldn-grade-slider {
@@ -447,8 +500,10 @@
 	border: 0;
 	background: transparent;
 	color: var(--ldn-secondary-text, #94a3b8);
-	font: inherit;
-	font-size: 0.7rem;
+	/* Explicit size — avoid font:inherit so theme button rules cannot inflate labels. */
+	font-family: inherit;
+	font-size: 0.65rem;
+	font-weight: 500;
 	line-height: 1.15;
 	/* Never ellipsize: adjacent stops were reading as "Fair G…" / "Id…". */
 	white-space: normal;
@@ -759,7 +814,15 @@
 	cursor: pointer;
 	color: var(--ldn-secondary-text, #666);
 	background: #fff;
+	font: inherit;
 	transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+button.ldn-shape-picker__option {
+	width: 100%;
+	margin: 0;
+	appearance: none;
+	-webkit-appearance: none;
 }
 
 .ldn-shape-picker__option:hover {
@@ -782,11 +845,14 @@
 	border: 0;
 }
 
-.ldn-shape-picker__option:focus-within {
+.ldn-shape-picker__option:focus-within,
+button.ldn-shape-picker__option:focus-visible {
 	box-shadow: 0 0 0 2px var(--ldn-accent, #706cc8);
+	outline: none;
 }
 
-.ldn-shape-picker__option:has(input:checked) {
+.ldn-shape-picker__option:has(input:checked),
+.ldn-shape-picker__option--active {
 	border-color: var(--ldn-accent, #706cc8);
 	color: var(--ldn-accent, #706cc8);
 	box-shadow: inset 0 0 0 1px var(--ldn-accent, #706cc8);
@@ -1043,30 +1109,6 @@
 	color: var(--ldn-secondary-text, var(--ldn-text, #333));
 }
 
-.ldn-shape-calc-pills {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.5rem;
-	margin: 0 0 1rem;
-}
-
-.ldn-shape-calc-pill {
-	padding: 0.4rem 0.85rem;
-	border: 1px solid var(--ldn-table-border, #ddd);
-	border-radius: 999px;
-	background: transparent;
-	font: inherit;
-	font-weight: 600;
-	cursor: pointer;
-	color: var(--ldn-text, #333);
-}
-
-.ldn-shape-calc-pill--active,
-.ldn-shape-calc-pill:hover,
-.ldn-shape-calc-pill:focus-visible {
-	border-color: var(--ldn-primary, #333);
-}
-
 .ldn-all-shapes-calculator__lead {
 	margin: 0 0 1rem;
 	color: var(--ldn-secondary-text, #475569);
@@ -1085,7 +1127,8 @@
 	border: 0;
 }
 
-/* Sticky table header inside scroll container (desktop/tablet). */
+/* Sticky table header inside scroll container (desktop/tablet).
+   Prefer .ldn-table-card for short full-height tables (carat tiers). */
 @media screen and (min-width: 641px) {
 	.ldn-table-scroll {
 		max-height: min(70vh, 32rem);
@@ -1134,6 +1177,12 @@
 .ldn-nat-lab-toggle__pill--active {
 	background: #fff;
 	color: var(--ldn-primary, #706cc8);
+}
+
+/* Instant click feedback while the sibling page navigates (B). */
+.ldn-nat-lab-toggle--pending {
+	opacity: 0.85;
+	pointer-events: none;
 }
 
 .ldn-diamond-type-hero-tools {
@@ -1305,6 +1354,29 @@
 	margin: 0.15rem 0 0;
 	font-size: 1.125rem;
 	font-weight: 600;
+}
+
+.ldn-stats--cards {
+	background: transparent;
+	padding: 0;
+	gap: 0.75rem;
+}
+
+.ldn-stat-card {
+	margin: 0;
+	padding: 0.85rem 1rem;
+	border-radius: 8px;
+	background: rgba(255, 255, 255, 0.14);
+	border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.ldn-stat-card dt {
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.ldn-stat-card dd {
+	color: #fff;
+	font-size: 1.35rem;
 }
 
 /* ----- Charts ----- */
@@ -1723,8 +1795,30 @@
 	margin-top: 0;
 }
 
-.ldn-size-explore-link__anchor {
+.ldn-size-explore-link__copy {
+	margin: 0 0 0.75rem;
+}
+
+/* Beat `.ldn-section a` (class+element) so this CTA is not a default underline. */
+.ldn-size-explore-link a.ldn-size-explore-link__anchor {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
 	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--ldn-primary, #706cc8);
+	text-decoration: none;
+	white-space: nowrap;
+}
+
+.ldn-size-explore-link a.ldn-size-explore-link__anchor:hover,
+.ldn-size-explore-link a.ldn-size-explore-link__anchor:focus-visible {
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.ldn-size-explore-link__arrow {
+	line-height: 1;
 }
 
 @media screen and (max-width: 600px) {
@@ -1874,6 +1968,13 @@
 	overflow: hidden;
 }
 
+/* Mega-hub / shape-hub ladder use the matrix scroll shell — no second card outline. */
+.ldn-size-hub-table .ldn-size-table.ldn-size-matrix {
+	border: none;
+	border-radius: 0;
+	overflow: visible;
+}
+
 .ldn-size-hub-table .ldn-size-table th,
 .ldn-size-hub-table .ldn-size-table td {
 	border-bottom: 1px solid var(--ldn-border, #e5e7eb);
@@ -1952,27 +2053,53 @@
 }
 
 .ldn-size-checker-panel {
+	position: relative;
 	margin: 0;
 	padding: 1.5rem 1.25rem 1.25rem;
 	border: 2px solid var(--ldn-primary, #706cc8);
 	border-radius: 12px;
 	background: #fff;
 	box-shadow: 0 1px 3px rgba(26, 26, 46, 0.08);
+	box-sizing: border-box;
+	height: 100%;
 }
 
+/* Sit on the top border without shifting panel content — keeps A/B fields aligned. */
 .ldn-size-checker-panel legend.ldn-size-checker-panel__title {
+	position: absolute;
+	top: 0;
+	left: 1rem;
+	transform: translateY(-50%);
 	float: none;
 	display: block;
-	width: 100%;
-	margin: 0 0 0.75rem;
-	padding: 0;
-	font-size: 1.05rem;
+	width: auto;
+	max-width: calc(100% - 2rem);
+	margin: 0;
+	padding: 0 0.4rem;
+	font-size: 0.95rem;
 	font-weight: 700;
 	line-height: 1.3;
+	background: #fff;
+	color: var(--ldn-text, #1a1a2e);
 }
 
 .ldn-size-checker-panel--b {
 	border-color: #6cc8be;
+}
+
+/* Match panel A as a grid cell so both fieldsets share the same top edge. */
+#ldn-checker-panel-b-wrap {
+	min-height: 100%;
+}
+
+#ldn-checker-panel-b-wrap:not([hidden]) {
+	display: flex;
+	flex-direction: column;
+}
+
+#ldn-checker-panel-b-wrap .ldn-size-checker-panel {
+	flex: 1 1 auto;
+	width: 100%;
 }
 
 .ldn-size-checker-panel__title {
@@ -2049,11 +2176,11 @@
 	padding: 0.75rem 2rem;
 }
 
-/* Results are a clearly separated section below the form. */
+/* Results sit below the form without a divider line. */
 .ldn-size-checker-results {
 	margin: 1.75rem 0 0;
-	padding: 1.25rem 0 0;
-	border-top: 1px solid var(--ldn-border, #e5e7eb);
+	padding: 0;
+	border: none;
 	border-radius: 0;
 	background: transparent;
 }
@@ -2132,11 +2259,38 @@
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 1.5rem;
+	align-items: stretch;
 }
 
+.ldn-size-comparison-column {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+/* Equal-height scale wells so the two spec tables share one baseline. */
 .ldn-size-comparison-column__scale {
+	flex: 1 1 auto;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
 	max-width: 320px;
-	margin-bottom: 1rem;
+	width: 100%;
+	margin: 0 0 1rem;
+	box-sizing: border-box;
+	background: #fff;
+	color: var(--ldn-text, #1a1a2e);
+}
+
+.ldn-size-comparison-column__scale svg {
+	max-width: 100%;
+	max-height: 180px;
+	width: auto;
+	height: auto;
+}
+
+.ldn-size-comparison-column .ldn-size-table {
+	margin-top: 0;
 }
 
 .ldn-size-comparison-prices__grid {
@@ -2157,8 +2311,14 @@
 	margin-top: 0.15rem;
 }
 
+/* Comparison-page result line: no card / outline — inherits the section band. */
 .ldn-size-comparison-callout .ldn-faceup-callout {
-	margin-bottom: 0;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	color: inherit;
 }
 
 .ldn-size-chart__subheading {
@@ -2220,14 +2380,7 @@
 	margin: 0 auto;
 }
 
-.ldn-size-checker-explore ul {
-	margin: 0;
-	padding-left: 1.25rem;
-}
-
-.ldn-size-checker-explore li + li {
-	margin-top: 0.35rem;
-}
+/* Explore links use shared .ldn-explore-card-grid (see explore_cards_section_html). */
 
 @media (min-width: 768px) {
 	.ldn-size-checker-steps {
@@ -2312,14 +2465,13 @@
 	padding: 0.85rem 1rem;
 	border-radius: 8px;
 	background: #ecfdf5;
-	border: 1px solid #a7f3d0;
+	border: none;
 	font-size: 1.05rem;
 	line-height: 1.45;
 }
 
 .ldn-faceup-callout--tie {
 	background: #f8fafc;
-	border-color: #e2e8f0;
 }
 
 .ldn-faceup-legend {
@@ -2360,14 +2512,34 @@
 .ldn-faceup-overlay {
 	display: flex;
 	justify-content: center;
-	margin: 0.5rem 0 1.25rem;
+	align-items: center;
+	margin: 0.5rem auto 1.25rem;
 	min-height: 120px;
+	max-width: min(100%, 480px);
+	overflow: hidden;
+	padding: 1rem 1.25rem;
+	border-radius: 12px;
+	background: #fff;
+	box-sizing: border-box;
+}
+
+.ldn-faceup-overlay svg,
+.ldn-size-outline--comparison svg {
+	max-width: min(100%, 420px);
+	max-height: min(50vh, 280px);
+	width: auto;
+	height: auto;
 }
 
 .ldn-faceup-bars {
 	max-width: 520px;
 	margin: 0 auto;
+	padding: 1rem 1.25rem;
+	border-radius: 12px;
+	background: #fff;
 	text-align: left;
+	box-sizing: border-box;
+	color: var(--ldn-text, #1a1a2e);
 }
 
 .ldn-faceup-bar {
@@ -2440,17 +2612,18 @@
 	padding: 0;
 	margin: 0;
 	display: grid;
-	gap: 0.5rem;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 0.5rem 1rem;
 }
 
 /* ------------------------------------------------------------------
    Mega-hub matrix table (sticky header + sticky shape column)
    ------------------------------------------------------------------ */
 .ldn-size-matrix-scroll {
-	overflow-x: auto;
+	overflow: auto;
 	-webkit-overflow-scrolling: touch;
 	max-width: 100%;
-	border: 1px solid var(--ldn-border, #e5e7eb);
+	border: none;
 	border-radius: 10px;
 	background: #fff;
 }
@@ -2478,6 +2651,24 @@
 	color: #fff;
 	font-weight: 700;
 	white-space: nowrap;
+}
+
+/* Corner radii on header/footer cells — belt-and-suspenders when a sticky
+   paint path ignores the scroll wrapper’s radius. */
+.ldn-size-matrix thead th:first-child {
+	border-top-left-radius: 10px;
+}
+
+.ldn-size-matrix thead th:last-child {
+	border-top-right-radius: 10px;
+}
+
+.ldn-size-matrix tbody tr:last-child > :first-child {
+	border-bottom-left-radius: 10px;
+}
+
+.ldn-size-matrix tbody tr:last-child > :last-child {
+	border-bottom-right-radius: 10px;
 }
 
 .ldn-size-matrix tbody tr:nth-child(even) td,
@@ -2619,16 +2810,31 @@
    Methodology page
    ------------------------------------------------------------------ */
 .ldn-size-methodology-stats {
-	margin-bottom: 1.5rem;
+	margin: 1.1rem 0 0;
 }
 
 .ldn-size-methodology-section p {
 	line-height: 1.6;
-	margin: 0 0 0.85rem;
+	margin: 0 0 0.65rem;
 }
 
 .ldn-size-methodology-section p:last-child {
 	margin-bottom: 0;
+}
+
+.ldn-size-figure--methodology {
+	margin: 1.25rem 0 0.25rem;
+	max-width: 36rem;
+}
+
+.ldn-size-figure--methodology .ldn-size-outline--fill svg {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+.ldn-size-figure--methodology .ldn-size-spread-labels {
+	margin-top: 0.75rem;
 }
 
 .ldn-btn {

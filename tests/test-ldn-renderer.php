@@ -30,6 +30,9 @@ error_reporting(E_ALL);
 // --- Minimal WordPress shims -------------------------------------------------
 define('ABSPATH', __DIR__ . '/');
 define('LDN_PLUGIN_DIR', dirname(__DIR__) . '/');
+if (!defined('LDN_PLUGIN_URL')) {
+    define('LDN_PLUGIN_URL', 'https://example.test/wp-content/plugins/loupe-diamond-network/');
+}
 
 if (!function_exists('__')) {
     function __($s, $d = null) { return $s; }
@@ -57,6 +60,25 @@ if (!function_exists('wp_kses_post')) {
 }
 if (!function_exists('esc_url')) {
     function esc_url($s) { return (string) $s; }
+}
+if (!function_exists('wp_unslash')) {
+    function wp_unslash($s) { return $s; }
+}
+if (!function_exists('add_query_arg')) {
+    function add_query_arg($key, $value = null, $url = null) {
+        if (is_array($key)) {
+            $args = $key;
+            $url = $value;
+        } else {
+            $args = array($key => $value);
+        }
+        $url = (string) $url;
+        foreach ($args as $k => $v) {
+            $sep = strpos($url, '?') === false ? '?' : '&';
+            $url .= $sep . rawurlencode((string) $k) . '=' . rawurlencode((string) $v);
+        }
+        return $url;
+    }
 }
 if (!function_exists('wp_json_encode')) {
     function wp_json_encode($data, $options = 0, $depth = 512) {
@@ -1306,7 +1328,9 @@ check(
     'type_overview_dynamic is empty when intro already rendered in the hero band'
 );
 
-// Test intent: carat tiers table shows price-per-carat and Ringspo how-to-read copy.
+// Test intent: carat tiers table shows all rows in a full-height card (no
+// max-height scrollport), with price-per-carat and Ringspo how-to-read copy.
+// Would fail if: wrapper used ldn-table-scroll / max-height again.
 // Would fail if: PPC column missing or Ringspo intro omitted from the table section.
 $ringspo_type_ctx = new LDN_Page_Context('ringspo', 'diamond-type', 'us', 'natural');
 $tiers_html = $renderer->carat_tiers_table_html(
@@ -1340,8 +1364,12 @@ check(
     'Ringspo carat tiers table omits milestone copy (lives under the chart)'
 );
 check(
-    strpos($tiers_html, 'ldn-table-scroll') !== false,
-    'carat_tiers_table_html wraps the table in a scroll container'
+    strpos($tiers_html, 'ldn-table-card') !== false,
+    'carat_tiers_table_html wraps the table in a full-height card (no inner scroll)'
+);
+check(
+    strpos($tiers_html, 'ldn-table-scroll') === false,
+    'carat_tiers_table_html does not use a max-height scrollport'
 );
 check(
     strpos($tiers_html, 'ldn-price-per-carat-block') !== false,
@@ -1421,7 +1449,7 @@ if (!class_exists('LDN_Config_Ringspo_Toggle')) {
     }
 }
 $ringspo_toggle_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Ringspo_Toggle());
-$toggle_html = $ringspo_toggle_renderer->nat_lab_toggle_html($ringspo_type_ctx);
+$toggle_html = $ringspo_toggle_renderer->nat_lab_toggle_html($ringspo_type_ctx, $type_summary_bag);
 check(
     strpos($toggle_html, 'ldn-nat-lab-toggle__pill--active') !== false,
     'nat_lab_toggle marks the current diamond type active when entitled'
@@ -1430,11 +1458,74 @@ check(
     strpos($toggle_html, 'lab-grown') !== false,
     'nat_lab_toggle links to the sibling diamond type when entitled'
 );
+// Test intent: inactive pill prefetches the sibling page; active pill does not.
+// Would fail if: rel=prefetch were missing or applied to the current type.
+check(
+    preg_match(
+        '/ldn-nat-lab-toggle__pill--active[^>]*aria-current="page"/',
+        $toggle_html
+    ) === 1,
+    'nat_lab_toggle marks the active pill with aria-current'
+);
+check(
+    substr_count($toggle_html, 'rel="prefetch"') === 1,
+    'nat_lab_toggle prefetches exactly one sibling type URL'
+);
+check(
+    strpos($toggle_html, 'type="speculationrules"') !== false
+        && strpos($toggle_html, 'lab-grown') !== false,
+    'nat_lab_toggle emits Speculation Rules for the sibling URL'
+);
+// Test intent: inactive pill carries the current hub carat so Natural ↔ Lab-grown
+// keeps the slider weight. Would fail if: sibling href omitted ?carat=1 while
+// natural's most_popular_carat is 1.
+check(
+    preg_match('/rel="prefetch"[^>]*carat=1|carat=1[^>]*rel="prefetch"/', $toggle_html) === 1
+        || strpos($toggle_html, 'carat=1') !== false,
+    'nat_lab_toggle sibling URL includes the current hub carat query'
+);
 
 $lookup_html = $renderer->type_carat_lookup_html($ringspo_type_ctx, $type_summary_bag, 'USD');
 check(
     strpos($lookup_html, 'ldn-type-carat-lookup-manifest') !== false,
     'type_carat_lookup embeds tier manifest JSON'
+);
+check(
+    strpos($lookup_html, '"default_carat":"1"') !== false
+        || strpos($lookup_html, '"default_carat": "1"') !== false,
+    'type_carat_lookup defaults to most_popular_carat when no ?carat= query'
+);
+
+// Test intent: ?carat= overrides most_popular_carat for slider + table highlight.
+// Would fail if: hub_anchor_carat ignored the query and stayed on popular=1.
+$_GET['carat'] = '2';
+$lookup_from_query = $renderer->type_carat_lookup_html($ringspo_type_ctx, $type_summary_bag, 'USD');
+$toggle_from_query = $ringspo_toggle_renderer->nat_lab_toggle_html($ringspo_type_ctx, $type_summary_bag);
+$tiers_from_query = $renderer->carat_tiers_table_html(
+    $ringspo_type_ctx,
+    $type_summary_bag,
+    'Natural diamond prices by carat weight'
+);
+unset($_GET['carat']);
+check(
+    strpos($lookup_from_query, '"default_carat":"2"') !== false
+        || strpos($lookup_from_query, '"default_carat": "2"') !== false,
+    'type_carat_lookup prefers ?carat= over most_popular_carat'
+);
+check(
+    strpos($toggle_from_query, 'carat=2') !== false,
+    'nat_lab_toggle carries ?carat= from the request onto the sibling URL'
+);
+check(
+    preg_match(
+        '/ldn-row-highlight[^>]*>.*?>2 ct<|>2 ct<\/a><\/td>/s',
+        $tiers_from_query
+    ) === 1
+        || (
+            strpos($tiers_from_query, 'ldn-row-highlight') !== false
+            && strpos($tiers_from_query, '>2 ct<') !== false
+        ),
+    'carat_tiers_table_html highlights the ?carat= row'
 );
 
 $explore_html = $renderer->diamond_type_explore_html($ringspo_type_ctx, $type_summary_bag);
@@ -1443,8 +1534,13 @@ check(
     'diamond_type_explore renders navigation cards'
 );
 check(
-    strpos($explore_html, 'lab-grown') !== false && strpos($explore_html, 'compare shapes') !== false,
-    'diamond_type_explore links to the opposite type hub and all-shapes entry'
+    strpos($explore_html, 'lab-grown') !== false
+        && strpos($explore_html, 'All diamond prices') !== false,
+    'diamond_type_explore links to the opposite type hub and top-level prices'
+);
+check(
+    strpos($explore_html, 'compare shapes') === false,
+    'diamond_type_explore omits the compare-shapes card (three-up layout)'
 );
 
 $ppc_bag = array(
@@ -1611,6 +1707,8 @@ check(
         && strpos($cc_with_size, 'ldn-price-size-card') === false,
     'color_clarity section no longer appends the size dimensions card'
 );
+// Test intent: size_explore_link keeps body copy and the CTA as separate
+// elements so the CTA can be styled as a block link (not an inline orphan arrow).
 $size_explore = $size_card_renderer->render_section(
     'size_explore_link',
     $ringspo_shape_ctx,
@@ -1619,8 +1717,14 @@ $size_explore = $size_card_renderer->render_section(
 );
 check(
     strpos($size_explore, 'ldn-size-explore-link') !== false
-        && strpos($size_explore, 'View size chart') !== false,
-    'size_explore_link renders the compact pricing→size cross-link'
+        && strpos($size_explore, 'ldn-size-explore-link__copy') !== false
+        && strpos($size_explore, 'ldn-size-explore-link__anchor') !== false
+        && strpos($size_explore, 'View size chart') !== false
+        && preg_match(
+            '/ldn-size-explore-link__copy">[^<]+<\/p>\s*<a class="ldn-size-explore-link__anchor"/',
+            $size_explore
+        ) === 1,
+    'size_explore_link renders copy and CTA as separate elements'
 );
 
 // --- buying_advice_static legacy merge ---------------------------------------
@@ -2024,6 +2128,10 @@ check(
     strpos($chart_escaped, '<b>') === false && strpos($chart_escaped, '&lt;b&gt;') !== false,
     'fallback text is escaped before rendering'
 );
+check(
+    strpos($chart_with_fallback, 'LDN.plotChart') !== false,
+    'chart_html delegates Plotly render to LDN.plotChart (WP Rocket Delay JS safe)'
+);
 
 // --- 14b. the fallback must quote the same figure as the visible page --------
 // Test intent: the factual statement resolves its headline price through the same
@@ -2158,6 +2266,10 @@ check(
 check(
     strpos($head, 'property="og:title" content="' . esc_attr($head_renderer->document_title($shape_ctx)) . '"') !== false,
     'og:title and the document title are the same string'
+);
+check(
+    strpos($head, 'property="og:image:alt" content="' . esc_attr($head_renderer->document_title($shape_ctx)) . '"') !== false,
+    'og:image:alt matches the page title so share cards stay readable'
 );
 
 // --- Section bands ----------------------------------------------------------
@@ -2300,6 +2412,9 @@ if (!class_exists('LDN_Config_Price_Calculator')) {
             return array('entitlements' => array('sites' => array(
                 'calcsite' => array('pages' => array(
                     'shape' => array('wp_widgets' => array(
+                        'price_calculator' => array('presentation' => 'full'),
+                    )),
+                    'all-shapes' => array('wp_widgets' => array(
                         'price_calculator' => array('presentation' => 'full'),
                     )),
                 )),
@@ -2450,8 +2565,58 @@ check(
 );
 check(
     strpos($calc_html, 'ldn-field-help') !== false
-        && strpos($calc_html, 'How colourless the diamond looks') !== false,
+        && strpos($calc_html, 'How colorless the diamond looks') !== false,
     'each grade field has a ? help affordance with a short definition'
+);
+check(
+    strpos($calc_html, 'ldn-price-calculator__surface') !== false,
+    'shape-page calculator wraps controls in a white surface for tint bands'
+);
+
+// Test intent: all-shapes hub uses destination-style shape icons and one white
+// surface; pills alone on purple are not enough for band-aware readability.
+// Would fail if: hub still rendered text-only ldn-shape-calc-pill buttons, or
+// omitted __surface so controls sat naked on a tint band.
+if (!class_exists('LDN_Fetcher_All_Shapes_Calc')) {
+    class LDN_Fetcher_All_Shapes_Calc extends LDN_Data_Fetcher {
+        /** @var array */
+        private $manifest;
+        public function __construct(array $manifest) {
+            $this->manifest = $manifest;
+        }
+        public function fetch_artefact($artefact_id, $ctx) {
+            if ($artefact_id === 'price_calculator_json') {
+                $out = $this->manifest;
+                if (isset($ctx->shape) && (string) $ctx->shape !== '') {
+                    $out['shape'] = (string) $ctx->shape;
+                }
+                return $out;
+            }
+            return null;
+        }
+    }
+}
+$hub_ctx = new LDN_Page_Context('calcsite', 'all-shapes', 'us', 'natural', '1');
+$hub_renderer = new LDN_Renderer(
+    new LDN_Fetcher_All_Shapes_Calc($calc_manifest),
+    new LDN_Config_Price_Calculator()
+);
+$hub_html = $hub_renderer->all_shapes_calculator_html($hub_ctx, array(
+    'ranking' => array(
+        'shapes' => array(
+            array('shape' => 'Round', 'median_price' => 5010),
+            array('shape' => 'Oval', 'median_price' => 4800),
+        ),
+    ),
+));
+check(
+    strpos($hub_html, 'ldn-price-calculator__surface') !== false
+        && strpos($hub_html, 'ldn-shape-picker__icon') !== false
+        && strpos($hub_html, 'ldn-shape-picker__option--active') !== false
+        && strpos($hub_html, 'data-ldn-shape-calc-pill="round"') !== false
+        && strpos($hub_html, 'data-ldn-shape-calc-pill="oval"') !== false
+        && strpos($hub_html, 'class="ldn-shape-calc-pill') === false,
+    'all-shapes calculator uses shape-picker icons inside a white surface'
 );
 
 // The heading and specification come from the manifest, not the page context:

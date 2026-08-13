@@ -340,10 +340,14 @@ trait LDN_Trait_Navigation {
     /**
      * Compact natural / lab-grown switcher for diamond-type hub pages.
      *
+     * Inactive pills carry `?carat=` from the current hub anchor so switching
+     * type keeps the slider weight the visitor was looking at.
+     *
      * @param LDN_Page_Context $ctx
+     * @param array            $bag Prefetch bag (optional; improves carat pick)
      * @return string
      */
-    public function nat_lab_toggle_html(LDN_Page_Context $ctx) {
+    public function nat_lab_toggle_html(LDN_Page_Context $ctx, array $bag = array()) {
         if ($ctx->page_level !== 'diamond-type' || $ctx->diamond_type === null) {
             return '';
         }
@@ -367,26 +371,54 @@ trait LDN_Trait_Navigation {
             ),
         );
 
+        $carat = $this->hub_anchor_carat($ctx, $bag);
         $pills = '';
+        $prefetch_urls = array();
         foreach ($types as $entry) {
             $url = $this->build_price_page_url($ctx, 'diamond-type', array('type' => $entry['type']));
             if ($url === '') {
                 continue;
             }
-            $active = strtolower($ctx->diamond_type) === $entry['type']
-                ? ' ldn-nat-lab-toggle__pill--active'
-                : '';
-            $pills .= '<a class="ldn-nat-lab-toggle__pill' . esc_attr($active) . '" href="'
-                . esc_url($url) . '">' . esc_html($entry['label']) . '</a>';
+            $is_active = strtolower($ctx->diamond_type) === $entry['type'];
+            $active = $is_active ? ' ldn-nat-lab-toggle__pill--active' : '';
+            if (!$is_active) {
+                $url = $this->append_hub_carat_query($url, $carat);
+            }
+            $attrs = ' href="' . esc_url($url) . '"';
+            if ($is_active) {
+                $attrs .= ' aria-current="page"';
+            } else {
+                // Hint the browser to warm the sibling page before click (A).
+                $attrs .= ' rel="prefetch"';
+                $prefetch_urls[] = $url;
+            }
+            $pills .= '<a class="ldn-nat-lab-toggle__pill' . esc_attr($active) . '"'
+                . $attrs . '>' . esc_html($entry['label']) . '</a>';
         }
         if ($pills === '') {
             return '';
         }
 
+        $speculation = '';
+        if (!empty($prefetch_urls)) {
+            $rules = array(
+                'prefetch' => array(
+                    array(
+                        'urls'      => array_values($prefetch_urls),
+                        'eagerness' => 'moderate',
+                    ),
+                ),
+            );
+            $speculation = '<script type="speculationrules">'
+                . wp_json_encode($rules)
+                . '</script>';
+        }
+
         return '<nav class="ldn-nat-lab-toggle" aria-label="'
             . esc_attr__('Diamond type', 'loupe-diamond-network') . '">'
             . $pills
-            . '</nav>';
+            . '</nav>'
+            . $speculation;
     }
 
     /**
@@ -400,8 +432,6 @@ trait LDN_Trait_Navigation {
             return '';
         }
 
-        $anchor_carat = $this->hub_anchor_carat($ctx, $bag);
-        $carat_label = $this->format_carat_label($anchor_carat);
         $specs = array();
 
         if ($ctx->diamond_type === 'natural') {
@@ -434,23 +464,6 @@ trait LDN_Trait_Navigation {
                 'url'   => $top_url,
                 'label' => __('All diamond prices', 'loupe-diamond-network'),
                 'desc'  => __('Natural and lab-grown on one hub', 'loupe-diamond-network'),
-            );
-        }
-
-        $shapes_url = $this->build_price_page_url(
-            $ctx,
-            'all-shapes',
-            array('type' => $ctx->diamond_type, 'carat' => $anchor_carat)
-        );
-        if ($shapes_url !== '') {
-            $specs[] = array(
-                'url'   => $shapes_url,
-                'label' => sprintf(
-                    /* translators: %s: carat label */
-                    __('%s carat — compare shapes', 'loupe-diamond-network'),
-                    $carat_label
-                ),
-                'desc'  => __('See how round, oval and other cuts compare at this weight', 'loupe-diamond-network'),
             );
         }
 
@@ -615,11 +628,12 @@ trait LDN_Trait_Navigation {
             $dimension
         );
 
-        return '<aside class="ldn-section ldn-size-explore-link"><p>'
-            . esc_html($text) . ' '
+        return '<aside class="ldn-section ldn-size-explore-link">'
+            . '<p class="ldn-size-explore-link__copy">' . esc_html($text) . '</p>'
             . '<a class="ldn-size-explore-link__anchor" href="' . esc_url($url) . '">'
             . esc_html__('View size chart and mm dimensions', 'loupe-diamond-network')
-            . ' →</a></p></aside>';
+            . '<span class="ldn-size-explore-link__arrow" aria-hidden="true">→</span>'
+            . '</a></aside>';
     }
 
     /**

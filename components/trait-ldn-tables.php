@@ -463,7 +463,7 @@ trait LDN_Trait_Tables {
         return '<section class="ldn-section ldn-carat-tiers-table">'
             . '<h2>' . esc_html($title) . '</h2>'
             . $table_intro
-            . '<div class="ldn-table-scroll">'
+            . '<div class="ldn-table-card">'
             . '<table class="ldn-data-table ldn-data-table--stacked"><thead><tr>'
             . '<th>' . esc_html__('Carat', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Typical price', 'loupe-diamond-network') . '</th>'

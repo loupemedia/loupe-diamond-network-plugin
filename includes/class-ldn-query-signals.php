@@ -88,24 +88,19 @@ final class LDN_Query_Signals {
         if (!$this->aspect_enabled('document_title')) {
             return $title;
         }
-        $ldn_title = $this->resolve_title();
+        $ldn_title = self::resolved_document_title();
         return $ldn_title === null ? $title : $ldn_title;
     }
 
-    // =========================================================================
-    // Internal
-    // =========================================================================
-
     /**
-     * The in-flight LDN page's title, or null when this is not an LDN page.
+     * The LDN page title with site name, or null when this is not an LDN page.
      *
-     * A dispatcher only holds a context once it has resolved a route AND found
-     * the page's primary artefact, so a non-null context is what proves we are
-     * rendering an LDN page rather than merely matching a route.
+     * Shared by `pre_get_document_title` and the SEOPress title bridge so the
+     * browser tab, the SERP link and the social card cannot disagree.
      *
      * @return string|null
      */
-    private function resolve_title() {
+    public static function resolved_document_title() {
         $plugin = LDN_Plugin::instance();
 
         $price = $plugin->dispatcher();
@@ -113,7 +108,7 @@ final class LDN_Query_Signals {
             $ctx = $price->current_context();
             $renderer = $plugin->renderer();
             if ($ctx instanceof LDN_Page_Context && $renderer instanceof LDN_Renderer) {
-                return $this->with_site_name($renderer->document_title($ctx));
+                return self::with_site_name($renderer->document_title($ctx));
             }
         }
 
@@ -123,7 +118,7 @@ final class LDN_Query_Signals {
             if ($ctx instanceof LDN_Page_Context) {
                 $summary = $size->primary_data();
                 $renderer = new LDN_Size_Renderer($plugin->data_fetcher(), $plugin->config());
-                return $this->with_site_name(
+                return self::with_site_name(
                     $renderer->page_title($ctx, is_array($summary) ? $summary : array())
                 );
             }
@@ -131,6 +126,10 @@ final class LDN_Query_Signals {
 
         return null;
     }
+
+    // =========================================================================
+    // Internal
+    // =========================================================================
 
     /**
      * Append the site name the way WordPress does for ordinary pages, so LDN
@@ -149,7 +148,7 @@ final class LDN_Query_Signals {
      * @param string $title
      * @return string|null Null when there is no title to work with.
      */
-    private function with_site_name($title) {
+    private static function with_site_name($title) {
         $title = is_string($title) ? trim(wp_strip_all_tags($title)) : '';
         if ($title === '') {
             return null;

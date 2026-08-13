@@ -162,7 +162,7 @@
             pct = Math.round(((faceupB - faceupA) / faceupA) * 100);
         }
         return '<p class="ldn-faceup-callout"><strong>' + escapeHtml(biggerLabel)
-            + '</strong> faces up about <strong>' + pct + '% larger</strong> on the finger.</p>';
+            + '</strong> faces up about <strong>' + pct + '% larger</strong>.</p>';
     }
 
     /**

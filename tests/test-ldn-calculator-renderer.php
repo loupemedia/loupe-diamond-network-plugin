@@ -212,6 +212,13 @@ check(
     'calculator page renders the how_it_works section when listed in the profile'
 );
 check(
+    // Test intent: how_it_works / what_drives_price must be ldn-section so band
+    // padding separates them — bare divs sat flush under How it works copy.
+    strpos($declared, 'class="ldn-section ldn-section--plain ldn-calculator-how"') !== false
+        && strpos($declared, 'class="ldn-section ldn-section--plain ldn-calculator-drivers"') !== false,
+    'how_it_works and what_drives_price wrap in ldn-section for band spacing'
+);
+check(
     strpos($declared, 'ldn-calculator-drivers') !== false
         && strpos($declared, 'What drives the price?') !== false,
     'calculator page renders what_drives_price when listed in the profile'
@@ -258,8 +265,8 @@ check(
         && strpos($declared, 'aria-label="Very Good"') !== false
         && strpos($declared, '>VG</button>') !== false
         && strpos($declared, 'aria-label="Super Ideal"') !== false
-        && strpos($declared, '>Ideal</button>') !== false,
-    'long cut grades use short stop text (VG / Ex / Ideal) with the full name in aria-label'
+        && strpos($declared, '>Super Ideal</button>') !== false,
+    'cut stops keep Super Ideal in full; shorter grades still compress (VG / Ex)'
 );
 
 // The discriminating case: if render() emitted the tool regardless of config, this

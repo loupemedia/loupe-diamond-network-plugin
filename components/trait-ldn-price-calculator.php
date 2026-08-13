@@ -101,7 +101,7 @@ trait LDN_Trait_Price_Calculator {
             strtolower($type_label)
         );
 
-        $pills = '';
+        $options = '';
         $panels = '';
         $first_shape = null;
 
@@ -134,10 +134,14 @@ trait LDN_Trait_Price_Calculator {
                 $first_shape = $shape_slug;
             }
             $active = $shape_slug === $first_shape;
-            $pills .= '<button type="button" class="ldn-shape-calc-pill'
-                . ($active ? ' ldn-shape-calc-pill--active' : '')
+            // Same visual language as the destination shape picker (icon + label),
+            // but buttons toggle pre-rendered panels — no REST round-trip.
+            $options .= '<button type="button" class="ldn-shape-picker__option'
+                . ($active ? ' ldn-shape-picker__option--active' : '')
                 . '" data-ldn-shape-calc-pill="' . esc_attr($shape_slug) . '">'
-                . esc_html($shape) . '</button>';
+                . $this->price_calculator_shape_icon_html($shape_slug)
+                . '<span class="ldn-shape-picker__label">' . esc_html($shape) . '</span>'
+                . '</button>';
 
             $panels .= '<div class="ldn-shape-calc-panel'
                 . ($active ? ' ldn-shape-calc-panel--active' : '')
@@ -146,7 +150,7 @@ trait LDN_Trait_Price_Calculator {
                 . '>' . $panel . '</div>';
         }
 
-        if ($pills === '' || $panels === '') {
+        if ($options === '' || $panels === '') {
             return '';
         }
 
@@ -158,11 +162,13 @@ trait LDN_Trait_Price_Calculator {
                 'loupe-diamond-network'
             )
             . '</p>'
-            . '<nav class="ldn-shape-calc-pills" aria-label="'
+            . '<div class="ldn-price-calculator__surface">'
+            . '<nav class="ldn-shape-picker" aria-label="'
             . esc_attr__('Calculator shape', 'loupe-diamond-network') . '">'
-            . $pills
+            . '<div class="ldn-shape-picker__options">' . $options . '</div>'
             . '</nav>'
             . '<div class="ldn-shape-calc-panels">' . $panels . '</div>'
+            . '</div>'
             . '</section>';
     }
 
@@ -212,11 +218,13 @@ trait LDN_Trait_Price_Calculator {
         // Intro lives on the shape-page shell, not inside the panel, so the
         // destination page and all-shapes hub can supply their own shorter lead
         // without inheriting "the median at the top of this page".
+        // Interactive controls sit on a white surface so tint/accent bands keep
+        // heading + lead on the coloured background and the tool readable.
         return '<section class="ldn-section ldn-price-calculator"'
             . ' data-ldn-price-calculator="1">'
             . '<h2>' . esc_html($heading) . '</h2>'
             . $this->price_calculator_prose_html($this->price_calculator_intro($manifest))
-            . $panel
+            . '<div class="ldn-price-calculator__surface">' . $panel . '</div>'
             . '</section>';
     }
 
@@ -621,9 +629,10 @@ trait LDN_Trait_Price_Calculator {
     /**
      * Cut options for the point slider: pooled "Any" first, then grades worst→best.
      *
-     * The manifest publishes cut_grades best-first (Super Ideal … Fair); the
+     * The manifest publishes cut_grades best-first (Super Ideal … Good); the
      * slider reverses that so it reads the same direction as colour (J→D) and
-     * clarity (I2→IF).
+     * clarity (I2→IF). Fair is never offered (sparse inventory; excluded from
+     * BENCHMARK_CUT_GRADES) even if a stale S3 manifest still lists it.
      *
      * @param array $manifest
      * @return array
@@ -641,10 +650,13 @@ trait LDN_Trait_Price_Calculator {
         ));
         foreach (array_reverse(array_values($grades)) as $grade) {
             $grade = (string) $grade;
+            if ($grade === 'Fair') {
+                continue;
+            }
             $options[] = array(
                 'value' => $grade,
                 'label' => $grade,
-                // Short stop text so six cut grades fit a single slider row.
+                // Short stop text so cut grades fit a single slider row.
                 'short' => $this->price_calculator_cut_stop_label($grade),
             );
         }
@@ -661,7 +673,7 @@ trait LDN_Trait_Price_Calculator {
         $short = array(
             'Very Good'   => __('VG', 'loupe-diamond-network'),
             'Excellent'   => __('Ex', 'loupe-diamond-network'),
-            'Super Ideal' => __('Ideal', 'loupe-diamond-network'),
+            'Super Ideal' => __('Super Ideal', 'loupe-diamond-network'),
         );
         return isset($short[$grade]) ? $short[$grade] : $grade;
     }
@@ -1089,8 +1101,11 @@ trait LDN_Trait_Price_Calculator {
             $out .= '<li>' . esc_html($step) . '</li>';
         }
         $out .= '</ol>';
-        return '<div class="ldn-calculator-how"><h2 class="ldn-calculator-how__title">'
-            . esc_html__('How it works', 'loupe-diamond-network') . '</h2>' . $out . '</div>';
+        return '<section class="ldn-section ldn-calculator-how">'
+            . '<h2 class="ldn-calculator-how__title">'
+            . esc_html__('How it works', 'loupe-diamond-network') . '</h2>'
+            . $out
+            . '</section>';
     }
 
     /**
@@ -1129,14 +1144,14 @@ trait LDN_Trait_Price_Calculator {
             'These percentages update when you change the selectors above.',
             'loupe-diamond-network'
         );
-        return '<div class="ldn-calculator-drivers" data-ldn-calculator-drivers="1">'
+        return '<section class="ldn-section ldn-calculator-drivers" data-ldn-calculator-drivers="1">'
             . '<h2 class="ldn-calculator-drivers__title">'
             . esc_html__('What drives the price?', 'loupe-diamond-network')
             . '</h2>'
             . '<p class="ldn-calculator-drivers__intro">' . esc_html($intro) . '</p>'
             . $list
             . '<p class="ldn-calculator-drivers__note">' . esc_html($note) . '</p>'
-            . '</div>';
+            . '</section>';
     }
 
     /**
@@ -1556,8 +1571,6 @@ trait LDN_Trait_Price_Calculator {
      */
     private function price_calculator_shape_picker_html(array $manifest) {
         $selected = isset($manifest['shape']) ? strtolower(trim((string) $manifest['shape'])) : '';
-        $icon_base = defined('LDN_PLUGIN_URL') ? LDN_PLUGIN_URL . 'assets/img/shapes/' : '';
-        $icon_ver = defined('LDN_VERSION') ? (string) LDN_VERSION : '';
         $shapes = $this->price_calculator_destination_shapes();
 
         if ($selected === '') {
@@ -1567,19 +1580,11 @@ trait LDN_Trait_Price_Calculator {
         $options = '';
         foreach ($shapes as $shape) {
             $slug = (string) $shape['slug'];
-            $icon_url = $icon_base . $slug . '.svg';
-            if ($icon_ver !== '') {
-                $icon_url .= '?ver=' . rawurlencode($icon_ver);
-            }
-            $icon = $icon_base !== ''
-                ? '<span class="ldn-shape-picker__icon" aria-hidden="true"'
-                    . ' style="--ldn-shape-icon:url(' . esc_url($icon_url) . ')"></span>'
-                : '';
             $options .= '<label class="ldn-shape-picker__option">'
                 . '<input type="radio" name="ldn-calculator-shape" value="' . esc_attr($slug) . '"'
                 . ($slug === $selected ? ' checked' : '')
                 . ' data-ldn-calculator-shape="1">'
-                . $icon
+                . $this->price_calculator_shape_icon_html($slug)
                 . '<span class="ldn-shape-picker__label">' . esc_html($shape['label']) . '</span>'
                 . '</label>';
         }
@@ -1590,6 +1595,26 @@ trait LDN_Trait_Price_Calculator {
             . '</legend>'
             . '<div class="ldn-shape-picker__options">' . $options . '</div>'
             . '</fieldset>';
+    }
+
+    /**
+     * Faceted outline icon painted via CSS mask (`--ldn-shape-icon`).
+     *
+     * @param string $slug Shape slug matching assets/img/shapes/{slug}.svg
+     * @return string
+     */
+    private function price_calculator_shape_icon_html($slug) {
+        $slug = sanitize_title((string) $slug);
+        $icon_base = defined('LDN_PLUGIN_URL') ? LDN_PLUGIN_URL . 'assets/img/shapes/' : '';
+        if ($icon_base === '' || $slug === '') {
+            return '';
+        }
+        $icon_url = $icon_base . $slug . '.svg';
+        if (defined('LDN_VERSION')) {
+            $icon_url .= '?ver=' . rawurlencode((string) LDN_VERSION);
+        }
+        return '<span class="ldn-shape-picker__icon" aria-hidden="true"'
+            . ' style="--ldn-shape-icon:url(' . esc_url($icon_url) . ')"></span>';
     }
 
     private function price_calculator_destination_shapes() {

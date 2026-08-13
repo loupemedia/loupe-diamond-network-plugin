@@ -225,14 +225,29 @@
 
 /* Hero-band data tables (carat tiers, market overview) as white cards. */
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table,
-.ldn-chrome--ringspo-classic .ldn-carat-tiers-table .ldn-table-scroll {
+.ldn-chrome--ringspo-classic .ldn-carat-tiers-table .ldn-table-card {
 	background-color: #fff;
 	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+	overflow: hidden;
 }
 
-.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table {
-	overflow: hidden;
+/* Match size-matrix card chrome: clipped corners, no inner scrollbar. */
+.ldn-chrome--ringspo-classic .ldn-carat-tiers-table .ldn-table-card .ldn-data-table {
+	width: 100%;
+	border: none;
+	margin: 0;
+}
+
+.ldn-chrome--ringspo-classic .ldn-diamond-type-explore .ldn-type-nav-card {
+	border-color: rgba(26, 26, 46, 0.12);
+	background: #fff;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.ldn-chrome--ringspo-classic .ldn-diamond-type-explore .ldn-type-nav-card:hover,
+.ldn-chrome--ringspo-classic .ldn-diamond-type-explore .ldn-type-nav-card:focus-visible {
+	border-color: var(--ringspo-purple, var(--ldn-primary));
 }
 
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-diamond-type-hero-tools {
@@ -282,9 +297,10 @@
    from `page_structure`, so they keep the legacy positional band. Every rule
    that treats a band as coloured therefore matches both forms via the
    `:is(...)` group below; when the size renderer is migrated to declared bands,
-   drop the third branch from each of these groups. */
+   drop the third branch from each of these groups. `:not(.ldn-section--plain)`
+   lets the last FAQ (forced plain) stay white before the purple theme footer. */
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd)) {
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain)) {
 	background-color: var(--ringspo-purple);
 	color: #fff;
 }
@@ -300,7 +316,7 @@
    per-component override per band. */
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
 	:is(h2, h3, h4, p, li, dt, dd, span, th, td, label, figcaption, a) {
 	color: inherit;
 }
@@ -309,12 +325,13 @@
    carries its own background is added here — there is no second list. */
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
 	:is(table, .ldn-chart, .ldn-chart-target:not(.ldn-chart-target--on-purple), .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
 		.ldn-size-ideal-real, .ldn-size-price-card, .ldn-price-size-card,
 		.ldn-size-matrix-scroll, .ldn-size-checker__surface, .ldn-size-checker-panel, .ldn-size-checker-results,
 		.ldn-size-checker-card, .ldn-size-scale-controls, .ldn-size-checker-cta,
-		.ldn-faceup-callout, .ldn-price-calculator__result, .ldn-size-table--segmentation) {
+		.ldn-size-comparison-column__scale, .ldn-faceup-overlay, .ldn-faceup-bars, .ldn-explore-card,
+		.ldn-price-calculator__surface, .ldn-size-table--segmentation) {
 	background-color: #fff;
 	color: var(--ringspo-ink);
 	border-color: transparent;
@@ -325,32 +342,46 @@
    white made carat links and currentColor SVG thumbnails invisible. */
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
 	:is(table, .ldn-shape-card, .ldn-type-nav-card, .ldn-size-checker__surface, .ldn-size-checker-panel,
-		.ldn-size-checker-results) a {
+		.ldn-size-checker-results, .ldn-explore-card) a {
 	color: var(--ringspo-purple);
 	text-decoration: none;
 }
 
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
 	:is(table, .ldn-shape-card, .ldn-type-nav-card) a:hover {
 	text-decoration: underline;
 }
 
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
 	:is(.ldn-shape-card__shape, .ldn-type-nav-card__title) {
 	color: var(--ringspo-purple);
+}
+
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+	.ldn-explore-card .ldn-explore-card__title {
+	color: var(--ringspo-purple);
+}
+
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+	.ldn-explore-card .ldn-explore-card__desc {
+	color: var(--ringspo-muted);
 }
 
 /* Colour/clarity heatmap: the scroll wrapper stays transparent so only the
    table itself reads as a card. */
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
 	.ldn-cc-scroll {
 	background-color: transparent;
 	padding: var(--ldn-space-1, 0.25rem) 0;
@@ -394,44 +425,88 @@
 .ldn-chrome--ringspo-classic .ldn-type-nav-card,
 .ldn-chrome--ringspo-classic .ldn-size-figure,
 .ldn-chrome--ringspo-classic .ldn-size-ideal-real,
-.ldn-chrome--ringspo-classic .ldn-size-checker-panel,
 .ldn-chrome--ringspo-classic .ldn-size-checker__surface,
 .ldn-chrome--ringspo-classic .ldn-size-checker-results,
 .ldn-chrome--ringspo-classic .ldn-size-checker-card,
 .ldn-chrome--ringspo-classic .ldn-size-scale-controls,
 .ldn-chrome--ringspo-classic .ldn-size-checker-cta,
-.ldn-chrome--ringspo-classic .ldn-faceup-callout {
+.ldn-chrome--ringspo-classic .ldn-faceup-callout,
+.ldn-chrome--ringspo-classic .ldn-faceup-overlay,
+.ldn-chrome--ringspo-classic .ldn-faceup-bars,
+.ldn-chrome--ringspo-classic .ldn-explore-card {
 	border-radius: var(--ringspo-card-radius);
 	overflow: hidden;
 }
 
-/* Matrix table: horizontal scroll + sticky header/column need overflow-x:auto,
-   not overflow:hidden (which clips sideways scroll and breaks position:sticky). */
-.ldn-chrome--ringspo-classic .ldn-size-matrix-scroll {
-	overflow-x: auto;
-	overflow-y: visible;
-	-webkit-overflow-scrolling: touch;
-	max-width: 100%;
+/* Calculator tips open below field labels; clipping would hide them. */
+.ldn-chrome--ringspo-classic .ldn-price-calculator__surface {
 	border-radius: var(--ringspo-card-radius);
 }
 
+/* Comparison result line stays unboxed on purple/white bands. */
+.ldn-chrome--ringspo-classic .ldn-size-comparison-callout .ldn-faceup-callout {
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	overflow: visible;
+	padding: 0;
+	color: inherit;
+}
+
+/* Checker panels keep overflow visible so the “Second diamond” legend can sit
+   on the top border without being clipped (and without shifting A/B fields). */
+.ldn-chrome--ringspo-classic .ldn-size-checker-panel {
+	border-radius: var(--ringspo-card-radius);
+	overflow: visible;
+}
+
+/* Matrix table: overflow:auto (both axes) so border-radius clips the purple
+   header without a stroke. Sticky header/shape column still work inside the
+   scrollport; overflow-y:visible would cancel the corner clip. */
+.ldn-chrome--ringspo-classic .ldn-size-matrix-scroll {
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+	max-width: 100%;
+	border: none;
+	border-radius: var(--ringspo-card-radius);
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-matrix thead th:first-child {
+	border-top-left-radius: var(--ringspo-card-radius);
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-matrix thead th:last-child {
+	border-top-right-radius: var(--ringspo-card-radius);
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-matrix tbody tr:last-child > :first-child {
+	border-bottom-left-radius: var(--ringspo-card-radius);
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-matrix tbody tr:last-child > :last-child {
+	border-bottom-right-radius: var(--ringspo-card-radius);
+}
+
 /* Primary CTA buttons must keep white label text — band-level `a { color: inherit }`
-   overrides `.ldn-btn--primary` and can paint purple-on-purple. */
+   overrides `.ldn-btn--primary` and can paint purple-on-purple. Theme link
+   underlines also beat `.ldn-btn { text-decoration: none }` without this. */
 .ldn-chrome--ringspo-classic .ldn-size-checker-cta .ldn-btn--primary,
 .ldn-chrome--ringspo-classic .ldn-size-methodology-cta .ldn-btn--primary {
 	color: #fff;
 	background: var(--ringspo-purple, var(--ldn-primary));
+	text-decoration: none;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-checker-cta .ldn-btn--primary:hover,
 .ldn-chrome--ringspo-classic .ldn-size-methodology-cta .ldn-btn--primary:hover {
 	color: #fff;
 	opacity: 0.92;
+	text-decoration: none;
 }
 
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
 	:is(table:not(.ldn-size-matrix), .ldn-cc-table) {
 	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
@@ -458,6 +533,39 @@
 .ldn-chrome--ringspo-classic.ldn-size-methodology-page {
 	padding-top: 0;
 	padding-bottom: 0;
+}
+
+/* Methodology is continuous prose: keep bands tight and skip positional purple. */
+.ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-size-methodology-section {
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+}
+
+.ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-size-methodology-section + .ldn-size-methodology-section {
+	padding-top: 0.75rem;
+}
+
+.ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-size-methodology-section.ldn-section--plain {
+	background-color: #fff;
+	color: var(--ringspo-ink);
+}
+
+.ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-size-methodology-section p {
+	margin: 0 0 0.55rem;
+	line-height: 1.55;
+}
+
+.ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-size-methodology-section p:last-child {
+	margin-bottom: 0;
+}
+
+.ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-section.ldn-size-internal-links {
+	padding-top: var(--ldn-space-5, 1.5rem);
+	padding-bottom: var(--ldn-space-6, 2rem);
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-size-methodology-stats {
+	margin-top: 1.25rem;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-chart--on-purple {
@@ -488,15 +596,20 @@
 	color: #fff;
 }
 
-.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple h2,
-.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple p {
-	color: #fff;
+.ldn-chrome--ringspo-classic .ldn-size-internal-links .ldn-explore-card {
+	border-radius: var(--ringspo-card-radius);
+	background: #fff;
+	border-color: rgba(26, 26, 46, 0.12);
+}
+
+.ldn-chrome--ringspo-classic .ldn-size-internal-links .ldn-explore-card:hover,
+.ldn-chrome--ringspo-classic .ldn-size-internal-links .ldn-explore-card:focus-visible {
+	border-color: var(--ringspo-purple, var(--ldn-primary));
 }
 
 .ldn-chrome--ringspo-classic.ldn-size-page > .ldn-section:last-of-type,
 .ldn-chrome--ringspo-classic.ldn-size-methodology-page > .ldn-section:last-of-type {
 	margin-bottom: 0;
-	padding-bottom: 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-size-intro p {
@@ -535,6 +648,12 @@
 	font-weight: 700;
 	color: var(--ringspo-ink);
 	margin-top: 0;
+}
+
+/* Must follow the general `.ldn-section h2` ink colour (equal specificity). */
+.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple h2,
+.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple p {
+	color: #fff;
 }
 
 /* h3 sat at the shared 1.125rem against 1.05rem body copy, so sub-headings

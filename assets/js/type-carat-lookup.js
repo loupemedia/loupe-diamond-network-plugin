@@ -1,5 +1,8 @@
 /**
  * Type-level carat price lookup — snaps to published tier medians from type-summary.
+ *
+ * Also keeps the Natural / Lab-grown toggle's inactive pill pointed at the same
+ * carat (`?carat=`) so switching type does not jump to the sibling's most-listed weight.
  */
 (function () {
 	'use strict';
@@ -21,6 +24,61 @@
 			return '';
 		}
 		return symbol + Math.round(value).toLocaleString();
+	}
+
+	function caratFromLocation() {
+		try {
+			return new URLSearchParams(window.location.search).get('carat') || '';
+		} catch (e) {
+			return '';
+		}
+	}
+
+	function withCaratQuery(url, carat) {
+		if (!url || carat === '' || carat === null || typeof carat === 'undefined') {
+			return url;
+		}
+		try {
+			var parsed = new URL(url, window.location.href);
+			parsed.searchParams.set('carat', String(carat));
+			return parsed.href;
+		} catch (e) {
+			return url;
+		}
+	}
+
+	function syncToggleCarat(carat) {
+		var pills = document.querySelectorAll(
+			'.ldn-nat-lab-toggle__pill:not(.ldn-nat-lab-toggle__pill--active)'
+		);
+		for (var i = 0; i < pills.length; i += 1) {
+			var href = pills[i].getAttribute('href');
+			if (!href) {
+				continue;
+			}
+			pills[i].setAttribute('href', withCaratQuery(href, carat));
+		}
+	}
+
+	function indexForCarat(tiers, carat) {
+		if (!carat) {
+			return -1;
+		}
+		for (var i = 0; i < tiers.length; i += 1) {
+			if (String(tiers[i].carat) === String(carat)) {
+				return i;
+			}
+		}
+		var asFloat = parseFloat(carat);
+		if (!isFinite(asFloat)) {
+			return -1;
+		}
+		for (var j = 0; j < tiers.length; j += 1) {
+			if (parseFloat(tiers[j].carat) === asFloat) {
+				return j;
+			}
+		}
+		return -1;
 	}
 
 	function init(root) {
@@ -63,6 +121,7 @@
 			if (link && tier.url) {
 				link.href = tier.url;
 			}
+			syncToggleCarat(tier.carat);
 		}
 
 		if (!slider) {
@@ -70,12 +129,13 @@
 		}
 
 		var defaultIdx = 0;
-		if (manifest.default_carat) {
-			for (var i = 0; i < manifest.tiers.length; i += 1) {
-				if (String(manifest.tiers[i].carat) === String(manifest.default_carat)) {
-					defaultIdx = i;
-					break;
-				}
+		var fromQuery = indexForCarat(manifest.tiers, caratFromLocation());
+		if (fromQuery >= 0) {
+			defaultIdx = fromQuery;
+		} else if (manifest.default_carat) {
+			var fromManifest = indexForCarat(manifest.tiers, manifest.default_carat);
+			if (fromManifest >= 0) {
+				defaultIdx = fromManifest;
 			}
 		}
 		slider.value = String(defaultIdx);

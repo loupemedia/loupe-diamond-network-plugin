@@ -230,10 +230,10 @@ $copy = array(
         array('question' => 'How big?', 'answer' => 'About 6.4 mm.'),
     ),
 );
-// Test intent: size-page JSON-LD is a connected graph — WebSite + WebPage (with
-// dateModified from the artefact's generated_date) + enriched Dataset
-// (measurementTechnique, license) + BreadcrumbList + FAQPage.
-// Would fail if: the graph regressed to Dataset-only or dropped dateModified.
+// Test intent: size-page JSON-LD is a connected graph — WebPage (with
+// dateModified) referencing the theme WebSite by @id (no duplicate WebSite
+// node) + enriched Dataset (measurementTechnique, license) + BreadcrumbList + FAQPage.
+// Would fail if: graph re-emitted @type WebSite alongside SEOPress, or dropped isPartOf.
 $summary_dated = $summary;
 $summary_dated['generated_date'] = '2026-07-11';
 $json_ld = $renderer->json_ld_script($ctx, $summary_dated, $copy, $canonical, 'Title', 'Desc');
@@ -241,7 +241,8 @@ check(strpos($json_ld, 'application/ld+json') !== false, 'JSON-LD script emitted
 check(strpos($json_ld, 'Dataset') !== false, 'JSON-LD includes Dataset');
 check(strpos($json_ld, 'FAQPage') !== false, 'JSON-LD includes FAQPage');
 check(strpos($json_ld, 'BreadcrumbList') !== false, 'JSON-LD includes BreadcrumbList');
-check(strpos($json_ld, 'WebSite') !== false, 'JSON-LD includes WebSite node');
+check(strpos($json_ld, '"@type":"WebSite"') === false, 'JSON-LD does not emit a duplicate WebSite node');
+check(strpos($json_ld, '#website') !== false, 'JSON-LD references theme WebSite by @id');
 check(strpos($json_ld, 'WebPage') !== false, 'JSON-LD includes WebPage node');
 check(strpos($json_ld, '2026-07-11') !== false, 'JSON-LD carries dateModified from generated_date');
 check(strpos($json_ld, 'measurementTechnique') !== false, 'Dataset declares measurementTechnique');
@@ -308,7 +309,31 @@ check(isset($comp['visuals']['scale_reference_a_svg']) && strpos($comp['visuals'
 check(isset($comp['a']['faceup_delta_pct']), 'build_comparison_summary computes ideal face-up delta');
 
 $delta_html = $renderer->comparison_delta_html($comp);
-check(strpos($delta_html, 'ldn-size-comparison-delta') !== false, 'comparison delta section renders');
+check(strpos($delta_html, 'ldn-size-comparison-delta') !== false, 'comparison_delta_html helper still builds delta copy');
+
+// Test intent: comparison pages show one result line (the callout), not a
+// second near-duplicate delta paragraph underneath.
+// Would fail if: comparison_body_html resumed appending comparison_delta_html.
+$comp_page = $renderer->render($ctx_cmp = new LDN_Page_Context(
+    'ringspo',
+    'size-comparison',
+    'us',
+    null,
+    null,
+    null,
+    'size',
+    'round-1-carat-vs-princess-1-carat'
+), $comp);
+check(strpos($comp_page, 'ldn-faceup-callout') !== false, 'comparison page keeps the face-up callout');
+check(strpos($comp_page, 'ldn-size-comparison-delta') === false, 'comparison page omits the duplicate delta section');
+
+// Test intent: comparison side links use the shared explore-card grid (not a
+// bare bullet list) so they read as cards on purple bands.
+// Would fail if: comparison_side_links_html fell back to <ul><li><a>.
+$side_links = $renderer->comparison_side_links_html($ctx_cmp, $comp);
+check(strpos($side_links, 'ldn-explore-card-grid') !== false, 'comparison side links use explore card grid');
+check(strpos($side_links, 'ldn-explore-card') !== false, 'comparison side links render as cards');
+check(strpos($side_links, '<ul>') === false, 'comparison side links are not a bullet list');
 
 $table_html = $renderer->comparison_table_html($comp);
 check(strpos($table_html, 'Side-by-side measurements') !== false, 'comparison table section renders');
@@ -503,10 +528,13 @@ check(strpos($checker_html, 'id="ldn-size-checker-results" aria-live="polite"') 
 check(strpos($checker_html, 'ldn-size-checker-empty') !== false, 'full tool includes example empty state');
 check(strpos($checker_html, 'ldn-size-checker-how') !== false, 'full tool includes how-it-works steps');
 check(strpos($checker_html, 'ldn-size-checker-explore') !== false, 'full tool includes explore links');
+check(strpos($checker_html, 'ldn-explore-card') !== false, 'explore links use card grid');
 check(strpos($checker_html, 'ldn-size-checker--full') !== false, 'full tool variant class is set');
 check(strpos($checker_html, 'ldn-checker-depth-a') !== false, 'manual entry offers optional depth input');
 check(strpos($checker_html, 'Your diamond') === false, 'checker panel A omits the Your diamond legend');
-check(strpos($checker_html, 'ldn-size-compare-popular') !== false, 'full tool lists crawlable popular comparisons');
+check(strpos($checker_html, 'ldn-size-compare-popular') !== false, 'full tool lists crawlable compare-by-shape links');
+check(strpos($checker_html, 'Compare by shape') !== false, 'compare-by-shape heading is accurate (not Popular comparisons)');
+check(strpos($checker_html, 'Popular comparisons') === false, 'old Popular comparisons heading is gone');
 
 // Widget mode: compact heading + link to the full tool, no popular list.
 $widget_renderer = new LDN_Size_Renderer(new LDN_Data_Fetcher(), $config);
@@ -530,16 +558,67 @@ $meth_summary = array(
     'stats' => array('total_n' => 2400000, 'shape_count' => 10, 'band_count' => 21, 'retailer_count' => 3),
 );
 $meth_copy = array(
+    'copy' => array(
+        'intro' => 'Most charts use formulas. We measured real inventory instead.',
+    ),
+    'plain_text' => 'Diamond size data methodology: millimetre measurements aggregated from 2,400,000 real diamonds.',
     'sections' => array(
         array('id' => 'why-real', 'heading' => 'Why we measure real diamonds',
               'paragraphs' => array('Most size charts calculate from ideal proportions.')),
     ),
 );
 $meth_html = $renderer->methodology_body_html($ctx_meth, $meth_summary, $meth_copy);
-check(strpos($meth_html, '2,400,000') !== false, 'methodology stats show total sample size');
 check(strpos($meth_html, 'Why we measure real diamonds') !== false, 'methodology renders templated sections');
-check(strpos($meth_html, 'Retailers sampled') === false, 'methodology hides small retailer count (3)');
-check(strpos($meth_html, '/diamond-size/compare/') !== false, 'methodology links to the size checker');
+check(strpos($meth_html, 'Retailers sampled') === false, 'methodology body omits small retailer count');
+check(strpos($meth_html, 'ldn-explore-card') !== false, 'methodology explore links use cards');
+check(strpos($meth_html, '2,400,000') === false, 'methodology body no longer hosts stats strip');
+
+$meth_stats = $renderer->methodology_stats_html($meth_summary);
+check(strpos($meth_stats, '2,400,000') !== false, 'methodology stats show total sample size');
+check(strpos($meth_stats, 'ldn-stat-card') !== false, 'methodology stats render as cards');
+check(strpos($meth_stats, 'Retailers sampled') === false, 'methodology stats hide small retailer count (3)');
+
+$meth_intro = $renderer->intro_paragraphs_html($ctx_meth, $meth_summary, $meth_copy);
+check(strpos($meth_intro, 'We measured real inventory') !== false, 'methodology hero uses engaging intro');
+check(strpos($meth_intro, 'Diamond size data methodology:') === false, 'methodology hero skips factual dump');
+
+// Test intent: methodology figures render from summary visuals (spread + fill).
+// Would fail if: section hooks stopped emitting figures when visuals are present.
+$meth_summary_vis = $meth_summary;
+$meth_summary_vis['visuals'] = array(
+    'example_spread_svg' => '<svg xmlns="http://www.w3.org/2000/svg" class="meth-spread"></svg>',
+    'example_spread_caption' => 'Example: 1 carat oval spread.',
+    'fill_factor_svg' => '<svg xmlns="http://www.w3.org/2000/svg" class="meth-fill"><ellipse/></svg>',
+    'fill_factor_caption' => 'Fill factor sketch.',
+);
+$meth_copy_vis = array(
+    'sections' => array(
+        array(
+            'id' => 'why-percentile-ranges',
+            'heading' => 'Why percentiles',
+            'paragraphs' => array('Percentile copy.'),
+        ),
+        array(
+            'id' => 'faceup-area',
+            'heading' => 'Face-up area',
+            'paragraphs' => array('Face-up copy.'),
+        ),
+        array(
+            'id' => 'drawbacks-of-other-methods',
+            'heading' => 'The drawbacks of ideal-proportion charts',
+            'paragraphs' => array('Drawbacks copy.'),
+        ),
+    ),
+);
+$meth_vis_html = $renderer->methodology_body_html($ctx_meth, $meth_summary_vis, $meth_copy_vis);
+check(strpos($meth_vis_html, 'meth-spread') !== false, 'methodology shows example spread SVG');
+check(strpos($meth_vis_html, 'meth-fill') !== false, 'methodology shows fill-factor SVG');
+check(strpos($meth_vis_html, 'ldn-size-methodology-section--purple') !== false,
+    'drawbacks section keeps purple band class');
+check(strpos($meth_vis_html, 'ldn-section--plain') !== false,
+    'prose methodology sections are plain bands');
+check(strpos($renderer->methodology_fill_factor_html(array()), 'ellipse') !== false,
+    'fill-factor fallback SVG is available without Z3 visuals');
 
 // Individual pages link to the methodology page from the About-this-data strip.
 check(strpos($renderer->methodology_html($summary, 'ringspo'), '/diamond-size/methodology/') !== false,
@@ -720,6 +799,16 @@ check(
     'legacy combined distribution heading removed for elongated shapes'
 );
 check(strpos($oval_body, 'Length-to-width ratio compares') !== false, 'L/W explainer copy renders');
+
+// Test intent: size FAQ is forced plain so it does not paint purple against the
+// theme footer (pricing pages already coerce last tint → plain).
+// Would fail if: faq_html omitted ldn-section--plain and CSS nth-of-type painted it purple.
+$faq_html = $oval_renderer->faq_html($copy);
+check(
+    strpos($faq_html, 'ldn-section ldn-section--plain ldn-faq') !== false
+    || strpos($faq_html, 'ldn-section--plain') !== false,
+    'size FAQ section is marked plain before the purple footer'
+);
 
 // Test intent: diamondchart full_range presentation uses min–max copy and two spread labels.
 // Would fail if: renderer still showed p10–p90 percentile rows when range_presentation is full_range.

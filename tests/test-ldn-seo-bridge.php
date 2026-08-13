@@ -13,6 +13,9 @@
  *   4. LDN emits its own meta description whenever no unbridged SEO plugin is
  *      active — the previous "any SEO plugin is installed, so stand down" rule
  *      left LDN pages on a SEOPress site with no description at all.
+ *   5. On a routed LDN page, SEOPress's HTML `<title>` is replaced with the
+ *      same string LDN uses for `og:title` (plus the site name), not the bare
+ *      blog-index site name.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-seo-bridge.php
  */
@@ -25,6 +28,15 @@ define('SEOPRESS_VERSION', '8.0');
 $GLOBALS['ldn_registered'] = array();
 function add_filter($hook, $cb, $priority = 10, $accepted = 1) {
     $GLOBALS['ldn_registered'][$hook] = $priority;
+}
+function get_bloginfo($show = '', $filter = 'raw') {
+    return 'Modern Jeweler';
+}
+function wp_strip_all_tags($text) {
+    return strip_tags((string) $text);
+}
+function apply_filters($hook, $value) {
+    return $value;
 }
 
 require_once __DIR__ . '/../includes/class-ldn-page-context.php';
@@ -42,11 +54,24 @@ class LDN_Plugin {
     public static $self;
     public $price;
     public $size;
+    public $render;
     public static function instance() { return self::$self; }
     public function dispatcher() { return $this->price; }
     public function size_dispatcher() { return $this->size; }
+    public function renderer() { return $this->render; }
+    public function data_fetcher() { return null; }
+    public function config() { return null; }
+}
+class LDN_Renderer {
+    public function document_title(LDN_Page_Context $ctx) {
+        if ($ctx->page_level === 'top-level') {
+            return 'Diamond Prices';
+        }
+        return '1 Carat Round Natural Diamond Prices (US)';
+    }
 }
 
+require_once __DIR__ . '/../includes/class-ldn-query-signals.php';
 require_once __DIR__ . '/../includes/class-ldn-seo-bridge.php';
 
 $checks = 0;
@@ -81,6 +106,10 @@ $expected = array(
 foreach ($expected as $filter => $label) {
     check(isset($GLOBALS['ldn_registered'][$filter]), "{$label} is claimed from SEOPress ({$filter})");
 }
+check(
+    isset($GLOBALS['ldn_registered'][LDN_Seo_Bridge::SEOPRESS_TITLE_FILTER]),
+    'the HTML title is claimed from SEOPress (seopress_titles_title)'
+);
 
 // --- 2. Site-level tags SEOPress gets right are left alone ------------------
 // LDN emits no og:locale or twitter card type, so suppressing these would lose
@@ -93,6 +122,7 @@ foreach (array('seopress_social_og_locale', 'seopress_social_twitter_card_summar
 LDN_Plugin::$self = new LDN_Plugin();
 LDN_Plugin::$self->price = new LDN_Dispatcher();
 LDN_Plugin::$self->size = new LDN_Size_Dispatcher();
+LDN_Plugin::$self->render = new LDN_Renderer();
 
 $seopress_canonical = '<link rel="canonical" href="https://ringspo.com/us/diamond-prices/">';
 
@@ -106,6 +136,10 @@ check(
     $bridge->suppress_on_ldn_route('A site description.') === 'A site description.',
     'an ordinary site page keeps its SEOPress description'
 );
+check(
+    $bridge->replace_title_on_ldn_route('Modern Jeweler') === 'Modern Jeweler',
+    'an ordinary site page keeps the SEOPress title'
+);
 
 LDN_Plugin::$self->price->ctx = new LDN_Page_Context('ringspo', 'shape', 'us', 'natural', '1', 'round');
 check(
@@ -114,6 +148,18 @@ check(
 );
 check($bridge->suppress_on_ldn_route('Blog description.') === '', 'a routed price page suppresses the SEOPress description');
 check($bridge->suppress_on_ldn_route('') === '', 'an already-empty value stays empty');
+check(
+    $bridge->replace_title_on_ldn_route('Modern Jeweler')
+        === '1 Carat Round Natural Diamond Prices (US) - Modern Jeweler',
+    'a routed price page replaces the SEOPress HTML title with the LDN page title'
+);
+
+$top_ctx = new LDN_Page_Context('modernjeweler', 'top-level', 'us');
+LDN_Plugin::$self->price->ctx = $top_ctx;
+check(
+    $bridge->replace_title_on_ldn_route('Modern Jeweler') === 'Diamond Prices - Modern Jeweler',
+    'a top-level Loupe hub replaces the bare site-name title'
+);
 
 // A size page is equally an LDN page.
 LDN_Plugin::$self->price->ctx = null;

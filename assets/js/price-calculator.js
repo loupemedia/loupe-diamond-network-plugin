@@ -327,9 +327,13 @@
 			onChange(value);
 		}
 
-		input.addEventListener('input', function () {
+		function onInput() {
 			setIndex(parseInt(input.value, 10) || 0);
-		});
+		}
+
+		// input + change: some optimizers / mobile browsers only fire one of them.
+		input.addEventListener('input', onInput);
+		input.addEventListener('change', onInput);
 
 		sliderRoot.querySelectorAll('.ldn-grade-slider__stop').forEach(function (stop) {
 			stop.addEventListener('click', function () {
@@ -344,6 +348,43 @@
 		return input;
 	}
 
+	/**
+	 * Close field-help tooltips on outside click or Escape.
+	 * Tips also open on CSS :hover / :focus-within; click keeps them sticky on touch.
+	 * Bound once; works for panels remounted via innerHTML.
+	 */
+	function initFieldHelpDismiss() {
+		if (document.documentElement.getAttribute('data-ldn-field-help-wired') === '1') {
+			return;
+		}
+		document.documentElement.setAttribute('data-ldn-field-help-wired', '1');
+
+		document.addEventListener('click', function (event) {
+			var target = event.target;
+			if (!target || typeof target.closest !== 'function') {
+				return;
+			}
+			var open = document.querySelectorAll('details.ldn-field-help[open]');
+			if (!open.length) {
+				return;
+			}
+			for (var i = 0; i < open.length; i += 1) {
+				if (!open[i].contains(target)) {
+					open[i].removeAttribute('open');
+				}
+			}
+		});
+
+		document.addEventListener('keydown', function (event) {
+			if (event.key !== 'Escape') {
+				return;
+			}
+			document.querySelectorAll('details.ldn-field-help[open]').forEach(function (node) {
+				node.removeAttribute('open');
+			});
+		});
+	}
+
 	function initCalculator(root) {
 		var manifest = readManifest(root);
 		if (!manifest || !manifest.labels || !manifest.cells) {
@@ -356,6 +397,12 @@
 		if (!region) {
 			return;
 		}
+
+		// Remounted panels are new nodes; skip only if this exact root was wired.
+		if (root.getAttribute('data-ldn-calc-wired') === '1') {
+			return;
+		}
+		root.setAttribute('data-ldn-calc-wired', '1');
 
 		var state = {
 			colour: manifest.default_cell && manifest.default_cell.color
@@ -421,7 +468,7 @@
 					return;
 				}
 				pills.forEach(function (other) {
-					other.classList.toggle('ldn-shape-calc-pill--active', other === pill);
+					other.classList.toggle('ldn-shape-picker__option--active', other === pill);
 				});
 				panels.forEach(function (panel) {
 					var active = panel.getAttribute('data-ldn-shape-calc-panel') === shape;
@@ -437,6 +484,7 @@
 	}
 
 	function init() {
+		initFieldHelpDismiss();
 		document.querySelectorAll('[data-ldn-price-calculator]').forEach(initCalculator);
 		initHub();
 	}
@@ -450,4 +498,6 @@
 	} else {
 		init();
 	}
+	// WP Rocket Delay JS may finish after first interaction; re-wire if needed.
+	window.addEventListener('rocket-allScriptsLoaded', init);
 })();
