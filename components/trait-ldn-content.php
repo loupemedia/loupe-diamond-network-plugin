@@ -59,7 +59,7 @@ trait LDN_Trait_Content {
                 'paths' => array(array('distribution', 'price_range', 'min'), array('min_price'), array('price_low'))),
             array('label' => 'Highest price', 'format' => 'currency', 'schema' => false,
                 'paths' => array(array('distribution', 'price_range', 'max'), array('max_price'), array('price_high'))),
-            array('label' => 'Diamonds analysed', 'format' => 'integer', 'schema' => true,
+            array('label' => __('Diamonds analyzed', 'loupe-diamond-network'), 'format' => 'integer', 'schema' => true,
                 'paths' => array(array('distribution', 'sample_size'), array('num_diamonds'), array('sample_size'))),
         );
     }
@@ -636,7 +636,7 @@ trait LDN_Trait_Content {
         }
         if ($samples !== null && is_scalar($samples) && !is_bool($samples)) {
             $cells[] = array(
-                'label' => __('Diamonds analysed', 'loupe-diamond-network'),
+                'label' => __('Diamonds analyzed', 'loupe-diamond-network'),
                 'value' => $this->format_stat($samples, 'integer', $currency),
             );
         }
@@ -747,7 +747,7 @@ trait LDN_Trait_Content {
         );
         if ($samples !== null && is_numeric($samples)) {
             $cards[] = array(
-                'label' => __('Diamonds analysed', 'loupe-diamond-network'),
+                'label' => __('Diamonds analyzed', 'loupe-diamond-network'),
                 'value' => $this->format_stat($samples, 'integer', $currency),
             );
         }

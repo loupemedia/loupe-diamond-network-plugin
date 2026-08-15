@@ -1,0 +1,58 @@
+/**
+ * Compact inject on Ringspo's legacy ring-buying-guide posts.
+ * Loaded only on matching permalinks — not on LDN rewrite routes.
+ *
+ * This HTML sits in a normal WP article, not `.ldn-chrome--ringspo-classic`.
+ * Do not invent a tinted outlined box (AI tell). Follow Ringspo: unboxed
+ * sections, theme headings, white chart surface with 12px radius + shadow.
+ */
+
+.ldn-ring-guide,
+.ldn-ring-guide__card {
+	max-width: 42rem;
+}
+
+.ldn-ring-guide__card {
+	margin: 2rem 0;
+	padding: 0;
+	border: none;
+	background: transparent;
+}
+
+.ldn-ring-guide__card h2 {
+	margin: 0 0 0.75rem;
+}
+
+.ldn-ring-guide__card p {
+	margin: 0 0 0.75rem;
+}
+
+.ldn-ring-guide__figure {
+	margin: 0 0 0.75rem;
+}
+
+.ldn-ring-guide__figure img {
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 12px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+.ldn-ring-guide__figure figcaption {
+	margin-top: 0.4rem;
+	font-size: 0.9rem;
+	color: #4a4a68;
+}
+
+.ldn-ring-guide__cta {
+	font-weight: 600;
+	color: #706cc8;
+	text-decoration: none;
+}
+
+.ldn-ring-guide__cta:hover,
+.ldn-ring-guide__cta:focus-visible {
+	color: #5249a3;
+	text-decoration: underline;
+}

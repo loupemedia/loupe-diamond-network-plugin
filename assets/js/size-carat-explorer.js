@@ -122,7 +122,7 @@
         }
 
         var aria = caratBand + ' carat ' + shapeLabel(currentShape)
-            + ' — ' + width.toFixed(2) + ' × ' + length.toFixed(2) + ' mm on millimetre ruler';
+            + ' — ' + width.toFixed(2) + ' × ' + length.toFixed(2) + ' mm on millimeter ruler';
         var svg = '<svg viewBox="0 0 ' + canvasWmm + ' ' + canvasHmm + '" width="100%" role="img"'
             + ' class="ldn-size-carat-scale-svg" aria-label="' + escapeHtml(aria) + '">'
             + stoneMarkup + ticks + '</svg>';

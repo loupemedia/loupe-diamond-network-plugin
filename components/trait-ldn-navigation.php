@@ -614,7 +614,7 @@ trait LDN_Trait_Navigation {
 
         $dimension = $primary !== ''
             ? $primary
-            : __('millimetre dimensions', 'loupe-diamond-network');
+            : __('millimeter dimensions', 'loupe-diamond-network');
 
         $text = sprintf(
             /* translators: 1: carat weight, 2: shape, 3: dimension summary */

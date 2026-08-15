@@ -446,7 +446,7 @@ trait LDN_Trait_Tables {
             $body .= '<tr' . $row_class . '><td data-label="' . esc_attr__('Carat', 'loupe-diamond-network') . '">'
                 . $link . '</td><td data-label="' . esc_attr__('Typical price', 'loupe-diamond-network') . '">'
                 . $price_cell . '</td><td data-label="' . esc_attr__('Price per carat', 'loupe-diamond-network') . '">'
-                . $ppc_cell . '</td><td data-label="' . esc_attr__('Diamonds analysed', 'loupe-diamond-network') . '">'
+                . $ppc_cell . '</td><td data-label="' . esc_attr__('Diamonds analyzed', 'loupe-diamond-network') . '">'
                 . esc_html(number_format($samples)) . '</td></tr>';
         }
         if ($body === '') {
@@ -459,6 +459,7 @@ trait LDN_Trait_Tables {
         }
 
         $chart_block = $this->build_price_per_carat_chart_block($ctx, $bag);
+        $history_block = $this->build_type_carat_history_chart_block($ctx, $bag);
 
         return '<section class="ldn-section ldn-carat-tiers-table">'
             . '<h2>' . esc_html($title) . '</h2>'
@@ -468,10 +469,11 @@ trait LDN_Trait_Tables {
             . '<th>' . esc_html__('Carat', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Typical price', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Price per carat', 'loupe-diamond-network') . '</th>'
-            . '<th>' . esc_html__('Diamonds analysed', 'loupe-diamond-network') . '</th>'
+            . '<th>' . esc_html__('Diamonds analyzed', 'loupe-diamond-network') . '</th>'
             . '</tr></thead><tbody>' . $body . '</tbody></table>'
             . '</div>'
             . $chart_block
+            . $history_block
             . '</section>';
     }
 
@@ -665,7 +667,7 @@ trait LDN_Trait_Tables {
                 $samples = isset($row['sample_size']) ? (int) $row['sample_size'] : 0;
                 $body .= '<tr><td data-label="' . esc_attr__('Diamond', 'loupe-diamond-network') . '">'
                     . $name_cell . '</td><td data-label="' . esc_attr__('Median price', 'loupe-diamond-network') . '">'
-                    . $price_cell . '</td><td data-label="' . esc_attr__('Diamonds analysed', 'loupe-diamond-network') . '">'
+                    . $price_cell . '</td><td data-label="' . esc_attr__('Diamonds analyzed', 'loupe-diamond-network') . '">'
                     . esc_html(number_format($samples)) . '</td></tr>';
             }
             if ($body === '') {
@@ -676,7 +678,7 @@ trait LDN_Trait_Tables {
                 . '<table class="ldn-data-table ldn-data-table--stacked"><thead><tr>'
                 . '<th>' . esc_html__('Diamond', 'loupe-diamond-network') . '</th>'
                 . '<th>' . esc_html__('Median price', 'loupe-diamond-network') . '</th>'
-                . '<th>' . esc_html__('Diamonds analysed', 'loupe-diamond-network') . '</th>'
+                . '<th>' . esc_html__('Diamonds analyzed', 'loupe-diamond-network') . '</th>'
                 . '</tr></thead><tbody>' . $body . '</tbody></table></div>';
         }
 
@@ -814,13 +816,7 @@ trait LDN_Trait_Tables {
             isset($overview['currency']) ? $overview['currency'] : $this->config->get_currency($ctx->site_id, $ctx->country_code)
         );
 
-        $trend_chart = $this->chart_html(
-            isset($bag['market_trend_chart']) && is_array($bag['market_trend_chart'])
-                ? $bag['market_trend_chart']
-                : array(),
-            'ldn-market-trend-chart',
-            __('Natural vs lab-grown price change (%)', 'loupe-diamond-network')
-        );
+        $trend_block = $this->build_market_trend_chart_block($ctx, $bag);
 
         $type_comparison = $this->section_value('type_comparison', $ctx, $bag);
         $table_intro = '';
@@ -840,16 +836,17 @@ trait LDN_Trait_Tables {
         $table_html = $this->carat_price_table_html($ctx, $overview, $currency, $table_intro);
 
         $discount_chart = $this->build_lab_grown_discount_chart_block($ctx, $overview, $bag);
-        if ($discount_chart !== '' && strpos($table_html, '</section>') !== false) {
+        $nested = $discount_chart . $trend_block;
+        if ($nested !== '' && strpos($table_html, '</section>') !== false) {
             $table_html = preg_replace(
                 '/<\/section>\s*$/',
-                $discount_chart . '</section>',
+                $nested . '</section>',
                 $table_html,
                 1
             );
         }
 
-        return $trend_chart . $table_html;
+        return $table_html;
     }
 
     /**
@@ -932,7 +929,7 @@ trait LDN_Trait_Tables {
             . '<th>' . esc_html__('Natural', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Lab-grown', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Lab-grown discount', 'loupe-diamond-network') . '</th>'
-            . '<th>' . esc_html__('Diamonds analysed', 'loupe-diamond-network') . '</th>'
+            . '<th>' . esc_html__('Diamonds analyzed', 'loupe-diamond-network') . '</th>'
             . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
     }
 
@@ -1082,6 +1079,85 @@ trait LDN_Trait_Tables {
             . $this->format_prose_html($intro)
             . $discount_chart
             . '</div>';
+    }
+
+    /**
+     * Nat vs lab % trend chart for the top-level hub (Loupe history; DPE uses
+     * the standalone price_trends_snapshot section instead).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @return string
+     */
+    private function build_market_trend_chart_block(LDN_Page_Context $ctx, array $bag) {
+        $trend_chart = $this->chart_html(
+            isset($bag['market_trend_chart']) && is_array($bag['market_trend_chart'])
+                ? $bag['market_trend_chart']
+                : array(),
+            'ldn-market-trend-chart',
+            __('Natural vs lab-grown price change (%)', 'loupe-diamond-network')
+        );
+        if ($trend_chart === '') {
+            return '';
+        }
+
+        $analysis = $this->copy_section_text($bag, 'chart_analysis');
+        $intro = $analysis !== ''
+            ? $this->format_prose_html($analysis)
+            : '';
+
+        return '<div class="ldn-hub-chart ldn-hub-chart--trend">'
+            . '<h2>' . esc_html__('Natural vs lab-grown price change', 'loupe-diamond-network') . '</h2>'
+            . $intro
+            . $trend_chart
+            . '</div>';
+    }
+
+    /**
+     * 1/2/3 ct price-over-time chart for the diamond-type hub (Loupe history).
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @return string
+     */
+    private function build_type_carat_history_chart_block(LDN_Page_Context $ctx, array $bag) {
+        $chart = $this->chart_html(
+            isset($bag['type_carat_history_chart']) && is_array($bag['type_carat_history_chart'])
+                ? $bag['type_carat_history_chart']
+                : array(),
+            'ldn-type-carat-history-chart',
+            __('1, 2 and 3 carat prices over time', 'loupe-diamond-network')
+        );
+        if ($chart === '') {
+            return '';
+        }
+
+        $analysis = $this->copy_section_text($bag, 'chart_analysis');
+        $intro = $analysis !== ''
+            ? $this->format_prose_html($analysis)
+            : '';
+
+        return '<div class="ldn-hub-chart ldn-hub-chart--type-history">'
+            . '<h3>' . esc_html__('How prices have moved at 1, 2 and 3 carats', 'loupe-diamond-network') . '</h3>'
+            . $intro
+            . $chart
+            . '</div>';
+    }
+
+    /**
+     * Templated copy.json section text, or '' when missing.
+     *
+     * @param array  $bag
+     * @param string $key
+     * @return string
+     */
+    private function copy_section_text(array $bag, $key) {
+        $copy = isset($bag['copy']) && is_array($bag['copy']) ? $bag['copy'] : array();
+        $sections = $this->copy_sections($copy);
+        if (!isset($sections[$key]) || !is_scalar($sections[$key])) {
+            return '';
+        }
+        return trim((string) $sections[$key]);
     }
 
     /**

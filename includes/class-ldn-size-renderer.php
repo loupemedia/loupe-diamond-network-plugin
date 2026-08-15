@@ -1077,7 +1077,7 @@ final class LDN_Size_Renderer {
         return __(
             'Length-to-width ratio compares how long an oval faces up relative to its width. '
             . 'Ratios around the typical range look balanced on the finger; more elongated silhouettes '
-            . 'can appear elegant, but very high ratios are more likely to show a visible bow-tie — '
+            . 'can appear elegant, but very high ratios are more likely to show a visible bow-tie - '
             . 'check video in natural light, not just the certificate dimensions.',
             'loupe-diamond-network'
         );
@@ -1224,7 +1224,7 @@ final class LDN_Size_Renderer {
             return '';
         }
         $text = __(
-            'Ranges use 10th–90th percentiles (typical spread among real listings), not absolute min and max — raw feeds include measurement errors and extreme outliers.',
+            'Ranges use 10th-90th percentiles, not min and max. Raw feeds often include bad measurements.',
             'loupe-diamond-network'
         );
         $link = '';
@@ -1647,7 +1647,7 @@ final class LDN_Size_Renderer {
             $carat
         )) . '</h2>';
         $out .= '<p class="ldn-size-chart__lead">' . esc_html__(
-            'Every outline shares one millimetre scale — compare how round, oval, and elongated shapes differ at this carat weight. Pick a shape to highlight it on the ruler below.',
+            'Every outline shares one millimeter scale — compare how round, oval, and elongated shapes differ at this carat weight. Pick a shape to highlight it on the ruler below.',
             'loupe-diamond-network'
         ) . '</p>';
         $out .= '<div class="ldn-size-scale-controls" id="ldn-carat-scale-controls" hidden>';
@@ -2965,7 +2965,7 @@ final class LDN_Size_Renderer {
             . '<div class="ldn-size-checker-cta"><h2>'
             . esc_html__('Check a diamond\'s size', 'loupe-diamond-network') . '</h2><p>'
             . esc_html__(
-                'Compare any of the sizes above, or enter a real diamond\'s carat weight, shape and millimetre measurements to see how it ranks against the market — and how it compares to another stone.',
+                'Compare any of the sizes above, or enter a real diamond\'s carat weight, shape and millimeter measurements to see how it ranks against the market — and how it compares to another stone.',
                 'loupe-diamond-network'
             ) . '</p><p><a class="ldn-btn ldn-btn--primary" href="' . esc_url($url) . '">'
             . esc_html__('Open the Diamond Size Checker', 'loupe-diamond-network') . '</a></p></div></section>';
@@ -3082,7 +3082,7 @@ final class LDN_Size_Renderer {
     private function size_checker_how_it_works_html() {
         $steps = array(
             __(
-                'Pick a shape and carat, or enter the millimetre measurements from a listing or certificate.',
+                'Pick a shape and carat, or enter the millimeter measurements from a listing or certificate.',
                 'loupe-diamond-network'
             ),
             __(
@@ -3121,7 +3121,7 @@ final class LDN_Size_Renderer {
         $lead = sprintf(
             /* translators: 1: carat+shape A, 2: carat+shape B */
             __(
-                'Example: a %1$s ct %2$s beside a %3$s ct %4$s at true scale. Press Check size above to analyse your own stone.',
+                'Example: a %1$s ct %2$s beside a %3$s ct %4$s at true scale. Press Check size above to analyze your own stone.',
                 'loupe-diamond-network'
             ),
             $carat_a,

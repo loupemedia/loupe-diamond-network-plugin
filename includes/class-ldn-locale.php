@@ -120,11 +120,63 @@ final class LDN_Locale {
     }
 
     /**
+     * WordPress locales that should use Commonwealth English plugin copy.
+     *
+     * en_US keeps source strings (American). WordPress does not fall back
+     * en_AU / en_CA / … to en_GB for a plugin text domain, so those locales
+     * reuse the shipped en_GB catalogue.
+     *
+     * @param string $wp_locale
+     * @return bool
+     */
+    public static function is_commonwealth_wp_locale($wp_locale) {
+        $wp_locale = (string) $wp_locale;
+        if ($wp_locale === 'en_GB') {
+            return true;
+        }
+        if (strpos($wp_locale, 'en_') !== 0) {
+            return false;
+        }
+        return $wp_locale !== 'en_US';
+    }
+
+    /**
+     * Compiled catalogue path for a WordPress locale, or empty when source
+     * strings should stay as authored (US English / missing translations).
+     *
+     * @param string $wp_locale
+     * @return string
+     */
+    public static function textdomain_mofile($wp_locale) {
+        $dir = LDN_PLUGIN_DIR . 'languages/';
+        $wp_locale = (string) $wp_locale;
+        $specific = $dir . 'loupe-diamond-network-' . $wp_locale . '.mo';
+        if (is_file($specific)) {
+            return $specific;
+        }
+        if (self::is_commonwealth_wp_locale($wp_locale)) {
+            $gb = $dir . 'loupe-diamond-network-en_GB.mo';
+            if (is_file($gb)) {
+                return $gb;
+            }
+        }
+        return '';
+    }
+
+    /**
      * Load plugin translations for the active WordPress locale.
      *
      * @return void
      */
     public static function load_textdomain() {
+        $locale = function_exists('determine_locale')
+            ? determine_locale()
+            : (function_exists('get_locale') ? get_locale() : '');
+        $mofile = self::textdomain_mofile($locale);
+        if ($mofile !== '' && function_exists('load_textdomain')) {
+            load_textdomain('loupe-diamond-network', $mofile);
+            return;
+        }
         if (!function_exists('load_plugin_textdomain')) {
             return;
         }

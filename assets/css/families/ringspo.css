@@ -6,7 +6,8 @@
  * breadcrumbs, the hero chart on a white card, and white headline stat cards.
  * Content sections below are edge-to-edge: white alternating with solid
  * signature-purple bands (#706cc8) and white text. Two brand colours only.
- * White card surfaces use a consistent 12px corner radius.
+ * White card surfaces use a consistent 12px corner radius and a light shadow —
+ * never a 1px outline on a tinted fill (AI design tell).
  */
 
 .ldn-chrome--ringspo-classic {

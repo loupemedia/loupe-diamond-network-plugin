@@ -414,7 +414,7 @@ $sampled_overview = array(
 );
 $sampled_html = $renderer->carat_price_table_html($top_ctx, $sampled_overview, '$');
 check(
-    strpos($sampled_html, 'Diamonds analysed') !== false,
+    strpos($sampled_html, 'Diamonds analyzed') !== false,
     'carat table exposes a diamonds-analysed column'
 );
 check(
@@ -428,7 +428,7 @@ check(
 check(
     strpos(
         $renderer->carat_price_table_html($top_ctx, $carat_overview, '$'),
-        'Diamonds analysed'
+        'Diamonds analyzed'
     ) !== false,
     'legacy rows without sample fields still render the column (em dash), no fatal'
 );
@@ -621,6 +621,42 @@ $discount_pos = strpos($market_html, 'ldn-market-discount-chart');
 check(
     $table_pos !== false && $discount_pos !== false && $table_pos < $discount_pos,
     'carat price table appears above the lab-grown discount chart'
+);
+
+// Test intent: Loupe top-level nests the % trend chart with templated analysis.
+// Would fail if: the chart rendered without a heading, or analysis copy was ignored.
+$loupe_trend_bag = $market_bag;
+$loupe_trend_bag['market_trend_chart'] = array(
+    'data' => array(array('x' => array('2026-01-01'), 'y' => array(-4.2), 'type' => 'scatter')),
+    'layout' => array('margin' => array('t' => 150)),
+);
+$loupe_trend_bag['copy'] = array(
+    'sections' => array(
+        'chart_analysis' => 'Over the past 12 months, natural prices have decreased by 4.2%.',
+    ),
+);
+$loupe_trend_html = $renderer->market_overview_table_html($top_ctx, $loupe_trend_bag);
+check(
+    strpos($loupe_trend_html, 'ldn-market-trend-chart') !== false,
+    'Loupe top-level renders the market trend chart when the artefact is in the bag'
+);
+check(
+    strpos($loupe_trend_html, 'Natural vs lab-grown price change') !== false,
+    'Loupe trend chart has a visible heading'
+);
+check(
+    strpos($loupe_trend_html, 'decreased by 4.2%') !== false,
+    'Loupe trend chart nests templated chart_analysis copy'
+);
+$loupe_table_pos = strpos($loupe_trend_html, 'ldn-carat-price-table');
+$loupe_trend_pos = strpos($loupe_trend_html, 'ldn-market-trend-chart');
+check(
+    $loupe_table_pos !== false && $loupe_trend_pos !== false && $loupe_table_pos < $loupe_trend_pos,
+    'Loupe trend chart sits under the carat table, not above it'
+);
+check(
+    strpos($market_html, 'ldn-market-trend-chart') === false,
+    'top-level hub without a trend artefact does not emit an empty chart heading'
 );
 
 // Test intent: Ringspo top-level uses fixed short H2 + median-variation copy (not C1).
@@ -1374,6 +1410,41 @@ check(
 check(
     strpos($tiers_html, 'ldn-price-per-carat-block') !== false,
     'carat_tiers_table_html nests the price-per-carat chart block'
+);
+check(
+    strpos($tiers_html, 'ldn-type-carat-history-chart') === false,
+    'Ringspo carat tiers table does not nest the Loupe 1/2/3 ct history chart'
+);
+
+// Test intent: Loupe diamond-type hub nests 1/2/3 ct history + analysis, not PPC.
+// Would fail if: history chart required the Ringspo PPC artefact, or analysis copy
+// was dropped.
+$loupe_history_html = $renderer->carat_tiers_table_html(
+    $type_ctx,
+    array_merge($type_summary_bag, array(
+        'type_carat_history_chart' => array(
+            'data' => array(array('x' => array('2026-01-01'), 'y' => array(5000), 'type' => 'scatter')),
+            'layout' => array('margin' => array('t' => 150)),
+        ),
+        'copy' => array(
+            'sections' => array(
+                'chart_analysis' => 'At 1 carat, typical natural prices have decreased by 3.1%.',
+            ),
+        ),
+    )),
+    'Natural diamond prices by carat weight'
+);
+check(
+    strpos($loupe_history_html, 'ldn-type-carat-history-chart') !== false,
+    'Loupe diamond-type table nests the 1/2/3 ct history chart'
+);
+check(
+    strpos($loupe_history_html, 'decreased by 3.1%') !== false,
+    'Loupe diamond-type history chart nests templated chart_analysis copy'
+);
+check(
+    strpos($loupe_history_html, 'ldn-price-per-carat-block') === false,
+    'Loupe diamond-type table does not nest Ringspo price-per-carat when that artefact is absent'
 );
 check(
     strpos($tiers_html, 'ldn-row-highlight') !== false,

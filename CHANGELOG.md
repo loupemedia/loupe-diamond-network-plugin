@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.21.6] — 2026-08-15
+
+- **English spelling:** US pages use American forms in plugin copy (color, jewelry, millimeter, Diamonds analyzed). The en_GB catalogue maps those to Commonwealth forms; AU/CA/NZ and other `en_*` locales reuse that catalogue (WordPress does not fall back to en_GB on its own).
+
+## [0.21.5] — 2026-08-15
+
+- **Size L/W explainer:** bow-tie copy uses a spaced hyphen (house style), not an em dash.
+
+## [0.21.4] — 2026-08-15
+
+- **Ring-guide inject copy:** house style on reader strings (no em/en dashes, no Oxford comma).
+
+## [0.21.3] — 2026-08-15
+
+- **Ring-guide inject chrome:** drop the tinted outlined card (AI tell). On Ringspo editorial posts the price/size blocks are unboxed article flow — theme headings, chart PNG with 12px radius + shadow, purple text CTA.
+
+## [0.21.2] — 2026-08-15
+
+- **Ringspo ring-guide inject (test slice):** on `/4-carat-diamond-ring/` and `/4-carat-cushion-cut-diamond-ring/`, strip Ninja Tables and replace the Price/Size sections with live US price and size links (shape pages also embed `og-preview.png`). Public hrefs use the site URL slug (`cushion`), not the S3 folder (`cushion-cut`). Expand `editorial_ring_guides` in the Ringspo profile after staging QA.
+
+## [0.21.1] — 2026-08-14
+
+- **Size percentile notes:** drop the lone `No.` FAQ opener, em dashes, and `extreme outliers` in the p10-p90 spread note. Buyer copy now says `No, …` and `bad measurements`.
+
+## [0.21.0] — 2026-08-14
+
+- **Loupe hub history charts:** top-level `/diamond-prices/` shows the natural vs lab-grown % trend chart with templated 1/3/12-month analysis; diamond-type pages show 1/2/3 ct price over time. Ringspo snapshot charts (discount curve, price-per-carat) are unchanged.
+
 ## [0.20.46] — 2026-08-13
 
 - **SEO titles on SEOPress sites:** replace `seopress_titles_title` on routed LDN pages so the HTML `<title>` matches `og:title` (e.g. `Diamond Prices - Modern Jeweler` instead of the bare site name). `pre_get_document_title` alone did not win when SEOPress owned the title tag.

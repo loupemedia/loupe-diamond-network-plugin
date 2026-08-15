@@ -640,6 +640,12 @@ check(strpos($dims, '10th') !== false, 'key dimensions labels percentile ranges'
 $spread_body = $renderer->percentile_range_note_html($summary, 'ringspo', 'ldn-size-spread__note');
 check(strpos($spread_body, '10th') !== false && strpos($spread_body, 'why-percentile-ranges') !== false,
     'percentile note links to methodology anchor');
+// Test intent: the spread note uses a hyphenated range and `bad measurements`,
+// not an em dash or `extreme outliers`.
+// Would fail if: the PHP string reverted to the GPTZero-flagged wording.
+check(strpos($spread_body, 'extreme outliers') === false, 'percentile note does not say extreme outliers');
+check(strpos($spread_body, "\u{2014}") === false, 'percentile note has no em dash');
+check(strpos($spread_body, 'bad measurements') !== false, 'percentile note uses concrete noun');
 
 // Test intent: figure captions and tier labels are HTML rendered by the plugin,
 // never <text> inside the mm-scaled SVGs (which renders at unpredictable size).
@@ -799,6 +805,8 @@ check(
     'legacy combined distribution heading removed for elongated shapes'
 );
 check(strpos($oval_body, 'Length-to-width ratio compares') !== false, 'L/W explainer copy renders');
+check(strpos($oval_body, 'visible bow-tie —') === false, 'L/W explainer has no em dash');
+check(strpos($oval_body, 'visible bow-tie - ') !== false, 'L/W explainer uses a spaced hyphen');
 
 // Test intent: size FAQ is forced plain so it does not paint purple against the
 // theme footer (pricing pages already coerce last tint → plain).

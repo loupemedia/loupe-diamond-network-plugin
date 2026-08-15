@@ -198,11 +198,15 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 	white-space: nowrap;
 }
 
-.ldn-carat-price-table .ldn-discount-chart {
+.ldn-carat-price-table .ldn-discount-chart,
+.ldn-carat-price-table .ldn-hub-chart,
+.ldn-carat-tiers-table .ldn-hub-chart {
 	margin-top: var(--ldn-space-6, 2rem);
 }
 
-.ldn-carat-price-table .ldn-discount-chart > h2 {
+.ldn-carat-price-table .ldn-discount-chart > h2,
+.ldn-carat-price-table .ldn-hub-chart > h2,
+.ldn-carat-tiers-table .ldn-hub-chart > h3 {
 	margin-top: 0;
 }
 

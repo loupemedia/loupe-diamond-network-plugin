@@ -126,7 +126,8 @@
 	margin-bottom: 0;
 }
 
-.ldn-chrome--loupe-classic .ldn-discount-chart-intro {
+.ldn-chrome--loupe-classic .ldn-discount-chart-intro,
+.ldn-chrome--loupe-classic .ldn-hub-chart p {
 	margin: 0 0 0.75rem;
 	font-size: 1rem;
 	line-height: 1.6;

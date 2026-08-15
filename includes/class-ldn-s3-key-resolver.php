@@ -49,6 +49,7 @@ final class LDN_S3_Key_Resolver {
         'shapes_ranking_json'    => 'shapes-ranking.json',
         'type_summary_json'      => 'type-summary.json',
         'type_price_per_carat_chart' => 'price-per-carat-chart.json',
+        'type_carat_history_chart'   => 'type-carat-history-chart.json',
         'market_overview_json'   => 'market-overview.json',
         'top_tables_json'        => 'top-tables.json',
         'market_discount_chart'  => 'market-discount-chart.json',

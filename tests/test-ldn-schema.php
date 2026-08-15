@@ -305,9 +305,9 @@ check(isset($dataset_flat['dateModified']) && $dataset_flat['dateModified'] === 
     'flat payload: dateModified must resolve from top-level analysis_date');
 $has_sample = false;
 foreach (($dataset_flat['variableMeasured'] ?? array()) as $pv) {
-    if (($pv['name'] ?? '') === 'Diamonds analysed' && ($pv['value'] ?? null) === 30155) { $has_sample = true; }
+    if (($pv['name'] ?? '') === 'Diamonds analyzed' && ($pv['value'] ?? null) === 30155) { $has_sample = true; }
 }
-check($has_sample, 'flat payload: Diamonds analysed must resolve from num_diamonds');
+check($has_sample, 'flat payload: Diamonds analyzed must resolve from num_diamonds');
 
 // === Renders valid JSON =====================================================
 $html = $schema->render($ctx, $summary_nested, $profile_md, $site, 'USD', $canonical, $breadcrumb, $faq);

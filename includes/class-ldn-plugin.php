@@ -164,6 +164,11 @@ final class LDN_Plugin {
             (new LDN_Seo_Bridge())->register();
             (new LDN_Llms_Txt($this->site_id(), $this->config(), $this->artefacts()))->register();
             require_once LDN_INCLUDES_DIR . 'class-ldn-sitemap-module.php';
+            (new LDN_Editorial_Bridge(
+                $this->site_id(),
+                $this->config(),
+                $this->data_fetcher()
+            ))->register();
         }
 
         if (is_admin()) {

@@ -3,10 +3,12 @@
  * Locale resolution and BCP-47 mapping.
  *
  * Test intent: calculator i18n reads locale from the site config bundle per
- * country code; BCP-47 tags map to WordPress locale slugs.
+ * country code; BCP-47 tags map to WordPress locale slugs; Commonwealth
+ * English locales without their own .mo reuse en_GB (colour, jewellery).
  *
  * Would fail if: get_locale() returned null for a configured Ringspo country,
- * or fr-FR mapped to anything other than fr_FR.
+ * fr-FR mapped to anything other than fr_FR, or en_AU kept US source strings
+ * because WordPress does not fall back plugin catalogues to en_GB.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-locale.php
  */
@@ -77,6 +79,27 @@ check(
 check(
     is_file(LDN_PLUGIN_DIR . 'languages/loupe-diamond-network-en_GB.mo'),
     'en_GB compiled catalogue ships with the plugin'
+);
+$gb_mo = LDN_PLUGIN_DIR . 'languages/loupe-diamond-network-en_GB.mo';
+check(
+    LDN_Locale::textdomain_mofile('en_GB') === $gb_mo,
+    'en_GB uses its compiled catalogue'
+);
+check(
+    LDN_Locale::textdomain_mofile('en_AU') === $gb_mo,
+    'en_AU plugin strings reuse the en_GB Commonwealth catalogue'
+);
+check(
+    LDN_Locale::textdomain_mofile('en_CA') === $gb_mo,
+    'en_CA plugin strings reuse the en_GB Commonwealth catalogue'
+);
+check(
+    LDN_Locale::textdomain_mofile('en_US') === '',
+    'en_US keeps plugin source strings (American English)'
+);
+check(
+    LDN_Locale::textdomain_mofile('fr_FR') === '',
+    'non-English locales do not fall back to en_GB'
 );
 
 // Shutdown restore is registered when a switch succeeds (price + calculator routes).

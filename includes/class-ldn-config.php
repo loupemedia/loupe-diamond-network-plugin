@@ -766,6 +766,35 @@ final class LDN_Config {
     }
 
     /**
+     * Public URL shape slug for a site (price and size paths).
+     *
+     * This is not the S3 folder slug. Ringspo prices live at `/…/cushion/`;
+     * S3 objects live under `cushion-cut/`.
+     *
+     * @param string $shape   Canonical shape name (e.g. 'cushion').
+     * @param string $site_id
+     * @return string
+     */
+    public function shape_to_url_slug($shape, $site_id) {
+        $key = strtolower(trim((string) $shape));
+        if ($key === '') {
+            return '';
+        }
+        $structures = $this->get_url_structures();
+        $variations = isset($structures['shape_variations'][$key])
+            && is_array($structures['shape_variations'][$key])
+            ? $structures['shape_variations'][$key]
+            : array();
+        $slug = isset($variations[$site_id]) && (string) $variations[$site_id] !== ''
+            ? (string) $variations[$site_id]
+            : $key;
+        if (function_exists('sanitize_title')) {
+            return sanitize_title($slug);
+        }
+        return str_replace(' ', '-', strtolower($slug));
+    }
+
+    /**
      * Resolve a URL shape slug back to the canonical KB shape name for a site.
      *
      * @param string $slug    URL segment (e.g. 'round', 'oval').
@@ -808,6 +837,27 @@ final class LDN_Config {
             return strtolower(trim($site['size_module']['rollout_country']));
         }
         return 'us';
+    }
+
+    /**
+     * Legacy WP ring-guide inject config from the site's content profile.
+     *
+     * @param string $site_id
+     * @return array|null Null when the profile omits the block or it is disabled.
+     */
+    public function editorial_ring_guides($site_id) {
+        $profile = $this->get_content_profile($site_id);
+        if ($profile === null
+            || empty($profile['editorial_ring_guides'])
+            || !is_array($profile['editorial_ring_guides'])
+        ) {
+            return null;
+        }
+        $guides = $profile['editorial_ring_guides'];
+        if (empty($guides['enabled'])) {
+            return null;
+        }
+        return $guides;
     }
 
     /**

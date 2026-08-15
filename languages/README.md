@@ -31,6 +31,8 @@ python scripts/ldn_build_en_gb_po.py
 
 Refreshes `loupe-diamond-network-en_GB.po` from the `.pot`, applies Commonwealth spelling overrides (`Color` → `Colour`, etc.), and compiles `loupe-diamond-network-en_GB.mo`.
 
+Other English locales (`en_AU`, `en_CA`, `en_NZ`, …) have no separate catalogue. `LDN_Locale::load_textdomain()` loads the en_GB `.mo` for those WordPress locales so plugin copy stays Commonwealth without shipping duplicate files. `en_US` keeps the PHP source strings (American English).
+
 ### Other locales
 
 1. Copy the `.pot` to `loupe-diamond-network-{locale}.po` (e.g. `loupe-diamond-network-fr_FR.po`).

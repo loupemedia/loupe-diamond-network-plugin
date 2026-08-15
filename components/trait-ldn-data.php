@@ -193,6 +193,10 @@ trait LDN_Trait_Data {
                     'type_price_per_carat_chart',
                     $ctx
                 );
+                $bag['type_carat_history_chart'] = $this->fetcher->fetch_artefact(
+                    'type_carat_history_chart',
+                    $ctx
+                );
                 if (!is_array($bag['summary']) || empty($bag['summary'])) {
                     $bag['summary'] = is_array($bag['type_summary']) ? $bag['type_summary'] : array();
                 }

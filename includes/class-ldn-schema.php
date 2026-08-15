@@ -77,7 +77,7 @@ final class LDN_Schema {
                 'paths' => array(array('distribution', 'price_range', 'min'), array('min_price'), array('price_low'))),
             array('label' => 'Highest price', 'format' => 'currency',
                 'paths' => array(array('distribution', 'price_range', 'max'), array('max_price'), array('price_high'))),
-            array('label' => 'Diamonds analysed', 'format' => 'integer',
+            array('label' => __('Diamonds analyzed', 'loupe-diamond-network'), 'format' => 'integer',
                 'paths' => array(array('distribution', 'sample_size'), array('num_diamonds'), array('sample_size'))),
         );
     }
