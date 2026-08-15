@@ -637,6 +637,20 @@ check(
     'key dimensions heading uses carat + shape title case'
 );
 check(strpos($dims, '10th') !== false, 'key dimensions labels percentile ranges');
+
+// Test intent: at ≤768px the key-dimensions table stacks under the coin/diamond
+// figure (one column). Would fail if: the stacking media query used `{ {` so
+// browsers ignored it and kept two columns at every width.
+$shared_css = file_get_contents(dirname(__DIR__) . '/assets/css/shared.css');
+check(strpos($shared_css, '@media screen and (max-width: 768px) { {') === false,
+    'size-hero stacking media query is not double-braced');
+check(
+    preg_match(
+        '/@media screen and \(max-width:\s*768px\)\s*\{[^{}]*\.ldn-size-hero\s*\{[^}]*grid-template-columns:\s*1fr/',
+        $shared_css
+    ) === 1,
+    'size-hero stacks to one column at 768px'
+);
 $spread_body = $renderer->percentile_range_note_html($summary, 'ringspo', 'ldn-size-spread__note');
 check(strpos($spread_body, '10th') !== false && strpos($spread_body, 'why-percentile-ranges') !== false,
     'percentile note links to methodology anchor');
@@ -669,6 +683,15 @@ check(strpos($merged, 'Chart numbers vs real stones') !== false, 'merged section
 check(strpos($merged, 'ldn-size-ideal-real') !== false && strpos($merged, 'ldn-size-proportions') !== false,
     'merged section contains both the ideal callout and the depth narrative');
 check(strpos($merged, 'About this data') !== false, 'about-this-data strip lives in chart-vs-real section');
+check(strpos($merged, 'ldn-size-methodology--inline') !== false,
+    'about-this-data is band prose (inherits purple/white), not a card surface');
+$ringspo_css = file_get_contents(dirname(__DIR__) . '/assets/css/families/ringspo.css');
+check(preg_match('/:is\(table,[\s\S]*?\.ldn-size-table--segmentation\)/', $ringspo_css, $surface) === 1,
+    'Ringspo white-surface :is() list is present');
+check(strpos($surface[0], '.ldn-size-ideal-real') === false,
+    'ideal-vs-real is band prose, not a white card on purple');
+check(strpos($surface[0], '.ldn-size-methodology') === false,
+    'methodology is not in the white-surface list');
 check(strpos($merged, 'Other websites that publish diamond size charts') !== false,
     'ideal copy refers to published size charts');
 check(strpos($merged, 'Chart sites') === false, 'ideal copy no longer says chart sites');

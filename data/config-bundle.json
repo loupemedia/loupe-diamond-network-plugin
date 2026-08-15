@@ -1,6 +1,6 @@
 {
-  "version": "51cd01a",
-  "generated_at": "2026-08-14T23:10:01.705978+00:00",
+  "version": "cc66203",
+  "generated_at": "2026-08-15T04:52:55.608886+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8900,7 +8900,9 @@
         "primary": "#706cc8",
         "secondary": "#5249a3",
         "accent": "#9590e8",
-        "iqr_fill": "rgba(112, 108, 200, 0.3)"
+        "iqr_fill": "rgba(112, 108, 200, 0.3)",
+        "text": "#1a1a2e",
+        "secondary_text": "#4a4a68"
       },
       "page_chrome": {
         "max_width": "840px",

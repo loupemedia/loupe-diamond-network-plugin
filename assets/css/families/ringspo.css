@@ -323,12 +323,14 @@
 }
 
 /* Components that own a white surface inside a coloured band. A new module that
-   carries its own background is added here — there is no second list. */
+   carries its own background is added here — there is no second list.
+   Do not add .ldn-size-methodology / .ldn-data-methodology / .ldn-size-ideal-real
+   / .ldn-size-proportions: those are band prose (white on purple/green), not a card. */
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
 	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
 	:is(table, .ldn-chart, .ldn-chart-target:not(.ldn-chart-target--on-purple), .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
-		.ldn-size-ideal-real, .ldn-size-price-card, .ldn-price-size-card,
+		.ldn-size-price-card, .ldn-price-size-card,
 		.ldn-size-matrix-scroll, .ldn-size-checker__surface, .ldn-size-checker-panel, .ldn-size-checker-results,
 		.ldn-size-checker-card, .ldn-size-scale-controls, .ldn-size-checker-cta,
 		.ldn-size-comparison-column__scale, .ldn-faceup-overlay, .ldn-faceup-bars, .ldn-explore-card,
@@ -425,7 +427,6 @@
 .ldn-chrome--ringspo-classic .ldn-price-size-card,
 .ldn-chrome--ringspo-classic .ldn-type-nav-card,
 .ldn-chrome--ringspo-classic .ldn-size-figure,
-.ldn-chrome--ringspo-classic .ldn-size-ideal-real,
 .ldn-chrome--ringspo-classic .ldn-size-checker__surface,
 .ldn-chrome--ringspo-classic .ldn-size-checker-results,
 .ldn-chrome--ringspo-classic .ldn-size-checker-card,
@@ -569,6 +570,26 @@
 	margin-top: 1.25rem;
 }
 
+/* "About this data" sits on the band, not on a white card. Later `.ldn-section a`
+   (primary purple) must not win on tint bands of equal specificity. */
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+	:is(.ldn-size-methodology, .ldn-data-methodology, .ldn-size-ideal-real, .ldn-size-proportions,
+		.ldn-size-segmentation__lead, .ldn-size-variation-note) {
+	background-color: transparent;
+	color: inherit;
+}
+
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+	:is(.ldn-size-methodology, .ldn-data-methodology, .ldn-size-ideal-real, .ldn-size-proportions,
+		.ldn-size-segmentation__lead, .ldn-size-variation-note) a {
+	color: inherit;
+	text-decoration: underline;
+}
+
 .ldn-chrome--ringspo-classic .ldn-size-chart--on-purple {
 	color: #fff;
 }
@@ -647,8 +668,14 @@
 	font-family: var(--ldn-font-title, "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif);
 	font-size: 1.5rem;
 	font-weight: 700;
-	color: var(--ringspo-ink);
 	margin-top: 0;
+}
+
+/* Ink only on white/plain bands. Coloured bands inherit white via the
+   :is(h2, p, …) rule above; a later ink colour here used to paint h2 grey
+   on purple when specificity tied. */
+.ldn-chrome--ringspo-classic .ldn-section:not(.ldn-section--tint):not(.ldn-section--accent) h2 {
+	color: var(--ringspo-ink);
 }
 
 /* Must follow the general `.ldn-section h2` ink colour (equal specificity). */

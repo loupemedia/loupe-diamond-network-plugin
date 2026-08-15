@@ -56,3 +56,178 @@
 	color: #5249a3;
 	text-decoration: underline;
 }
+
+/* True-mm shape row (hub): live medians + outline SVGs + US quarter.
+ *
+ * Layout is a 2-column grid: quarter is intrinsic width, shapes fill the
+ * rest. Do not put width:100% on the shared item class - the quarter uses
+ * that class too, and 100% in a row made it eat the canvas and crush the
+ * diamonds into a one-character column.
+ */
+.ldn-ring-guide__size-chart {
+	container-type: inline-size;
+	margin: 0 0 0.75rem;
+	--chart-purple: #706cc8;
+	--chart-purple-deep: #5249a3;
+	--chart-ink: #1a1a2e;
+}
+
+.ldn-ring-guide__size-chart-kicker {
+	margin: 0 0 0.65rem;
+	font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+	font-size: 1.05rem;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--chart-ink);
+}
+
+.ldn-ring-guide__size-chart-canvas {
+	--px-per-mm: 5.5;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	column-gap: 1.1rem;
+	row-gap: 1rem;
+	padding: 1.2rem 1.1rem 1rem;
+	background-color: #fff;
+	background-image:
+		linear-gradient(to right, rgba(112, 108, 200, 0.09) 1px, transparent 1px),
+		linear-gradient(to bottom, rgba(112, 108, 200, 0.09) 1px, transparent 1px);
+	background-size: calc(5 * var(--px-per-mm) * 1px) calc(5 * var(--px-per-mm) * 1px);
+	background-position: center;
+	border-radius: 12px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+.ldn-ring-guide__size-chart-shapes {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 0.85rem 0.45rem;
+	min-width: 0;
+	align-items: stretch;
+	justify-items: stretch;
+}
+
+.ldn-ring-guide__size-item {
+	display: grid;
+	grid-template-rows: minmax(0, 1fr) auto auto;
+	justify-items: center;
+	align-items: end;
+	gap: 0.3rem;
+	min-width: 0;
+	color: inherit;
+	text-decoration: none;
+}
+
+.ldn-ring-guide__size-chart-shapes .ldn-ring-guide__size-item {
+	width: 100%;
+}
+
+.ldn-ring-guide__size-item--quarter {
+	width: auto;
+	max-width: 100%;
+	justify-self: center;
+}
+
+a.ldn-ring-guide__size-item:hover .ldn-ring-guide__size-label,
+a.ldn-ring-guide__size-item:focus-visible .ldn-ring-guide__size-label {
+	text-decoration: underline;
+}
+
+a.ldn-ring-guide__size-item:hover .ldn-ring-guide__size-stone svg,
+a.ldn-ring-guide__size-item:focus-visible .ldn-ring-guide__size-stone svg {
+	color: var(--chart-purple-deep);
+}
+
+.ldn-ring-guide__size-stone {
+	display: block;
+	width: calc(var(--mm-w) * var(--px-per-mm) * 1px);
+	max-width: 100%;
+	height: auto;
+	aspect-ratio: var(--mm-w) / var(--mm-l);
+}
+
+.ldn-ring-guide__size-item--quarter .ldn-ring-guide__size-stone {
+	border-radius: 50%;
+	overflow: hidden;
+	background: transparent;
+}
+
+.ldn-ring-guide__size-stone svg,
+.ldn-ring-guide__size-stone img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/*
+ * Facet SVGs mix filled ribbons and source stroke-widths, then get
+ * stretched by each stone's millimetres. Drop the fill and pin stroke
+ * to screen pixels so every shape shares one line weight.
+ */
+.ldn-ring-guide__size-stone svg {
+	color: var(--chart-purple);
+	overflow: hidden;
+}
+
+.ldn-ring-guide__size-stone svg path {
+	fill: none !important;
+	stroke: var(--chart-purple);
+	stroke-width: 0.75px !important;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+	vector-effect: non-scaling-stroke;
+}
+
+.ldn-ring-guide__size-label,
+.ldn-ring-guide__size-dims {
+	max-width: 100%;
+	line-height: 1.2;
+	text-align: center;
+	overflow-wrap: break-word;
+}
+
+.ldn-ring-guide__size-label {
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--chart-ink);
+}
+
+.ldn-ring-guide__size-dims {
+	font-size: 0.68rem;
+	color: #4a4a68;
+}
+
+.ldn-ring-guide__size-chart figcaption {
+	margin-top: 0.45rem;
+	font-size: 0.9rem;
+	color: #4a4a68;
+}
+
+/* Narrow article or viewport: quarter on top, shapes in two columns. */
+@container (max-width: 36rem) {
+	.ldn-ring-guide__size-chart-canvas {
+		--px-per-mm: 5;
+		grid-template-columns: minmax(0, 1fr);
+		padding: 1rem 0.85rem 0.85rem;
+	}
+
+	.ldn-ring-guide__size-chart-shapes {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem 0.75rem;
+	}
+}
+
+@media (max-width: 640px) {
+	.ldn-ring-guide__size-chart-canvas {
+		--px-per-mm: 5;
+		grid-template-columns: minmax(0, 1fr);
+		padding: 1rem 0.85rem 0.85rem;
+	}
+
+	.ldn-ring-guide__size-chart-shapes {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem 0.75rem;
+	}
+}

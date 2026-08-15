@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.22.7] — 2026-08-15
+
+- **Size-page key dimensions:** at ≤768px the millimetre table stacks under the coin/diamond figure. The stacking media query was invalid (`{ {`) so two columns stayed at every width.
+
+## [0.22.6] — 2026-08-15
+
+- **Ring-guide size chart layout:** the quarter no longer takes 100% width (that crushed the shapes into a one-character column). Two-column grid: intrinsic quarter + fluid 5×2 shapes, stacking under 640px.
+
+## [0.22.5] — 2026-08-15
+
+- **Ring-guide size chart:** even stroke-only facet lines, and the comparison reflows (2-column shapes under the quarter) when the article is narrow.
+
+## [0.22.4] — 2026-08-15
+
+- **Ring-guide size chart strokes:** lighter, still even facet lines (0.9px non-scaling stroke in brand purple).
+
+## [0.22.3] — 2026-08-15
+
+- **Ring-guide size chart alignment:** stones in each row share a baseline, name and millimetre lines align across the row, and the shelf rule under each outline is gone.
+
+## [0.22.2] — 2026-08-15
+
+- **Ring-guide size chart layout:** quarter sits to the left of a 5×2 shape grid (Heart no longer orphans on a third row). Drop the green disc behind the coin.
+
+## [0.22.1] — 2026-08-15
+
+- **Ring-guide size chart polish:** consistent screen-pixel facet strokes (the source SVGs were stretching line weight with each stone's millimetres). Ringspo purple gems, 5 mm grid and a green quarter token.
+
+## [0.22.0] — 2026-08-15
+
+- **Ring-guide size chart:** `/4-carat-diamond-ring/` now shows a true-scale comparison (US quarter + every shape) from the live size mega-hub medians and outline SVGs, replacing the old static millimetre infographic.
+
+## [0.21.9] — 2026-08-15
+
+- **Size-page band prose:** "Chart numbers vs real stones" (ideal-vs-real callout, depth note, L/W lead) inherits the purple/green band instead of sitting in a white card with grey ink. Ringspo `brand_tokens.text` now sets `--ldn-text` to ink (`#1a1a2e`) so body copy is not the `#333` fallback.
+
+## [0.21.8] — 2026-08-15
+
+- **About this data on coloured bands:** the size-page methodology strip inherits the band colour (white on Ringspo purple) instead of muted grey inside a dark-on-purple block. Same rule for pricing `data_methodology` when that section is tint/accent. Not a white card.
+
+## [0.21.7] — 2026-08-15
+
+- **Face-up overlay:** dedicated comparison pages use the same 200px overlay as the size checker. The viewport cap no longer shrinks curated millimetre SVGs to actual size.
+
 ## [0.21.6] — 2026-08-15
 
 - **English spelling:** US pages use American forms in plugin copy (color, jewelry, millimeter, Diamonds analyzed). The en_GB catalogue maps those to Commonwealth forms; AU/CA/NZ and other `en_*` locales reuse that catalogue (WordPress does not fall back to en_GB on its own).

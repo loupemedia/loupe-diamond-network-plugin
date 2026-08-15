@@ -1621,6 +1621,13 @@ button.ldn-shape-picker__option:focus-visible {
 	align-items: start;
 }
 
+/* Narrow: stack the key-dimensions table under the coin/diamond figure. */
+@media screen and (max-width: 768px) {
+	.ldn-size-hero {
+		grid-template-columns: 1fr;
+	}
+}
+
 .ldn-size-hero__heading {
 	margin: 0 0 0.75rem;
 	font-size: 1.125rem;
@@ -1847,9 +1854,8 @@ button.ldn-shape-picker__option:focus-visible {
 }
 
 .ldn-size-ideal-real {
-	padding: 1rem 1.25rem;
-	background: var(--ldn-surface-muted, #f8f7fc);
-	border-radius: 4px;
+	padding: 0;
+	background: transparent;
 }
 
 .ldn-size-ideal-real p {
@@ -1884,7 +1890,9 @@ button.ldn-shape-picker__option:focus-visible {
 
 .ldn-size-methodology {
 	font-size: 0.95rem;
-	color: var(--ldn-text-muted, #4b5563);
+	/* Inherit the section band. Hardcoding muted grey made "About this data"
+	   unreadable on purple/green bands (size chart-vs-real, tint sections). */
+	color: inherit;
 }
 
 .ldn-size-proportions p {
@@ -2527,12 +2535,22 @@ button.ldn-shape-picker__option:focus-visible {
 	box-sizing: border-box;
 }
 
-.ldn-faceup-overlay svg,
-.ldn-size-outline--comparison svg {
+.ldn-faceup-overlay svg {
 	max-width: min(100%, 420px);
 	max-height: min(50vh, 280px);
 	width: auto;
 	height: auto;
+}
+
+/* Dedicated pair pages: same painted size as the size-checker overlay
+   (maxPx 200). width: auto would honour the artefact's width="Nmm" and
+   collapse the graphic to ~25px. */
+.ldn-size-comparison-visual .ldn-faceup-overlay svg,
+.ldn-size-outline--comparison svg {
+	width: 100%;
+	max-width: 200px;
+	height: auto;
+	max-height: min(50vh, 280px);
 }
 
 .ldn-faceup-bars {
@@ -2906,10 +2924,4 @@ button.ldn-shape-picker__option:focus-visible {
 	font-size: 0.75rem;
 	color: var(--ldn-muted-text, #666);
 	margin-top: 0.25rem;
-}
-
-@media screen and (max-width: 768px) { {
-	.ldn-size-hero {
-		grid-template-columns: 1fr;
-	}
 }

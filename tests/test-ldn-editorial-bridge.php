@@ -6,13 +6,16 @@
  * test slice) receive the live price/size panel; Ninja Tables are stripped;
  * Price and Size H2 sections are replaced so stale dollar/mm copy is gone
  * while colour/clarity/settings copy remains. Public hrefs use the site URL
- * slug (cushion), not the S3 folder slug (cushion-cut). Injected reader copy
- * follows house style: no em/en dashes and no Oxford commas.
+ * slug (cushion), not the S3 folder slug (cushion-cut). The hub size card
+ * draws a true-scale comparison from the size mega-hub matrix (live medians
+ * + outline SVGs + US quarter), not a static infographic. Injected reader
+ * copy follows house style: no em/en dashes and no Oxford commas.
  *
  * Would fail if: match_path treated every /N-carat-*-diamond-ring/ URL as
  * in-scope, splice_panels left the Ninja Table shortcode in place, the
  * colour H2 was swallowed by the price-section regex, price/size hrefs
- * used shape_to_s3_slug, or a lead/caption used `—` or `, and`.
+ * used shape_to_s3_slug, the hub size card omitted the matrix outlines, or
+ * a lead/caption used `—` or `, and`.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-editorial-bridge.php
  */
@@ -72,6 +75,14 @@ if (!class_exists('LDN_Config')) {
     }
 }
 
+if (!class_exists('LDN_Assets')) {
+    class LDN_Assets {
+        public static function us_quarter_image_url() {
+            return 'https://ringspo.test/ldn/assets/img/us-quarter.png';
+        }
+    }
+}
+
 if (!class_exists('LDN_Data_Fetcher')) {
     class LDN_Data_Fetcher {
         public function resolve_artefact_url($artefact_id, $ctx) {
@@ -80,6 +91,42 @@ if (!class_exists('LDN_Data_Fetcher')) {
                 : null;
         }
         public function fetch_artefact($artefact_id, $ctx) {
+            if ($artefact_id === 'size_summary_json'
+                && is_object($ctx)
+                && isset($ctx->page_level)
+                && $ctx->page_level === 'size-mega-hub'
+            ) {
+                return array(
+                    'type' => 'mega_hub',
+                    'matrix' => array(
+                        'carats' => array('4'),
+                        'rows' => array(
+                            array(
+                                'shape' => 'round',
+                                'label' => 'Round',
+                                'cells' => array(
+                                    '4' => array(
+                                        'length_mm' => 10.32,
+                                        'width_mm' => 10.32,
+                                        'outline_svg' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.32 10.32" class="ldn-test-round"><circle cx="5.16" cy="5.16" r="5" fill="#1a1a2e"/></svg>',
+                                    ),
+                                ),
+                            ),
+                            array(
+                                'shape' => 'cushion',
+                                'label' => 'Cushion',
+                                'cells' => array(
+                                    '4' => array(
+                                        'length_mm' => 9.25,
+                                        'width_mm' => 9.25,
+                                        'outline_svg' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.25 9.25" class="ldn-test-cushion"></svg>',
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                );
+            }
             return array('metadata' => array('analysis_date' => '2026-08-14'));
         }
     }
@@ -172,6 +219,15 @@ check(strpos($hub_out, '/us/diamond-prices/natural/4-carat/') !== false,
     'hub panel links to the all-shapes price page');
 check(strpos($hub_out, '/diamond-size/') !== false, 'hub panel links to the size mega hub');
 check(strpos($hub_out, 'og-preview.png') === false, 'hub does not embed the shape-level OG card');
+check(strpos($hub_out, 'ldn-ring-guide__size-chart') !== false, 'hub size card renders the live comparison figure');
+check(strpos($hub_out, 'ldn-ring-guide__size-chart-kicker') !== false, 'hub size chart has an actual-size kicker');
+check(strpos($hub_out, 'ldn-ring-guide__size-chart-shapes') !== false, 'hub size chart puts shapes in a two-row grid beside the quarter');
+check(strpos($hub_out, 'data-shape="round"') !== false, 'hub size items carry a shape hook for stroke CSS');
+check(strpos($hub_out, 'us-quarter.png') !== false, 'hub size chart includes the US quarter');
+check(strpos($hub_out, 'ldn-test-round') !== false, 'hub size chart uses the mega-hub round outline');
+check(strpos($hub_out, '10.32') !== false, 'hub size chart shows the matrix median millimetres');
+check(strpos($hub_out, '/diamond-size/cushion/4-carat/') !== false, 'hub size chart links cushion to the live size page');
+check(strpos($out, 'ldn-ring-guide__size-chart') === false, 'shape guide does not get the all-shapes size chart');
 check_house_style($hub_out, 'hub');
 
 $passthrough = $bridge->transform($cushion_html, '/3-carat-cushion-cut-diamond-ring/');

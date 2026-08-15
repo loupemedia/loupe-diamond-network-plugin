@@ -45,7 +45,8 @@
             lengthB: data.b.length_mm,
             catalog: catalog,
             widthPercent: true,
-            cssClass: 'ldn-comparison-overlay-svg',
+            maxPx: 200,
+            cssClass: 'ldn-comparison-overlay-svg ldn-size-compare-svg ldn-size-compare-svg--compact',
             ariaLabel: 'Face-up size comparison',
         });
 

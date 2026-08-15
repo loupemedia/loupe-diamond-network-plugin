@@ -17,6 +17,9 @@ if (!defined('ABSPATH')) {
 
 final class LDN_Editorial_Bridge {
 
+    /** Official US quarter diameter (mm); same constant Z3 uses for scale SVGs. */
+    const US_QUARTER_DIAMETER_MM = '24.26';
+
     /** @var string */
     private $site_id;
 
@@ -323,11 +326,159 @@ final class LDN_Editorial_Bridge {
         $out = '<section class="ldn-ring-guide__card ldn-ring-guide__card--size">';
         $out .= '<h2>' . esc_html($heading) . '</h2>';
         $out .= '<p>' . esc_html($lead) . '</p>';
+        $out .= $this->size_chart_html($match);
         $out .= '<p><a class="ldn-ring-guide__cta" href="' . esc_url($url) . '">'
             . esc_html($anchor)
             . ' <span aria-hidden="true">→</span></a></p>';
         $out .= '</section>';
         return $out;
+    }
+
+    /**
+     * True-scale 4 ct (etc.) shape row from the size mega-hub matrix: live
+     * median L×W plus outline SVGs, with a US quarter for reference.
+     *
+     * @param array $match
+     * @return string
+     */
+    private function size_chart_html(array $match) {
+        if ($match['kind'] !== 'hub') {
+            return '';
+        }
+        $shapes = $this->hub_size_shapes($match['carat']);
+        if ($shapes === array()) {
+            return '';
+        }
+
+        $quarter_mm = self::US_QUARTER_DIAMETER_MM;
+        $quarter_url = class_exists('LDN_Assets') ? LDN_Assets::us_quarter_image_url() : '';
+        $aria = sprintf(
+            /* translators: %s: carat weight */
+            __('%s carat diamond size comparison at one millimeter scale beside a US quarter', 'loupe-diamond-network'),
+            $match['carat']
+        );
+        // US pages: American spelling in the visible caption (en_GB maps it).
+        $caption = __(
+            'Median face-up size from live US listings. Every outline shares one millimeter scale beside a US quarter.',
+            'loupe-diamond-network'
+        );
+
+        $out = '<figure class="ldn-ring-guide__size-chart">';
+        $out .= '<p class="ldn-ring-guide__size-chart-kicker">' . esc_html(sprintf(
+            /* translators: %s: carat weight */
+            __('%s carat at actual size', 'loupe-diamond-network'),
+            $match['carat']
+        )) . '</p>';
+        $out .= '<div class="ldn-ring-guide__size-chart-canvas" role="img" aria-label="'
+            . esc_attr($aria) . '">';
+
+        $out .= '<div class="ldn-ring-guide__size-item ldn-ring-guide__size-item--quarter"'
+            . ' style="--mm-w:' . esc_attr($quarter_mm) . ';--mm-l:' . esc_attr($quarter_mm) . '">';
+        $out .= '<span class="ldn-ring-guide__size-stone">';
+        if ($quarter_url !== '') {
+            $out .= '<img src="' . esc_url($quarter_url) . '" alt="'
+                . esc_attr(sprintf(
+                    /* translators: %s: diameter in millimetres */
+                    __('US quarter, %s mm across', 'loupe-diamond-network'),
+                    $quarter_mm
+                ))
+                . '" width="243" height="243">';
+        }
+        $out .= '</span>';
+        $out .= '<span class="ldn-ring-guide__size-label">'
+            . esc_html(__('US quarter', 'loupe-diamond-network')) . '</span>';
+        $out .= '<span class="ldn-ring-guide__size-dims">'
+            . esc_html($quarter_mm . ' mm') . '</span>';
+        $out .= '</div>';
+
+        $out .= '<div class="ldn-ring-guide__size-chart-shapes">';
+        foreach ($shapes as $cell) {
+            $shape = (string) $cell['shape'];
+            $label = (string) $cell['label'];
+            $length = (string) $cell['length_mm'];
+            $width = (string) $cell['width_mm'];
+            $href = $this->size_individual_url($shape, $match['carat']);
+            $svg = $this->safe_outline_svg(isset($cell['outline_svg']) ? $cell['outline_svg'] : '');
+            $dims = $length . ' × ' . $width . ' mm';
+            $item = '<span class="ldn-ring-guide__size-stone">' . $svg . '</span>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+                . '<span class="ldn-ring-guide__size-label">' . esc_html($label) . '</span>'
+                . '<span class="ldn-ring-guide__size-dims">' . esc_html($dims) . '</span>';
+            $style = '--mm-w:' . esc_attr($width) . ';--mm-l:' . esc_attr($length);
+            $out .= $href !== ''
+                ? '<a class="ldn-ring-guide__size-item" data-shape="' . esc_attr($shape)
+                    . '" style="' . $style . '" href="'
+                    . esc_url($href) . '">' . $item . '</a>'
+                : '<div class="ldn-ring-guide__size-item" data-shape="' . esc_attr($shape)
+                    . '" style="' . $style . '">' . $item . '</div>';
+        }
+
+        $out .= '</div></div>';
+        $out .= '<figcaption>' . esc_html($caption) . '</figcaption>';
+        $out .= '</figure>';
+        return $out;
+    }
+
+    /**
+     * @param string $carat
+     * @return list<array{shape:string,label:string,length_mm:float|int|string,width_mm:float|int|string,outline_svg?:string}>
+     */
+    private function hub_size_shapes($carat) {
+        $ctx = new LDN_Page_Context(
+            $this->site_id,
+            'size-mega-hub',
+            'us',
+            null,
+            null,
+            null,
+            'size'
+        );
+        $summary = $this->fetcher->fetch_artefact('size_summary_json', $ctx);
+        if (!is_array($summary)) {
+            return array();
+        }
+        $matrix = isset($summary['matrix']) && is_array($summary['matrix']) ? $summary['matrix'] : array();
+        $rows = isset($matrix['rows']) && is_array($matrix['rows']) ? $matrix['rows'] : array();
+        $carat_key = (string) $carat;
+        $out = array();
+        foreach ($rows as $row) {
+            if (!is_array($row) || empty($row['shape'])) {
+                continue;
+            }
+            $cells = isset($row['cells']) && is_array($row['cells']) ? $row['cells'] : array();
+            $cell = null;
+            if (isset($cells[$carat_key]) && is_array($cells[$carat_key])) {
+                $cell = $cells[$carat_key];
+            } elseif (isset($cells[(int) $carat_key]) && is_array($cells[(int) $carat_key])) {
+                $cell = $cells[(int) $carat_key];
+            }
+            if ($cell === null || !isset($cell['length_mm'], $cell['width_mm'])) {
+                continue;
+            }
+            $out[] = array(
+                'shape'       => (string) $row['shape'],
+                'label'       => isset($row['label'])
+                    ? (string) $row['label']
+                    : $this->shape_label($row['shape']),
+                'length_mm'   => $cell['length_mm'],
+                'width_mm'    => $cell['width_mm'],
+                'outline_svg' => isset($cell['outline_svg']) ? $cell['outline_svg'] : '',
+            );
+        }
+        return $out;
+    }
+
+    /**
+     * @param mixed $svg
+     * @return string
+     */
+    private function safe_outline_svg($svg) {
+        if (!is_string($svg) || $svg === '' || stripos($svg, '<svg') === false) {
+            return '';
+        }
+        if (stripos($svg, '<script') !== false) {
+            return '';
+        }
+        return $svg;
     }
 
     /**
@@ -374,14 +525,24 @@ final class LDN_Editorial_Bridge {
                 : '/diamond-size';
             return $this->home_path($pattern);
         }
+        return $this->size_individual_url($match['shape'], $match['carat']);
+    }
+
+    /**
+     * @param string $shape
+     * @param string $carat
+     * @return string
+     */
+    private function size_individual_url($shape, $carat) {
+        $structure = $this->config->get_url_structure($this->site_id);
         $pattern = is_array($structure) && !empty($structure['size_level_3'])
             ? (string) $structure['size_level_3']
             : '/diamond-size/{shape}/{carat}';
         $path = str_replace(
             array('{shape}', '{carat}'),
             array(
-                $this->config->shape_to_url_slug($match['shape'], $this->site_id),
-                self::normalise_carat_label($match['carat']) . '-carat',
+                $this->config->shape_to_url_slug($shape, $this->site_id),
+                self::normalise_carat_label($carat) . '-carat',
             ),
             $pattern
         );
