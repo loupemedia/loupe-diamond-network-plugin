@@ -955,9 +955,21 @@ button.ldn-shape-picker__option:focus-visible {
 
 .ldn-shape-cards__grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 0.75rem;
 	margin-top: 1rem;
+}
+
+@media screen and (max-width: 899px) {
+	.ldn-shape-cards__grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media screen and (max-width: 480px) {
+	.ldn-shape-cards__grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }
 
 .ldn-shape-card {
@@ -993,13 +1005,22 @@ button.ldn-shape-picker__option:focus-visible {
 	background: rgba(0, 0, 0, 0.02);
 }
 
+.ldn-shape-card__shape,
+.ldn-shape-card__sample,
+.ldn-shape-card__range,
+.ldn-shape-card__price,
+.ldn-shape-card__change {
+	display: block;
+}
+
 .ldn-shape-card__shape {
 	font-weight: 600;
 	font-size: 1rem;
 	color: var(--ldn-primary, #333);
 }
 
-.ldn-shape-card__meta {
+.ldn-shape-card__sample,
+.ldn-shape-card__range {
 	font-size: 0.8125rem;
 	color: var(--ldn-secondary-text, #666);
 	line-height: 1.35;
@@ -1327,6 +1348,21 @@ button.ldn-shape-picker__option:focus-visible {
 	color: inherit;
 	text-decoration: underline;
 	text-underline-offset: 2px;
+}
+
+/* Card-as-link: decoration on <a> paints through every child line. Kill it on
+   the anchor itself (!important beats family `.ldn-section a` and UA underline). */
+.ldn-shape-card a,
+.ldn-explore-card,
+.ldn-type-nav-card,
+.ldn-size-price-card,
+.ldn-price-size-card {
+	text-decoration: none !important;
+}
+
+.ldn-shape-card a.ldn-shape-card__size-link:hover,
+.ldn-shape-card a.ldn-shape-card__size-link:focus-visible {
+	text-decoration: underline !important;
 }
 
 .ldn-intro-dynamic {

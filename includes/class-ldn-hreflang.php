@@ -4,6 +4,8 @@
  *
  * Emits `<link rel="alternate" hreflang="…">` for cross-domain clusters that
  * share a content profile (Loupe ccTLD network, Diamond Price Exact family).
+ * Only siblings whose price module is hub-ON in the published rollout are
+ * listed, so a Modern Jeweler-only launch does not advertise 404 alternates.
  * Multi-country sites (Ringspo URL with `{country}`) are deferred — those pages
  * need per-country path substitution and remain the legacy mega-plugin's job
  * until the registry-driven hreflang pass lands.
@@ -41,10 +43,32 @@ final class LDN_Hreflang {
     private $config;
 
     /**
-     * @param LDN_Config $config
+     * @var LDN_Rollout_Reader|null
      */
-    public function __construct($config) {
+    private $rollout;
+
+    /**
+     * @param LDN_Config                  $config
+     * @param LDN_Rollout_Reader|null     $rollout When null, no cluster tags are emitted.
+     */
+    public function __construct($config, $rollout = null) {
         $this->config = $config;
+        $this->rollout = $rollout;
+    }
+
+    /**
+     * @param LDN_Config $config
+     * @return self
+     */
+    public static function from_plugin($config) {
+        $rollout = null;
+        if (class_exists('LDN_Plugin')) {
+            $plugin = LDN_Plugin::instance();
+            if ($plugin) {
+                $rollout = $plugin->rollout();
+            }
+        }
+        return new self($config, $rollout);
     }
 
     /**
@@ -105,6 +129,9 @@ final class LDN_Hreflang {
             if (!is_array($site) || empty($site['domain'])) {
                 continue;
             }
+            if (!$this->sibling_is_live($site_id, $site)) {
+                continue;
+            }
             $locale = $this->primary_locale($site);
             if ($locale === '') {
                 continue;
@@ -128,6 +155,42 @@ final class LDN_Hreflang {
             ? self::X_DEFAULT_LOCALE[$profile_name]
             : 'en-US';
         return isset($alternates[$locale]) ? $alternates[$locale] : '';
+    }
+
+    /**
+     * Hub-ON price module for this sibling, or false when rollout is unknown.
+     *
+     * @param string $site_id
+     * @param array  $site
+     * @return bool
+     */
+    private function sibling_is_live($site_id, array $site) {
+        if ($this->rollout === null || !method_exists($this->rollout, 'is_site_enabled')) {
+            return false;
+        }
+        $country = $this->rollout_country($site);
+        if ($country === '') {
+            return false;
+        }
+        return (bool) $this->rollout->is_site_enabled($site_id, $country, 'price');
+    }
+
+    /**
+     * @param array $site
+     * @return string
+     */
+    private function rollout_country(array $site) {
+        if (!empty($site['canonical_source_country'])) {
+            return strtolower((string) $site['canonical_source_country']);
+        }
+        if (empty($site['countries']) || !is_array($site['countries'])) {
+            return '';
+        }
+        $entry = $site['countries'][0];
+        if (!is_array($entry) || empty($entry['code'])) {
+            return '';
+        }
+        return strtolower((string) $entry['code']);
     }
 
     /**

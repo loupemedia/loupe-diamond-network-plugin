@@ -2067,9 +2067,9 @@ $rich_hub_bag = array(
     ),
 );
 $rich_cards = $ringspo_renderer->shape_cards_html($all_shapes_ctx, $rich_hub_bag);
-check(strpos($rich_cards, '#1') !== false, 'shape_cards show rank on each card');
+check(strpos($rich_cards, '#1: Round') !== false, 'shape_cards show rank on each card');
 check(strpos($rich_cards, '45,000 diamonds') !== false, 'shape_cards show sample size');
-check(strpos($rich_cards, '$1,800–$8,900') !== false, 'shape_cards show price range');
+check(strpos($rich_cards, '$1,800 - $8,900') !== false, 'shape_cards show price range');
 check(strpos($rich_cards, 'ldn-shapes-ranking-chart') !== false, 'shape_cards append the ranking bar chart');
 check(strpos($rich_cards, 'ldn-chart__title') !== false, 'shape_cards chart uses an H3 title from the Plotly payload');
 check(strpos($rich_cards, 'United States 1 Carat Natural Diamond Prices by Shape') !== false, 'shape_cards chart title comes from layout.title.text');
@@ -2464,6 +2464,66 @@ check(
 check(
     strpos($banded_html, 'ldn-section ldn-section--plain ldn-natural-vs-lab-analysis') !== false,
     'a section the profile does not mention renders plain, whatever its position'
+);
+
+// Test intent: all-shapes FAQ ranking comes from copy.json and sits ahead of C1.
+// Would fail if: schema_faq_pairs / faq_static still read only static-content.json,
+// so "Round is the price ceiling" could outrank the live Marquise median.
+$faq_rank_ctx = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'natural', '1');
+$faq_rank_bag = array(
+    'static' => array(
+        'faq' => array(
+            array(
+                'question' => 'Oval or cushion at 1 carat - which should I pick?',
+                'answer' => 'Choose oval if face-up size is your priority.',
+            ),
+        ),
+    ),
+    'copy' => array(
+        'sections' => array(
+            'faq' => array(
+                array(
+                    'question' => 'How much is a 1-carat diamond worth across different shapes?',
+                    'answer' => 'Marquise has the highest typical price ($3,620).',
+                ),
+            ),
+        ),
+    ),
+);
+$merged_faq = $renderer->merged_faq_pairs($faq_rank_ctx, $faq_rank_bag);
+check(
+    isset($merged_faq[0]['question'])
+    && strpos($merged_faq[0]['question'], 'across different shapes') !== false
+    && strpos($merged_faq[0]['answer'], 'Marquise') !== false,
+    'live ranking FAQ from copy.json is first'
+);
+check(
+    isset($merged_faq[1]['question'])
+    && strpos($merged_faq[1]['question'], 'Oval or cushion') !== false,
+    'C1 educational FAQ still follows the live ranking pair'
+);
+$faq_html = $renderer->render_section('faq_static', $faq_rank_ctx, $faq_rank_bag);
+check(
+    strpos($faq_html, 'Marquise has the highest typical price') !== false
+    && strpos($faq_html, 'Oval or cushion') !== false,
+    'faq_static HTML includes the live ranking answer and the C1 pair'
+);
+$schema_only_live = $renderer->schema_faq_pairs(
+    $faq_rank_ctx,
+    array(
+        'static' => null,
+        'copy' => array(
+            'sections' => array(
+                'faq' => array(
+                    array('question' => 'Q live', 'answer' => 'A live'),
+                ),
+            ),
+        ),
+    )
+);
+check(
+    count($schema_only_live) === 1 && $schema_only_live[0]['question'] === 'Q live',
+    'FAQPage schema still emits when only copy.json FAQ is present'
 );
 
 // --- price_calculator (CP 123) -----------------------------------------------

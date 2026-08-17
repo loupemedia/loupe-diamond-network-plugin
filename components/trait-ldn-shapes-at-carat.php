@@ -109,32 +109,38 @@ trait LDN_Trait_Shapes_At_Carat {
                 }
             }
 
-            $meta_parts = array();
+            $card_heading = $shape;
             if (isset($row['rank']) && is_numeric($row['rank'])) {
-                $meta_parts[] = sprintf(
-                    /* translators: %d: rank position */
-                    __('#%d', 'loupe-diamond-network'),
-                    (int) $row['rank']
+                $card_heading = sprintf(
+                    /* translators: 1: rank position, 2: shape name */
+                    __('#%1$d: %2$s', 'loupe-diamond-network'),
+                    (int) $row['rank'],
+                    $shape
                 );
             }
+
+            $sample_html = '';
             if (isset($row['sample_size']) && is_numeric($row['sample_size']) && (int) $row['sample_size'] > 0) {
-                $meta_parts[] = sprintf(
-                    /* translators: %s: formatted integer count */
-                    __('%s diamonds', 'loupe-diamond-network'),
-                    number_format((int) $row['sample_size'])
-                );
+                $sample_html = '<span class="ldn-shape-card__sample">'
+                    . esc_html(sprintf(
+                        /* translators: %s: formatted integer count */
+                        __('%s diamonds', 'loupe-diamond-network'),
+                        number_format((int) $row['sample_size'])
+                    ))
+                    . '</span>';
             }
+
+            $range_html = '';
             $price_min = isset($row['price_min']) ? $row['price_min'] : null;
             $price_max = isset($row['price_max']) ? $row['price_max'] : null;
             if (is_numeric($price_min) && is_numeric($price_max) && (float) $price_max > 0) {
-                $meta_parts[] = esc_html(
-                    $currency . number_format((float) $price_min, 0)
-                    . '–' . $currency . number_format((float) $price_max, 0)
-                );
+                $range_html = '<span class="ldn-shape-card__range">'
+                    . esc_html(
+                        $currency . number_format((float) $price_min, 0)
+                        . ' - ' . $currency . number_format((float) $price_max, 0)
+                    )
+                    . '</span>';
             }
-            $meta_html = $meta_parts !== array()
-                ? '<span class="ldn-shape-card__meta">' . implode(' · ', $meta_parts) . '</span>'
-                : '';
 
             $size_link_html = '';
             $card_class = 'ldn-shape-card';
@@ -153,8 +159,9 @@ trait LDN_Trait_Shapes_At_Carat {
 
             $cards .= '<div class="' . esc_attr($card_class) . '">'
                 . '<a class="ldn-shape-card__main" href="' . esc_url($url) . '">'
-                . '<span class="ldn-shape-card__shape">' . esc_html($shape) . '</span>'
-                . $meta_html
+                . '<span class="ldn-shape-card__shape">' . esc_html($card_heading) . '</span>'
+                . $sample_html
+                . $range_html
                 . '<span class="ldn-shape-card__price">' . $price_cell . '</span>'
                 . $change_html
                 . '</a>'

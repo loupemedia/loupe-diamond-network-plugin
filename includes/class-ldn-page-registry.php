@@ -17,6 +17,27 @@ final class LDN_Page_Registry {
     const TRANSIENT_TTL = 15 * MINUTE_IN_SECONDS;
 
     /**
+     * Inclusive cap for price-sitemap rows.
+     *
+     * C4.5 writes shape-leaf pages at hierarchy_level 5 (product "Level 4").
+     * A cap of 4 dropped every money page and the sitemap 404'd empty.
+     * 6+ is reserved for a future cert/listing leaf that must not be indexed
+     * with the market-index tree.
+     */
+    const PRICE_SITEMAP_MAX_HIERARCHY = 5;
+
+    /**
+     * Whether a registry hierarchy_level belongs in the price sitemap.
+     *
+     * @param int $hierarchy_level
+     * @return bool
+     */
+    public static function price_sitemap_includes_level($hierarchy_level) {
+        $level = (int) $hierarchy_level;
+        return $level >= 1 && $level <= self::PRICE_SITEMAP_MAX_HIERARCHY;
+    }
+
+    /**
      * Fetch sitemap rows for a site, optionally filtered by country codes.
      *
      * Each row: canonical_url, url_path, locale, last_generated, country_code,
@@ -24,10 +45,14 @@ final class LDN_Page_Registry {
      *
      * @param string   $site_id
      * @param string[] $country_codes Lowercase; empty = all countries.
-     * @param int[]    $max_level     Max hierarchy_level inclusive (default 4 = shape hub and above).
+     * @param int      $max_level     Max hierarchy_level inclusive.
      * @return array<int, array<string, mixed>>
      */
-    public function fetch_sitemap_rows($site_id, array $country_codes = array(), $max_level = 4) {
+    public function fetch_sitemap_rows(
+        $site_id,
+        array $country_codes = array(),
+        $max_level = self::PRICE_SITEMAP_MAX_HIERARCHY
+    ) {
         $site_id = (string) $site_id;
         $cache_key = self::TRANSIENT_PREFIX . md5($site_id . '|' . implode(',', $country_codes) . '|' . $max_level);
         $cached = get_transient($cache_key);

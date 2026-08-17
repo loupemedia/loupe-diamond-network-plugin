@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.22.12] — 2026-08-15
+
+- **All-shapes FAQ ranking:** prepend C5.8 `copy.json` FAQ (live most/least expensive shapes) ahead of C1 educational FAQs so the FAQ cannot contradict the ranking chart.
+
+## [0.22.11] — 2026-08-15
+
+- **Shape hub cards:** stacked lines (`#1: Marquise`, sample, typical range, median, change). Kill leftover underlines on card-as-link blocks. Typical range is p10-p90 once C5.1 republishes (raw min/max hid a $117k 1ct marquise tail).
+
+## [0.22.10] — 2026-08-15
+
+- **Shape hub cards:** 5×2 grid on desktop (2-col tablet, 1-col phone). Card-as-link blocks (shape, explore, type-nav, size/price) no longer inherit `.ldn-section a` underlines on every line; Size chart still underlines on hover.
+
+## [0.22.9] — 2026-08-15
+
+- **Hreflang follows hub-ON:** Loupe (and DPE) alternate tags only list siblings whose price module is live in the published rollout. A Modern Jeweler-only launch no longer advertises Jewellery Monthly (and the rest) as language alternates while those URLs 404.
+
+## [0.22.8] — 2026-08-15
+
+- **Price sitemap includes shape pages:** C4.5 writes those rows at registry `hierarchy_level` 5; the plugin had been asking for `<= 4`, so the sitemap was empty and 404'd. Cap is now 5.
+- **Plugin serves `/robots.txt`:** three-tier bot policy plus `Sitemap: {host}/sitemaps/network.xml`. Plugin deploy updates sitemap lines; do not copy a template onto each WP root. If a physical `robots.txt` is already in the web root, delete it once so nginx does not hide the plugin.
+
 ## [0.22.7] — 2026-08-15
 
 - **Size-page key dimensions:** at ≤768px the millimetre table stacks under the coin/diamond figure. The stacking media query was invalid (`{ {`) so two columns stayed at every width.

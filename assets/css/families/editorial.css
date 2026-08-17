@@ -156,6 +156,23 @@
 	text-underline-offset: 2px;
 }
 
+.ldn-chrome--editorial .ldn-section :is(
+	a.ldn-shape-card__main,
+	a.ldn-shape-card__size-link,
+	a.ldn-explore-card,
+	a.ldn-type-nav-card,
+	a.ldn-size-price-card,
+	a.ldn-price-size-card
+) {
+	text-decoration: none;
+	font-weight: inherit;
+}
+
+.ldn-chrome--editorial .ldn-section a.ldn-shape-card__size-link:hover,
+.ldn-chrome--editorial .ldn-section a.ldn-shape-card__size-link:focus-visible {
+	text-decoration: underline;
+}
+
 .ldn-chrome--editorial .ldn-section a:hover {
 	color: var(--editorial-accent);
 }

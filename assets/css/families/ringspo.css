@@ -355,7 +355,7 @@
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
 	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
-	:is(table, .ldn-shape-card, .ldn-type-nav-card) a:hover {
+	table a:hover {
 	text-decoration: underline;
 }
 
@@ -700,6 +700,22 @@
 
 .ldn-chrome--ringspo-classic .ldn-section a {
 	color: var(--ldn-primary, var(--ringspo-purple));
+}
+
+.ldn-chrome--ringspo-classic .ldn-section :is(
+	a.ldn-shape-card__main,
+	a.ldn-shape-card__size-link,
+	a.ldn-explore-card,
+	a.ldn-type-nav-card,
+	a.ldn-size-price-card,
+	a.ldn-price-size-card
+) {
+	text-decoration: none;
+}
+
+.ldn-chrome--ringspo-classic .ldn-section a.ldn-shape-card__size-link:hover,
+.ldn-chrome--ringspo-classic .ldn-section a.ldn-shape-card__size-link:focus-visible {
+	text-decoration: underline;
 }
 
 .ldn-chrome--ringspo-classic .ldn-faq dt {

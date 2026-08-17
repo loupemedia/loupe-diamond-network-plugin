@@ -1,0 +1,134 @@
+# robots.txt for consumer diamond pricing sites
+# Served by Loupe Diamond Network at /robots.txt. DOMAIN is replaced from
+# the site origin at request time. Canonical copy also lives in
+# loupe-diamond-network/assets/robots-consumer-site.txt (keep in sync).
+#
+# BOT POLICY (three tiers):
+#
+# Tier 1 — Search engines: ALLOWED
+#   Powers traditional search rankings AND AI search features (Google AI
+#   Overviews, Bing Copilot). Best citation behaviour — always links back.
+#
+# Tier 2 — AI bots that cite sources: ALLOWED
+#   Includes both retrieval bots (browse at query time) and training bots
+#   from platforms that cite our sites in their answers. Our moat is data
+#   freshness and quality, not secrecy — we want LLMs to have current
+#   prices so citations are accurate and drive traffic back to our sites.
+#
+# Tier 3 — Bulk scrapers / low-citation platforms: BLOCKED
+#   Bots that absorb content into datasets or models with no meaningful
+#   attribution, or platforms too immature to evaluate. Revisited quarterly.
+#
+# REVIEW SCHEDULE: Review this file every quarter (Jan, Apr, Jul, Oct).
+# Check for new bots, re-evaluate Tier 3 "wait and see" bots, and verify
+# that Tier 2 platforms are still citing sources. Track in docs/TECH_DEBT.md.
+#
+# See docs/SECURITY_HARDENING.md for full context.
+
+# ─── Tier 1: Search engines — welcome ────────────────────────────────────────
+
+User-agent: Googlebot
+Allow: /
+Allow: /diamond-size/
+
+User-agent: Bingbot
+Allow: /
+Allow: /diamond-size/
+
+User-agent: Yandex
+Allow: /
+Allow: /diamond-size/
+
+# ─── Tier 2: AI bots that cite sources — allowed ─────────────────────────────
+#
+# Retrieval bots: fetch pages at query time, cite with links.
+# Training bots (from citing platforms): keep models current so citations
+# use today's prices, not stale data. Our competitive moat is freshness.
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /diamond-size/
+
+User-agent: GPTBot
+Allow: /
+Allow: /diamond-size/
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /diamond-size/
+
+User-agent: anthropic-ai
+Allow: /
+Allow: /diamond-size/
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /diamond-size/
+
+User-agent: Amazonbot
+Allow: /
+Allow: /diamond-size/
+
+# ─── Tier 3: Bulk scrapers / wait-and-see — blocked ──────────────────────────
+#
+# CCBot: Common Crawl bulk dataset — feeds many downstream LLMs with no
+#   direct attribution. No product that cites sources. Keep blocked.
+#
+# Google-Extended: Gemini training. Google AI Overviews use Googlebot
+#   (Tier 1) so blocking this has no impact on Google AI answers. Allow
+#   if Gemini starts citing sources directly. Re-evaluate Q3 2026.
+#
+# Bytespider / PetalBot: TikTok and Huawei training bots. Low-quality
+#   platforms with no meaningful citation. Keep blocked.
+#
+# FacebookBot / Meta-ExternalAgent: Meta AI training. Product is emerging;
+#   unclear citation behaviour. Re-evaluate Q3 2026.
+#
+# Applebot-Extended: Apple Intelligence training. Product is emerging;
+#   unclear citation behaviour. Re-evaluate Q3 2026.
+#
+# cohere-ai: Cohere model training. Enterprise-focused, no consumer
+#   product that cites sources. Keep blocked.
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+# ─── WordPress admin paths — reduce noise in logs ────────────────────────────
+
+User-agent: *
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /xmlrpc.php
+Allow: /wp-admin/admin-ajax.php
+
+# Diamond size analysis tool (PRD-015): hub, individual, and curated comparison
+# pages under /diamond-size/. Long-tail comparison URLs may emit noindex at render
+# time; they remain crawlable here for Tier 1–2 bots (see diamond-size-tool.md).
+
+# WordPress posts/pages (SEOPress). Ring-guide articles live here.
+Sitemap: https://DOMAIN/sitemap_index.xml
+# LDN routed pages (price, and size when that module is hub-ON).
+# The index only lists children that exist, so Loupe sites do not advertise
+# a /diamond-size/sitemap.xml that 404s. Submit this URL in GSC and Bing.
+Sitemap: https://DOMAIN/sitemaps/network.xml

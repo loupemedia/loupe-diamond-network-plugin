@@ -177,6 +177,34 @@ final class LDN_Rollout_Reader {
     }
 
     /**
+     * Is (site, country, module) live in this environment?
+     *
+     * Used by hreflang so a cluster only lists siblings that are hub-ON.
+     * Reads the already-fetched rollout file; it does not enable routes on
+     * another install.
+     *
+     * @param string $site_id
+     * @param string $country
+     * @param string $module
+     * @return bool
+     */
+    public function is_site_enabled($site_id, $country, $module) {
+        $sites = $this->resolve_env_sites($this->get_rollout());
+        $site_id = (string) $site_id;
+        $module = strtolower(trim((string) $module));
+        $codes = $this->country_aliases($country);
+        if ($site_id === '' || empty($sites[$site_id]) || !is_array($sites[$site_id])) {
+            return false;
+        }
+        foreach ($codes as $code) {
+            if (isset($sites[$site_id][$code][$module]) && $sites[$site_id][$code][$module] === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Country codes for this site that have at least one module enabled.
      *
      * @return string[]
@@ -527,6 +555,21 @@ final class LDN_Rollout_Reader {
      */
     private function empty_rollout() {
         return array('version' => 0, 'sites' => array());
+    }
+
+    /**
+     * @param string $country
+     * @return string[]
+     */
+    private function country_aliases($country) {
+        $country = strtolower(trim((string) $country));
+        if ($country === '') {
+            return array();
+        }
+        if ($country === 'uk' || $country === 'gb') {
+            return array('uk', 'gb');
+        }
+        return array($country);
     }
 
     /**

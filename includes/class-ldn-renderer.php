@@ -371,6 +371,7 @@ final class LDN_Renderer {
         $bag = array(
             'summary'    => $summary,
             'static'     => $this->fetcher->fetch_artefact('static_content_json', $ctx),
+            'copy'       => $this->fetcher->fetch_artefact('templated_copy_json', $ctx),
             'individual' => null,
             'ranking'    => $ctx->page_level === 'all-shapes'
                 ? $this->fetcher->fetch_artefact('shapes_ranking_json', $ctx)
@@ -392,7 +393,7 @@ final class LDN_Renderer {
             $this->schema_items($ctx, $bag)
         );
 
-        $hreflang = new LDN_Hreflang($this->config);
+        $hreflang = LDN_Hreflang::from_plugin($this->config);
         $out .= $hreflang->render($ctx, $canonical);
 
         return $out;

@@ -187,7 +187,7 @@ trait LDN_Trait_Content {
             $this->schema_items($ctx, $bag)
         );
 
-        $hreflang = new LDN_Hreflang($this->config);
+        $hreflang = LDN_Hreflang::from_plugin($this->config);
         $out .= $hreflang->render($ctx, $canonical);
 
         return $out;

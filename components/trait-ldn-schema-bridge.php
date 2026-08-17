@@ -31,8 +31,7 @@ trait LDN_Trait_SchemaBridge {
      * @return array<int, array{question:mixed, answer:mixed}>
      */
     public function schema_faq_pairs(LDN_Page_Context $ctx, array $bag) {
-        $value = $this->section_value('faq_static', $ctx, $bag);
-        return is_array($value) ? $value : array();
+        return $this->merged_faq_pairs($ctx, $bag);
     }
 
     /**

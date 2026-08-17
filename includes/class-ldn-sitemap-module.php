@@ -266,7 +266,11 @@ final class LDN_Sitemap_Module {
             $countries = $this->enabled_countries_for_kind('price');
         }
 
-        $rows = $this->registry->fetch_sitemap_rows($this->site_id, $countries, 4);
+        $rows = $this->registry->fetch_sitemap_rows(
+            $this->site_id,
+            $countries,
+            LDN_Page_Registry::PRICE_SITEMAP_MAX_HIERARCHY
+        );
         if (empty($rows)) {
             return '';
         }

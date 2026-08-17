@@ -46,6 +46,10 @@ if (!class_exists('LDN_Rollout_Reader')) {
         public function is_enabled($country, $module) {
             return true;
         }
+
+        public function is_site_enabled($site_id, $country, $module) {
+            return true;
+        }
     }
 }
 

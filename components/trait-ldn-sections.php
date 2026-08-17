@@ -106,7 +106,7 @@ trait LDN_Trait_Sections {
             );
         }
         if ($section_id === 'faq_static') {
-            return $this->faq_html($this->section_value($section_id, $ctx, $bag));
+            return $this->faq_html($this->merged_faq_pairs($ctx, $bag));
         }
         if ($section_id === 'intro_dynamic') {
             return $this->intro_html(
@@ -257,6 +257,49 @@ trait LDN_Trait_Sections {
             }
         }
         return null;
+    }
+
+    /**
+     * Ranking FAQ pairs from copy.json (C5.8), or [].
+     *
+     * @param array $bag
+     * @return array<int, array{question:mixed, answer:mixed}>
+     */
+    private function templated_faq_pairs(array $bag) {
+        $copy = isset($bag['copy']) && is_array($bag['copy']) ? $bag['copy'] : array();
+        $sections = isset($copy['sections']) && is_array($copy['sections'])
+            ? $copy['sections']
+            : array();
+        $raw = isset($sections['faq']) && is_array($sections['faq']) ? $sections['faq'] : array();
+        $pairs = array();
+        foreach ($raw as $qa) {
+            if (!is_array($qa)) {
+                continue;
+            }
+            $q = $qa['question'] ?? ($qa['q'] ?? null);
+            $a = $qa['answer'] ?? ($qa['a'] ?? null);
+            if (!is_scalar($q) || !is_scalar($a) || (string) $q === '' || (string) $a === '') {
+                continue;
+            }
+            $pairs[] = array('question' => $q, 'answer' => $a);
+        }
+        return $pairs;
+    }
+
+    /**
+     * Live ranking FAQ (copy.json) first, then C1 educational FAQ.
+     *
+     * Ranking claims belong in C5.8 so they match the chart. C1 must not
+     * restate which shape is dearest.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @return array<int, array{question:mixed, answer:mixed}>
+     */
+    public function merged_faq_pairs(LDN_Page_Context $ctx, array $bag) {
+        $static = $this->section_value('faq_static', $ctx, $bag);
+        $static = is_array($static) ? $static : array();
+        return array_merge($this->templated_faq_pairs($bag), $static);
     }
 
     /**

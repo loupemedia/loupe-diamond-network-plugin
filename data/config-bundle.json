@@ -1,6 +1,6 @@
 {
-  "version": "cc66203",
-  "generated_at": "2026-08-15T04:52:55.608886+00:00",
+  "version": "958f645",
+  "generated_at": "2026-08-16T06:59:05.301411+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8389,6 +8389,7 @@
           "3_months",
           "12_months"
         ],
+        "long_horizon_downsample": "weekly",
         "default_view": "price",
         "chart_style": {
           "font_family": "\"Lato\", \"Segoe UI\", sans-serif",
@@ -8466,7 +8467,7 @@
           "faq_static": {
             "json_key": "faq",
             "output_type": "array",
-            "instruction": "Write as a knowledgeable local jewellery guide — professional, clear, and helpful. Generate questions a buyer comparing shapes at {carat} carats for {diamond_type} engagement rings would realistically ask: face-up size on the hand, which shapes offer the best value at this weight, durability in daily wear, and where to start once they have chosen a carat. Answers must be concise and practical — no hedging, no live prices or market commentary.\n",
+            "instruction": "Write as a knowledgeable local jewellery guide - professional, clear and helpful. Generate questions a buyer comparing shapes at {carat} carats for {diamond_type} engagement rings would realistically ask: face-up size on the hand, durability in daily wear, and where to start once they have chosen a carat. Answers must be concise and practical. No hedging, no live prices or market commentary. Do not rank shapes by price, name a price ceiling, or say which shape is most or least expensive or offers the best value for money - the ranking on this page owns that. Do not write a \"how much is a {carat}-carat diamond worth across different shapes\" question.\n",
             "length": "3 pairs"
           }
         },
@@ -9350,7 +9351,7 @@
           "faq_static": {
             "json_key": "faq",
             "output_type": "array",
-            "instruction": "Write in a direct, buyer-protective voice. Generate questions someone comparing diamond shapes at {carat} carats would actually search for — face-up size, sparkle character, value trade-offs between shapes at this weight, and which shapes suit which settings. Answers must be short and opinionated. Do not quote specific prices or daily market moves (the ranking table handles that). At least one question must address choosing between two popular shapes at {carat} carats. Never include calendar years or words like today or currently.\n",
+            "instruction": "Write in a direct, buyer-protective voice. Generate questions someone comparing diamond shapes at {carat} carats would actually search for: face-up size, sparkle character, and which shapes suit which settings. Answers must be short and opinionated. Do not quote specific prices or daily market moves. Do not rank shapes by price, name a price ceiling, or say which shape is most or least expensive - the ranking on this page owns that. Do not write a \"how much is a {carat}-carat diamond worth across different shapes\" question. At least one question must address choosing between two popular shapes at {carat} carats on look and wear, not on which costs more. Never include calendar years or words like today or currently.\n",
             "length": "3 pairs"
           }
         },
@@ -9407,7 +9408,13 @@
         "all_shapes": {
           "intro_text": "The current price for a {carat} carat {type_label} diamond in {country_name} is {currency_symbol}{current_price:,.0f}, calculated from {num_diamonds:,} diamonds that match this carat weight and type in our database{intro_change_clause}.\nPrices for these diamonds range from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f}, depending on factors such as the diamond shape, color and clarity.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "The most expensive shape for {carat} carat {type_label} diamonds is {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}; the least expensive is {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f} - a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes at this weight; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "The most expensive shape for {carat} carat {type_label} diamonds is {most_expensive_shape} at {currency_symbol}{most_expensive_price:,.0f}; the least expensive is {least_expensive_shape} at {currency_symbol}{least_expensive_price:,.0f} - a {currency_symbol}{price_difference:,.0f} gap ({price_difference_pct:.1f}%).\nWe track {total_sample_size:,} {type} stones across {shape_count} shapes at this weight; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n",
+          "faq": [
+            {
+              "question": "How much is a {carat}-carat diamond worth across different shapes?",
+              "answer": "At this weight the {most_expensive_shape} has the highest typical price ({currency_symbol}{most_expensive_price:,.0f}); the {least_expensive_shape} is the cheapest ({currency_symbol}{least_expensive_price:,.0f}). Those are overall medians across the {color_word} and clarity mix we track - not a matched grade pair. The ranking on this page is the live order.\n"
+            }
+          ]
         },
         "diamond_type": {
           "intro": "{type_title} diamond prices {in_country} span {carat_count} carat weights in our index. The most listed weight is {most_popular_carat} carat, with a median of {currency_symbol}{most_popular_median_price:,.0f} across {most_popular_sample_size:,} tracked stones.\n"
@@ -13056,13 +13063,13 @@
         "runtime_note": "C3.2 writes one grid per retailer pool to ringspo.calc_data (pool_id); C5.7 consults should_produce and reads the pool named by the site's source_site_id. R4_color_clarity_db_json retired 2026-07-30."
       },
       "price_calculator_json": {
-        "schema_version": 1,
+        "schema_version": 2,
         "page_level": "shape",
         "producing_script": "C5.9_price_calculator (data: C3.2_color_clarity_aggregate)",
         "gate": "site_entitlement",
         "status": "live",
         "filename": "price-calculator.json",
-        "description": "Price-calculator cells — percentiles and sample size per colour group × clarity group × cut grade, for the interactive calculator/checker and its server-rendered default answer.",
+        "description": "Price-calculator cells - percentiles and sample size per individual colour x clarity x cut grade, for the interactive calculator/checker and its server-rendered default answer.",
         "wp_widgets": [
           "price_calculator"
         ],
@@ -13642,7 +13649,7 @@
         ]
       },
       "price_calculator": {
-        "description": "Interactive price calculator / position checker (CP 123). The reader picks colour group, clarity group and, on round pages, cut grade; leaving the price blank answers \"what should this cost\", entering a quoted price answers where that price sits in the distribution for the same specification. The sample size is shown alongside either answer. The default cell is server-rendered so the page answers without JavaScript, and a specification with no cell says so rather than falling back to a coarser one. One widget, not two: the checker is the calculator with the price field filled in.\n",
+        "description": "Interactive price calculator / position checker (CP 123). The reader picks colour grade, clarity grade and, on round pages, cut grade; leaving the price blank answers \"what should this cost\", entering a quoted price answers where that price sits in the distribution for the same specification. The sample size is shown alongside either answer. The default cell is server-rendered so the page answers without JavaScript, and a specification with no cell says so rather than falling back to a coarser one. One widget, not two: the checker is the calculator with the price field filled in.\n",
         "reads_artefacts": [
           "price_calculator_json"
         ],
