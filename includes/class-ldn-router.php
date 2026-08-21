@@ -139,13 +139,14 @@ final class LDN_Router {
         }
 
         $countries = $this->enabled_price_countries();
+        if (method_exists($this->config, 'countries_for_install')) {
+            $countries = $this->config->countries_for_install($this->site_id, $countries);
+        }
         if (empty($countries)) {
             return array();
         }
 
-        $type_slugs = $this->type_slugs($structure);
-        $levels = $this->ordered_levels($structure);
-        $has_country = $this->patterns_have_country($levels);
+        $has_country = $this->patterns_have_country($this->ordered_levels($structure));
 
         // Country-less families (Loupe/DPE) carry one implied country; build the
         // rule set once using that country as the query value.
@@ -155,7 +156,17 @@ final class LDN_Router {
 
         $rules = array();
         foreach ($countries as $country) {
-            foreach ($levels as $level_num => $pattern) {
+            $variant = $this->structure_for_country($structure, $country);
+            $type_slugs = $this->type_slugs($variant);
+            foreach ($this->ordered_levels($variant) as $level_num => $pattern) {
+                if (method_exists($this->config, 'install_relative_pattern')) {
+                    $pattern = $this->config->install_relative_pattern($pattern, $country);
+                }
+                if ($pattern === '' || $pattern === '/') {
+                    // Bare /{country} is the subsite front page; a rewrite
+                    // cannot own it. Guru / carat sites handle that separately.
+                    continue;
+                }
                 list($regex, $query) = $this->compile_pattern(
                     $pattern,
                     $country,
@@ -167,6 +178,75 @@ final class LDN_Router {
         }
 
         return $rules;
+    }
+
+    /**
+     * url-structure for one country's public paths.
+     *
+     * Non-English countries get the localised block (same substitutions C4.5
+     * applied). English countries keep the yaml as-is. One scheme per country,
+     * so outbound links and rewrite rules cannot drift.
+     *
+     * @param array  $structure
+     * @param string $country
+     * @return array
+     */
+    private function structure_for_country(array $structure, $country) {
+        if (method_exists($this->config, 'url_structure_for')) {
+            $variant = $this->config->url_structure_for($this->site_id, $country);
+            return is_array($variant) ? $variant : $structure;
+        }
+        $segments = method_exists($this->config, 'url_locale_segments')
+            ? $this->config->url_locale_segments($this->site_id, $country)
+            : array();
+        return $this->localise_structure($structure, $segments);
+    }
+
+    /**
+     * Apply C4.5's path-segment substitutions to one url-structure block.
+     *
+     * Delegates to LDN_Config when the method exists so the router and the
+     * outbound URL builders share one implementation.
+     *
+     * @param array $structure
+     * @param array $segments  From LDN_Config::url_locale_segments().
+     * @return array
+     */
+    public function localise_structure(array $structure, array $segments) {
+        if (method_exists($this->config, 'localise_url_structure')) {
+            return $this->config->localise_url_structure($structure, $segments);
+        }
+        if ($segments === array()) {
+            return $structure;
+        }
+        $out = $structure;
+        $path_hub = isset($segments['path_diamond_prices'])
+            ? (string) $segments['path_diamond_prices'] : '';
+        $path_prices = isset($segments['path_prices'])
+            ? (string) $segments['path_prices'] : '';
+        foreach ($out as $key => $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+            if ($path_hub !== '' && strpos($value, 'diamond-prices') !== false) {
+                $out[$key] = str_replace('diamond-prices', $path_hub, $value);
+            } elseif (
+                $path_prices !== ''
+                && (strpos($value, '/prices/') !== false || substr($value, -7) === '/prices')
+            ) {
+                $out[$key] = str_replace('prices', $path_prices, $value);
+            }
+        }
+        if (!empty($segments['type_natural'])) {
+            $out['type_natural'] = (string) $segments['type_natural'];
+        }
+        if (!empty($segments['type_lab'])) {
+            $out['type_lab'] = (string) $segments['type_lab'];
+        }
+        if (!empty($segments['carat_suffix'])) {
+            $out['carat_format'] = '{value}-' . $segments['carat_suffix'];
+        }
+        return $out;
     }
 
     /**
@@ -261,6 +341,15 @@ final class LDN_Router {
                 $regex_parts[] = preg_quote($country, '#');
                 continue;
             }
+            if ($this->segment_is_composite($segment)) {
+                $regex_parts[] = $this->compile_composite_segment(
+                    $segment,
+                    $type_slugs,
+                    $capture,
+                    $query
+                );
+                continue;
+            }
             if ($segment === '{type}') {
                 $alts = array_map(function ($s) { return preg_quote($s, '#'); }, $type_slugs);
                 $regex_parts[] = '(' . implode('|', $alts) . ')';
@@ -291,6 +380,79 @@ final class LDN_Router {
         $query_string = 'index.php?' . $this->build_query_string($query);
 
         return array($regex, $query_string);
+    }
+
+    /**
+     * A path segment that mixes placeholders with literals (DA flat leaf:
+     * `{carat}-{type}-{shape}-diamond-price`).
+     *
+     * @param string $segment
+     * @return bool
+     */
+    private function segment_is_composite($segment) {
+        if (strpos($segment, '{') === false) {
+            return false;
+        }
+        $atoms = array('{country}', '{type}', '{carat}', '{shape}');
+        return !in_array($segment, $atoms, true);
+    }
+
+    /**
+     * Build a capture regex for a composite slug. `{type}` is an alternation of
+     * known slugs so `{carat}` can be `1-carat` (contains a hyphen) without
+     * eating the type token.
+     *
+     * @param string   $segment
+     * @param string[] $type_slugs
+     * @param int      $capture
+     * @param array    $query
+     * @return string
+     */
+    private function compile_composite_segment($segment, array $type_slugs, &$capture, array &$query) {
+        $parts = preg_split(
+            '/(\{type\}|\{carat\}|\{shape\}|\{country\})/',
+            $segment,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE
+        );
+        $regex = '';
+        foreach ($parts as $part) {
+            if ($part === '') {
+                continue;
+            }
+            if ($part === '{type}') {
+                $alts = array_map(function ($s) { return preg_quote($s, '#'); }, $type_slugs);
+                $regex .= '(' . implode('|', $alts) . ')';
+                $query['ldn_type'] = '$matches[' . (++$capture) . ']';
+                continue;
+            }
+            if ($part === '{carat}') {
+                $regex .= '(.+)';
+                $query['ldn_carat'] = '$matches[' . (++$capture) . ']';
+                continue;
+            }
+            if ($part === '{shape}') {
+                $regex .= '(.+)';
+                $query['ldn_shape'] = '$matches[' . (++$capture) . ']';
+                continue;
+            }
+            if ($part === '{country}') {
+                $regex .= preg_quote($this->country_literal_or($query), '#');
+                continue;
+            }
+            $regex .= preg_quote($part, '#');
+        }
+        return $regex;
+    }
+
+    /**
+     * Country already stored on the query (compile_pattern always sets it).
+     *
+     * @param array $query
+     * @return string
+     */
+    private function country_literal_or(array $query) {
+        return isset($query['ldn_country']) ? (string) $query['ldn_country'] : '';
     }
 
     /**

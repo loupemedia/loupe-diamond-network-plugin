@@ -1,0 +1,249 @@
+/*
+ * LDN navigation: mega-menu panel and narrow layout — PRD-018 CP125_03.
+ *
+ * Replaces the per-site Customizer rules
+ *   .mega-menu > ul { width: 1140px; left: -34% !important; }
+ * whose offset was calibrated to the position of the old top-level items, so it
+ * misaligns the moment the item set changes - which is exactly what PRD-018 does.
+ * Panel geometry here derives from the viewport and a custom property, never from
+ * item order.
+ *
+ * COLOURS ARE INHERITED, NOT IMPOSED. The menu lives in the theme's header, and
+ * this stylesheet loads on every page including legacy editorial posts, where
+ * LDN's own `--ldn-*` custom properties are NOT emitted (only the page renderers
+ * emit those). So every colour resolves to `currentColor`, `inherit` or a system
+ * keyword, with the LDN token as an optional override when it happens to exist.
+ * That is also why there is not a single hex value below.
+ *
+ * Scoped to `.ldn-nav-*` throughout: a theme menu LDN does not own must be
+ * untouched, and `.mega-menu` is a class name other plugins use too.
+ */
+
+/* =========================================================================
+   Desktop mega-menu panel
+   ========================================================================= */
+
+/*
+ * `static` lets the panel escape the item and anchor to the navigation container
+ * instead, which is what removes the dependency on where the item sits in the bar.
+ * GeneratePress positions `.main-navigation`; if a theme does not, the panel falls
+ * back to the page box, which is still on screen because the width is clamped
+ * below.
+ */
+.ldn-nav-item.ldn-nav-mega {
+	position: static;
+}
+
+.ldn-nav-mega > .sub-menu {
+	--ldn-nav-cols: 4;
+
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 20;
+
+	/*
+	 * Bounded by the viewport first, the site's preferred panel width second.
+	 * A fixed 1140px overflows a 1024px laptop; this cannot.
+	 */
+	width: min(calc(100vw - 2rem), var(--ldn-nav-panel-max, 1140px));
+	max-width: calc(100vw - 2rem);
+	box-sizing: border-box;
+
+	display: grid;
+	/*
+	 * minmax(0, 1fr), never 1fr: a bare 1fr track refuses to shrink below its
+	 * longest label, which pushes the row wider than the viewport.
+	 * See .cursor/rules/mobile-execution.mdc.
+	 */
+	grid-template-columns: repeat(var(--ldn-nav-cols), minmax(0, 1fr));
+	gap: 0.25rem 1.5rem;
+	align-items: start;
+
+	padding: 1.25rem 1.5rem;
+	margin: 0;
+	list-style: none;
+
+	/*
+	 * A solid surface lifted by a shadow. Deliberately NOT a tinted panel with a
+	 * matching 1px border - .cursor/rules/no-outlined-colour-boxes.mdc names that
+	 * as a layout tell and forbids it.
+	 */
+	background: var(--ldn-nav-panel-bg, var(--ldn-background, Canvas));
+	color: inherit;
+	box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
+}
+
+/* Column counts match the config vocabulary (2-5). */
+.ldn-nav-mega.ldn-nav-mega-2-col > .sub-menu { --ldn-nav-cols: 2; }
+.ldn-nav-mega.ldn-nav-mega-3-col > .sub-menu { --ldn-nav-cols: 3; }
+.ldn-nav-mega.ldn-nav-mega-4-col > .sub-menu { --ldn-nav-cols: 4; }
+.ldn-nav-mega.ldn-nav-mega-5-col > .sub-menu { --ldn-nav-cols: 5; }
+
+/*
+ * Column headings are menu items too (CP125_02 emits them), so they need to break
+ * the grid flow and start a new column rather than sitting in one cell.
+ */
+.ldn-nav-mega > .sub-menu > .ldn-nav-column-heading {
+	grid-column: auto;
+	grid-row: 1;
+	font-weight: 600;
+	text-transform: none;
+	padding-bottom: 0.25rem;
+}
+
+.ldn-nav-mega > .sub-menu li {
+	min-width: 0;
+	list-style: none;
+}
+
+.ldn-nav-mega > .sub-menu a {
+	display: block;
+	padding: 0.4rem 0;
+	color: inherit;
+	/*
+	 * Normal wrapping. Never overflow-wrap: anywhere in a narrow column - it
+	 * produces one character per line.
+	 */
+	overflow-wrap: break-word;
+	hyphens: none;
+}
+
+/* The panel is hidden until the parent is hovered or focus is inside it. */
+.ldn-nav-mega > .sub-menu {
+	visibility: hidden;
+	opacity: 0;
+}
+
+.ldn-nav-mega:hover > .sub-menu,
+.ldn-nav-mega:focus-within > .sub-menu {
+	visibility: visible;
+	opacity: 1;
+}
+
+/* =========================================================================
+   Focus visibility
+
+   Keyboard users must see where they are on the parent AND on every child. The
+   outline uses currentColor so it stays visible whatever the theme's palette.
+   ========================================================================= */
+
+.ldn-nav-item > a:focus-visible,
+.ldn-nav-mega > .sub-menu a:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+/* =========================================================================
+   Narrow layout
+
+   Required in this same change by .cursor/rules/mobile-execution.mdc: a ~50 item
+   desktop panel has to have a defined phone layout, not a follow-up ticket.
+
+   Two triggers, because GP Premium's slide-out is rendered server-side with no
+   viewport: the container id when the slide-out is what is rendering, and a media
+   query for the mobile header. The desktop rules above are absolute-positioned
+   grids, which are wrong in a vertical drawer, so both triggers undo them.
+   ========================================================================= */
+
+#generate-slideout-menu .ldn-nav-mega > .sub-menu,
+#mobile-header .ldn-nav-mega > .sub-menu {
+	position: static;
+	width: auto;
+	max-width: none;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0;
+	padding: 0 0 0 1rem;
+	box-shadow: none;
+	background: transparent;
+
+	/*
+	 * Collapsed by default. The desktop rule this replaces set
+	 * `position: static; display: block` unconditionally, which is correct in a
+	 * hover dropdown and is what dumps every child inline in a drawer.
+	 * The toggle that flips this is GP Premium's; CP125_04 supplies the
+	 * shallower item set so there is less to reveal.
+	 */
+	visibility: visible;
+	opacity: 1;
+	display: none;
+}
+
+#generate-slideout-menu .ldn-nav-mega.ldn-nav-open > .sub-menu,
+#generate-slideout-menu .ldn-nav-mega[aria-expanded="true"] > .sub-menu,
+#mobile-header .ldn-nav-mega.ldn-nav-open > .sub-menu {
+	display: grid;
+}
+
+/* Tap targets: 44px minimum, per the mobile rule and WCAG target size. */
+#generate-slideout-menu .ldn-nav-item > a,
+#generate-slideout-menu .ldn-nav-mega > .sub-menu a,
+#mobile-header .ldn-nav-item > a {
+	min-height: 44px;
+	display: flex;
+	align-items: center;
+	padding-block: 0.5rem;
+}
+
+@media (max-width: 768px) {
+	/*
+	 * Same undo for a theme that renders the primary menu inline rather than in
+	 * the slide-out. Without this the absolutely positioned panel would sit on
+	 * top of the page content at phone width.
+	 */
+	.ldn-nav-mega > .sub-menu {
+		position: static;
+		width: auto;
+		max-width: none;
+		grid-template-columns: minmax(0, 1fr);
+		padding-left: 1rem;
+		box-shadow: none;
+		background: transparent;
+
+		/*
+		 * `display: none`, not just the inherited `visibility: hidden`. Once the
+		 * panel is `static` it is in normal flow, and a merely invisible element
+		 * still reserves its box - which held ~500px of blank page open below the
+		 * menu at 360px. Hover is also not a thing here, so nothing would ever
+		 * reveal it.
+		 */
+		display: none;
+	}
+
+	.ldn-nav-mega.ldn-nav-open > .sub-menu,
+	.ldn-nav-mega[aria-expanded="true"] > .sub-menu {
+		display: grid;
+		visibility: visible;
+		opacity: 1;
+	}
+
+	.ldn-nav-mega > .sub-menu > .ldn-nav-column-heading {
+		grid-row: auto;
+		padding-top: 0.75rem;
+	}
+
+	.ldn-nav-item > a {
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+	}
+}
+
+/*
+ * Narrowest supported width. The grid is already single-column by here; this only
+ * tightens the gutters so a long localised label (German and French run longer
+ * than English) still has a usable measure rather than wrapping every word.
+ */
+@media (max-width: 400px) {
+	#generate-slideout-menu .ldn-nav-mega > .sub-menu,
+	.ldn-nav-mega > .sub-menu {
+		padding-left: 0.75rem;
+	}
+}
+
+/* Respect a reduced-motion preference: the panel reveal is the only transition. */
+@media (prefers-reduced-motion: no-preference) {
+	.ldn-nav-mega > .sub-menu {
+		transition: opacity 120ms ease-out;
+	}
+}

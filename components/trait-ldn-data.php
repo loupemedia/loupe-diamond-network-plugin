@@ -47,7 +47,7 @@ trait LDN_Trait_Data {
         // type hub (no carat) and shape pages (named cut + (CC) suffix).
         if ($ctx->page_level === 'all-shapes' && $ctx->site_id === 'ringspo') {
             return sprintf(
-                '%s Diamond Prices by Shape — %s',
+                '%s Diamond Prices by Shape - %s',
                 $subject,
                 $this->country_full_name($ctx)
             );

@@ -5,7 +5,24 @@
  * This HTML sits in a normal WP article, not `.ldn-chrome--ringspo-classic`.
  * Do not invent a tinted outlined box (AI tell). Follow Ringspo: unboxed
  * sections, theme headings, white chart surface with 12px radius + shadow.
+ *
+ * The inject paints no band of its own. Any colour behind it belongs to the
+ * post's own GenerateBlocks container and is a WordPress edit, not a CSS one.
  */
+
+body.ldn-editorial-ring-guide {
+	overflow-x: clip;
+}
+
+/* Legacy GenerateBlocks colour bands stop short inside `.entry-content`. */
+body.ldn-editorial-ring-guide .entry-content > .gb-container {
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+	padding-left: calc(50vw - 50%);
+	padding-right: calc(50vw - 50%);
+	max-width: none;
+	width: auto;
+}
 
 .ldn-ring-guide,
 .ldn-ring-guide__card {
@@ -55,6 +72,95 @@
 .ldn-ring-guide__cta:focus-visible {
 	color: #5249a3;
 	text-decoration: underline;
+}
+
+/* Price ladder (shape guides): median price per carat weight.
+ *
+ * Three narrow columns survive 320px without a scroller, so the wrapper only
+ * catches the overflow case where a locale renders long money strings.
+ */
+.ldn-ring-guide__ladder-wrap {
+	overflow-x: auto;
+	margin: 0 0 0.75rem;
+}
+
+.ldn-ring-guide__ladder {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.95rem;
+}
+
+.ldn-ring-guide__ladder caption {
+	caption-side: top;
+	padding: 0 0 0.4rem;
+	font-size: 0.9rem;
+	color: #4a4a68;
+	text-align: left;
+}
+
+.ldn-ring-guide__ladder th,
+.ldn-ring-guide__ladder td {
+	padding: 0.35rem 0.5rem;
+	border-bottom: 1px solid #e3e1f5;
+	text-align: right;
+}
+
+.ldn-ring-guide__ladder thead th {
+	font-size: 0.8rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #4a4a68;
+}
+
+.ldn-ring-guide__ladder tbody th {
+	font-weight: 600;
+	text-align: left;
+	white-space: nowrap;
+}
+
+.ldn-ring-guide__ladder tbody th a {
+	color: #706cc8;
+	text-decoration: none;
+}
+
+.ldn-ring-guide__ladder tbody th a:hover,
+.ldn-ring-guide__ladder tbody th a:focus-visible {
+	text-decoration: underline;
+}
+
+.ldn-ring-guide__ladder:not(.ldn-ring-guide__compare-table) tr.is-anchor {
+	background: #f4f3fd;
+}
+
+@media (max-width: 400px) {
+	.ldn-ring-guide__ladder {
+		font-size: 0.875rem;
+	}
+
+	.ldn-ring-guide__ladder th,
+	.ldn-ring-guide__ladder td {
+		padding: 0.3rem 0.35rem;
+	}
+}
+
+/* In-body replacement for a hand-built price table.
+ *
+ * Unboxed on purpose. It stands where the reader's own table stood, so it takes
+ * the article's type and spacing instead of announcing itself as a widget. The
+ * only rules are the table's own cell hairlines.
+ */
+.ldn-ring-guide__compare {
+	margin: 0 0 1.25rem;
+}
+
+.ldn-ring-guide__compare p {
+	margin: 0.5rem 0 0;
+}
+
+.ldn-ring-guide__updated {
+	margin: 0.5rem 0 0;
+	font-size: 0.9rem;
+	color: #4a4a68;
 }
 
 /* True-mm shape row (hub): live medians + outline SVGs + US quarter.

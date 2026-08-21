@@ -462,9 +462,8 @@
 	overflow: visible;
 }
 
-/* Matrix table: overflow:auto (both axes) so border-radius clips the purple
-   header without a stroke. Sticky header/shape column still work inside the
-   scrollport; overflow-y:visible would cancel the corner clip. */
+/* Matrix table: overflow:auto + max-height (shared.css) so the carat header
+   stays sticky while scrolling shapes; corner radii on header/footer cells. */
 .ldn-chrome--ringspo-classic .ldn-size-matrix-scroll {
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;

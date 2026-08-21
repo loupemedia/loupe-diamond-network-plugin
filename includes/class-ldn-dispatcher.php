@@ -19,9 +19,10 @@
  * the URL slug (e.g. '1-carat', '1ct') and is reduced to the numeric value via
  * the family's `carat_format`.
  *
- * Scope: standard families (Ringspo/Loupe/DPE). Reverse shape-slug mapping for
- * suffixed families (guru `round-brilliant`, advisors `round-cut`) is a
- * documented follow-up; those sites pass the slug through unchanged for now.
+ * `ldn_shape` arrives as the site's public URL slug (e.g. guru
+ * `round-brilliant`, advisors `round-cut`) and is reduced to the canonical
+ * knowledge-base name (`round`) via `LDN_Config::slug_to_shape()`, the inverse
+ * of `shape_to_url_slug()`. S3 keys and page context use the canonical name.
  *
  * @package LoupeDiamondNetwork
  * @since   0.1.0
@@ -240,11 +241,14 @@ final class LDN_Dispatcher {
         }
         $type_raw = $this->str_or_null($vars, 'ldn_type');
         $carat_raw = $this->str_or_null($vars, 'ldn_carat');
-        $shape = $this->str_or_null($vars, 'ldn_shape');
+        $shape_raw = $this->str_or_null($vars, 'ldn_shape');
 
-        $page_level = $this->page_level_from_vars($type_raw, $carat_raw, $shape);
-        $type = $this->canonical_type($type_raw);
-        $carat = $this->parse_carat($carat_raw);
+        $page_level = $this->page_level_from_vars($type_raw, $carat_raw, $shape_raw);
+        $type = $this->canonical_type($type_raw, $country);
+        $carat = $this->parse_carat($carat_raw, $country);
+        $shape = $shape_raw !== null
+            ? $this->config->slug_to_shape($shape_raw, $this->site_id, $country)
+            : null;
 
         return new LDN_Page_Context($this->site_id, $page_level, $country, $type, $carat, $shape);
     }
@@ -274,11 +278,23 @@ final class LDN_Dispatcher {
      * Map the site's raw type slug to canonical natural / lab-grown.
      *
      * @param string|null $raw
+     * @param string|null $country When set, also match that country's type slugs.
      * @return string|null
      */
-    public function canonical_type($raw) {
+    public function canonical_type($raw, $country = null) {
         if ($raw === null) {
             return null;
+        }
+        if ($country !== null && $country !== ''
+            && method_exists($this->config, 'url_locale_segments')
+        ) {
+            $segments = $this->config->url_locale_segments($this->site_id, $country);
+            if (!empty($segments['type_natural']) && $raw === $segments['type_natural']) {
+                return 'natural';
+            }
+            if (!empty($segments['type_lab']) && $raw === $segments['type_lab']) {
+                return 'lab-grown';
+            }
         }
         $structure = $this->config->get_url_structure($this->site_id);
         if (is_array($structure)) {
@@ -296,12 +312,25 @@ final class LDN_Dispatcher {
     /**
      * Reduce a carat URL slug to its numeric value using `carat_format`.
      *
-     * @param string|null $raw e.g. '1-carat', '1ct'.
+     * @param string|null $raw     e.g. '1-carat', '1ct', '1-karatto'.
+     * @param string|null $country When set, also strip that country's carat suffix.
      * @return string|null e.g. '1'.
      */
-    public function parse_carat($raw) {
+    public function parse_carat($raw, $country = null) {
         if ($raw === null) {
             return null;
+        }
+        if ($country !== null && $country !== ''
+            && method_exists($this->config, 'url_locale_segments')
+        ) {
+            $segments = $this->config->url_locale_segments($this->site_id, $country);
+            if (!empty($segments['carat_suffix'])) {
+                $suffix = '-' . $segments['carat_suffix'];
+                $len = strlen($suffix);
+                if ($len > 1 && substr($raw, -$len) === $suffix) {
+                    return substr($raw, 0, -$len);
+                }
+            }
         }
         $structure = $this->config->get_url_structure($this->site_id);
         $format = is_array($structure) && isset($structure['carat_format']) ? $structure['carat_format'] : null;

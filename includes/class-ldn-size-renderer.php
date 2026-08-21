@@ -668,7 +668,7 @@ final class LDN_Size_Renderer {
                 : __('How We Measure Diamond Sizes — Methodology', 'loupe-diamond-network');
         }
         if ($ctx->page_level === 'size-individual' && $ctx->shape !== null && $ctx->carat !== null) {
-            $shape = ucwords(str_replace('-', ' ', $ctx->shape));
+            $shape = $this->size_shape_label($ctx->shape);
             if ($this->is_full_range_site($ctx->site_id)) {
                 $lmin = $this->dig($summary, array('dimensions_mm', 'length', 'range_min'));
                 $lmax = $this->dig($summary, array('dimensions_mm', 'length', 'range_max'));
@@ -707,6 +707,29 @@ final class LDN_Size_Renderer {
     }
 
     /**
+     * Reader-facing label for a shape on size pages ('cushion' → 'Cushion Cut').
+     *
+     * Four shapes are published under a '-cut' suffix and are named that way on
+     * the page. The S3 folder map is the one place that already records which
+     * ones, so the suffix is derived from it rather than from a second per-shape
+     * map that could drift. Shapes whose S3 slug is not simply their own name
+     * plus '-cut' (e.g. 'cushion elongated' → 'cushion-cut') keep their own
+     * name, so a storage alias never renames the shape on screen.
+     *
+     * @param string|null $shape Canonical shape name.
+     * @return string
+     */
+    public function size_shape_label($shape) {
+        $canonical = str_replace(' ', '-', strtolower(trim((string) $shape)));
+        if ($canonical === '') {
+            return '';
+        }
+        $s3_slug = $this->config->shape_to_s3_slug($shape);
+        $label = $s3_slug === $canonical . '-cut' ? $s3_slug : $canonical;
+        return ucwords(str_replace('-', ' ', $label));
+    }
+
+    /**
      * @param LDN_Page_Context $ctx
      * @param array            $summary
      * @return string
@@ -723,11 +746,10 @@ final class LDN_Size_Renderer {
             );
         }
         if ($ctx->page_level === 'size-shape-hub' && $ctx->shape !== null) {
-            return ucwords(str_replace('-', ' ', $ctx->shape)) . ' Diamond Size Chart';
+            return $this->size_shape_label($ctx->shape) . ' Diamond Size Chart';
         }
         if ($ctx->page_level === 'size-individual' && $ctx->shape !== null && $ctx->carat !== null) {
-            $shape = ucwords(str_replace('-', ' ', $ctx->shape));
-            return $ctx->carat . ' Carat ' . $shape . ' Diamond Size';
+            return $ctx->carat . ' Carat ' . $this->size_shape_label($ctx->shape) . ' Diamond Size';
         }
         if ($ctx->page_level === 'size-comparison' && isset($summary['a'], $summary['b'])) {
             return $this->comparison_headline($summary['a'], $summary['b']);
@@ -925,7 +947,7 @@ final class LDN_Size_Renderer {
                     /* translators: 1: carat weight, 2: shape name */
                     __('Do all %1$s carat %2$s diamonds look the same size?', 'loupe-diamond-network'),
                     $ctx->carat,
-                    strtolower(str_replace('-', ' ', $ctx->shape))
+                    strtolower($this->size_shape_label($ctx->shape))
                 );
             } else {
                 $heading = __('Size distribution', 'loupe-diamond-network');
@@ -1710,7 +1732,7 @@ final class LDN_Size_Renderer {
         if ($svg === '') {
             return '';
         }
-        $shape_label = ucwords(str_replace('-', ' ', $ctx->shape));
+        $shape_label = $this->size_shape_label($ctx->shape);
         $out = '<section class="ldn-section ldn-size-hub-scale" id="ldn-size-scale-explorer"'
             . ' data-shape="' . esc_attr($ctx->shape) . '" data-carat="1">';
         $out .= '<h2>' . esc_html(sprintf(
@@ -1924,7 +1946,7 @@ final class LDN_Size_Renderer {
             $title = esc_html(sprintf(
                 /* translators: %s: diamond shape */
                 __('%s diamond size chart by carat weight', 'loupe-diamond-network'),
-                ucwords(str_replace('-', ' ', $ctx->shape))
+                $this->size_shape_label($ctx->shape)
             ));
         } elseif ($ctx->page_level === 'size-carat-hub' && $ctx->carat !== null) {
             $title = esc_html(sprintf(
@@ -2188,8 +2210,8 @@ final class LDN_Size_Renderer {
     public function spread_section_heading(LDN_Page_Context $ctx, array $summary) {
         $carat = $ctx->carat !== null ? (string) $ctx->carat : (isset($summary['carat_band']) ? (string) $summary['carat_band'] : '');
         $shape = $ctx->shape !== null
-            ? ucwords(str_replace('-', ' ', (string) $ctx->shape))
-            : (isset($summary['shape']) ? ucwords(str_replace('-', ' ', (string) $summary['shape'])) : 'Diamond');
+            ? $this->size_shape_label($ctx->shape)
+            : (isset($summary['shape']) ? $this->size_shape_label((string) $summary['shape']) : 'Diamond');
         if ($carat === '') {
             return __('How much do diamond sizes vary?', 'loupe-diamond-network');
         }
@@ -2497,12 +2519,12 @@ final class LDN_Size_Renderer {
             }
             if ($ctx->shape !== null && $ctx->page_level === 'size-individual') {
                 $trail[] = array(
-                    'name' => ucwords(str_replace('-', ' ', $ctx->shape)),
+                    'name' => $this->size_shape_label($ctx->shape),
                     'url'  => $canonical_url,
                 );
             }
         } elseif ($ctx->shape !== null && $ctx->page_level !== 'size-mega-hub') {
-            $shape_label = ucwords(str_replace('-', ' ', $ctx->shape)) . ' '
+            $shape_label = $this->size_shape_label($ctx->shape) . ' '
                 . __('Size', 'loupe-diamond-network');
             $trail[] = array(
                 'name' => $shape_label,

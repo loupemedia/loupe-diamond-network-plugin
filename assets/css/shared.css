@@ -1204,10 +1204,15 @@ button.ldn-shape-picker__option:focus-visible {
 	color: var(--ldn-primary, #706cc8);
 }
 
-/* Instant click feedback while the sibling page navigates (B). */
+/*
+ * Click feedback while the sibling type loads. The delay means a swap served
+ * from cache finishes before the dim is ever visible, so the common case does
+ * not flicker; pointer-events blocks a second click racing the first.
+ */
 .ldn-nat-lab-toggle--pending {
 	opacity: 0.85;
 	pointer-events: none;
+	transition: opacity 0.15s ease 0.12s;
 }
 
 .ldn-diamond-type-hero-tools {
@@ -2678,12 +2683,22 @@ button.ldn-shape-picker__option:focus-visible {
    Mega-hub matrix table (sticky header + sticky shape column)
    ------------------------------------------------------------------ */
 .ldn-size-matrix-scroll {
+	/* overflow:auto + max-height keeps the purple carat header sticky while the
+	   reader scrolls through shapes. overflow-x alone would still trap sticky
+	   inside this box; a capped height makes vertical scroll happen here. */
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
 	max-width: 100%;
+	max-height: min(70vh, 36rem);
 	border: none;
 	border-radius: 10px;
 	background: #fff;
+}
+
+@media screen and (max-width: 640px) {
+	.ldn-size-matrix-scroll {
+		max-height: min(65vh, 28rem);
+	}
 }
 
 .ldn-size-matrix {
@@ -2709,6 +2724,7 @@ button.ldn-shape-picker__option:focus-visible {
 	color: #fff;
 	font-weight: 700;
 	white-space: nowrap;
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* Corner radii on header/footer cells — belt-and-suspenders when a sticky
@@ -2830,6 +2846,13 @@ button.ldn-shape-picker__option:focus-visible {
 	border-radius: 10px;
 	background: var(--ldn-surface-muted, #f8f7fc);
 	border: 1px solid var(--ldn-border, #e5e7eb);
+}
+
+/* Server-rendered empty, unhidden by size-checker.js once it has a manifest to
+   populate them from. An author `display` beats the UA `[hidden]` rule, so
+   without this a failed enhancement paints a dead dropdown and slider. */
+.ldn-size-scale-controls[hidden] {
+	display: none;
 }
 
 .ldn-size-scale-control label {

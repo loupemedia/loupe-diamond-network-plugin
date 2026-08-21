@@ -3,12 +3,17 @@
  *
  * Also keeps the Natural / Lab-grown toggle's inactive pill pointed at the same
  * carat (`?carat=`) so switching type does not jump to the sibling's most-listed weight.
+ *
+ * Exposes LDN.initTypeCaratLookup() so nat-lab-toggle.js can re-wire the control
+ * after it swaps the page body in place, optionally carrying the reader's carat
+ * across the switch.
  */
-(function () {
+(function (w, d) {
 	'use strict';
 
-	function readManifest() {
-		var node = document.getElementById('ldn-type-carat-lookup-manifest');
+	function readManifest(root) {
+		var node = (root && root.querySelector('#ldn-type-carat-lookup-manifest'))
+			|| d.getElementById('ldn-type-carat-lookup-manifest');
 		if (!node) {
 			return null;
 		}
@@ -28,7 +33,7 @@
 
 	function caratFromLocation() {
 		try {
-			return new URLSearchParams(window.location.search).get('carat') || '';
+			return new URLSearchParams(w.location.search).get('carat') || '';
 		} catch (e) {
 			return '';
 		}
@@ -39,7 +44,7 @@
 			return url;
 		}
 		try {
-			var parsed = new URL(url, window.location.href);
+			var parsed = new URL(url, w.location.href);
 			parsed.searchParams.set('carat', String(carat));
 			return parsed.href;
 		} catch (e) {
@@ -48,7 +53,7 @@
 	}
 
 	function syncToggleCarat(carat) {
-		var pills = document.querySelectorAll(
+		var pills = d.querySelectorAll(
 			'.ldn-nat-lab-toggle__pill:not(.ldn-nat-lab-toggle__pill--active)'
 		);
 		for (var i = 0; i < pills.length; i += 1) {
@@ -81,8 +86,15 @@
 		return -1;
 	}
 
-	function init(root) {
-		var manifest = readManifest();
+	function init(root, options) {
+		// A swap replaces the root node, so this only guards against initAll()
+		// being called twice over the same DOM and double-binding the slider.
+		if (root.getAttribute('data-ldn-lookup-bound') === '1') {
+			return;
+		}
+		root.setAttribute('data-ldn-lookup-bound', '1');
+
+		var manifest = readManifest(root);
 		if (!manifest || !Array.isArray(manifest.tiers) || manifest.tiers.length === 0) {
 			return;
 		}
@@ -121,6 +133,9 @@
 			if (link && tier.url) {
 				link.href = tier.url;
 			}
+			// Published so a page swap can carry the reader's weight to the
+			// sibling type without re-reading the slider's index mapping.
+			root.setAttribute('data-ldn-selected-carat', String(tier.carat));
 			syncToggleCarat(tier.carat);
 		}
 
@@ -128,9 +143,15 @@
 			return;
 		}
 
+		// Precedence: an explicit carry from a page swap, then ?carat= on the
+		// request, then this type's most-listed weight.
+		var carried = (options && options.carat) ? String(options.carat) : '';
 		var defaultIdx = 0;
-		var fromQuery = indexForCarat(manifest.tiers, caratFromLocation());
-		if (fromQuery >= 0) {
+		var fromCarry = indexForCarat(manifest.tiers, carried);
+		var fromQuery = fromCarry >= 0 ? -1 : indexForCarat(manifest.tiers, caratFromLocation());
+		if (fromCarry >= 0) {
+			defaultIdx = fromCarry;
+		} else if (fromQuery >= 0) {
 			defaultIdx = fromQuery;
 		} else if (manifest.default_carat) {
 			var fromManifest = indexForCarat(manifest.tiers, manifest.default_carat);
@@ -146,10 +167,21 @@
 		});
 	}
 
-	document.addEventListener('DOMContentLoaded', function () {
-		var nodes = document.querySelectorAll('[data-ldn-type-carat-lookup]');
+	function initAll(options) {
+		var nodes = d.querySelectorAll('[data-ldn-type-carat-lookup]');
 		for (var i = 0; i < nodes.length; i += 1) {
-			init(nodes[i]);
+			init(nodes[i], options);
 		}
-	});
-})();
+	}
+
+	w.LDN = w.LDN || {};
+	w.LDN.initTypeCaratLookup = initAll;
+
+	if (d.readyState === 'loading') {
+		d.addEventListener('DOMContentLoaded', function () {
+			initAll();
+		});
+	} else {
+		initAll();
+	}
+})(window, document);

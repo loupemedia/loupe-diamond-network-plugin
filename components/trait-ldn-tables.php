@@ -207,7 +207,7 @@ trait LDN_Trait_Tables {
             sprintf(
                 /* translators: %s: diamond shape name */
                 __(
-                    'How the median price of a %s diamond scales across carat weights — a useful way to weigh size against budget. Select a weight to see its full breakdown.',
+                    'How the median price of a %s diamond scales across carat weights - a useful way to weigh size against budget. Select a weight to see its full breakdown.',
                     'loupe-diamond-network'
                 ),
                 strtolower($shape_label)
@@ -825,7 +825,7 @@ trait LDN_Trait_Tables {
                 __(
                     'Each row combines every shape we track at that weight, weighted toward shapes with more '
                     . 'diamonds on the market. Shape and quality move the price a lot. Sample sizes are on the '
-                    . 'right — heavier weights are thinner and more volatile.',
+                    . 'right - heavier weights are thinner and more volatile.',
                     'loupe-diamond-network'
                 )
             );
@@ -988,7 +988,7 @@ trait LDN_Trait_Tables {
         }
         return sprintf(
             /* translators: %s: semicolon-separated list like "1 ct: $3,093; 2 ct: $7,259" */
-            __('Price per carat — %s.', 'loupe-diamond-network'),
+            __('Price per carat - %s.', 'loupe-diamond-network'),
             implode('; ', $parts)
         );
     }
@@ -1019,7 +1019,7 @@ trait LDN_Trait_Tables {
         }
         return sprintf(
             /* translators: %s: comma-separated list like "1 ct: 69.0%, 2 ct: 81.9%" */
-            __('Lab-grown discount vs natural — %s.', 'loupe-diamond-network'),
+            __('Lab-grown discount vs natural - %s.', 'loupe-diamond-network'),
             implode('; ', $parts)
         );
     }

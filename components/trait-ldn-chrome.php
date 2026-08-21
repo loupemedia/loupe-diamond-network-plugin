@@ -118,9 +118,10 @@ trait LDN_Trait_Chrome {
     /**
      * Resolve the band to apply, downgrading when adjacency or footer rules require.
      *
-     * Coloured bands (tint / accent) must be separated by a plain band so green and
-     * purple never sit back-to-back. The last body section must not be purple (tint)
-     * because the theme footer is already purple on Ringspo.
+     * Same-coloured bands must not stack (tint after tint, accent after accent).
+     * Alternating purple (tint) and green (accent) is allowed. The last body
+     * section must not be purple (tint) because the theme footer is already
+     * purple on Ringspo.
      *
      * @param string $declared                  Band from profile, or '' for plain.
      * @param string $previous_effective_band   Band applied to the prior rendered section.
@@ -138,7 +139,7 @@ trait LDN_Trait_Chrome {
             $band = 'plain';
         }
 
-        if ($this->is_colored_section_band($band) && $this->is_colored_section_band($previous_effective_band)) {
+        if ($band === $previous_effective_band && $this->is_colored_section_band($band)) {
             $band = 'plain';
         }
         if ($is_last_on_page && $band === 'tint') {

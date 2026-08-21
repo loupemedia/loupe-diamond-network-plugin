@@ -42,6 +42,20 @@
  *   - `version` is monotonic; the router flushes rewrite rules only when the
  *     applied version changes.
  *
+ * Cache scope — deliberately split, do not "tidy" these into one kind:
+ *
+ *   - The fetched payload and the last-good copy describe the WHOLE network
+ *     (every site, every country), so they are stored network-wide via
+ *     `*_site_transient` / `*_site_option`. One WordPress multisite network
+ *     therefore performs ONE fetch per TTL no matter how many country subsites
+ *     it has. With per-blog storage a 30-country network made 30 fetches per
+ *     TTL, and the platform target of ~17 country-path site families would have
+ *     made ~510. These calls work unchanged on a single install, where WordPress
+ *     falls back to the options table, so there is no `is_multisite()` branch.
+ *   - `APPLIED_VERSION_OPTION` stays PER-BLOG, because rewrite rules are
+ *     per-blog: every subsite has to flush its own, so each needs its own
+ *     record of what it last applied.
+ *
  * @package LoupeDiamondNetwork
  * @since   0.1.0
  */
@@ -54,6 +68,7 @@ final class LDN_Rollout_Reader {
 
     /**
      * Transient holding the most recent FRESH fetch (avoids refetch per request).
+     * Network-scoped: shared by every subsite of a multisite network.
      */
     const TRANSIENT_KEY = 'ldn_rollout_cache';
 
@@ -64,11 +79,13 @@ final class LDN_Rollout_Reader {
 
     /**
      * Durable last-good copy (survives transient expiry / cache flushes).
+     * Network-scoped, like the transient.
      */
     const LAST_GOOD_OPTION = 'ldn_rollout_last_good';
 
     /**
      * Persisted version the router has already applied (for flush decisions).
+     * PER-BLOG: rewrite rules are per-blog, so each subsite tracks its own.
      */
     const APPLIED_VERSION_OPTION = 'ldn_rollout_applied_version';
 
@@ -302,6 +319,9 @@ final class LDN_Rollout_Reader {
      * @return void
      */
     public function invalidate_cache() {
+        delete_site_transient(self::TRANSIENT_KEY);
+        // Also clear the pre-network-scope per-blog key, so "invalidate" on an
+        // upgraded install does not leave a stale copy that outlives it.
         delete_transient(self::TRANSIENT_KEY);
         $this->rollout = null;
     }
@@ -350,6 +370,8 @@ final class LDN_Rollout_Reader {
     /**
      * Version the router last applied (flushed rewrite rules for).
      *
+     * Per-blog on purpose: see the cache-scope note in the file docblock.
+     *
      * @return int|null
      */
     public function applied_version() {
@@ -372,6 +394,10 @@ final class LDN_Rollout_Reader {
 
     /**
      * Record the current version as applied (call after flushing rewrite rules).
+     *
+     * Per-blog on purpose: every subsite flushes its own rewrite rules, so a
+     * network-wide marker would let the first subsite to run suppress the flush
+     * on all the others.
      *
      * @return void
      */
@@ -399,7 +425,7 @@ final class LDN_Rollout_Reader {
             return $this->rollout;
         }
 
-        $cached = get_transient(self::TRANSIENT_KEY);
+        $cached = get_site_transient(self::TRANSIENT_KEY);
         if ($this->is_valid($cached)) {
             $this->rollout = $cached;
             return $this->rollout;
@@ -407,16 +433,28 @@ final class LDN_Rollout_Reader {
 
         $fetched = $this->fetch();
         if ($this->is_valid($fetched)) {
-            set_transient(self::TRANSIENT_KEY, $fetched, self::TRANSIENT_TTL);
-            update_option(self::LAST_GOOD_OPTION, $fetched, false);
+            set_site_transient(self::TRANSIENT_KEY, $fetched, self::TRANSIENT_TTL);
+            update_site_option(self::LAST_GOOD_OPTION, $fetched);
             $this->rollout = $fetched;
             return $this->rollout;
         }
 
-        $last_good = get_option(self::LAST_GOOD_OPTION, null);
+        $last_good = get_site_option(self::LAST_GOOD_OPTION, null);
         if ($this->is_valid($last_good)) {
             $this->log('using last-good rollout (fresh fetch unavailable/invalid)');
             $this->rollout = $last_good;
+            return $this->rollout;
+        }
+
+        // Upgrade path: a pre-network-scope version of this plugin wrote last-good
+        // to the per-blog options table. On multisite that row is invisible to
+        // get_site_option(), so read it once and promote it rather than letting a
+        // subsite go dark while S3 is unreachable during the upgrade window.
+        $legacy = get_option(self::LAST_GOOD_OPTION, null);
+        if ($this->is_valid($legacy)) {
+            $this->log('promoting per-blog last-good rollout to network scope');
+            update_site_option(self::LAST_GOOD_OPTION, $legacy);
+            $this->rollout = $legacy;
             return $this->rollout;
         }
 

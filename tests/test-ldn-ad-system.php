@@ -145,7 +145,6 @@ $sample_manifest = array(
                     'targeting' => array(
                         'sites' => array('ringspo'),
                         'countries' => array('us'),
-                        'page_types' => array('natural'),
                     ),
                     'slots' => array('horizontal_mid_content'),
                     'priority' => 20,
@@ -165,7 +164,6 @@ $sample_manifest = array(
                     'targeting' => array(
                         'sites' => array('ringspo'),
                         'countries' => array('uk'),
-                        'page_types' => array('natural'),
                     ),
                     'slots' => array('horizontal_mid_content'),
                     'priority' => 10,
@@ -202,6 +200,10 @@ check($us_resolved[0]['ad']['advertiser_slug'] === 'blue-nile', 'US gets US-targ
 $uk_resolved = $resolver->resolve_for_layout_slot($uk_ctx, 'horizontal_mid_content');
 check(count($uk_resolved) === 1, 'UK resolves one ad');
 check($uk_resolved[0]['ad']['advertiser_slug'] === 'uk-jeweller', 'UK gets UK-targeted advertiser');
+
+$lab_ctx = new LDN_Page_Context('ringspo', 'shape', 'us', 'lab-grown', '1', 'round');
+$lab_resolved = $resolver->resolve_for_layout_slot($lab_ctx, 'horizontal_mid_content');
+check(count($lab_resolved) === 0, 'natural diamond_type does not serve on lab-grown page');
 
 $GLOBALS['ldn_is_production'] = true;
 $GLOBALS['ldn_track_posts'] = array();

@@ -207,7 +207,7 @@ trait LDN_Trait_Shapes_At_Carat {
             : ucwords(str_replace('-', ' ', (string) $ctx->diamond_type));
         $chart_fallback_title = sprintf(
             /* translators: 1: carat label, 2: diamond type label, 3: country name */
-            __('%1$s Carat %2$s Diamond Prices by Shape — %3$s', 'loupe-diamond-network'),
+            __('%1$s Carat %2$s Diamond Prices by Shape - %3$s', 'loupe-diamond-network'),
             $carat_label !== '' ? $carat_label : '1',
             $type_label,
             $this->country_full_name($ctx)

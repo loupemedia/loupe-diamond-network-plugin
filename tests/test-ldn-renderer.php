@@ -141,6 +141,12 @@ if (!class_exists('LDN_Config')) {
         public function size_price_internal_links($site_id) {
             return false;
         }
+        public function shape_to_url_slug($shape, $site_id, $country = null) {
+            return sanitize_title($shape);
+        }
+        public function slug_to_shape($slug, $site_id) {
+            return str_replace('-', ' ', strtolower((string) $slug));
+        }
     }
 }
 
@@ -216,12 +222,12 @@ check(
 $ringspo_all = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'lab-grown', '1');
 check(
     $renderer->headline($ringspo_all, false)
-        === '1 Carat Lab-Grown Diamond Prices by Shape — United States',
-    'Ringspo all-shapes headline is "{carat} {type} … by Shape — {Country}"'
+        === '1 Carat Lab-Grown Diamond Prices by Shape - United States',
+    'Ringspo all-shapes headline is "{carat} {type} … by Shape - {Country}"'
 );
 check(
     $renderer->headline($ringspo_all, true)
-        === '1 Carat Lab-Grown Diamond Prices by Shape — United States',
+        === '1 Carat Lab-Grown Diamond Prices by Shape - United States',
     'Ringspo all-shapes headline keeps full country regardless of include_country'
 );
 $loupe_all = new LDN_Page_Context('modernjeweler', 'all-shapes', 'us', 'lab-grown', '1');
@@ -1292,6 +1298,44 @@ check(
     'overview_combined_dynamic merges shape_analysis then analysis in one section'
 );
 
+// Test intent: one ranking row must not paint a shape-vs-shape paragraph.
+// Would fail if: copy_dynamic_html still output stale "Round vs Round saves $0".
+$one_shape_bag = $copy_bag;
+$one_shape_bag['ranking'] = array(
+    'shapes' => array(array('shape' => 'Round', 'median_price' => 3338)),
+);
+$one_shape_bag['copy']['sections']['shape_analysis'] = 'The Round is cheapest and the Round is priciest - switching saves $0.';
+$one_shape_html = $renderer->copy_dynamic_html('overview_detail_dynamic', $all_shapes_ctx, $one_shape_bag);
+check(
+    $one_shape_html === '',
+    'overview_detail_dynamic is empty when the ranking has only one shape'
+);
+$one_shape_bag['copy']['sections']['intro_text'] = "Right now a 1 carat natural is about \$3,338.\n\nThey run from \$3,338 all the way up to \$3,338.";
+$one_intro = $renderer->copy_dynamic_html('overview_intro_dynamic', $all_shapes_ctx, $one_shape_bag);
+check(
+    strpos($one_intro, 'about $3,338') !== false && strpos($one_intro, 'all the way up') === false,
+    'overview_intro_dynamic keeps only the first paragraph when the ranking has one shape'
+);
+$flat_intro_bag = $one_shape_bag;
+$flat_intro_bag['copy']['sections']['intro_text'] = 'Right now a 1 carat natural is about $3,338. They run from $3,338 all the way up to $3,338.';
+$flat_intro = $renderer->copy_dynamic_html('overview_intro_dynamic', $all_shapes_ctx, $flat_intro_bag);
+check(
+    strpos($flat_intro, 'about $3,338') !== false && strpos($flat_intro, 'all the way up') === false,
+    'overview_intro_dynamic also drops a flattened They-run-from sentence'
+);
+$two_shape_bag = $copy_bag;
+$two_shape_bag['ranking'] = array(
+    'shapes' => array(
+        array('shape' => 'Round', 'median_price' => 4000),
+        array('shape' => 'Oval', 'median_price' => 3000),
+    ),
+);
+$two_shape_html = $renderer->copy_dynamic_html('overview_detail_dynamic', $all_shapes_ctx, $two_shape_bag);
+check(
+    strpos($two_shape_html, 'Oval leads') !== false,
+    'overview_detail_dynamic still paints shape_analysis when two shapes differ'
+);
+
 // --- 16. diamond-type intro from type_summary fallback (CP3) -----------------
 // Test intent: type_overview_dynamic leads with the most-listed carat tier's own
 // median/sample from type-summary.json — never the type-wide weighted median.
@@ -1622,7 +1666,7 @@ $ppc_bag = array(
 );
 $ppc_html = $renderer->price_per_carat_chart_html($ringspo_type_ctx, $ppc_bag);
 check(
-    strpos($ppc_html, 'Price per carat —') !== false
+    strpos($ppc_html, 'Price per carat -') !== false
         && strpos($ppc_html, '$3,107') !== false
         && strpos($ppc_html, '$7,277') !== false,
     'price_per_carat_chart_html includes no-JS fallback for anchor weights'
@@ -2204,6 +2248,28 @@ check(
     'chart_html delegates Plotly render to LDN.plotChart (WP Rocket Delay JS safe)'
 );
 
+// Test intent: chart_html tags its Plotly bootstrap `data-ldn-chart` so the
+// nat/lab client-side page swap re-runs exactly the chart scripts and leaves
+// every other script in the swapped subtree inert.
+// Would fail if: the bootstrap were emitted as a bare <script> (swapped charts
+// stay blank), or the Plotly CDN loader carried the marker too (a swap would
+// re-execute the ~3 MB library).
+check(
+    strpos($chart_with_fallback, '<script data-ldn-chart="1">') !== false,
+    'chart_html tags its Plotly bootstrap for the client-side page swap'
+);
+$loader_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config());
+$chart_with_loader = $loader_renderer->chart_html(
+    $cp5404_payload,
+    'ldn-price-chart',
+    'Price over time'
+);
+check(
+    strpos($chart_with_loader, 'cdn.plot.ly') !== false
+        && substr_count($chart_with_loader, 'data-ldn-chart') === 1,
+    'the Plotly CDN loader is not tagged for re-execution on swap'
+);
+
 // --- 14b. the fallback must quote the same figure as the visible page --------
 // Test intent: the factual statement resolves its headline price through the same
 // order as intro_html() and hero_stats_html(), so the text a crawler reads can
@@ -2382,18 +2448,25 @@ check(
 
 check($renderer->apply_section_band('', 'tint') === '', 'an empty section stays empty');
 
-// Test intent: coloured bands must not stack, and the last body section must not
-// be purple (theme footer is purple). Runtime coercion handles optional sections
-// that skip; these tests lock the rule itself.
-// Would fail if: tint followed accent were left as declared, or tint were kept on
+// Test intent: same-coloured bands must not stack; purple/green alternation is
+// allowed. The last body section must not be purple (theme footer is purple).
+// Would fail if: tint followed tint were left as declared, or tint were kept on
 // the last section.
 check(
-    $renderer->coerce_section_band('accent', 'tint', false) === 'plain',
-    'accent after tint coerces to plain'
+    $renderer->coerce_section_band('accent', 'tint', false) === 'accent',
+    'accent after tint stays accent (purple then green)'
 );
 check(
-    $renderer->coerce_section_band('tint', 'accent', false) === 'plain',
-    'tint after accent coerces to plain'
+    $renderer->coerce_section_band('tint', 'accent', false) === 'tint',
+    'tint after accent stays tint (green then purple)'
+);
+check(
+    $renderer->coerce_section_band('tint', 'tint', false) === 'plain',
+    'tint after tint coerces to plain'
+);
+check(
+    $renderer->coerce_section_band('accent', 'accent', false) === 'plain',
+    'accent after accent coerces to plain'
 );
 check(
     $renderer->coerce_section_band('tint', 'plain', true) === 'plain',
@@ -2852,6 +2925,18 @@ check(
     strpos($calc_legacy_html, '$4,000') !== false || strpos($calc_legacy_html, '4,000') !== false,
     'legacy grouped manifest resolves default_cell colour_group/clarity_group'
 );
+
+// Test intent: reader prose never keeps an em/en dash. Stale S3 copy still has
+// them; format_prose_html / faq_html are the render backstop.
+// Would fail if: those helpers passed U+2014 through unchanged.
+$prose_html = $renderer->format_prose_html('Colour, clarity — two stones.');
+check(strpos($prose_html, "\u{2014}") === false, 'format_prose_html strips em dashes');
+check(strpos($prose_html, ' - ') !== false, 'format_prose_html replaces em dash with a spaced hyphen');
+$faq_html = $renderer->faq_html(array(
+    array('question' => 'Why — this?', 'answer' => 'Because — that.'),
+));
+check(strpos($faq_html, "\u{2014}") === false, 'faq_html strips em dashes from question and answer');
+check(strpos($faq_html, 'Why - this?') !== false, 'faq_html keeps the question readable after the swap');
 
 // --- Report -----------------------------------------------------------------
 $tests = $GLOBALS['__tests'];

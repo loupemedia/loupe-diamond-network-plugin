@@ -259,6 +259,276 @@ final class LDN_Config {
     }
 
     /**
+     * Localised URL segments per site → country (non-English only).
+     *
+     * Built by `shared/urls_i18n.py` into the config bundle so C4.5 and this
+     * plugin resolve a Japanese path from the same values. English countries
+     * are omitted: their URLs come from `url_structures.yaml`.
+     *
+     * @return array<string, array<string, array>>
+     */
+    public function get_url_locales() {
+        $bundle = $this->get_bundle();
+        return isset($bundle['url_locales']) && is_array($bundle['url_locales'])
+            ? $bundle['url_locales']
+            : array();
+    }
+
+    /**
+     * Localised path segments for one site × country, or empty for English.
+     *
+     * @param string $site_id
+     * @param string $country Country code (e.g. 'jp').
+     * @return array{path_diamond_prices?:string,path_prices?:string,type_natural?:string,type_lab?:string,carat_suffix?:string,locale?:string,shapes?:array<string,string>}
+     */
+    public function url_locale_segments($site_id, $country) {
+        $all = $this->get_url_locales();
+        if (!isset($all[$site_id]) || !is_array($all[$site_id])) {
+            return array();
+        }
+        $per_country = $all[$site_id];
+        $code = strtolower(trim((string) $country));
+        if (isset($per_country[$code]) && is_array($per_country[$code])) {
+            return $per_country[$code];
+        }
+        if (isset($per_country[$country]) && is_array($per_country[$country])) {
+            return $per_country[$country];
+        }
+        return array();
+    }
+
+    /**
+     * Apply C4.5's path-segment substitutions to one url-structure block.
+     *
+     * `diamond-prices` is replaced when present; otherwise a trailing `/prices`
+     * hub is. Type slugs and `carat_format` become the locale's. Shape slugs
+     * stay on the `shapes` map, not in the pattern.
+     *
+     * @param array $structure
+     * @param array $segments From url_locale_segments().
+     * @return array
+     */
+    public function localise_url_structure(array $structure, array $segments) {
+        if ($segments === array()) {
+            return $structure;
+        }
+        $out = $structure;
+        $path_hub = isset($segments['path_diamond_prices'])
+            ? (string) $segments['path_diamond_prices'] : '';
+        $path_prices = isset($segments['path_prices'])
+            ? (string) $segments['path_prices'] : '';
+        foreach ($out as $key => $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+            if ($path_hub !== '' && strpos($value, 'diamond-prices') !== false) {
+                $out[$key] = str_replace('diamond-prices', $path_hub, $value);
+            } elseif (
+                $path_prices !== ''
+                && (strpos($value, '/prices/') !== false || substr($value, -7) === '/prices')
+            ) {
+                $out[$key] = str_replace('prices', $path_prices, $value);
+            }
+        }
+        if (!empty($segments['type_natural'])) {
+            $out['type_natural'] = (string) $segments['type_natural'];
+        }
+        if (!empty($segments['type_lab'])) {
+            $out['type_lab'] = (string) $segments['type_lab'];
+        }
+        if (!empty($segments['carat_suffix'])) {
+            $out['carat_format'] = '{value}-' . $segments['carat_suffix'];
+        }
+        return $out;
+    }
+
+    /**
+     * url-structure for a public path in one country.
+     *
+     * English countries (and unknown ones) get the yaml block unchanged.
+     * Non-English countries get the same substitutions C4.5 applied.
+     *
+     * @param string      $site_id
+     * @param string|null $country
+     * @return array|null
+     */
+    public function url_structure_for($site_id, $country = null) {
+        $structure = $this->get_url_structure($site_id);
+        if (!is_array($structure)) {
+            return $structure;
+        }
+        if ($country === null || $country === '') {
+            return $structure;
+        }
+        $segments = $this->url_locale_segments($site_id, $country);
+        if ($segments === array()) {
+            return $structure;
+        }
+        return $this->localise_url_structure($structure, $segments);
+    }
+
+    /**
+     * Normalise an install mount to `/` or `/nz/`.
+     *
+     * @param string $path
+     * @return string
+     */
+    public static function normalise_mount_path($path) {
+        $trim = trim((string) $path, '/');
+        return $trim === '' ? '/' : '/' . strtolower($trim) . '/';
+    }
+
+    /**
+     * Path this WordPress install is mounted at (`/` or `/nz/`).
+     *
+     * Overridable via `ldn_install_mount_path` so tests and the preview harness
+     * do not have to fake `home_url()`. Not inferred from `is_multisite()`.
+     *
+     * @return string
+     */
+    public function install_mount_path() {
+        if (function_exists('apply_filters')) {
+            $filtered = apply_filters('ldn_install_mount_path', null);
+            if (is_string($filtered) && $filtered !== '') {
+                return self::normalise_mount_path($filtered);
+            }
+        }
+        if (function_exists('home_url')) {
+            $path = parse_url(home_url('/'), PHP_URL_PATH);
+            if (is_string($path) && $path !== '') {
+                return self::normalise_mount_path($path);
+            }
+        }
+        return '/';
+    }
+
+    /**
+     * Country codes declared on a site, lowercased.
+     *
+     * @param string $site_id
+     * @return string[]
+     */
+    public function site_country_codes($site_id) {
+        $site = $this->get_site($site_id);
+        if (!is_array($site) || empty($site['countries']) || !is_array($site['countries'])) {
+            return array();
+        }
+        $codes = array();
+        foreach ($site['countries'] as $entry) {
+            if (is_array($entry) && !empty($entry['code'])) {
+                $codes[] = strtolower((string) $entry['code']);
+            } elseif (is_string($entry) && $entry !== '') {
+                $codes[] = strtolower($entry);
+            }
+        }
+        return $codes;
+    }
+
+    /**
+     * Country this install serves when the mount path *is* a declared country.
+     *
+     * `/` and `/blog/` return null: the former is the network root, the latter
+     * is a subdirectory that is not a country and must not be stripped.
+     *
+     * @param string      $site_id
+     * @param string|null $mount
+     * @return string|null
+     */
+    public function mount_country($site_id, $mount = null) {
+        $mount = $mount !== null
+            ? self::normalise_mount_path($mount)
+            : $this->install_mount_path();
+        $seg = trim($mount, '/');
+        if ($seg === '') {
+            return null;
+        }
+        $known = $this->site_country_codes($site_id);
+        return in_array($seg, $known, true) ? $seg : null;
+    }
+
+    /**
+     * Enabled countries this install should register rules for.
+     *
+     * A country subsite registers only itself. The root (and any mount that is
+     * not a declared country) keeps today's "every enabled country" set, so
+     * Ringspo.com/uk/… keeps working until those countries move off the root.
+     *
+     * @param string      $site_id
+     * @param string[]    $enabled
+     * @param string|null $mount
+     * @return string[]
+     */
+    public function countries_for_install($site_id, array $enabled, $mount = null) {
+        $mine = $this->mount_country($site_id, $mount);
+        if ($mine === null) {
+            return array_values($enabled);
+        }
+        $enabled = array_map('strtolower', $enabled);
+        return in_array($mine, $enabled, true) ? array($mine) : array();
+    }
+
+    /**
+     * Public url-structure pattern → the install-relative pattern WP matches.
+     *
+     * `/{country}/diamond-prices` + country `nz` + mount `/nz/` → `/diamond-prices`.
+     * Same pattern on mount `/` is unchanged. A mount that is not this country
+     * is left unchanged (the caller should not compile that pair).
+     *
+     * @param string      $pattern
+     * @param string      $country
+     * @param string|null $mount
+     * @return string Empty string when the public path *is* the mount (bare `/{country}`).
+     */
+    public function install_relative_pattern($pattern, $country, $mount = null) {
+        $mount = $mount !== null
+            ? self::normalise_mount_path($mount)
+            : $this->install_mount_path();
+        $country = strtolower((string) $country);
+        if ($mount === '/' || trim($mount, '/') !== $country) {
+            return $pattern;
+        }
+        $parts = array_values(array_filter(explode('/', trim((string) $pattern, '/')), 'strlen'));
+        if ($parts === array()) {
+            return $pattern;
+        }
+        $first = strtolower((string) $parts[0]);
+        if ($first === '{country}' || $first === $country) {
+            array_shift($parts);
+        }
+        return $parts === array() ? '' : '/' . implode('/', $parts);
+    }
+
+    /**
+     * Public URL path → the remainder to pass to `home_url()`, so a `/nz/`
+     * install does not emit `/nz/nz/…`.
+     *
+     * @param string      $public_path
+     * @param string|null $mount
+     * @return string
+     */
+    public function path_relative_to_mount($public_path, $mount = null) {
+        $mount = $mount !== null
+            ? self::normalise_mount_path($mount)
+            : $this->install_mount_path();
+        $public = '/' . trim((string) $public_path, '/');
+        if ($public === '/') {
+            return '/';
+        }
+        if ($mount === '/') {
+            return $public;
+        }
+        $prefix = rtrim($mount, '/');
+        if ($public === $prefix) {
+            return '/';
+        }
+        if (strpos($public . '/', $prefix . '/') === 0) {
+            $rest = substr($public, strlen($prefix));
+            return $rest === '' ? '/' : $rest;
+        }
+        return $public;
+    }
+
+    /**
      * Entitlements bundle section.
      *
      * @return array
@@ -640,6 +910,27 @@ final class LDN_Config {
     }
 
     /**
+     * Navigation declaration for a site, or null when it declares none.
+     *
+     * Already flat: `_extends` was resolved and the declaration validated at bundle
+     * build time by `shared/config/navigation.py`, so there is no inheritance to
+     * apply here and an invalid menu never reaches the plugin.
+     *
+     * @param string $site_id
+     * @return array|null
+     */
+    public function get_navigation($site_id) {
+        $bundle = $this->get_bundle();
+        $navigation = isset($bundle['navigation']) && is_array($bundle['navigation'])
+            ? $bundle['navigation']
+            : array();
+        if (isset($navigation[$site_id]) && is_array($navigation[$site_id])) {
+            return $navigation[$site_id];
+        }
+        return null;
+    }
+
+    /**
      * Country config row from the site bundle (locale, currency, table_prefix, …).
      *
      * @param string $site_id
@@ -771,14 +1062,26 @@ final class LDN_Config {
      * This is not the S3 folder slug. Ringspo prices live at `/…/cushion/`;
      * S3 objects live under `cushion-cut/`.
      *
-     * @param string $shape   Canonical shape name (e.g. 'cushion').
-     * @param string $site_id
+     * @param string      $shape   Canonical shape name (e.g. 'cushion').
+     * @param string      $site_id
+     * @param string|null $country When set, prefer that country's localised slug.
      * @return string
      */
-    public function shape_to_url_slug($shape, $site_id) {
+    public function shape_to_url_slug($shape, $site_id, $country = null) {
         $key = strtolower(trim((string) $shape));
         if ($key === '') {
             return '';
+        }
+        if ($country !== null && $country !== '') {
+            $segments = $this->url_locale_segments($site_id, $country);
+            $shapes = isset($segments['shapes']) && is_array($segments['shapes'])
+                ? $segments['shapes']
+                : array();
+            foreach ($shapes as $loc_slug => $canonical) {
+                if (strtolower((string) $canonical) === $key) {
+                    return (string) $loc_slug;
+                }
+            }
         }
         $structures = $this->get_url_structures();
         $variations = isset($structures['shape_variations'][$key])
@@ -797,21 +1100,43 @@ final class LDN_Config {
     /**
      * Resolve a URL shape slug back to the canonical KB shape name for a site.
      *
-     * @param string $slug    URL segment (e.g. 'round', 'oval').
-     * @param string $site_id
+     * @param string      $slug    URL segment (e.g. 'round', 'oval', 'kissenschliff').
+     * @param string      $site_id
+     * @param string|null $country When set, try that country's localised slug map first.
      * @return string|null
      */
-    public function slug_to_shape($slug, $site_id) {
+    public function slug_to_shape($slug, $site_id, $country = null) {
         $slug = strtolower(trim((string) $slug));
         if ($slug === '') {
             return null;
         }
-        $bundle = $this->get_bundle();
-        $mappings = isset($bundle['url_structures']['shape_slug_mappings'])
-            && is_array($bundle['url_structures']['shape_slug_mappings'])
-            ? $bundle['url_structures']['shape_slug_mappings']
+        if ($country !== null && $country !== '') {
+            $segments = $this->url_locale_segments($site_id, $country);
+            $shapes = isset($segments['shapes']) && is_array($segments['shapes'])
+                ? $segments['shapes']
+                : array();
+            foreach ($shapes as $loc_slug => $canonical) {
+                if (strtolower((string) $loc_slug) === $slug) {
+                    return (string) $canonical;
+                }
+            }
+        }
+        $structures = $this->get_url_structures();
+        $variations = isset($structures['shape_variations']) && is_array($structures['shape_variations'])
+            ? $structures['shape_variations']
             : array();
-        foreach ($mappings as $shape => $per_site) {
+        foreach ($variations as $shape => $per_site) {
+            if (!is_array($per_site)) {
+                continue;
+            }
+            if (isset($per_site[$site_id]) && strtolower((string) $per_site[$site_id]) === $slug) {
+                return (string) $shape;
+            }
+        }
+        $legacy = isset($structures['shape_slug_mappings']) && is_array($structures['shape_slug_mappings'])
+            ? $structures['shape_slug_mappings']
+            : array();
+        foreach ($legacy as $shape => $per_site) {
             if (!is_array($per_site)) {
                 continue;
             }
@@ -820,6 +1145,37 @@ final class LDN_Config {
             }
         }
         return str_replace('-', ' ', $slug);
+    }
+
+    /**
+     * Resolve a size-module URL segment back to the canonical KB shape name.
+     *
+     * Size pages are published under the S3 folder slug, not the site's price
+     * shape slug: LDN_Size_Renderer::build_size_shape_hub_url() and friends all
+     * build paths with shape_to_s3_slug(), so Ringspo's cushion hub lives at
+     * `/diamond-size/cushion-cut/` while its price pages use `/…/cushion/`.
+     * The S3 map therefore has to be tried before the per-site slug map.
+     *
+     * Without this the slug falls through slug_to_shape()'s dash-to-space
+     * fallback and yields the non-shape string 'cushion cut', which matches no
+     * key in the size-checker manifest (so the scale explorer silently dies)
+     * and no entry in the test-combos allowlist.
+     *
+     * @param string $slug    URL segment (e.g. 'cushion-cut', 'round').
+     * @param string $site_id
+     * @return string|null Canonical shape name (e.g. 'cushion') or null.
+     */
+    public function size_slug_to_shape($slug, $site_id) {
+        $slug = strtolower(trim((string) $slug));
+        if ($slug === '') {
+            return null;
+        }
+        foreach (self::SHAPE_S3_SLUG_MAP as $shape => $s3_slug) {
+            if ($s3_slug === $slug) {
+                return $shape;
+            }
+        }
+        return $this->slug_to_shape($slug, $site_id);
     }
 
     /**

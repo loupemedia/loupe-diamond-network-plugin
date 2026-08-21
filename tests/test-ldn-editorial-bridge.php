@@ -2,20 +2,20 @@
 /**
  * Editorial ring-guide inject (Ringspo legacy WP posts).
  *
- * Test intent: only configured permalinks (4 ct hub + 4 ct cushion in the
- * test slice) receive the live price/size panel; Ninja Tables are stripped;
- * Price and Size H2 sections are replaced so stale dollar/mm copy is gone
- * while colour/clarity/settings copy remains. Public hrefs use the site URL
- * slug (cushion), not the S3 folder slug (cushion-cut). The hub size card
- * draws a true-scale comparison from the size mega-hub matrix (live medians
- * + outline SVGs + US quarter), not a static infographic. Injected reader
- * copy follows house style: no em/en dashes and no Oxford commas.
+ * Test intent: only configured permalinks receive the live price/size panel.
+ * Ringspo matches its /N-carat-…-diamond-ring/ and /{prefix}-engagement-rings/
+ * patterns. Other sites declare exact paths under `paths` (Diamond Hunt's
+ * /diamond-shapes/ and so on) rather than pretending those posts use the
+ * Ringspo URL shape. UK guides use Colour and a UK price href, and omit the
+ * size card when the site has no size tree. Injected reader copy follows
+ * house style: no em/en dashes and no Oxford commas.
  *
  * Would fail if: match_path treated every /N-carat-*-diamond-ring/ URL as
- * in-scope, splice_panels left the Ninja Table shortcode in place, the
- * colour H2 was swallowed by the price-section regex, price/size hrefs
- * used shape_to_s3_slug, the hub size card omitted the matrix outlines, or
- * a lead/caption used `—` or `, and`.
+ * in-scope, match_shape_page matched any /*-engagement-rings/ URL instead of
+ * only shape_pages.prefixes, a declared path of unknown kind was guessed,
+ * Diamond Hunt hrefs used Ringspo level_3/level_4, UK copy said Color or
+ * Current US prices, include_size: false still rendered a US quarter, or a
+ * lead/caption used `—` or `, and`.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-editorial-bridge.php
  */
@@ -46,6 +46,40 @@ if (!function_exists('user_trailingslashit')) {
 if (!class_exists('LDN_Config')) {
     class LDN_Config {
         public function editorial_ring_guides($site_id) {
+            if ($site_id === 'diamondhuntuk') {
+                return array(
+                    'enabled' => true,
+                    'default_country' => 'uk',
+                    'default_type' => 'natural',
+                    'include_size' => false,
+                    'embed_og_preview' => true,
+                    'price_hub_level' => 'level_3',
+                    'price_shape_level' => 'level_4',
+                    'shape_pages' => array(
+                        'anchor_carat' => '1',
+                        'ladder_carats' => array('0.5', '1', '2'),
+                    ),
+                    'paths' => array(
+                        '/diamond-shapes/' => array(
+                            'kind' => 'hub',
+                            'carat' => '1',
+                            'price_heading' => 'how shape affects price',
+                        ),
+                        '/diamond-carat/' => array(
+                            'kind' => 'shape_hub',
+                            'carat' => '1',
+                            'shape' => 'round',
+                            'price_heading' => 'how carat weight affects price',
+                        ),
+                        '/diamond-cut/' => array(
+                            'kind' => 'shape',
+                            'carat' => '1',
+                            'shape' => 'round',
+                            'price_heading' => 'how cut changes what you pay',
+                        ),
+                    ),
+                );
+            }
             return array(
                 'enabled' => true,
                 'default_country' => 'us',
@@ -54,22 +88,46 @@ if (!class_exists('LDN_Config')) {
                 'carats' => array('4'),
                 'infixes' => array('cushion' => 'cushion-cut'),
                 'embed_og_preview' => true,
+                'replace_price_tables' => true,
+                'shape_pages' => array(
+                    'suffix' => 'engagement-rings',
+                    'anchor_carat' => '1',
+                    'prefixes' => array('cushion' => 'cushion-cut'),
+                    'comparison_reference' => 'round',
+                    'ladder_carats' => array('0.5', '1', '2'),
+                    'size_carats' => array('0.5', '1', '2'),
+                ),
             );
         }
         public function get_url_structure($site_id) {
+            if ($site_id === 'diamondhuntuk') {
+                return array(
+                    'level_1' => '/prices',
+                    'level_2' => '/{type}',
+                    'level_3' => '/{type}/{carat}',
+                    'level_4' => '/{type}/{carat}/{shape}',
+                    'level_5' => '/{type}/{carat}/{shape}/{lab}/{cert}',
+                    'type_natural' => 'mined-diamonds',
+                    'carat_format' => '{value}-carat',
+                );
+            }
             return array(
                 'level_3' => '/{country}/diamond-prices/{type}/{carat}',
                 'level_4' => '/{country}/diamond-prices/{type}/{carat}/{shape}',
                 'type_natural' => 'natural',
                 'carat_format' => '{value}-carat',
                 'size_level_1' => '/diamond-size',
+                'size_level_2' => '/diamond-size/{shape}',
                 'size_level_3' => '/diamond-size/{shape}/{carat}',
             );
+        }
+        public function get_currency($site_id, $country_code) {
+            return strtolower((string) $country_code) === 'uk' ? 'GBP' : 'USD';
         }
         public function shape_to_s3_slug($shape) {
             return strtolower((string) $shape) === 'cushion' ? 'cushion-cut' : strtolower((string) $shape);
         }
-        public function shape_to_url_slug($shape, $site_id) {
+        public function shape_to_url_slug($shape, $site_id, $country = null) {
             return strtolower((string) $shape);
         }
     }
@@ -85,6 +143,17 @@ if (!class_exists('LDN_Assets')) {
 
 if (!class_exists('LDN_Data_Fetcher')) {
     class LDN_Data_Fetcher {
+        /**
+         * Live-shaped medians so the ladder has something to sort and link.
+         * Dates differ across weights exactly as the freshness cadence makes
+         * them differ in production.
+         */
+        private $medians = array(
+            '0.5' => array(630.0, 2453, '2026-08-17'),
+            '1'   => array(2450.0, 8649, '2026-08-18'),
+            '2'   => array(13130.0, 4581, '2026-08-18'),
+        );
+
         public function resolve_artefact_url($artefact_id, $ctx) {
             return $artefact_id === 'og_preview_png'
                 ? 'https://s3.example/us/natural/4-carat/cushion/og-preview.png'
@@ -99,7 +168,7 @@ if (!class_exists('LDN_Data_Fetcher')) {
                 return array(
                     'type' => 'mega_hub',
                     'matrix' => array(
-                        'carats' => array('4'),
+                        'carats' => array('0.5', '1', '2', '4'),
                         'rows' => array(
                             array(
                                 'shape' => 'round',
@@ -116,6 +185,21 @@ if (!class_exists('LDN_Data_Fetcher')) {
                                 'shape' => 'cushion',
                                 'label' => 'Cushion',
                                 'cells' => array(
+                                    '0.5' => array(
+                                        'length_mm' => 4.91,
+                                        'width_mm' => 4.23,
+                                        'outline_svg' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4.91 4.23" class="ldn-test-cushion-0-5"></svg>',
+                                    ),
+                                    '1' => array(
+                                        'length_mm' => 5.83,
+                                        'width_mm' => 5.83,
+                                        'outline_svg' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5.83 5.83" class="ldn-test-cushion-1"></svg>',
+                                    ),
+                                    '2' => array(
+                                        'length_mm' => 7.27,
+                                        'width_mm' => 7.05,
+                                        'outline_svg' => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7.27 7.05" class="ldn-test-cushion-2"></svg>',
+                                    ),
                                     '4' => array(
                                         'length_mm' => 9.25,
                                         'width_mm' => 9.25,
@@ -125,6 +209,39 @@ if (!class_exists('LDN_Data_Fetcher')) {
                             ),
                         ),
                     ),
+                );
+            }
+            if ($artefact_id === 'summary_data_json'
+                && is_object($ctx)
+                && isset($ctx->page_level)
+                && $ctx->page_level === 'all-shapes'
+            ) {
+                // Live shape ranking: cushion below round, so the replacement
+                // asserts a saving the data actually supports.
+                return array(
+                    'analysis_date' => '2026-08-18',
+                    'aggregate' => array('shape_count' => 10),
+                    'ranking' => array(
+                        array('rank' => 2, 'shape' => 'Round', 'median_price' => 3510.0, 'sample_size' => 26369),
+                        array('rank' => 9, 'shape' => 'Cushion cut', 'median_price' => 2450.0, 'sample_size' => 8649),
+                    ),
+                );
+            }
+            if ($artefact_id === 'summary_data_json'
+                && is_object($ctx)
+                && isset($ctx->carat)
+                && isset($this->medians[(string) $ctx->carat])
+            ) {
+                list($median, $sample, $date) = $this->medians[(string) $ctx->carat];
+                // Mirrors production: C5 writes the date to time_series, and
+                // `metadata` holds the JSON-LD/OG payload with no
+                // `analysis_date` of its own. Kept free of any other date so a
+                // regression in the time_series lookup cannot pass on a
+                // fallback.
+                return array(
+                    'metadata' => array('open_graph' => array('og:title' => 'Cushion')),
+                    'distribution' => array('median_price' => $median),
+                    'time_series' => array('num_diamonds' => $sample, 'analysis_date' => $date),
                 );
             }
             return array('metadata' => array('analysis_date' => '2026-08-14'));
@@ -147,10 +264,16 @@ function check($cond, $msg) {
 }
 
 function inject_html($html) {
-    if (!preg_match_all('/<section class="ldn-ring-guide__card\b[^"]*"[^>]*>.*?<\/section>/s', $html, $m)) {
-        return '';
+    $found = array();
+    if (preg_match_all('/<section class="ldn-ring-guide__card\b[^"]*"[^>]*>.*?<\/section>/s', $html, $m)) {
+        $found = $m[0];
     }
-    return implode("\n", $m[0]);
+    // The in-body price-table replacement is injected copy too, so house style
+    // has to cover it even though it is not inside a card section.
+    if (preg_match_all('/<div class="ldn-ring-guide__compare">.*?<\/div>\s*<\/div>/s', $html, $m2)) {
+        $found = array_merge($found, $m2[0]);
+    }
+    return $found === array() ? '' : implode("\n", $found);
 }
 
 function check_house_style($html, $label) {
@@ -220,6 +343,10 @@ check(strpos($hub_out, '/us/diamond-prices/natural/4-carat/') !== false,
 check(strpos($hub_out, '/diamond-size/') !== false, 'hub panel links to the size mega hub');
 check(strpos($hub_out, 'og-preview.png') === false, 'hub does not embed the shape-level OG card');
 check(strpos($hub_out, 'ldn-ring-guide__size-chart') !== false, 'hub size card renders the live comparison figure');
+$_SERVER['REQUEST_URI'] = '/4-carat-diamond-ring/';
+check(in_array('ldn-editorial-ring-guide', $bridge->body_class(array()), true),
+    'ring-guide pages get a body class that scopes full-bleed band CSS');
+unset($_SERVER['REQUEST_URI']);
 check(strpos($hub_out, 'ldn-ring-guide__size-chart-kicker') !== false, 'hub size chart has an actual-size kicker');
 check(strpos($hub_out, 'ldn-ring-guide__size-chart-shapes') !== false, 'hub size chart puts shapes in a two-row grid beside the quarter');
 check(strpos($hub_out, 'data-shape="round"') !== false, 'hub size items carry a shape hook for stroke CSS');
@@ -230,7 +357,190 @@ check(strpos($hub_out, '/diamond-size/cushion/4-carat/') !== false, 'hub size ch
 check(strpos($out, 'ldn-ring-guide__size-chart') === false, 'shape guide does not get the all-shapes size chart');
 check_house_style($hub_out, 'hub');
 
+// Carat-free shape guides (/{shape}-engagement-rings/).
+$shape_hub = LDN_Editorial_Bridge::match_path('/cushion-cut-engagement-rings/', $guides);
+check(is_array($shape_hub)
+    && $shape_hub['kind'] === 'shape_hub'
+    && $shape_hub['shape'] === 'cushion'
+    && $shape_hub['carat'] === '1',
+    'cushion shape guide matches as a shape hub anchored at the configured carat');
+check(LDN_Editorial_Bridge::match_path('/oval-engagement-rings/', $guides) === null,
+    'a shape guide whose prefix is not in shape_pages.prefixes is left alone');
+check(LDN_Editorial_Bridge::match_path('/engagement-rings/', $guides) === null,
+    'the bare engagement-rings path is not a shape guide');
+check(LDN_Editorial_Bridge::match_path('/cushion-cut-engagement-ring/', $guides) === null,
+    'a near-miss suffix does not match');
+
+$shape_html = file_get_contents(__DIR__ . '/fixtures/ring-guide-cushion-shape.html');
+check(is_string($shape_html), 'shape guide fixture loads');
+$shape_out = $bridge->transform($shape_html, '/cushion-cut-engagement-rings/');
+
+check(strpos($shape_out, 'ninja_tables') === false, 'shape guide strips the price table shortcode');
+check(strpos($shape_out, 'ldn-ring-guide__ladder') !== false, 'shape guide gets a price ladder');
+check(strpos($shape_out, '$2,450') !== false, 'ladder shows the live median at the anchor carat');
+check(strpos($shape_out, '$13,130') !== false, 'ladder shows the live median at the top carat');
+check(strpos($shape_out, '8,649') !== false, 'ladder shows the sample size behind each median');
+check(strpos($shape_out, '/us/diamond-prices/natural/2-carat/cushion/') !== false,
+    'each ladder row links to its own carat, not the anchor carat');
+check(strpos($shape_out, '/us/diamond-prices/natural/0.5-carat/cushion/') !== false,
+    'sub-carat ladder rows keep their decimal in the URL');
+check(strpos($shape_out, 'Color, clarity and cut quality') !== false,
+    'the price lead uses American spelling on US source strings');
+check(strpos($shape_out, 'Colour, clarity and cut quality') === false,
+    'the price lead does not use Commonwealth spelling in source copy');
+check(strpos($shape_out, 'drawn at true scale next to a US quarter for reference') !== false,
+    'the size caption is plain language, not size-tool jargon');
+check(strpos($shape_out, 'Every outline shares one millimeter scale') === false,
+    'the size caption does not reuse internal size-tool wording');
+check(strpos($shape_out, 'ldn-ring-guide__compare-table') !== false, 'comparison table is rendered');
+check(!preg_match('/ldn-ring-guide__compare-table[\s\S]*?<tr class="is-anchor"/', $shape_out),
+    'the comparison table does not highlight a row');
+check(preg_match('/ldn-ring-guide__ladder-wrap[\s\S]*?<tr class="is-anchor"/', $shape_out),
+    'the carat ladder still marks the anchor weight row');
+check(strpos($shape_out, 'og-preview.png') !== false, 'shape guide embeds the anchor-carat OG preview');
+
+check(strpos($shape_out, 'ldn-ring-guide__size-chart') !== false, 'shape guide gets a true-scale size row');
+check(strpos($shape_out, 'ldn-test-cushion-2') !== false,
+    'size row draws each carat from the mega-hub matrix, not the empty per-carat cells');
+check(strpos($shape_out, '7.27 × 7.05 mm') !== false, 'size row shows live matrix millimetres');
+check(strpos($shape_out, '/diamond-size/cushion/0.5-carat/') !== false,
+    'size row items link to their own per-carat size page');
+check(strpos($shape_out, 'us-quarter.png') !== false, 'size row keeps the US quarter reference');
+check(strpos($shape_out, 'ldn-test-round') === false, 'shape guide size row shows only its own shape');
+check(strpos($shape_out, '/diamond-size/cushion/') !== false, 'shape guide CTA links to the cushion size hub');
+check(strpos($shape_out, '/diamond-size/cushion-cut/') === false,
+    'shape guide hrefs use the public URL slug, not the S3 folder');
+
+// The post has no price/size H2, so the cards lead the body.
+check(strpos($shape_out, 'ldn-ring-guide__card--price') < strpos($shape_out, 'What is a cushion cut diamond?'),
+    'cards are prepended above the editorial when no price H2 exists');
+check(strpos($shape_out, 'Crushed ice') !== false, 'shape guide keeps the shape-specific editorial');
+check(strpos($shape_out, 'Table %') !== false, 'shape guide keeps the recommended specs');
+
+// The hand-built Gutenberg price table is replaced by live data.
+check(strpos($shape_out, '4,109') === false, 'the stale single-retailer price is gone');
+check(strpos($shape_out, '6,610') === false, 'the stale round comparison price is gone');
+check(strpos($shape_out, 'ldn-ring-guide__compare') !== false, 'a live comparison replaces the stale table');
+check(strpos($shape_out, '$2,450') !== false, 'comparison shows the live cushion median');
+check(strpos($shape_out, '$3,510') !== false, 'comparison shows the live reference-shape median');
+check(strpos($shape_out, 'costs about 30% less than Round') !== false,
+    'the saving is computed from live medians, not the stale 38% claim');
+check(strpos($shape_out, '9 of 10 shapes') !== false, 'comparison states the live rank at this weight');
+
+// The proportion tables in the same post share the markup but not the subject.
+check(strpos($shape_out, '55% &#8211; 68%') !== false, 'the depth percentage table survives');
+check(strpos($shape_out, '54% &#8211; 64%') !== false, 'the table percentage table survives');
+check(substr_count($shape_out, 'wp-block-table') === 2, 'only the pricing table was taken');
+
+// The sentence that quoted the removed table's percentage goes with it.
+check(strpos($shape_out, 'save yourself a huge 38%') === false,
+    'the stale saving claim below the table is dropped');
+check(strpos($shape_out, 'Here&#8217;s how they stack-up:') !== false,
+    'the lead-in to the table is kept, it still introduces the live one');
+
+// Real wording from the other nine guides: a caveat sharing the paragraph with
+// a stale figure must survive on its own.
+$emerald_tail = LDN_Editorial_Bridge::replace_price_tables(
+    '<figure class="wp-block-table"><table><tbody><tr><td>SHAPE</td><td>PRICE (US$)</td></tr>'
+    . '<tr><td>Round</td><td>6,610</td></tr></tbody></table></figure>'
+    . '<p>There&#8217;s a massive 37% saving to be had by choosing a different shape to the most '
+    . 'popular shape. The actual saving that you could make will depend on the carat, cut and '
+    . 'clarity of the stone that you&#8217;re looking at.</p>',
+    '<div class="ldn-ring-guide__compare">LIVE</div>'
+);
+check(strpos($emerald_tail, '37% saving') === false, 'the stale percentage sentence is dropped');
+check(strpos($emerald_tail, 'The actual saving that you could make will depend') !== false,
+    'the caveat sentence sharing that paragraph survives');
+check(strpos($emerald_tail, 'LIVE') !== false, 'the live block still lands');
+
+// A closing paragraph with no percentage is left alone: on the radiant guide it
+// is an affiliate call to action, not a stale claim.
+$radiant_tail = LDN_Editorial_Bridge::replace_price_tables(
+    '<figure class="wp-block-table"><table><tbody><tr><td>SHAPE</td><td>PRICE (US$)</td></tr>'
+    . '<tr><td>Round</td><td>6,610</td></tr></tbody></table></figure>'
+    . '<p>Click here to check today&#8217;s prices.</p>',
+    '<div class="ldn-ring-guide__compare">LIVE</div>'
+);
+check(strpos($radiant_tail, 'Click here to check') !== false,
+    'a closing paragraph with no percentage is untouched');
+
+// Freshness: the date is published, from the field production actually uses.
+check(strpos(strip_tags($shape_out), 'Prices updated between 17 August 2026 and 18 August 2026') !== false,
+    'the ladder spans the oldest and newest row dates');
+check(strpos($shape_out, '<time datetime="2026-08-18">18 August 2026</time>') !== false,
+    'dates are machine readable and reader formatted');
+check(strpos($shape_out, 'as of 18 August 2026') !== false,
+    'the chart caption is dated from time_series.analysis_date');
+check(strpos($shape_out, 'Open the live chart and color/clarity grid') === false,
+    'the undated caption fallback is not used when the artefact carries a date');
+check_house_style($shape_out, 'shape guide');
+
+check(strpos($hub_out, 'ldn-ring-guide__ladder') === false, 'the carat hub does not get a shape ladder');
+check(strpos($out, 'ldn-ring-guide__ladder') === false, 'the 4 ct cushion page does not get a shape ladder');
+
+// A shape guide that does name its price/size sections has them replaced.
+$headed = $bridge->transform(
+    '<h2>Cushion cut diamond price</h2><p>Stale $4,109 line.</p>'
+    . '<h2>Cushion cut diamond size</h2><p>Around 5.50mm x 5.50mm.</p>'
+    . '<h2>Cushion cut diamond color</h2><p>Go to G colour as a minimum.</p>',
+    '/cushion-cut-engagement-rings/'
+);
+check(strpos($headed, '4,109') === false, 'a carat-free price H2 section is replaced');
+check(strpos($headed, '5.50mm') === false, 'a carat-free size H2 section is replaced');
+check(strpos($headed, 'Go to G colour') !== false, 'the colour H2 is not swallowed by the price section');
+
 $passthrough = $bridge->transform($cushion_html, '/3-carat-cushion-cut-diamond-ring/');
 check($passthrough === $cushion_html, 'out-of-slice paths are left unchanged');
+$shape_passthrough = $bridge->transform($shape_html, '/oval-engagement-rings/');
+check($shape_passthrough === $shape_html, 'unconfigured shape guides are left unchanged');
+
+$dh_guides = (new LDN_Config())->editorial_ring_guides('diamondhuntuk');
+$dh_shapes = LDN_Editorial_Bridge::match_path('/diamond-shapes/', $dh_guides);
+check(is_array($dh_shapes) && $dh_shapes['kind'] === 'hub' && $dh_shapes['carat'] === '1',
+    'diamondhunt /diamond-shapes/ matches as a 1 ct hub');
+$dh_carat = LDN_Editorial_Bridge::match_path('/diamond-carat/', $dh_guides);
+check(is_array($dh_carat) && $dh_carat['kind'] === 'shape_hub' && $dh_carat['shape'] === 'round',
+    'diamondhunt /diamond-carat/ matches as a round shape hub');
+$dh_cut = LDN_Editorial_Bridge::match_path('/diamond-cut/', $dh_guides);
+check(is_array($dh_cut) && $dh_cut['kind'] === 'shape' && $dh_cut['shape'] === 'round',
+    'diamondhunt /diamond-cut/ matches as a 1 ct round shape guide');
+check(LDN_Editorial_Bridge::match_path('/diamond-colour/', $dh_guides) === null,
+    'an undeclared diamondhunt education URL is left alone');
+check(LDN_Editorial_Bridge::match_path('/4-carat-diamond-ring/', $dh_guides) === null,
+    'Ringspo ring-guide URLs do not match a paths-only site');
+
+$dh = new LDN_Editorial_Bridge('diamondhuntuk', new LDN_Config(), new LDN_Data_Fetcher());
+$dh_cut_out = $dh->transform(
+    '<h2>How cut changes what you pay</h2><p>Placeholder until live UK prices land.</p>'
+    . '<h2>How to choose a cut grade</h2><p>Keep cut first.</p>',
+    '/diamond-cut/'
+);
+check(strpos($dh_cut_out, 'Placeholder until live UK prices land') === false,
+    'the declared price H2 on /diamond-cut/ is replaced');
+check(strpos($dh_cut_out, 'Keep cut first.') !== false,
+    'the next H2 on /diamond-cut/ is not swallowed');
+check(strpos($dh_cut_out, 'Current UK prices') !== false, 'diamondhunt inject says UK not US');
+check(strpos($dh_cut_out, 'Current US prices') === false, 'diamondhunt inject does not keep the US heading');
+check(strpos($dh_cut_out, 'Colour, clarity and cut quality') !== false,
+    'diamondhunt inject uses British spelling');
+check(strpos($dh_cut_out, 'Color, clarity and cut quality') === false,
+    'diamondhunt inject does not use American spelling');
+check(strpos($dh_cut_out, '/mined-diamonds/1-carat/round/') !== false,
+    'diamondhunt shape href uses the UK URL structure, not Ringspo levels');
+check(strpos($dh_cut_out, '/{lab}/') === false, 'leftover cert tokens are not left in the href');
+check(strpos($dh_cut_out, 'ldn-ring-guide__size-chart') === false,
+    'diamondhunt omits the size card when include_size is false');
+check(strpos($dh_cut_out, 'us-quarter.png') === false,
+    'diamondhunt does not render a US quarter');
+
+$dh_carat_out = $dh->transform(
+    '<h2>How carat weight affects price</h2><p>Stale Blue Nile line.</p>',
+    '/diamond-carat/'
+);
+check(strpos($dh_carat_out, 'ldn-ring-guide__ladder') !== false,
+    'diamondhunt /diamond-carat/ gets the live carat ladder');
+check(strpos($dh_carat_out, '£2,450') !== false, 'diamondhunt ladder formats GBP');
+check(strpos($dh_carat_out, '/mined-diamonds/2-carat/round/') !== false,
+    'diamondhunt ladder rows use the UK shape URL at each carat');
 
 fwrite(STDOUT, "OK $checks checks\n");

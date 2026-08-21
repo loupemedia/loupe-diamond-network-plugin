@@ -152,9 +152,18 @@ if (!class_exists('LDN_Config')) {
             );
         }
         public function shape_to_s3_slug($shape) {
-            $map = array('emerald' => 'emerald-cut', 'asscher' => 'asscher-cut', 'princess' => 'princess-cut');
+            $map = array(
+                'emerald' => 'emerald-cut',
+                'asscher' => 'asscher-cut',
+                'princess' => 'princess-cut',
+                'cushion' => 'cushion-cut',
+                'cushion elongated' => 'cushion-cut',
+            );
             $key = strtolower(trim((string) $shape));
             return $map[$key] ?? str_replace(' ', '-', $key);
+        }
+        public function shape_to_url_slug($shape, $site_id, $country = null) {
+            return sanitize_title($shape);
         }
         public function slug_to_shape($slug, $site_id) {
             return str_replace('-', ' ', strtolower((string) $slug));
@@ -457,6 +466,43 @@ check(strpos($shape_table, 'ldn-size-hub-table--ladder') !== false, 'shape hub t
 check(strpos($shape_table, 'ldn-size-matrix-scroll') !== false, 'shape hub table wraps in matrix scroll');
 check(strpos($shape_table, 'ldn-size-matrix__outline') !== false, 'shape hub table uses matrix outline class');
 check(strpos($shape_table, '>1 ct</a>') !== false || strpos($shape_table, '>1 ct<') !== false, 'shape hub table lists carat weights');
+
+// Test intent: a shape published under a '-cut' S3 folder is named with the
+// suffix on the page ('cushion' → 'Cushion Cut'), while the page context still
+// carries the canonical shape the manifest and S3 resolver are keyed by.
+// Would fail if: labels read $ctx->shape directly, so correcting the slug
+// resolution silently retitled four hubs to "Cushion Diamond Size Chart".
+check($renderer->size_shape_label('cushion') === 'Cushion Cut', 'cushion is labelled Cushion Cut');
+check($renderer->size_shape_label('asscher') === 'Asscher Cut', 'asscher is labelled Asscher Cut');
+check($renderer->size_shape_label('round') === 'Round', 'round keeps its own name');
+check($renderer->size_shape_label('cushion elongated') === 'Cushion Elongated',
+    'a shape sharing another shape\'s S3 folder keeps its own name');
+check($renderer->size_shape_label(null) === '', 'a missing shape has no label');
+
+$ctx_cushion_hub = new LDN_Page_Context('ringspo', 'size-shape-hub', 'us', null, null, 'cushion', 'size');
+check(
+    $renderer->headline($ctx_cushion_hub, $hub_summary) === 'Cushion Cut Diamond Size Chart',
+    'cushion shape hub H1 keeps the Cut suffix'
+);
+check(
+    strpos($renderer->hub_table_html($ctx_cushion_hub, $hub_summary),
+        'Cushion Cut diamond size chart by carat weight') !== false,
+    'cushion hub table heading keeps the Cut suffix'
+);
+$ctx_cushion_one = new LDN_Page_Context('ringspo', 'size-individual', 'us', null, '1', 'cushion', 'size');
+check(
+    $renderer->headline($ctx_cushion_one, array()) === '1 Carat Cushion Cut Diamond Size',
+    'cushion individual H1 keeps the Cut suffix'
+);
+$cushion_crumbs = $renderer->breadcrumb_trail($ctx_cushion_one);
+$cushion_crumb_names = array();
+foreach ($cushion_crumbs as $crumb) {
+    $cushion_crumb_names[] = isset($crumb['name']) ? (string) $crumb['name'] : '';
+}
+check(
+    in_array('Cushion Cut Size', $cushion_crumb_names, true),
+    'cushion breadcrumb keeps the Cut suffix (got: ' . implode(' / ', $cushion_crumb_names) . ')'
+);
 
 $shape_hub_summary = array(
     'type' => 'shape_hub',

@@ -109,7 +109,7 @@ $schema = new LDN_Schema();
 
 // === Rule 1: market_data → Dataset, no Article =============================
 $profile_md = array('schema_type' => 'market_data', 'schema_features' => array('faq'),
-    'schema_dataset_name_suffix' => '— Local Market Pricing');
+    'schema_dataset_name_suffix' => ' - Local Market Pricing');
 $g = $schema->build_graph($ctx, $summary_nested, $profile_md, $site, 'USD', $canonical, $breadcrumb, $faq);
 $dataset = node_of($g, 'Dataset');
 check($dataset !== null, 'market_data must emit a Dataset node');
@@ -186,8 +186,8 @@ check(
 // Would fail if: schema headline still emitted "1 Carat Lab-Grown Diamond Prices (US)".
 check(
     $schema->headline($all_ctx, $site)
-        === '1 Carat Lab-Grown Diamond Prices by Shape — United States',
-    'Ringspo all-shapes schema headline is "{carat} {type} … by Shape — {Country}"'
+        === '1 Carat Lab-Grown Diamond Prices by Shape - United States',
+    'Ringspo all-shapes schema headline is "{carat} {type} … by Shape - {Country}"'
 );
 
 // Test intent: all-shapes keywords differentiate from type (no bare type prices)
@@ -232,7 +232,7 @@ check(isset($dataset['url']) && $dataset['url'] === $canonical, 'Dataset.url mus
 check(isset($dataset['publisher']['@id']), 'Dataset.publisher must reference the Organization @id');
 check(isset($dataset['isPartOf']['@id']) && strpos($dataset['isPartOf']['@id'], '#website') !== false,
     'Dataset.isPartOf must reference the site WebSite @id');
-check(strpos((string) $dataset['name'], '— Local Market Pricing') !== false,
+check(strpos((string) $dataset['name'], ' - Local Market Pricing') !== false,
     'Dataset.name must include the profile suffix');
 
 // price PropertyValue carries ISO unitText

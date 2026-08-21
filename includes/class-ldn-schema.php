@@ -590,7 +590,7 @@ final class LDN_Schema {
             );
         }
         $desc = implode(' ', $parts)
-            . '. Daily median prices by carat — compare natural vs lab-grown and drill into any weight';
+            . '. Daily median prices by carat - compare natural vs lab-grown and drill into any weight';
         $date = $this->dataset_date($overview);
         if ($date !== '') {
             if (is_string($display_date) && $display_date !== '') {
@@ -823,7 +823,7 @@ final class LDN_Schema {
         }
         if ($ctx->site_id === 'ringspo' && $ctx->page_level === 'all-shapes') {
             return sprintf(
-                '%s Diamond Prices by Shape — %s',
+                '%s Diamond Prices by Shape - %s',
                 $subject,
                 $this->country_full_name($ctx, $site)
             );

@@ -1120,8 +1120,21 @@ trait LDN_Trait_Content {
      * @param string $text
      * @return string Safe HTML paragraphs.
      */
+    /**
+     * Replace em/en dashes with a spaced hyphen. Mirrors
+     * shared.content.anti_ai_copy.strip_em_en_dashes so stale S3 copy cannot
+     * paint a tell the pipeline backstop already forbids.
+     *
+     * @param string $text
+     * @return string
+     */
+    public function strip_em_en_dashes($text) {
+        $text = str_replace(array("\u{2014}", "\u{2013}"), ' - ', (string) $text);
+        return preg_replace('/[^\S\n]{2,}/', ' ', $text);
+    }
+
     public function format_prose_html($text) {
-        $text = trim((string) $text);
+        $text = trim($this->strip_em_en_dashes((string) $text));
         if ($text === '') {
             return '';
         }
@@ -1167,7 +1180,9 @@ trait LDN_Trait_Content {
             if (!is_scalar($q) || !is_scalar($a)) {
                 continue;
             }
-            $items .= '<dt>' . esc_html((string) $q) . '</dt><dd>' . wp_kses_post(wpautop((string) $a)) . '</dd>';
+            $q = $this->strip_em_en_dashes((string) $q);
+            $a = $this->strip_em_en_dashes((string) $a);
+            $items .= '<dt>' . esc_html($q) . '</dt><dd>' . wp_kses_post(wpautop($a)) . '</dd>';
         }
         if ($items === '') {
             return '';
@@ -1221,11 +1236,21 @@ trait LDN_Trait_Content {
         $sections = $this->copy_sections(is_array($bag['copy']) ? $bag['copy'] : array());
         $html = '';
         $paragraphs = '';
+        $skip_shape_analysis = $this->ranking_unique_shape_count($bag) === 1;
         foreach ($keys as $key) {
+            if ($skip_shape_analysis && $key === 'shape_analysis') {
+                continue;
+            }
             if (!isset($sections[$key]) || !is_scalar($sections[$key]) || (string) $sections[$key] === '') {
                 continue;
             }
-            $paragraphs .= $this->format_prose_html((string) $sections[$key]);
+            $text = (string) $sections[$key];
+            if ($skip_shape_analysis && $key === 'intro_text') {
+                $parts = preg_split('/\n\s*\n/', trim($text), 2);
+                $text = is_array($parts) && isset($parts[0]) ? $parts[0] : $text;
+                $text = preg_replace('/\s+They run from\b.*$/s', '', $text);
+            }
+            $paragraphs .= $this->format_prose_html($text);
         }
         if ($paragraphs === '') {
             return '';
@@ -1245,7 +1270,9 @@ trait LDN_Trait_Content {
      * @return string
      */
     public function build_price_page_url(LDN_Page_Context $ctx, $page_level, array $parts = array()) {
-        $structure = $this->config->get_url_structure($ctx->site_id);
+        $structure = method_exists($this->config, 'url_structure_for')
+            ? $this->config->url_structure_for($ctx->site_id, $ctx->country_code)
+            : $this->config->get_url_structure($ctx->site_id);
         if (!is_array($structure)) {
             return '';
         }
@@ -1270,9 +1297,9 @@ trait LDN_Trait_Content {
 
         $replacements = array(
             '{country}' => strtolower($ctx->country_code),
-            '{type}'    => $this->type_url_slug($ctx->site_id, $type),
-            '{carat}'   => $this->format_carat_slug($ctx->site_id, $carat),
-            '{shape}'   => sanitize_title($shape),
+            '{type}'    => $this->type_url_slug($ctx->site_id, $type, $ctx->country_code),
+            '{carat}'   => $this->format_carat_slug($ctx->site_id, $carat, $ctx->country_code),
+            '{shape}'   => $this->config->shape_to_url_slug($shape, $ctx->site_id, $ctx->country_code),
         );
 
         $path = $pattern;
@@ -1283,7 +1310,40 @@ trait LDN_Trait_Content {
             $path = str_replace($placeholder, $value, $path);
         }
 
+        if (method_exists($this->config, 'path_relative_to_mount')) {
+            $path = $this->config->path_relative_to_mount($path);
+        }
         return home_url(user_trailingslashit(ltrim($path, '/')));
+    }
+
+    /**
+     * Distinct shape names in the all-shapes ranking payload, or 0 when unknown.
+     *
+     * Used to suppress a stale shape_analysis paragraph that compares a shape
+     * to itself. 0 means "we do not know", so copy still paints.
+     *
+     * @param array $bag
+     * @return int
+     */
+    private function ranking_unique_shape_count(array $bag) {
+        $ranking = isset($bag['ranking']) && is_array($bag['ranking']) ? $bag['ranking'] : array();
+        $rows = array();
+        if (isset($ranking['shapes']) && is_array($ranking['shapes'])) {
+            $rows = $ranking['shapes'];
+        } elseif (isset($ranking[0]) && is_array($ranking[0])) {
+            $rows = $ranking;
+        }
+        $names = array();
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $name = strtolower(trim((string) ($row['shape'] ?? '')));
+            if ($name !== '') {
+                $names[$name] = true;
+            }
+        }
+        return count($names);
     }
 
     /**

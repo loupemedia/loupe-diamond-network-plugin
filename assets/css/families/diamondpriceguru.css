@@ -1,27 +1,130 @@
 /**
- * Diamond Price Guru — dark page shell (template_folder: diamondpriceguru).
+ * Diamond Price Guru — printed poster shell (template_folder: diamondpriceguru).
  *
- * Bleeds the navy background to the viewport edges inside the WP content column.
- * Outer margins (header, sidebar, theme canvas) still need WP theme tweaks if
- * you want those areas dark too.
+ * Yellow is the brand, cream is the paper, ink is the type. The rubber-hose
+ * guru sits in the H1 masthead. Colours come from brand_tokens; this file
+ * only skins surfaces the shared stylesheet cannot express (bleed, tables,
+ * the lockup). Windsor is the intended display face; Fraunces is the
+ * licensed Google Fonts stand-in until Windsor is available.
  */
 
 .ldn-page-shell {
 	width: 100vw;
 	margin-left: calc(50% - 50vw);
 	margin-right: calc(50% - 50vw);
+	background-color: var(--ldn-background, #fff8e8);
 }
 
 .ldn-price-page {
-	--ldn-table-border: #2a3548;
-	--ldn-table-header-bg: #1a2438;
-	--ldn-table-row-alt: #151e30;
+	--ldn-table-border: #0a0a0a;
+	--ldn-table-header-bg: var(--ldn-primary, #ffc52f);
+	--ldn-table-row-alt: #f3e6c4;
+	--guru-red: var(--ldn-accent, #ef5544);
+	--guru-blue: var(--ldn-secondary, #59a9ee);
 }
 
+.ldn-price-page > h1.ldn-page-title,
+.ldn-chrome--minimal > h1.ldn-page-title {
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+	flex-wrap: wrap;
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+	margin-bottom: 1.5rem;
+	padding: 1.15rem calc(50vw - 50% + var(--ldn-padding, 1.25rem));
+	background: var(--ldn-primary, #ffc52f);
+	color: var(--ldn-text, #0a0a0a);
+	border-bottom: 4px solid var(--ldn-text, #0a0a0a);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+}
+
+.ldn-price-page > h1.ldn-page-title::before {
+	content: "";
+	flex: 0 0 4.5rem;
+	width: 4.5rem;
+	height: 4.5rem;
+	min-width: 4.5rem;
+	background: url("../../img/dpg-guru.jpg") center / contain no-repeat;
+}
+
+.ldn-price-page h2 {
+	font-family: var(--ldn-font-title, Georgia, serif);
+	font-weight: 700;
+	letter-spacing: -0.015em;
+	color: var(--ldn-text, #0a0a0a);
+}
+
+/* Stats sit on the paper. No tinted inset and no left accent stripe
+   (outlined / striped colour box is an AI layout tell). */
 .ldn-price-page .ldn-stats {
-	background: rgba(255, 255, 255, 0.06);
+	display: block;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	border-radius: 0;
+}
+
+.ldn-price-page .ldn-stats-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 0.75rem 1.5rem;
+	margin: 0 0 0.75rem;
+}
+
+.ldn-price-page .ldn-stats-row:last-child {
+	margin-bottom: 0;
+}
+
+.ldn-price-page .ldn-stat-label,
+.ldn-price-page .ldn-stat-value {
+	display: block;
+}
+
+.ldn-price-page .ldn-stat-label {
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--ldn-secondary-text, #3a3228);
+}
+
+.ldn-price-page .ldn-stat-value {
+	margin-top: 0.15rem;
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--ldn-text, #0a0a0a);
 }
 
 .ldn-price-page .ldn-section a {
-	color: var(--ldn-primary, #19b39a);
+	color: var(--guru-blue);
+	text-underline-offset: 2px;
+}
+
+.ldn-price-page .ldn-section a:hover,
+.ldn-price-page .ldn-section a:focus-visible {
+	color: var(--guru-red);
+}
+
+.ldn-price-page table thead th {
+	font-family: var(--ldn-font-body, Inter, Arial, sans-serif);
+	font-weight: 700;
+	color: var(--ldn-text, #0a0a0a);
+}
+
+@media screen and (max-width: 400px) {
+	.ldn-price-page > h1.ldn-page-title {
+		gap: 0.6rem;
+		padding-top: 0.9rem;
+		padding-bottom: 0.9rem;
+	}
+
+	.ldn-price-page > h1.ldn-page-title::before {
+		flex-basis: 3.25rem;
+		width: 3.25rem;
+		height: 3.25rem;
+		min-width: 3.25rem;
+	}
 }

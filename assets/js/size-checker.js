@@ -591,10 +591,52 @@
             return;
         }
 
-        var shapes = manifest.shapes || [];
+        // A sparse band publishes n: 0 with an empty distribution and no median
+        // to scale from (cushion at 0.3, 1 and 1.5 ct), but it still carries
+        // industry ideal proportions. Those are what the hub table and the
+        // server-rendered figure already show at those carats, so falling back
+        // to them keeps 1 ct on the slider, the weight the cushion hub is about,
+        // and keeps the figure agreeing with the table beneath it.
+        function dimsFor(shape, band) {
+            var entry = entryFor(shape, band);
+            if (!entry) {
+                return null;
+            }
+            var measuredLength = median(entry.length_mm);
+            var measuredWidth = median(entry.width_mm);
+            if (measuredLength !== null && measuredWidth !== null) {
+                return { length: measuredLength, width: measuredWidth, measured: true };
+            }
+            var ideal = entry.ideal || {};
+            var idealLength = parseNum(ideal.length_mm);
+            var idealWidth = parseNum(ideal.width_mm);
+            if (idealLength !== null && idealWidth !== null) {
+                return { length: idealLength, width: idealWidth, measured: false };
+            }
+            return null;
+        }
+
+        function drawableBandsForShape(shape) {
+            var all = bandsForShape(shape);
+            var out = [];
+            for (var b = 0; b < all.length; b++) {
+                if (dimsFor(shape, all[b]) !== null) {
+                    out.push(all[b]);
+                }
+            }
+            return out;
+        }
+
+        var shapes = [];
+        var offered = manifest.shapes || [];
+        for (var s = 0; s < offered.length; s++) {
+            if (drawableBandsForShape(offered[s]).length > 0) {
+                shapes.push(offered[s]);
+            }
+        }
         var currentShape = root.getAttribute('data-shape') || shapes[0];
         var currentBand = root.getAttribute('data-carat') || '1';
-        var bands = bandsForShape(currentShape);
+        var bands = drawableBandsForShape(currentShape);
         if (bands.length === 0) {
             return;
         }
@@ -602,16 +644,12 @@
         var fixedCanvasWmm = QUARTER_MM + 4;
         var shapeIdx;
         for (shapeIdx = 0; shapeIdx < shapes.length; shapeIdx++) {
-            var shapeBands = bandsForShape(shapes[shapeIdx]);
+            var shapeBands = drawableBandsForShape(shapes[shapeIdx]);
             var bandIdx;
             for (bandIdx = 0; bandIdx < shapeBands.length; bandIdx++) {
-                var probe = entryFor(shapes[shapeIdx], shapeBands[bandIdx]);
-                if (!probe) {
-                    continue;
-                }
-                var probeWidth = median(probe.width_mm);
-                if (probeWidth !== null) {
-                    fixedCanvasWmm = Math.max(fixedCanvasWmm, QUARTER_MM + 4 + probeWidth);
+                var probe = dimsFor(shapes[shapeIdx], shapeBands[bandIdx]);
+                if (probe !== null) {
+                    fixedCanvasWmm = Math.max(fixedCanvasWmm, QUARTER_MM + 4 + probe.width);
                 }
             }
         }
@@ -628,7 +666,7 @@
         }
 
         function syncSlider() {
-            bands = bandsForShape(currentShape);
+            bands = drawableBandsForShape(currentShape);
             var idx = bands.indexOf(currentBand);
             if (idx === -1) {
                 idx = nearestBandIndex(bands, currentBand);
@@ -656,15 +694,12 @@
         }
 
         function renderFigure() {
-            var entry = entryFor(currentShape, currentBand);
-            if (!entry) {
+            var dims = dimsFor(currentShape, currentBand);
+            if (dims === null) {
                 return;
             }
-            var length = median(entry.length_mm);
-            var width = median(entry.width_mm);
-            if (length === null || width === null) {
-                return;
-            }
+            var length = dims.length;
+            var width = dims.width;
 
             var pxPerMm = 7;
             var gapMm = 4;
@@ -714,9 +749,15 @@
                 + stoneMarkup
                 + '</svg>';
 
-            var caption = 'Relative actual size (mm): US quarter (24.26 mm) beside the median '
-                + currentBand + ' carat ' + shapeLabel(currentShape).toLowerCase()
-                + ' — ' + width.toFixed(2) + ' × ' + length.toFixed(2) + ' mm.';
+            var caption = 'Relative actual size (mm): US quarter (24.26 mm) beside '
+                + (dims.measured
+                    ? 'the median ' + currentBand + ' carat '
+                    : 'a ' + currentBand + ' carat ')
+                + shapeLabel(currentShape).toLowerCase()
+                + ' at ' + width.toFixed(2) + ' × ' + length.toFixed(2) + ' mm'
+                + (dims.measured
+                    ? '.'
+                    : ', from industry ideal proportions - too few measured stones at this weight.');
 
             figure.innerHTML = '<figure class="ldn-size-figure ldn-size-figure--scale">'
                 + '<div class="ldn-size-outline ldn-size-outline--scale">' + svg + '</div>'

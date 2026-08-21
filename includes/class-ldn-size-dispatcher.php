@@ -220,7 +220,7 @@ final class LDN_Size_Dispatcher {
 
         $shape_slug = $this->str_or_null($vars, 'ldn_shape');
         $shape = $shape_slug !== null
-            ? $this->config->slug_to_shape($shape_slug, $this->site_id)
+            ? $this->config->size_slug_to_shape($shape_slug, $this->site_id)
             : null;
         $carat = $this->parse_carat($this->str_or_null($vars, 'ldn_carat'));
         $country = $this->config->size_rollout_country($this->site_id);

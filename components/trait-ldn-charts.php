@@ -51,7 +51,11 @@ trait LDN_Trait_Charts {
             : '';
         $html .= '<div id="' . esc_attr($dom_id) . '" class="ldn-chart-target">'
             . $fallback_html . '</div>';
-        $html .= '<script>(function(){var run=function(){if(!window.LDN||!window.LDN.plotChart){return false;}'
+        // data-ldn-chart marks this as the only script a client-side page swap
+        // may re-run (nat-lab-toggle.js). Ad and analytics scripts in the same
+        // subtree must not fire twice, so the swap needs a positive marker
+        // rather than "every script in <main>".
+        $html .= '<script data-ldn-chart="1">(function(){var run=function(){if(!window.LDN||!window.LDN.plotChart){return false;}'
             . 'window.LDN.plotChart('
             . wp_json_encode($dom_id)
             . ',' . $data . ',' . $layout_json . ',' . $cfg . ');return true;};'

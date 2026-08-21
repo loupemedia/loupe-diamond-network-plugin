@@ -97,13 +97,24 @@ final class LDN_Calculator_Router {
      * @return array<string, string>
      */
     public function build_rewrite_rules() {
-        $structure = $this->config->get_url_structure($this->site_id);
-        $pattern = is_array($structure) && !empty($structure['calculator_level'])
-            ? (string) $structure['calculator_level']
-            : '/{country}/diamond-prices/calculator';
-
+        $countries = $this->enabled_countries();
+        if (method_exists($this->config, 'countries_for_install')) {
+            $countries = $this->config->countries_for_install($this->site_id, $countries);
+        }
         $rules = array();
-        foreach ($this->enabled_countries() as $country) {
+        foreach ($countries as $country) {
+            $structure = method_exists($this->config, 'url_structure_for')
+                ? $this->config->url_structure_for($this->site_id, $country)
+                : $this->config->get_url_structure($this->site_id);
+            $pattern = is_array($structure) && !empty($structure['calculator_level'])
+                ? (string) $structure['calculator_level']
+                : '/{country}/diamond-prices/calculator';
+            if (method_exists($this->config, 'install_relative_pattern')) {
+                $pattern = $this->config->install_relative_pattern($pattern, $country);
+            }
+            if ($pattern === '' || $pattern === '/') {
+                continue;
+            }
             $compiled = $this->compile_pattern($pattern, $country);
             if ($compiled !== null) {
                 $rules[$compiled[0]] = $compiled[1];

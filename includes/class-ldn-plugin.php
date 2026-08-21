@@ -77,6 +77,11 @@ final class LDN_Plugin {
     private $artefacts = null;
 
     /**
+     * @var LDN_Nav|null
+     */
+    private $nav = null;
+
+    /**
      * Lazily-built S3 key resolver.
      *
      * @var LDN_S3_Key_Resolver|null
@@ -159,6 +164,7 @@ final class LDN_Plugin {
         if ($this->is_network_site()) {
             $this->router()->register();
             $this->dispatcher()->register();
+            $this->nav()->register();
             (new LDN_Canonical_Redirect())->register();
             (new LDN_Query_Signals())->register();
             (new LDN_Seo_Bridge())->register();
@@ -357,6 +363,25 @@ final class LDN_Plugin {
             $this->router = new LDN_Router($this->site_id(), $this->rollout(), $this->config());
         }
         return $this->router;
+    }
+
+    /**
+     * Navigation module for the resolved site, or null when off-network.
+     *
+     * Deliberately context-free: the header renders on legacy posts and 404s
+     * where no route matched, so this does not depend on the dispatcher having
+     * built an LDN_Page_Context. CP125_02 hooks the menu filters onto it.
+     *
+     * @return LDN_Nav|null
+     */
+    public function nav() {
+        if (!$this->is_network_site()) {
+            return null;
+        }
+        if ($this->nav === null) {
+            $this->nav = new LDN_Nav($this->site_id(), $this->config(), $this->data_fetcher());
+        }
+        return $this->nav;
     }
 
     /**

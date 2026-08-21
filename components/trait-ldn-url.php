@@ -13,10 +13,13 @@ trait LDN_Trait_Url {
     /**
      * @param string      $site_id
      * @param string|null $canonical_type natural|lab-grown
+     * @param string|null $country        When set, use that country's type slugs.
      * @return string
      */
-    private function type_url_slug($site_id, $canonical_type) {
-        $structure = $this->config->get_url_structure($site_id);
+    private function type_url_slug($site_id, $canonical_type, $country = null) {
+        $structure = method_exists($this->config, 'url_structure_for')
+            ? $this->config->url_structure_for($site_id, $country)
+            : $this->config->get_url_structure($site_id);
         if (!is_array($structure)) {
             return (string) $canonical_type;
         }
@@ -32,13 +35,16 @@ trait LDN_Trait_Url {
     /**
      * @param string      $site_id
      * @param string|null $carat_value Numeric carat label.
+     * @param string|null $country     When set, use that country's carat suffix.
      * @return string
      */
-    private function format_carat_slug($site_id, $carat_value) {
+    private function format_carat_slug($site_id, $carat_value, $country = null) {
         if ($carat_value === null || $carat_value === '') {
             return '';
         }
-        $structure = $this->config->get_url_structure($site_id);
+        $structure = method_exists($this->config, 'url_structure_for')
+            ? $this->config->url_structure_for($site_id, $country)
+            : $this->config->get_url_structure($site_id);
         $format = (is_array($structure) && array_key_exists('carat_format', $structure))
             ? $structure['carat_format']
             : '{value}-carat';

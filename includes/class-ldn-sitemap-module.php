@@ -146,9 +146,18 @@ final class LDN_Sitemap_Module {
         }
 
         $countries = $this->enabled_countries_for_kind($kind);
+        if (method_exists($this->config, 'countries_for_install')) {
+            $countries = $this->config->countries_for_install($this->site_id, $countries);
+        }
         $rules = array();
         foreach ($countries as $country) {
             $concrete = str_replace('{country}', $country, $path);
+            if (method_exists($this->config, 'path_relative_to_mount')) {
+                $concrete = $this->config->path_relative_to_mount($concrete);
+            }
+            if ($concrete === '' || $concrete === '/') {
+                continue;
+            }
             $rules[$this->pattern_to_regex($concrete)] =
                 'index.php?ldn_route=' . self::ROUTE
                 . '&ldn_sitemap_kind=' . $kind
@@ -226,6 +235,9 @@ final class LDN_Sitemap_Module {
             if (strpos($price_path, '{country}') !== false) {
                 foreach ($this->enabled_countries_for_kind('price') as $country) {
                     $path = str_replace('{country}', $country, $price_path);
+                    if (method_exists($this->config, 'path_relative_to_mount')) {
+                        $path = $this->config->path_relative_to_mount($path);
+                    }
                     $child_urls[] = $base . $path;
                 }
             } else {
