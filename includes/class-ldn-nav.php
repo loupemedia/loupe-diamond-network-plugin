@@ -67,6 +67,36 @@ final class LDN_Nav {
     const GATE_MODULES = array('price', 'size', 'standard_pages');
 
     /**
+     * Synthetic item IDs start high so they cannot collide with real post IDs in
+     * a menu we are augmenting rather than replacing.
+     */
+    const NAV_ID_BASE = 900000;
+
+    /**
+     * Keys that make a generated entry a fan-out: one item per value.
+     *
+     * Mirrors FAN_OUT_KEYS in shared/config/navigation.py.
+     */
+    const FAN_OUT_DIMENSIONS = array('shapes', 'carats', 'diamond_types');
+
+    /**
+     * The hub that lists what a truncated column omits.
+     *
+     * Keyed by family AND by the dimension the column fans out over, because those
+     * need different destinations: a column of nine carats should land on the page
+     * that lists carats, and a column of ten shapes on the page that lists shapes.
+     * Keying on family alone sent both columns of a menu to one URL, which put two
+     * identically-linked items in the drawer.
+     */
+    const NAV_FAMILY_HUB = array(
+        // family => array(fan-out dimension => hub family)
+        'price_all_shapes' => array('carats' => 'price_diamond_type'),
+        'price_individual_shape' => array('shapes' => 'price_all_shapes'),
+        'size_shape_hub' => array('shapes' => 'size_mega_hub'),
+        'size_individual' => array('carats' => 'size_shape_hub'),
+    );
+
+    /**
      * @var LDN_Data_Fetcher|null
      */
     private $fetcher;

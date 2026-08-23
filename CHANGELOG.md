@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.39.1] — 2026-08-23
+
+- Fix PHP 8.1 fatal on every request (front and wp-admin): move nav constants off `trait-ldn-nav-items.php` onto `LDN_Nav`. Trait constants are PHP 8.2+ only; Kinsta staging (Modern Jeweler) runs 8.1. Same pattern as the earlier content-trait fix.
+
 ## [0.39.0] — 2026-08-23
 
 - **CP52_04 registry modules land in LDN.** Price sitemaps now read `module IN (pricing, calculator)` with `is_indexable = TRUE` from `ops.page_url_registry`. Size sitemaps read the same table (`module = size`) instead of the Z3 S3 artefact. Calculator rows are written by C4.5; size rows by Z3 after migration 018.
