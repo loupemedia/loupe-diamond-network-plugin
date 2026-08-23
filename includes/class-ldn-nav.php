@@ -28,10 +28,12 @@ if (!defined('ABSPATH')) {
 }
 
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-nav-items.php';
+require_once LDN_PLUGIN_DIR . 'components/trait-ldn-nav-country-switcher.php';
 
 final class LDN_Nav {
 
     use LDN_Trait_Nav_Items;
+    use LDN_Trait_Nav_Country_Switcher;
 
     /**
      * Theme location used when a menu block does not name one. GeneratePress
@@ -43,6 +45,7 @@ final class LDN_Nav {
     const DEFAULT_LOCATIONS = array(
         'primary' => 'primary',
         'secondary' => 'secondary',
+        'footer' => 'footer',
     );
 
     /**
@@ -61,7 +64,7 @@ final class LDN_Nav {
      * A navigation-specific vocabulary would let the hub be off while the menu
      * believed it was on.
      */
-    const GATE_MODULES = array('price', 'size');
+    const GATE_MODULES = array('price', 'size', 'standard_pages');
 
     /**
      * @var LDN_Data_Fetcher|null
@@ -107,6 +110,14 @@ final class LDN_Nav {
      * @var bool
      */
     private $resolved = false;
+
+    /**
+     * The footer hook fires twice (GeneratePress widget slot, then wp_footer)
+     * so the strip is printed once per request.
+     *
+     * @var bool
+     */
+    private $footer_rendered = false;
 
     /**
      * @param string                $site_id
@@ -248,7 +259,29 @@ final class LDN_Nav {
 
         if (function_exists('add_action')) {
             add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
+            add_action('init', array($this, 'register_footer_location'));
+            // Ringspo's live footer is GeneratePress widgets, not a menu
+            // assigned to `theme_location: footer`. Injection only runs when a
+            // menu is assigned, so this paints the config strip when the
+            // request country is `replace`. wp_footer is the fallback if the
+            // theme hook is absent.
+            add_action('generate_after_footer_widgets', array($this, 'render_footer_menu'), 10);
+            add_action('wp_footer', array($this, 'render_footer_menu'), 8);
         }
+    }
+
+    /**
+     * Register the footer location so an operator can assign a WP menu later.
+     *
+     * Auto-render still covers a site that never assigns one (Ringspo US).
+     *
+     * @return void
+     */
+    public function register_footer_location() {
+        if (!function_exists('register_nav_menu')) {
+            return;
+        }
+        register_nav_menu('footer', 'LDN Footer');
     }
 
     /**
@@ -275,6 +308,113 @@ final class LDN_Nav {
             array(),
             defined('LDN_VERSION') ? LDN_VERSION : '0.1.0'
         );
+    }
+
+    /**
+     * Paint the config footer when the theme has no menu on that location.
+     *
+     * Injection already covers an assigned footer menu. Ringspo's live footer
+     * is widgets, so without this hook `menus.footer` would never appear.
+     * Only `replace` markets get the strip: an `augment` market keeps the
+     * theme footer, which is still that country's own links.
+     *
+     * @return void
+     */
+    public function render_footer_menu() {
+        if ($this->footer_rendered) {
+            return;
+        }
+        $html = $this->footer_menu_html();
+        if ($html === '') {
+            return;
+        }
+        $this->footer_rendered = true;
+        echo $html;
+    }
+
+    /**
+     * Footer markup for the current request, or empty when this request
+     * should leave the theme footer alone.
+     *
+     * @return string
+     */
+    public function footer_menu_html() {
+        if ($this->footer_location_has_assigned_menu()) {
+            return '';
+        }
+
+        $navigation = $this->config->get_navigation($this->site_id);
+        if (!is_array($navigation) || empty($navigation['menus']['footer'])
+            || !is_array($navigation['menus']['footer'])
+        ) {
+            return '';
+        }
+
+        $scope = $this->resolve_request_scope();
+        if ($scope === null) {
+            return '';
+        }
+        if ($this->injection_mode_for($navigation, $scope['country_code']) !== 'replace') {
+            return '';
+        }
+
+        $this->nav_item_seq = 0;
+        $items = $this->nav_items($scope, $navigation['menus']['footer']);
+        if ($items === array()) {
+            return '';
+        }
+
+        return '<nav class="ldn-nav-footer-wrap" aria-label="Footer">'
+            . '<ul class="ldn-nav-footer">'
+            . $this->walk_nav_items_html($items, 0)
+            . '</ul></nav>';
+    }
+
+    /**
+     * @return bool
+     */
+    private function footer_location_has_assigned_menu() {
+        if (!function_exists('get_nav_menu_locations')) {
+            return false;
+        }
+        $locations = get_nav_menu_locations();
+        return is_array($locations) && !empty($locations['footer']);
+    }
+
+    /**
+     * Nested list markup from the same item objects the theme walker uses.
+     *
+     * Footer is the one place LDN emits HTML: the live footer is widgets, not
+     * a `wp_nav_menu` location, so there is no theme walker to hand items to.
+     *
+     * @param array $items
+     * @param int   $parent_id
+     * @return string
+     */
+    private function walk_nav_items_html(array $items, $parent_id) {
+        $html = '';
+        foreach ($items as $item) {
+            if (!is_object($item)) {
+                continue;
+            }
+            $item_parent = isset($item->menu_item_parent) ? (string) $item->menu_item_parent : '0';
+            if ($item_parent !== (string) $parent_id) {
+                continue;
+            }
+            $classes = isset($item->classes) && is_array($item->classes)
+                ? implode(' ', array_filter($item->classes))
+                : '';
+            $url = isset($item->url) ? (string) $item->url : '';
+            $title = isset($item->title) ? (string) $item->title : '';
+            $children = $this->walk_nav_items_html($items, (int) $item->ID);
+            $html .= '<li class="' . esc_attr($classes) . '">';
+            $html .= '<a href="' . esc_url($url) . '">' . esc_html($title) . '</a>';
+            if ($children !== '') {
+                $html .= '<ul class="sub-menu">' . $children . '</ul>';
+            }
+            $html .= '</li>';
+        }
+        return $html;
     }
 
     /**
@@ -310,9 +450,7 @@ final class LDN_Nav {
             return $items;
         }
 
-        $mode = isset($navigation['injection_mode'])
-            ? (string) $navigation['injection_mode']
-            : 'augment';
+        $mode = $this->injection_mode_for($navigation, $scope['country_code']);
 
         $this->nav_item_seq = $this->highest_menu_order($items);
         $injected = $this->nav_items($scope, $menu_config);
@@ -327,6 +465,46 @@ final class LDN_Nav {
         }
 
         return array_merge($items, $injected);
+    }
+
+    /**
+     * How to treat the existing WordPress menu in one market.
+     *
+     * `replace` means "this file is the whole menu here", which is only true
+     * where that market's own items have been extracted into config. Ringspo's
+     * nine subsites have nine hand-built menus sharing almost nothing, so the
+     * claim is per country and only the US makes it today.
+     *
+     * An undeclared market gets `augment`. Validation in
+     * `shared/config/navigation.py` makes undeclared impossible to ship, so this
+     * is the second line rather than a silent default - and it errs additively,
+     * because a wrong `replace` deletes that market's entire header while a
+     * wrong `augment` merely appends two items.
+     *
+     * @param array  $navigation
+     * @param string $country_code
+     * @return string
+     */
+    private function injection_mode_for(array $navigation, $country_code) {
+        $declared = isset($navigation['injection_mode'])
+            ? $navigation['injection_mode']
+            : 'augment';
+
+        if (!is_array($declared)) {
+            return (string) $declared;
+        }
+
+        $code = strtolower((string) $country_code);
+        if (!empty($declared[$code])) {
+            return (string) $declared[$code];
+        }
+
+        $this->log(sprintf(
+            'country "%s" has no injection_mode; augmenting rather than replacing '
+                . 'a menu that was never extracted',
+            $code
+        ));
+        return 'augment';
     }
 
     /**
@@ -378,8 +556,32 @@ final class LDN_Nav {
 
         $this->nav_item_seq = $this->highest_menu_order($kept);
         $narrow = $this->nav_items($scope, $navigation['menus'][$menu_name], 'narrow');
+        $merged = array_merge($kept, $narrow);
 
-        return array_merge($kept, $narrow);
+        // GP's secondary location is a desktop utility bar and is hidden in the
+        // slide-out. On a replace market the config is the whole chrome, so
+        // About / Contact / the switcher have to live in this drawer or they
+        // vanish on a phone. Augment markets keep their own theme drawer.
+        if ($menu_name === 'primary'
+            && $this->injection_mode_for($navigation, $scope['country_code']) === 'replace'
+            && !empty($navigation['menus']['secondary'])
+            && is_array($navigation['menus']['secondary'])
+        ) {
+            $this->nav_item_seq = $this->highest_menu_order($merged);
+            $utility = $this->nav_items($scope, $navigation['menus']['secondary']);
+            $first = true;
+            foreach ($utility as $item) {
+                if ($first && is_object($item)
+                    && (string) $item->menu_item_parent === '0'
+                ) {
+                    $item->classes[] = 'ldn-nav-utility-start';
+                    $first = false;
+                }
+            }
+            $merged = array_merge($merged, $utility);
+        }
+
+        return $merged;
     }
 
     /**

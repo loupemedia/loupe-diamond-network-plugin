@@ -167,6 +167,7 @@ final class LDN_Plugin {
             $this->nav()->register();
             (new LDN_Canonical_Redirect())->register();
             (new LDN_Query_Signals())->register();
+            (new LDN_Body_Schema())->register();
             (new LDN_Seo_Bridge())->register();
             (new LDN_Llms_Txt($this->site_id(), $this->config(), $this->artefacts()))->register();
             (new LDN_Robots_Txt())->register();

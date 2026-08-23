@@ -69,6 +69,10 @@ final class LDN_Config {
     public function consumer_advisory_enabled($site_id, $country_code) {
         return false;
     }
+
+    public function get_site($site_id) {
+        return array('brand_name' => 'Ringspo', 'domain' => 'ringspo.com');
+    }
 }
 
 final class LDN_Artefacts {
@@ -138,6 +142,7 @@ final class LDN_Data_Fetcher {
 }
 
 require_once LDN_PLUGIN_DIR . 'includes/class-ldn-page-context.php';
+require_once LDN_PLUGIN_DIR . 'includes/class-ldn-schema.php';
 require_once LDN_PLUGIN_DIR . 'includes/class-ldn-calculator-renderer.php';
 
 $ctx = new LDN_Page_Context('ringspo', 'calculator', 'us', null, null, null, 'calculator');
@@ -367,6 +372,14 @@ foreach ($shape_slugs as $slug) {
         "{$slug} icon is shipped in the plugin (run Sizing/build_shape_svgs.py)"
     );
 }
+
+$head_ctx = new LDN_Page_Context('ringspo', 'calculator', 'us', null, null, null, 'calculator');
+$GLOBALS['wp'] = (object) array('request' => 'us/diamond-prices/calculator');
+$head_renderer = new LDN_Calculator_Renderer(new LDN_Data_Fetcher(), new LDN_Config());
+$head = $head_renderer->render_head_content($head_ctx);
+check(strpos($head, 'rel="canonical"') !== false, 'calculator head emits canonical');
+check(strpos($head, 'property="og:url"') !== false, 'calculator head emits og:url');
+check(strpos($head, 'WebApplication') !== false, 'calculator head emits WebApplication JSON-LD');
 
 // --- Report -----------------------------------------------------------------
 

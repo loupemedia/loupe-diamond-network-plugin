@@ -26,6 +26,18 @@ final class LDN_Page_Registry {
      */
     const PRICE_SITEMAP_MAX_HIERARCHY = 5;
 
+    const MODULE_PRICING = 'pricing';
+
+    const MODULE_CALCULATOR = 'calculator';
+
+    const MODULE_SIZE = 'size';
+
+    /** @var string[] Modules included in the price sitemap child. */
+    const PRICE_SITEMAP_MODULES = array(self::MODULE_PRICING, self::MODULE_CALCULATOR);
+
+    /** @var string[] Modules included in the size sitemap child. */
+    const SIZE_SITEMAP_MODULES = array(self::MODULE_SIZE);
+
     /**
      * Whether a registry hierarchy_level belongs in the price sitemap.
      *
@@ -51,16 +63,20 @@ final class LDN_Page_Registry {
     public function fetch_sitemap_rows(
         $site_id,
         array $country_codes = array(),
-        $max_level = self::PRICE_SITEMAP_MAX_HIERARCHY
+        $max_level = self::PRICE_SITEMAP_MAX_HIERARCHY,
+        array $modules = self::PRICE_SITEMAP_MODULES
     ) {
         $site_id = (string) $site_id;
-        $cache_key = self::TRANSIENT_PREFIX . md5($site_id . '|' . implode(',', $country_codes) . '|' . $max_level);
+        $module_key = implode(',', $modules);
+        $cache_key = self::TRANSIENT_PREFIX . md5(
+            $site_id . '|' . implode(',', $country_codes) . '|' . $max_level . '|' . $module_key
+        );
         $cached = get_transient($cache_key);
         if (is_array($cached)) {
             return $cached;
         }
 
-        $rows = $this->query_sitemap_rows($site_id, $country_codes, (int) $max_level);
+        $rows = $this->query_sitemap_rows($site_id, $country_codes, (int) $max_level, $modules);
         set_transient($cache_key, $rows, self::TRANSIENT_TTL);
         return $rows;
     }
@@ -87,14 +103,19 @@ final class LDN_Page_Registry {
      * @param int      $max_level
      * @return array<int, array<string, mixed>>
      */
-    private function query_sitemap_rows($site_id, array $country_codes, $max_level) {
+    private function query_sitemap_rows($site_id, array $country_codes, $max_level, array $modules) {
         $conn = LDN_Db::connection();
         if ($conn === null) {
             LDN_Plugin::debug_log('Page_Registry', 'no database connection');
             return array();
         }
 
-        $params = array($site_id, $max_level);
+        $modules = array_values(array_filter(array_map('strval', $modules)));
+        if (empty($modules)) {
+            return array();
+        }
+
+        $params = array($site_id, $modules, $max_level);
         $country_filter = '';
         if (!empty($country_codes)) {
             $placeholders = array();
@@ -107,12 +128,14 @@ final class LDN_Page_Registry {
 
         $sql = "
             SELECT canonical_url, url_path, locale, last_generated, country_code,
-                   hierarchy_level, diamond_type, carat, shape
+                   hierarchy_level, diamond_type, carat, shape, module
             FROM ops.page_url_registry
             WHERE site_id = \$1
-              AND hierarchy_level <= \$2
+              AND module = ANY(\$2::text[])
+              AND is_indexable = TRUE
+              AND hierarchy_level <= \$3
               {$country_filter}
-            ORDER BY hierarchy_level, country_code, diamond_type, carat NULLS FIRST, shape NULLS FIRST
+            ORDER BY module, hierarchy_level, country_code, diamond_type, carat NULLS FIRST, shape NULLS FIRST
         ";
 
         $result = @pg_query_params($conn, $sql, $params);
@@ -160,6 +183,7 @@ final class LDN_Page_Registry {
             WHERE diamond_type = \$1
               AND country_code = \$2
               AND hierarchy_level = \$3
+              AND module = \$6
               AND (carat IS NOT DISTINCT FROM \$4::numeric)
               AND (shape IS NOT DISTINCT FROM \$5)
             ORDER BY locale
@@ -174,6 +198,7 @@ final class LDN_Page_Registry {
             (int) $hierarchy_level,
             $carat_param,
             $shape_param,
+            self::MODULE_PRICING,
         ));
 
         if ($result === false) {

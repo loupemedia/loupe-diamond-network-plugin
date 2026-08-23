@@ -931,6 +931,31 @@ final class LDN_Config {
     }
 
     /**
+     * Resolved navigation wording for one site and locale.
+     *
+     * Built from `i18n/{locale}/common.json` by the bundle builder, so the menu
+     * word is the page word and PHP never parses the i18n tree at request time.
+     * Returns `array('label' => …, 'country' => …)`, either key possibly absent
+     * when that locale carries none of those terms.
+     *
+     * @param string $site_id
+     * @param string $locale
+     * @return array<string, array<string, string>>
+     */
+    public function get_nav_terms($site_id, $locale) {
+        $bundle = $this->get_bundle();
+        if (empty($bundle['nav_terms'][$site_id]) || !is_array($bundle['nav_terms'][$site_id])) {
+            return array();
+        }
+        $per_site = $bundle['nav_terms'][$site_id];
+        $locale = (string) $locale;
+
+        return (isset($per_site[$locale]) && is_array($per_site[$locale]))
+            ? $per_site[$locale]
+            : array();
+    }
+
+    /**
      * Country config row from the site bundle (locale, currency, table_prefix, …).
      *
      * @param string $site_id

@@ -87,7 +87,11 @@ $fetcher = new LDN_Data_Fetcher(new LDN_S3_Key_Resolver($config), new LDN_Artefa
  * than gating. Without this they would all assert against a fully gated-out menu.
  */
 function ldn_rollout_all_on() {
-    return new LDN_Fake_Rollout(array('*/price' => true, '*/size' => true));
+    return new LDN_Fake_Rollout(array(
+        '*/price' => true,
+        '*/size' => true,
+        '*/standard_pages' => true,
+    ));
 }
 
 function ldn_items_for($path, $menu_name = 'primary') {
@@ -398,16 +402,83 @@ $nav = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
 $filtered = $nav->filter_menu_items($existing, $aus_menu, array());
 
 check(
-    count($filtered) > count($existing),
+    count($filtered) > 1,
     'injection fires on a menu named "Aus Menu", proving it keys on location not slug'
 );
+$filtered_titles = array_map(function ($i) { return $i->title; }, $filtered);
 check(
-    $filtered[0]->title === 'Engagement Rings',
-    'augment mode preserves the existing WordPress items, and preserves their order'
+    !in_array('Engagement Rings', $filtered_titles, true),
+    'replace mode drops the existing WordPress items rather than appending to them'
 );
 check(
+    $filtered[0]->title === 'Diamond Prices',
+    'replace mode starts from the declared menu, not the leftover WordPress item'
+);
+
+// -----------------------------------------------------------------------------
+// Injection mode is a per-country claim
+//
+// Test intent: `replace` says "this file is the whole menu in this market", so it
+// applies only where that market's own items have been extracted into config.
+// A market that has not been migrated keeps its WordPress menu and merely gains
+// the generated items.
+// Would fail if: injection_mode were read as one site-wide string, as it was
+// before LDN 0.37.0. Ringspo's nine subsites carry nine hand-built menus that
+// share almost nothing - 168 items on us, 40 Japanese items on jp, five on ie -
+// so a site-wide `replace` deletes eight markets' headers and leaves English
+// labels pointing at US slugs that 404 under those mounts.
+// -----------------------------------------------------------------------------
+
+$navigation_modes = $config->get_navigation('ringspo');
+check(
+    is_array($navigation_modes['injection_mode']),
+    'injection_mode ships as a per-country map, not a single string'
+);
+check(
+    $navigation_modes['injection_mode']['us'] === 'replace'
+        && $navigation_modes['injection_mode']['jp'] === 'augment',
+    'the US is migrated and claims replace; Japan is not and stays on augment'
+);
+
+$GLOBALS['__ldn_nav_path'] = '/jp/daiyamondo-kakaku/';
+$jp_existing = array();
+$jp_post = new stdClass();
+$jp_post->ID = 12;
+$jp_post->db_id = 12;
+$jp_post->title = '誕生石';
+$jp_post->url = 'https://ringspo.com/jp/birthstones/';
+$jp_post->menu_item_parent = '0';
+$jp_post->menu_order = 1;
+$jp_post->classes = array();
+$jp_existing[] = $jp_post;
+
+$nav_jp = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+$jp_filtered = $nav_jp->filter_menu_items($jp_existing, $aus_menu, array());
+$jp_filtered_titles = array_map(function ($i) { return $i->title; }, $jp_filtered);
+
+check(
+    in_array('誕生石', $jp_filtered_titles, true),
+    'an unmigrated market KEEPS its hand-built WordPress items, got: '
+        . implode(', ', array_slice($jp_filtered_titles, 0, 5))
+);
+check(
+    $jp_filtered[0]->title === '誕生石',
+    'and keeps them first, so augmented items sort below what was hand-placed'
+);
+check(
+    count($jp_filtered) > count($jp_existing),
+    'while still gaining the generated pricing items it had no entry point for'
+);
+check(
+    !in_array('Learn', $jp_filtered_titles, true)
+        && !in_array('Sell jewelry', $jp_filtered_titles, true),
+    'and does NOT inherit the US editorial items, which point at US slugs'
+);
+
+$GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
+check(
     ldn_url_contains($filtered, '/us/diamond-prices/'),
-    'augment mode appends the declared pricing items'
+    'replace mode still includes the declared pricing items'
 );
 
 $appended_orders = array();
@@ -613,9 +684,43 @@ check(
     )
 );
 check(
-    $after_narrow[0]->title === 'Engagement Rings',
-    'the narrow swap keeps the theme\'s own items and only replaces ours'
+    $after_narrow[0]->title === 'Diamond Prices',
+    'replace mode drops leftover WordPress items in the slide-out as well as on desktop'
 );
+
+$narrow_titles = array_map(function ($i) { return $i->title; }, $after_narrow);
+check(
+    in_array('About', $narrow_titles, true)
+        && in_array('Contact', $narrow_titles, true),
+    'the US slide-out carries the secondary utility items, because GP hides that bar on a phone'
+);
+check(
+    in_array('ldn-nav-utility-start', $after_narrow[0]->classes, true) === false,
+    'the utility separator sits on the first secondary item, not on Diamond Prices'
+);
+$utility_marked = 0;
+foreach ($after_narrow as $item) {
+    if (in_array('ldn-nav-utility-start', $item->classes, true)) {
+        $utility_marked++;
+        check(
+            $item->title === 'About',
+            'the first utility item in the slide-out is About, got: ' . $item->title
+        );
+    }
+}
+check($utility_marked === 1, 'exactly one slide-out item is marked as the utility start');
+
+$GLOBALS['__ldn_nav_path'] = '/jp/daiyamondo-kakaku/';
+$nav_jp_slide = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+$jp_slide = $nav_jp_slide->filter_menu_objects($jp_filtered, $slideout_args);
+$jp_slide_titles = array_map(function ($i) { return $i->title; }, $jp_slide);
+check(
+    in_array('誕生石', $jp_slide_titles, true)
+        && !in_array('About', $jp_slide_titles, true)
+        && !in_array('Contact', $jp_slide_titles, true),
+    'an augment market does not receive the US utility items in the slide-out'
+);
+$GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
 
 $slideout_by_location = new stdClass();
 $slideout_by_location->theme_location = 'slideout';
@@ -678,14 +783,14 @@ class LDN_Fake_Rollout {
  * @param string $path
  * @return array<int, object>
  */
-function ldn_gated_items(array $state, $path = '/us/diamond-prices/') {
+function ldn_gated_items(array $state, $path = '/us/diamond-prices/', $menu_name = 'primary') {
     global $config, $fetcher;
     $GLOBALS['__ldn_nav_path'] = $path;
     $GLOBALS['ldn_preview_query_vars'] = array();
     $nav = new LDN_Nav('ringspo', $config, $fetcher, new LDN_Fake_Rollout($state));
     $scope = $nav->resolve_request_scope();
     $navigation = $config->get_navigation('ringspo');
-    return $nav->nav_items($scope, $navigation['menus']['primary']);
+    return $nav->nav_items($scope, $navigation['menus'][$menu_name]);
 }
 
 function ldn_titles(array $items) {
@@ -740,17 +845,25 @@ check(
 $none = ldn_gated_items(array());
 $none_titles = ldn_titles($none);
 check(
-    $none_titles === array('Sell jewelry'),
-    'with NO module live only the ungated entry remains, got: ' . implode(', ', $none_titles)
+    in_array('Sell jewelry', $none_titles, true)
+        && in_array('Learn', $none_titles, true),
+    'with NO module live the ungated editorial entries remain, got: ' . implode(', ', $none_titles)
 );
-$empty_triggers = 0;
+check(
+    !in_array('Diamond Prices', $none_titles, true)
+        && !in_array('Diamond Sizes', $none_titles, true),
+    'with NO module live no gated generated item remains'
+);
+$gated_triggers = 0;
 foreach ($none as $item) {
-    if (in_array('ldn-nav-mega', $item->classes, true)) {
-        $empty_triggers++;
+    if (in_array('ldn-nav-diamond_prices', $item->classes, true)
+        || in_array('ldn-nav-diamond_sizes', $item->classes, true)
+    ) {
+        $gated_triggers++;
     }
 }
 check(
-    $empty_triggers === 0,
+    $gated_triggers === 0,
     'a top-level item whose every column was gated out leaves no mega-menu trigger'
 );
 
@@ -784,8 +897,12 @@ check(
 $GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
 $nav_no_reader = new LDN_Nav('ringspo', $config, $fetcher, new LDN_Fake_Rollout(array()));
 $scope_nr = $nav_no_reader->resolve_request_scope();
+$no_reader_titles = ldn_titles(
+    $nav_no_reader->nav_items($scope_nr, $navigation['menus']['primary'])
+);
 check(
-    ldn_titles($nav_no_reader->nav_items($scope_nr, $navigation['menus']['primary'])) === array('Sell jewelry'),
+    in_array('Sell jewelry', $no_reader_titles, true)
+        && !in_array('Diamond Prices', $no_reader_titles, true),
     'an empty rollout state omits gated entries rather than defaulting them visible'
 );
 
@@ -877,9 +994,450 @@ check(
     'an entry with no gate always passes'
 );
 check(
-    in_array('price', LDN_Nav::GATE_MODULES, true) && in_array('size', LDN_Nav::GATE_MODULES, true)
-        && count(LDN_Nav::GATE_MODULES) === 2,
-    'the runtime gate vocabulary matches the rollout hub (price, size) exactly'
+    in_array('price', LDN_Nav::GATE_MODULES, true)
+        && in_array('size', LDN_Nav::GATE_MODULES, true)
+        && in_array('standard_pages', LDN_Nav::GATE_MODULES, true)
+        && count(LDN_Nav::GATE_MODULES) === 3,
+    'the runtime gate vocabulary matches the rollout hub (price, size, standard_pages) exactly'
+);
+
+// -----------------------------------------------------------------------------
+// Country switcher (CP126_01)
+//
+// Test intent: the switcher lists exactly the markets the register declares
+// live, each linking to that market's own pricing hub as a root-relative path.
+// Would fail if: the list were hardcoded, as the nine hand-built subsite copies
+// were, so 21 of 30 configured markets stayed unreachable and nothing broke; or
+// if a switcher link went through home_url(), which on the /us/ install turns
+// /jp/... into /us/jp/... and sends every market switch to a 404.
+// -----------------------------------------------------------------------------
+
+/**
+ * The switcher parent and its country children, from a rendered secondary menu.
+ */
+function ldn_switcher(array $items) {
+    $parent = null;
+    $children = array();
+    foreach ($items as $item) {
+        if (in_array('ldn-nav-country_switcher', $item->classes, true)) {
+            $parent = $item;
+            continue;
+        }
+        if ($parent !== null && (string) $item->menu_item_parent === (string) $parent->ID) {
+            $children[] = $item;
+        }
+    }
+    return array($parent, $children);
+}
+
+$secondary_us = ldn_items_for('/us/diamond-prices/', 'secondary');
+list($switcher_us, $markets_us) = ldn_switcher($secondary_us);
+
+check($switcher_us !== null, 'the secondary menu still carries a country switcher parent');
+check(
+    $switcher_us !== null && $switcher_us->url !== '' && $switcher_us->url !== '#',
+    'the switcher parent has a real destination, not "#": on a phone it is what gets tapped'
+);
+check(
+    $switcher_us !== null && in_array('menu-item-has-children', $switcher_us->classes, true),
+    'the switcher parent is marked as having children so the theme renders a submenu'
+);
+
+$market_titles = array();
+$market_urls = array();
+foreach ($markets_us as $item) {
+    $market_titles[] = $item->title;
+    $market_urls[$item->title] = $item->url;
+}
+
+$navigation = $config->get_navigation('ringspo');
+$switcher_entry = null;
+foreach ($navigation['menus']['secondary']['items'] as $entry) {
+    if (isset($entry['id']) && $entry['id'] === 'country_switcher') {
+        $switcher_entry = $entry;
+        break;
+    }
+}
+$register = $switcher_entry['target']['countries'];
+
+check(
+    count($markets_us) === count($register['live']),
+    sprintf(
+        'the switcher renders one item per live market, expected %d got %d',
+        count($register['live']),
+        count($markets_us)
+    )
+);
+check(
+    count($register['suppressed']) > 0,
+    'the register suppresses the markets with no subsite, rather than omitting them silently'
+);
+foreach ($register['suppressed'] as $entry) {
+    if (!ldn_url_contains($markets_us, '/' . $entry['code'] . '/')) {
+        continue;
+    }
+    check(false, sprintf('suppressed market "%s" must not appear in the switcher', $entry['code']));
+}
+
+check(
+    isset($market_urls['United States']) && $market_urls['United States'] === '/us/diamond-prices/',
+    'the US resolves to its path form, not the bare domain the hand-built menu used'
+);
+check(
+    isset($market_urls['Japan']) && strpos($market_urls['Japan'], '/jp/daiyamondo-kakaku/') === 0,
+    'Japan links to its localised path, got: '
+        . (isset($market_urls['Japan']) ? $market_urls['Japan'] : 'nothing')
+);
+check(
+    isset($market_urls['United Kingdom']) && $market_urls['United Kingdom'] === '/uk/diamond-prices/',
+    'every market links to its own pricing hub'
+);
+
+$non_root = array();
+foreach ($market_urls as $title => $url) {
+    if (strpos($url, '/') !== 0) {
+        $non_root[] = $title . ' => ' . $url;
+    }
+}
+check(
+    $non_root === array(),
+    'switcher links are root-relative so they cross subsites, got: ' . implode(', ', $non_root)
+);
+
+$current_us = array();
+foreach ($markets_us as $item) {
+    if ($item->current === true) {
+        $current_us[] = $item->title;
+    }
+}
+check(
+    $current_us === array('United States'),
+    'on a US path exactly the US entry is current, got: ' . implode(', ', $current_us)
+);
+
+/*
+ * The mount bug, exercised against a REAL mounted install rather than the
+ * harness default of `/`. Every other nav link is mount-relative, and rightly:
+ * it points inside the current subsite. A switcher link points at a different
+ * one, so passing it through home_url() on the /jp/ install yields
+ * /jp/us/diamond-prices/ - a 404 on every market switch. With the mount left at
+ * `/` this check passes either way and guards nothing.
+ */
+add_filter('ldn_install_mount_path', function ($value) {
+    return isset($GLOBALS['__ldn_mount']) ? $GLOBALS['__ldn_mount'] : $value;
+});
+$GLOBALS['__ldn_mount'] = '/jp/';
+$GLOBALS['ldn_preview_site_base'] = '/jp';
+
+list(, $markets_jp) = ldn_switcher(ldn_items_for('/jp/daiyamondo-kakaku/', 'secondary'));
+$jp_urls = array();
+$current_jp = array();
+foreach ($markets_jp as $item) {
+    $jp_urls[] = $item->url;
+    if ($item->current === true) {
+        $current_jp[] = $item->url;
+    }
+}
+
+$GLOBALS['__ldn_mount'] = null;
+$GLOBALS['ldn_preview_site_base'] = '';
+
+check(
+    in_array('/us/diamond-prices/', $jp_urls, true),
+    'mounted at /jp/, the US link is still /us/diamond-prices/ and not nested under the mount, got: '
+        . implode(', ', $jp_urls)
+);
+check(
+    $current_jp === array('/jp/daiyamondo-kakaku/'),
+    'the current market follows the request, got: ' . implode(', ', $current_jp)
+);
+
+// A yaml-live market whose prices are not on must not appear. That is the
+// 404-behind-a-working-menu failure the hub/switcher sync exists to prevent.
+list(, $markets_partial) = ldn_switcher(ldn_gated_items(
+    array(
+        '*/price' => true,
+        'uk/price' => false,
+    ),
+    '/us/diamond-prices/',
+    'secondary'
+));
+check(
+    !ldn_url_contains($markets_partial, '/uk/'),
+    'UK is live in the register but omitted from the switcher while price is off'
+);
+check(
+    ldn_url_contains($markets_partial, '/us/diamond-prices/'),
+    'US stays in the switcher because its price module is on'
+);
+
+// Launching a market is a register edit, not a code change.
+$GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
+$nav_extra = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+$menu_extra = $navigation['menus']['secondary'];
+foreach ($menu_extra['items'] as $i => $entry) {
+    if (isset($entry['id']) && $entry['id'] === 'country_switcher') {
+        $menu_extra['items'][$i]['target']['countries']['live'][] = 'de';
+    }
+}
+list(, $markets_extra) = ldn_switcher(
+    $nav_extra->nav_items($nav_extra->resolve_request_scope(), $menu_extra)
+);
+check(
+    ldn_url_contains($markets_extra, '/de/diamant-preise/')
+        || ldn_url_contains($markets_extra, '/de/'),
+    'moving a market into the register\'s live list adds it with no code change'
+);
+check(
+    count($markets_extra) === count($markets_us) + 1,
+    'and adds exactly one item'
+);
+
+// -----------------------------------------------------------------------------
+// Terminology resolves from the bundle's nav_terms (CP124_03)
+//
+// Test intent: a structural label and a market name are rendered in the locale
+// of the request, from the same i18n tree the destination page resolves from,
+// while an editorial label pointing at an English post stays English.
+// Would fail if: structural labels stayed on the gettext map, which only has an
+// en_GB catalogue, so /jp/ read "Diamond Prices" above ダイヤモンド価格; or if
+// the editorial entries were translated too, promising Japanese articles that
+// do not exist.
+// -----------------------------------------------------------------------------
+
+$jp_primary_titles = ldn_titles(ldn_items_for('/jp/daiyamondo-kakaku/'));
+$us_primary_titles = ldn_titles(ldn_items_for('/us/diamond-prices/'));
+
+$jp_terms = $config->get_nav_terms('ringspo', 'ja-JP');
+check(
+    !empty($jp_terms['label']) && !empty($jp_terms['country']),
+    'the bundle ships resolved labels and market names for ja-JP'
+);
+
+$jp_prices = $jp_terms['label']['nav.diamond_prices'];
+check(
+    in_array($jp_prices, $jp_primary_titles, true),
+    'on a Japanese path the pricing item uses the Japanese term, got: ' . $jp_prices
+);
+check(
+    !in_array('Diamond Prices', $jp_primary_titles, true),
+    'and does NOT also render the English one'
+);
+check(
+    in_array('Diamond Prices', $us_primary_titles, true),
+    'on a US path the same entry is English, so the term follows the request'
+);
+
+/*
+ * The rule that keeps the menu honest: an editorial label is the literal from
+ * config, never a resolved term, because its destination post is one specific
+ * article in one language. Exercised with an entry scoped to `jp` rather than
+ * with the US items: those are `countries: [us]` and correctly absent here, so
+ * asserting on them would only have proved the leak this scoping removed.
+ */
+$editorial_jp = array(
+    'items' => array(
+        array(
+            'id' => 'jp_editorial_probe',
+            // A label that also exists as a resolvable nav term. If editorial
+            // ever started going through the resolver, this would come back as
+            // the Japanese term instead of the literal.
+            'label' => 'Diamond Prices',
+            'countries' => array('jp'),
+            'target' => array('kind' => 'editorial', 'url' => '/jp/probe/'),
+        ),
+    ),
+);
+$GLOBALS['__ldn_nav_path'] = '/jp/daiyamondo-kakaku/';
+$nav_editorial = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+$editorial_titles = ldn_titles(
+    $nav_editorial->nav_items($nav_editorial->resolve_request_scope(), $editorial_jp)
+);
+check(
+    in_array('Diamond Prices', $editorial_titles, true),
+    'an editorial label stays the config literal on a Japanese path, got: '
+        . implode(', ', $editorial_titles)
+);
+check(
+    !in_array($jp_prices, $editorial_titles, true),
+    'and is NOT swapped for the resolved term, which would promise a Japanese '
+        . 'article that does not exist'
+);
+
+// The US editorial items must be absent here, which is the other half of it.
+foreach (array('Sell jewelry', 'Where to buy', 'Learn') as $us_only) {
+    check(
+        !in_array($us_only, $jp_primary_titles, true),
+        sprintf(
+            'US editorial item "%s" does not appear on a Japanese path: it points '
+                . 'at a US slug that 404s under the /jp/ mount',
+            $us_only
+        )
+    );
+}
+
+list(, $jp_markets) = ldn_switcher(ldn_items_for('/jp/daiyamondo-kakaku/', 'secondary'));
+$jp_market_titles = array();
+foreach ($jp_markets as $item) {
+    $jp_market_titles[] = $item->title;
+}
+check(
+    in_array($jp_terms['country']['jp'], $jp_market_titles, true)
+        && !in_array('Japan', $jp_market_titles, true),
+    'market names follow the locale too, got: ' . implode(', ', $jp_market_titles)
+);
+check(
+    count($jp_market_titles) === count($market_titles),
+    'the same markets are listed whatever the locale; only the wording changes'
+);
+
+// A locale the tree does not cover must fall back to the plugin's English rather
+// than emitting the Translator's [key] marker or an empty label.
+$GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
+$nav_unknown = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+$unknown_scope = array(
+    'site_id' => 'ringspo',
+    'country_code' => 'us',
+    'locale' => 'xx-XX',
+);
+$unknown_titles = ldn_titles(
+    $nav_unknown->nav_items($unknown_scope, $navigation['menus']['primary'])
+);
+check(
+    in_array('Diamond Prices', $unknown_titles, true),
+    'an unknown locale falls back to the plugin English, got: '
+        . implode(', ', array_slice($unknown_titles, 0, 4))
+);
+foreach ($unknown_titles as $title) {
+    if ($title === '' || strpos($title, '[') === 0) {
+        check(false, 'no label may be empty or a [key] debug marker, got: ' . $title);
+    }
+}
+
+$switcher_source = php_strip_whitespace(
+    LDN_PLUGIN_DIR . 'components/trait-ldn-nav-country-switcher.php'
+);
+foreach (array('<ul', '<li', '<nav', '<a href') as $markup) {
+    check(
+        stripos($switcher_source, $markup) === false,
+        sprintf('the country switcher must not emit %s either', $markup)
+    );
+}
+
+// -----------------------------------------------------------------------------
+// Footer (US replace only; theme widgets elsewhere)
+//
+// Test intent: the US footer is the price and size hubs plus the migrated
+// widget links, painted by LDN when no WordPress menu is assigned to the
+// location, and Japan keeps the theme footer.
+// Would fail if: auto-render ran on augment markets (US legal URLs under /jp/),
+// or the James Allen offer were copied in.
+// -----------------------------------------------------------------------------
+
+$GLOBALS['ldn_preview_menu_locations'] = array('primary' => 77, 'secondary' => 78);
+$GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
+$nav_footer = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+$footer_html = $nav_footer->footer_menu_html();
+check($footer_html !== '', 'the US footer paints when no menu is assigned to the location');
+check(
+    strpos($footer_html, 'Diamond Prices') !== false
+        && strpos($footer_html, '/us/diamond-prices/') !== false
+        && strpos($footer_html, 'Diamond Sizes') !== false
+        && strpos($footer_html, '/diamond-size/') !== false,
+    'the US footer starts with the price and size hubs, the same destinations as the header'
+);
+check(
+    strpos($footer_html, 'Privacy Policy') !== false
+        && strpos($footer_html, '/privacy-policy/') !== false,
+    'the US footer includes the privacy link from config'
+);
+check(
+    strpos($footer_html, 'James Allen') === false
+        && strpos($footer_html, 'james-allen') === false,
+    'the James Allen offer is not migrated into the footer'
+);
+check(
+    strpos($footer_html, 'class="ldn-nav-footer"') !== false,
+    'the footer strip uses the plugin class the stylesheet owns'
+);
+
+$GLOBALS['__ldn_nav_path'] = '/jp/daiyamondo-kakaku/';
+$nav_footer_jp = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+check(
+    $nav_footer_jp->footer_menu_html() === '',
+    'Japan does not receive the US footer strip; the theme still owns that footer'
+);
+
+$GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
+$GLOBALS['ldn_preview_menu_locations'] = array(
+    'primary' => 77,
+    'secondary' => 78,
+    'footer' => 79,
+);
+$nav_footer_assigned = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+check(
+    $nav_footer_assigned->footer_menu_html() === '',
+    'auto-render stays silent when a WordPress menu is assigned to footer, so the strip is not painted twice'
+);
+
+$footer_menu = new stdClass();
+$footer_menu->term_id = 79;
+$footer_menu->name = 'Footer';
+$footer_menu->slug = 'footer';
+$theme_offer = new stdClass();
+$theme_offer->ID = 20;
+$theme_offer->db_id = 20;
+$theme_offer->title = 'James Allen offer (theme)';
+$theme_offer->url = '/recommends/james-allen-footer/';
+$theme_offer->menu_item_parent = '0';
+$theme_offer->menu_order = 1;
+$theme_offer->classes = array();
+$footer_injected = $nav_footer_assigned->filter_menu_items(array($theme_offer), $footer_menu, array());
+$footer_injected_titles = array_map(function ($i) { return $i->title; }, $footer_injected);
+check(
+    in_array('Privacy Policy', $footer_injected_titles, true)
+        && !in_array('James Allen offer (theme)', $footer_injected_titles, true),
+    'an assigned footer location still uses replace, so the leftover offer widget is dropped'
+);
+
+$GLOBALS['ldn_preview_menu_locations'] = array('primary' => 77, 'secondary' => 78);
+
+$no_legal = ldn_gated_items(
+    array(
+        '*/price' => true,
+        '*/size' => true,
+        '*/standard_pages' => false,
+    ),
+    '/us/diamond-prices/',
+    'footer'
+);
+$no_legal_titles = ldn_titles($no_legal);
+check(
+    in_array('About', $no_legal_titles, true)
+        && !in_array('Privacy Policy', $no_legal_titles, true)
+        && !in_array('Terms of Service', $no_legal_titles, true),
+    'legal footer links hide when standard_pages is off; the rest of the strip stays'
+);
+check(
+    in_array('Diamond Prices', $no_legal_titles, true)
+        && in_array('Diamond Sizes', $no_legal_titles, true),
+    'price and size footer hubs stay when only standard_pages is off'
+);
+
+$no_price_footer = ldn_gated_items(
+    array(
+        '*/price' => false,
+        '*/size' => true,
+        '*/standard_pages' => true,
+    ),
+    '/us/diamond-prices/',
+    'footer'
+);
+$no_price_footer_titles = ldn_titles($no_price_footer);
+check(
+    !in_array('Diamond Prices', $no_price_footer_titles, true)
+        && in_array('Diamond Sizes', $no_price_footer_titles, true),
+    'the footer price hub hides when price is off; the size hub stays'
 );
 
 // -----------------------------------------------------------------------------

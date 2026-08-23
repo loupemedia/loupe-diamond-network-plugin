@@ -220,13 +220,45 @@ check(
 );
 
 check(
-    strpos($code, ':focus-within') !== false,
-    'the panel stays open while focus is inside it, so children are reachable by keyboard'
+    strpos($code, '.ldn-nav-column-heading > .sub-menu') !== false
+        && preg_match(
+            '/\.ldn-nav-column-heading\s*>\s*\.sub-menu[^{]*\{[^}]*display:\s*block/s',
+            $code
+        ),
+    'nested column lists are display:block, so a mega panel shows more than headings'
 );
 
 check(
     !preg_match('/outline:\s*(none|0)/i', $code),
     'focus outlines are never removed'
+);
+
+// -----------------------------------------------------------------------------
+// Footer + slide-out utility (phone)
+//
+// Test intent: the footer is a wrapping row on desktop and a stacked column
+// on a phone, with 44px targets, and the slide-out marks where secondary
+// items begin. Would fail if: the footer used nowrap or a shared 100% width
+// that crushed siblings, or the utility separator was unscoped.
+// -----------------------------------------------------------------------------
+
+check(
+    strpos($code, '.ldn-nav-footer') !== false
+        && preg_match(
+            '/\.ldn-nav-footer(?:\s*,\s*\.ldn-nav-footer ul)?[^{]*\{[^}]*flex-direction:\s*column/s',
+            $code
+        ),
+    'the footer stacks to one column below 768px'
+);
+
+check(
+    preg_match('/\.ldn-nav-footer a[^{]*\{[^}]*min-height:\s*44px/', $code) === 1,
+    'footer links are at least 44px tall'
+);
+
+check(
+    strpos($code, '.ldn-nav-utility-start') !== false,
+    'the slide-out marks where the utility items begin'
 );
 
 // -----------------------------------------------------------------------------

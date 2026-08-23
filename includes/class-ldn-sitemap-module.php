@@ -1,6 +1,6 @@
 <?php
 /**
- * Sitemap routing — price (registry), size (S3 artefact), and combined index.
+ * Sitemap routing — price + calculator (registry), size (registry), and combined index.
  *
  * Uses the same XML envelope (LDN_Sitemap) and HTTP response path for all
  * module sitemaps so crawlers see a consistent format.
@@ -281,7 +281,8 @@ final class LDN_Sitemap_Module {
         $rows = $this->registry->fetch_sitemap_rows(
             $this->site_id,
             $countries,
-            LDN_Page_Registry::PRICE_SITEMAP_MAX_HIERARCHY
+            LDN_Page_Registry::PRICE_SITEMAP_MAX_HIERARCHY,
+            LDN_Page_Registry::PRICE_SITEMAP_MODULES
         );
         if (empty($rows)) {
             return '';
@@ -308,22 +309,17 @@ final class LDN_Sitemap_Module {
             return '';
         }
 
-        $ctx = new LDN_Page_Context(
+        $rows = $this->registry->fetch_sitemap_rows(
             $this->site_id,
-            'size-sitemap',
-            $country,
-            null,
-            null,
-            null,
-            'size'
+            array($country),
+            99,
+            LDN_Page_Registry::SIZE_SITEMAP_MODULES
         );
-
-        $raw = $this->fetcher->fetch_artefact_html('size_sitemap_xml', $ctx);
-        if (!is_string($raw) || trim($raw) === '') {
+        if (empty($rows)) {
             return '';
         }
 
-        return LDN_Sitemap::normalise_urlset_xml($raw);
+        return LDN_Sitemap::urlset_from_rows($rows);
     }
 
     /**

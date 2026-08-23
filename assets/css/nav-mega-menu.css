@@ -117,8 +117,38 @@
 
 .ldn-nav-mega:hover > .sub-menu,
 .ldn-nav-mega:focus-within > .sub-menu {
+	display: grid;
 	visibility: visible;
 	opacity: 1;
+}
+
+/*
+ * Column lists live in a nested .sub-menu under each heading. Superfish and
+ * GeneratePress hide every .sub-menu until hover, which is right for a flyout
+ * and wrong inside a mega panel. The Customizer rule this replaces was
+ * `.mega-menu ul .sub-menu { position: static; display: block; }`. Without the
+ * equivalent here the panel only shows the column headings.
+ */
+.ldn-nav-mega > .sub-menu > .ldn-nav-column-heading > .sub-menu {
+	display: block;
+	position: static;
+	visibility: visible;
+	opacity: 1;
+	width: auto;
+	max-width: none;
+	left: auto;
+	top: auto;
+	float: none;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
+	margin: 0;
+	transform: none;
+}
+
+.ldn-nav-column-heading > .dropdown-menu-toggle,
+.ldn-nav-column-heading > a .dropdown-menu-toggle {
+	display: none;
 }
 
 /* =========================================================================
@@ -238,6 +268,63 @@
 	#generate-slideout-menu .ldn-nav-mega > .sub-menu,
 	.ldn-nav-mega > .sub-menu {
 		padding-left: 0.75rem;
+	}
+}
+
+/* Utility items appended to the slide-out on a replace market. */
+#generate-slideout-menu .ldn-nav-utility-start,
+#mobile-header .ldn-nav-utility-start {
+	margin-top: 0.75rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid;
+}
+
+/*
+ * Footer. The live Ringspo footer is widgets, so this strip is painted by the
+ * plugin rather than the theme walker. Desktop is a wrapping row; a phone is
+ * one stacked column with the same 44px targets as the slide-out.
+ */
+.ldn-nav-footer-wrap {
+	width: 100%;
+}
+
+.ldn-nav-footer,
+.ldn-nav-footer ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 1.25rem;
+	margin: 0;
+	padding: 0.5rem 0;
+	list-style: none;
+}
+
+.ldn-nav-footer li {
+	min-width: 0;
+}
+
+.ldn-nav-footer a {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	text-decoration: none;
+	color: inherit;
+}
+
+.ldn-nav-footer a:focus-visible {
+	outline: 2px solid;
+	outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+	.ldn-nav-footer,
+	.ldn-nav-footer ul {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0;
+	}
+
+	.ldn-nav-footer a {
+		min-height: 44px;
 	}
 }
 

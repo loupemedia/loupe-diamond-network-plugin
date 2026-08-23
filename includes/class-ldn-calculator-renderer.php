@@ -12,11 +12,13 @@ if (!defined('ABSPATH')) {
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-chrome.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-data.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-price-calculator.php';
+require_once LDN_PLUGIN_DIR . 'components/trait-ldn-url.php';
 
 final class LDN_Calculator_Renderer {
     use LDN_Trait_Chrome;
     use LDN_Trait_Data;
     use LDN_Trait_Price_Calculator;
+    use LDN_Trait_Url;
 
     /** @var array<string, string> Mirrors LDN_Renderer::CURRENCY_SYMBOLS for trait-ldn-data. */
     const CURRENCY_SYMBOLS = array(
@@ -229,12 +231,33 @@ final class LDN_Calculator_Renderer {
      * @return string
      */
     public function render_head_content(LDN_Page_Context $ctx) {
+        $title = __('Diamond Price Calculator', 'loupe-diamond-network');
         $description = __(
             'Free diamond price calculator with daily-refreshed market data. '
             . 'Check typical prices for any carat, shape, colour and clarity, or compare a quote.',
             'loupe-diamond-network'
         );
-        return '<meta name="description" content="' . esc_attr($description) . '">';
+        $canonical = $this->current_url();
+        $site = $this->config->get_site($ctx->site_id);
+        $site = is_array($site) ? $site : array();
+
+        $out = '<meta name="description" content="' . esc_attr($description) . '" />' . "\n";
+        if ($canonical !== '') {
+            $out .= '<link rel="canonical" href="' . esc_url($canonical) . '" />' . "\n";
+            $out .= '<meta property="og:url" content="' . esc_url($canonical) . '" />' . "\n";
+        }
+        $out .= '<meta property="og:type" content="website" />' . "\n";
+        $out .= '<meta property="og:title" content="' . esc_attr($title) . '" />' . "\n";
+        $out .= '<meta property="og:description" content="' . esc_attr($description) . '" />' . "\n";
+
+        $brand = !empty($site['brand_name']) ? (string) $site['brand_name'] : '';
+        if ($brand !== '') {
+            $out .= '<meta property="og:site_name" content="' . esc_attr($brand) . '" />' . "\n";
+        }
+
+        $schema = new LDN_Schema();
+        $out .= $schema->render_webapp($ctx, $site, $title, $description, $canonical);
+        return $out;
     }
 
     /**

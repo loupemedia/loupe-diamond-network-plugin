@@ -1,5 +1,53 @@
 # Changelog
 
+## [0.39.0] — 2026-08-23
+
+- **CP52_04 registry modules land in LDN.** Price sitemaps now read `module IN (pricing, calculator)` with `is_indexable = TRUE` from `ops.page_url_registry`. Size sitemaps read the same table (`module = size`) instead of the Z3 S3 artefact. Calculator rows are written by C4.5; size rows by Z3 after migration 018.
+- **Calculator destination head is complete.** Canonical, Open Graph and `WebApplication` JSON-LD now ship on `/diamond-prices/calculator` routes.
+- **Blog microdata removed on LDN routes.** `LDN_Body_Schema` suppresses GeneratePress `itemtype="Blog"` on routed pages and swaps the `blog` body class for `ldn-page` without clearing `is_home()`.
+
+## [0.38.0] — 2026-08-22
+
+- **The US footer is now in the same YAML as the header.** Diamond Prices and Diamond Sizes first (the hubs the old widget footer could not link to), then the seven live widget links (intro, sell, where to buy, about, disclosure, privacy, terms). The James Allen offer is dropped, not migrated. Items are `countries: [us]`, so Japan and the other seven blogs keep the theme footer. A `standard_pages` gate now passes the publish check (legal chrome is not a URL-structure family), so privacy, terms and disclosure can actually appear when the hub module is on.
+- **LDN paints that footer when no WordPress menu is assigned to the location.** Ringspo's live footer is GeneratePress widgets, so the header-style `wp_nav_menu` filter would never fire. Auto-render runs only for a `replace` market. An assigned footer menu still uses the existing inject path.
+- **Secondary items join the phone slide-out on a replace market.** GeneratePress hides the utility bar on a phone, which would have stranded About, Contact and the country switcher. Desktop secondary is unchanged. Augment markets keep their own theme drawer.
+
+## [0.37.0] — 2026-08-22
+
+- **`injection_mode` is per country, and a site-wide `replace` is now a validation error.** Ringspo is a multisite with one subsite per market, and the nine live subsites have nine separately hand-built menus that share almost nothing: 168 items on `us`, 40 Japanese items on `jp` (diamond info, brands, twelve retailer reviews, twelve birthstone pages), 34 on `uk`, 22 on `ca`, five to seven on `au` / `nz` / `sg` / `hk` / `ie`. Since 0.32.0 the one line `injection_mode: replace` applied to all nine, so a deploy would have deleted eight markets' headers and put English labels on US slugs that 404 under those mounts. Only `us` has been migrated, so only `us` claims `replace`.
+- **An entry can declare which markets it belongs to.** `countries: [us]` on the eight US editorial items, because `augment` appends the *whole* declared menu, so per-country mode alone would still have appended Learn, Sell jewelry and Where to buy on top of Japan's own menu. Generated pricing and size families stay network-wide: the same product everywhere, gated by rollout rather than by membership. Dropping an entry drops its subtree, so a market that does not get Learn does not get its columns.
+- **Two guards that make the next step safe.** A live market with no declared mode fails validation, and a market claiming `replace` with no editorial of its own fails too, because replace discards the WordPress menu and would leave that market with pricing links and nothing else. At runtime an undeclared market augments rather than replaces, erring additively.
+- Editorial labels are asserted against a market-scoped entry now rather than against the US items on a Japanese path. The old assertion only held because of the leak this release removes.
+
+## [0.36.0] — 2026-08-22
+
+- **Navigation wording comes from the i18n tree (PRD-018 CP124_03, part).** Structural labels and market names resolve from `i18n/{locale}/common.json`, the same source the destination page, chart and breadcrumb use, and ship pre-resolved in the bundle's new `nav_terms` section. The plugin's `_x()` map survives as the fallback for a site with no `nav_terms`, which is English by definition: gettext has only an `en_GB` catalogue, so wrapping these in `_x()` had made them *translatable*, never translated. A reader on `/jp/` saw "Diamond Prices" above a page headed ダイヤモンド価格.
+- **Editorial labels are still not translated, deliberately.** Learn, Ring guides, Sell jewelry and Where to buy point at one English post set, so a Japanese label there would promise an article that does not exist. Guarded by test, because it looks like an omission.
+- **Eight of the nine live markets author nothing.** `en-AU`, `en-CA`, `en-HK`, `en-IE`, `en-NZ` and `en-SG` inherit through `_fallback` to `en-GB` then `en-US`, and Commonwealth spelling applies on the way through, so `jewelry` becomes `jewellery` without a second copy of the term. Only `en-US` and `ja-JP` carry the 43 keys.
+- **A launch into an untranslated language now fails CI.** `nav_term_locale_gaps()` reports what a locale inherits rather than what it resolves, because the fallback chain means everything resolves. Moving `fr` into the switcher register's `live` list without French terms names `fr-FR` and the missing keys. Suppressed markets are exempt: nobody can see them.
+
+## [0.35.0] — 2026-08-22
+
+- **`standard_pages` is a third rollout module (PRD-021 CP 136).** The hub, the menu gate and the slave share one vocabulary (`price`, `size`, `standard_pages`). A country switcher entry is omitted until `price` is live for that market, so a yaml-live country cannot sit in the header above a 404. The config bundle now carries the standard-pages catalogue so the hub can refuse an unmapped country at publish.
+
+## [0.34.0] — 2026-08-22
+
+- **The country switcher is generated (PRD-018 CP126_01).** `injection_mode: replace` in 0.32.0 made LDN the owner of the secondary menu, and the switcher was still a parent with no children, so "Select Country" would have shipped as a single link to the US price hub. It now emits one item per live market, from a register on the `country_switcher` entry.
+- **Markets are a three-state register, not a list.** Every code in `countries[]` must be `live` or `suppressed` with a reason; an undeclared one fails validation naming it. Ringspo declares 9 live and 21 suppressed. Launching a market is deleting a line, and adding a country to site config can no longer leave it configured but unreachable from the header — which is how the hand-built menu reached 9 of 30 without anyone noticing.
+- **Switcher links are root-relative, and only there.** Every other nav link is mount-relative because it stays inside the current subsite. A switcher link crosses to another one, and `home_url()` on the `/jp/` install turns `/us/diamond-prices/` into `/jp/us/diamond-prices/`. Guarded by a test that runs against a mounted install; with the mount left at `/` the check passes either way.
+- **One label convention and one ordering.** Names come from `countries[]` `full_name`, order is the declared register order. The nine hand-built subsite copies had drifted on both: Japan was `日本` while the rest were English, and `au` listed the UK before Singapore where the other eight reversed them. The US resolves to `/us/diamond-prices/` rather than the bare domain, and Japan to its localised `/jp/daiyamondo-kakaku/`. Labels are English pending the move to `i18n/{locale}/common.json`.
+
+## [0.33.0] — 2026-08-22
+
+- **Ringspo primary nav is six items.** Diamond Prices, Diamond Sizes, Learn, Ring guides, Sell jewelry, Where to buy. Learn merges the old Learn here / Guides / Jewelry columns (jewelry SKUs sit under Guides). Carat weight guides is labelled Ring guides so it does not read as a third price/size index. Secondary and the theme footer are unchanged.
+
+## [0.32.0] — 2026-08-21
+
+- **Ringspo navigation is `injection_mode: replace` (PRD-018 CP124_02).** The US WordPress menu (168 primary items, 14 secondary) is now declared in `config/navigation/ringspo.yaml`, with Diamond Prices and Diamond Sizes merged in after Jewelry. LDN owns membership; leftover WP items no longer share the bar, which is what wrapped the header onto two rows and duplicated Sell jewelry.
+- **Mega-menu columns show their links.** Nested `.sub-menu` lists under column headings are `display: block; position: static`, matching the Customizer rule the LDN stylesheet replaced. Without this the Diamond Prices / Diamond Sizes panels only showed the three headings.
+- **Editorial items may use an absolute http(s) URL.** Secondary "Reviews of Ringspo" points at TrustSpot. Hash parents (`Learn here`) resolve to the first real descendant rather than emitting `#`.
+- **Long editorial columns collapse in the slide-out.** A headed list with more than three leaves becomes its heading, same as a generated fan-out, so the drawer does not inherit the 168-item desktop tree. Short tool lists stay whole.
+
 ## [0.31.0] — 2026-08-21
 
 - **Competing-brand price URL trees.** Diamond Price Exact is carat-first at the domain root (`/1ct/round/natural/`). Diamond Price Guru is shape-first (`/us/round-brilliant/1-ct/mined/`). Diamond Advisors uses a flat leaf (`/us/1-carat-natural-round-cut-diamond-price/`) plus sibling shape and carat hubs so large terms still have a parent. `compile_pattern` now matches composite slug segments (`{carat}-{type}-{shape}-diamond-price`).

@@ -70,5 +70,13 @@ check(
     !LDN_Page_Registry::price_sitemap_includes_level(6),
     'future cert/listing leaves (registry 6+) stay out of the price sitemap'
 );
+check(
+    in_array('calculator', LDN_Page_Registry::PRICE_SITEMAP_MODULES, true),
+    'price sitemap includes calculator module rows'
+);
+check(
+    LDN_Page_Registry::SIZE_SITEMAP_MODULES === array('size'),
+    'size sitemap reads registry size module only'
+);
 
 echo "OK: {$checks} checks passed\n";

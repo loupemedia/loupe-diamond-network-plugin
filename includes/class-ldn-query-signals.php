@@ -46,7 +46,7 @@ final class LDN_Query_Signals {
      * streams XML and exits before the theme loads, so it has no title or
      * pagination state to correct.
      */
-    const ROUTES = array('price', 'size');
+    const ROUTES = array('price', 'size', 'calculator');
 
     /**
      * Hook the corrections.
@@ -121,6 +121,18 @@ final class LDN_Query_Signals {
                 return self::with_site_name(
                     $renderer->page_title($ctx, is_array($summary) ? $summary : array())
                 );
+            }
+        }
+
+        if (class_exists('LDN_Calculator_Module')) {
+            $calculator = LDN_Calculator_Module::dispatcher();
+            if ($calculator instanceof LDN_Calculator_Dispatcher) {
+                $ctx = $calculator->current_context();
+                if ($ctx instanceof LDN_Page_Context) {
+                    return self::with_site_name(
+                        __('Diamond Price Calculator', 'loupe-diamond-network')
+                    );
+                }
             }
         }
 

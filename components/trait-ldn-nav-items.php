@@ -70,6 +70,16 @@ trait LDN_Trait_Nav_Items {
     private $nav_item_seq = 0;
 
     /**
+     * Resolved wording for the locale being rendered, from the bundle's
+     * `nav_terms`. Set in `nav_items()`, which is the only entry point, so every
+     * label lookup below sees the request's locale without threading it through
+     * six signatures.
+     *
+     * @var array<string, array<string, string>>
+     */
+    private $nav_terms = array();
+
+    /**
      * Build the synthetic item list for a resolved scope and one menu's config.
      *
      * @param array  $scope       From LDN_Nav::resolve_request_scope().
@@ -79,6 +89,7 @@ trait LDN_Trait_Nav_Items {
      */
     public function nav_items(array $scope, array $menu_config, $variant = 'desktop') {
         $items = array();
+        $this->nav_terms = $this->nav_resolve_terms($scope);
         $declared = isset($menu_config['items']) && is_array($menu_config['items'])
             ? $menu_config['items']
             : array();
@@ -143,6 +154,10 @@ trait LDN_Trait_Nav_Items {
      * @return array<int, object>
      */
     private function expand_entry(array $entry, array $scope, $parent_id, $variant = 'desktop') {
+        if (!$this->nav_entry_in_country($entry, $scope)) {
+            return array();
+        }
+
         if (!$this->nav_entry_passes_gate($entry, $scope)) {
             return array();
         }
@@ -156,16 +171,7 @@ trait LDN_Trait_Nav_Items {
         }
 
         if ($kind === 'country_switcher') {
-            // The switcher's own items are CP126_01; here it is a parent only.
-            $url = $this->nav_generated_url(
-                array('page_family' => 'price_top_level'),
-                $scope
-            );
-            if ($url === '') {
-                return array();
-            }
-            $item = $this->nav_item($this->nav_entry_label($entry), $url, $parent_id, $entry);
-            return array($item);
+            return $this->expand_country_switcher($scope, $entry, $parent_id);
         }
 
         $url = '';
@@ -245,16 +251,55 @@ trait LDN_Trait_Nav_Items {
                 : array();
 
             $is_list = isset($entries['kind']) && $entries['kind'] === 'list';
+            $list_items = ($is_list && isset($entries['items']) && is_array($entries['items']))
+                ? $entries['items']
+                : array();
 
             /*
              * In the slide-out, a fan-out column collapses to its heading, which
              * then links to the hub that still lists the ten shapes or nine carats.
-             * `list` columns are kept whole: they are short, hand-ordered, and hold
-             * the calculator and the comparison tool, which have to stay reachable
-             * in two taps.
+             * Short `list` columns stay whole: they hold the calculator and the
+             * comparison tool, which have to stay reachable in two taps.
+             * A headed editorial list with more than three leaves (Learn here,
+             * carat guides, retailer reviews) collapses the same way, or the
+             * drawer inherits the 168-item desktop tree.
              */
+            $collapse_long_list = $variant === 'narrow'
+                && $is_list
+                && $heading_label !== ''
+                && count($list_items) > 3;
             if ($variant === 'narrow' && !$is_list && $this->nav_is_fan_out($entries)) {
                 $hub = $this->nav_column_hub_url($entries, $scope);
+                if ($hub === '' || $heading_label === '') {
+                    continue;
+                }
+                if (isset($seen_urls[$hub])) {
+                    $this->nav_log(sprintf(
+                        'narrow: dropping "%s", its hub duplicates a link already in this branch',
+                        $heading_label
+                    ));
+                    continue;
+                }
+                $seen_urls[$hub] = true;
+                $heading = $this->nav_item($heading_label, $hub, $parent_id, array());
+                $heading->classes[] = 'ldn-nav-column-heading';
+                $heading->classes[] = 'ldn-nav-narrow-hub';
+                $items[] = $heading;
+                continue;
+            }
+            if ($collapse_long_list) {
+                $hub = '';
+                foreach ($list_items as $sub) {
+                    if (!is_array($sub)) {
+                        continue;
+                    }
+                    $expanded = $this->expand_entry($sub, $scope, $parent_id, $variant);
+                    if ($expanded === array()) {
+                        continue;
+                    }
+                    $hub = $expanded[0]->url;
+                    break;
+                }
                 if ($hub === '' || $heading_label === '') {
                     continue;
                 }
@@ -570,10 +615,22 @@ trait LDN_Trait_Nav_Items {
      */
     private function nav_editorial_url(array $target) {
         $url = isset($target['url']) ? (string) $target['url'] : '';
-        if ($url === '' || $url[0] !== '/') {
+        if ($url === '') {
             return '';
         }
-        return $this->nav_home_url($url);
+        if (preg_match('#^https?://#', $url)) {
+            return $url;
+        }
+        if ($url[0] !== '/') {
+            return '';
+        }
+        $fragment = '';
+        $hash = strpos($url, '#');
+        if ($hash !== false) {
+            $fragment = substr($url, $hash);
+            $url = substr($url, 0, $hash);
+        }
+        return $this->nav_home_url($url) . $fragment;
     }
 
     /**
@@ -698,15 +755,42 @@ trait LDN_Trait_Nav_Items {
     }
 
     /**
+     * Resolved wording for a scope's locale, or an empty set.
+     *
+     * @param array $scope
+     * @return array<string, array<string, string>>
+     */
+    private function nav_resolve_terms(array $scope) {
+        if (empty($scope['site_id']) || empty($scope['locale'])) {
+            return array();
+        }
+        if (!method_exists($this->config, 'get_nav_terms')) {
+            return array();
+        }
+        $terms = $this->config->get_nav_terms($scope['site_id'], $scope['locale']);
+        return is_array($terms) ? $terms : array();
+    }
+
+    /**
      * Structural nav label for a `nav.*` key.
      *
-     * Structural wording is translated through the plugin's own catalogue, unlike
-     * shape and carat terms which come from the shipped bundle terms.
+     * The i18n tree wins, because it is the same source the destination page,
+     * chart and breadcrumb resolve from, and it carries all 33 locales. The
+     * gettext map below is the fallback for a site whose bundle ships no
+     * `nav_terms` at all, and it is what keeps the msgids in the POT.
+     *
+     * Note that gettext only has an `en_GB` catalogue, so reaching the fallback
+     * means English regardless of locale. That is the bug the i18n tree fixes,
+     * not something to rely on.
      *
      * @param string $key
      * @return string
      */
     private function nav_structural_label($key) {
+        if (!empty($this->nav_terms['label'][$key])) {
+            return (string) $this->nav_terms['label'][$key];
+        }
+
         $labels = array(
             'nav.diamond_prices' => _x('Diamond Prices', 'navigation', 'loupe-diamond-network'),
             'nav.diamond_sizes' => _x('Diamond Sizes', 'navigation', 'loupe-diamond-network'),
@@ -819,6 +903,50 @@ trait LDN_Trait_Nav_Items {
     }
 
     /**
+     * Whether an entry belongs in this market at all.
+     *
+     * Distinct from the rollout `gate`, which asks whether a module has launched
+     * for a country. This asks whether the item is *that market's item*, and the
+     * answer is a config fact with no rollout dimension.
+     *
+     * No `countries` means network-wide, which is right for the generated pricing
+     * and size families: the same product in every market, differing only in
+     * data. `countries` is for editorial, which genuinely differs - Ringspo's
+     * nine subsites have nine hand-built menus, and the US items point at US
+     * posts that 404 under the `/jp/` mount while Japan's twelve retailer
+     * reviews and twelve birthstone pages have no US equivalent.
+     *
+     * Dropping an entry drops its whole subtree, because children are expanded
+     * from this same call. That is the intent: a market that does not get "Learn"
+     * must not get its columns either.
+     *
+     * @param array $entry
+     * @param array $scope
+     * @return bool
+     */
+    private function nav_entry_in_country(array $entry, array $scope) {
+        if (empty($entry['countries']) || !is_array($entry['countries'])) {
+            return true;
+        }
+
+        // A country_switcher's `countries` is the live/suppressed register, a
+        // different thing that happens to share the key. It is never a
+        // membership list, so it must not be read as one.
+        if (isset($entry['countries']['live']) || isset($entry['countries']['suppressed'])) {
+            return true;
+        }
+
+        $country = strtolower((string) $scope['country_code']);
+        foreach ($entry['countries'] as $code) {
+            if (is_scalar($code) && strtolower((string) $code) === $country) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Whether an entry's `gate` allows it for this scope.
      *
      * Two conditions, both required. The site must publish that page family at all
@@ -865,6 +993,11 @@ trait LDN_Trait_Nav_Items {
         }
         if ($module === 'price') {
             return !empty($structure['level_1']);
+        }
+        if ($module === 'standard_pages') {
+            // Legal chrome is not a URL-structure family. The hub ON/OFF is
+            // the gate; this check only asks whether the site could publish it.
+            return true;
         }
         // Unknown module: refuse rather than fall through to another module's check.
         $this->nav_log(sprintf('unknown gate module "%s" in publish check', $module));

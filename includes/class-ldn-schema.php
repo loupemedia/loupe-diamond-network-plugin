@@ -139,6 +139,48 @@ final class LDN_Schema {
     }
 
     /**
+     * WebApplication JSON-LD for the calculator destination page.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $site
+     * @param string           $name
+     * @param string           $description
+     * @param string           $canonical_url
+     * @return string
+     */
+    public function render_webapp(
+        LDN_Page_Context $ctx,
+        array $site,
+        $name,
+        $description,
+        $canonical_url
+    ) {
+        if (!apply_filters('ldn_emit_json_ld', true, $ctx)) {
+            return '';
+        }
+
+        $org = $this->organization_node($site);
+        $node = array(
+            '@type'               => 'WebApplication',
+            '@id'                 => rtrim((string) $canonical_url, '/') . '#webapp',
+            'name'                => (string) $name,
+            'description'         => (string) $description,
+            'url'                 => (string) $canonical_url,
+            'applicationCategory' => 'FinanceApplication',
+            'operatingSystem'     => 'Any (web-based)',
+            'isAccessibleForFree' => true,
+            'provider'            => $org,
+        );
+
+        $doc = array('@context' => 'https://schema.org', '@graph' => array($org, $node));
+        $json = wp_json_encode($doc, self::JSON_SCRIPT_FLAGS);
+        if (!is_string($json) || $json === '') {
+            return '';
+        }
+        return '<script type="application/ld+json">' . $json . '</script>' . "\n";
+    }
+
+    /**
      * Assemble the `@graph` node list (pure — unit-tested).
      *
      * @return array<int, array<string, mixed>>
