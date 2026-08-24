@@ -744,7 +744,12 @@ $market_bag['market_overview']['carat_price_table'] = array(
 $carat_table_html = $renderer->carat_price_table_html($ringspo_top, $market_bag['market_overview'], '$', '');
 check(
     strpos($carat_table_html, 'ldn-row-highlight') !== false,
-    'top-level carat table highlights the 1 ct anchor row'
+    'Ringspo top-level carat table highlights the 1 ct anchor row'
+);
+$loupe_carat_table_html = $renderer->carat_price_table_html($top_ctx, $market_bag['market_overview'], '$', '');
+check(
+    strpos($loupe_carat_table_html, 'ldn-row-highlight') === false,
+    'Loupe top-level carat table does not highlight the anchor row'
 );
 
 $type_nav_html = $renderer->type_nav_links_html($ringspo_top, $market_bag);
@@ -1029,6 +1034,14 @@ check(
     strpos($loupe_intro, 'increased by 8.50%') !== false,
     'intro_html reports the 12-month change value (not the 7-day value)'
 );
+check(
+    strpos($loupe_intro, ', and has') === false,
+    'intro_html does not put a comma before "and has" (house style: no Oxford comma)'
+);
+check(
+    strpos($loupe_intro, ' and has increased') !== false,
+    'intro_html still joins the change clause with "and has"'
+);
 
 $snapshot_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Snapshot_Policy());
 $snapshot_intro = $snapshot_renderer->intro_html($shape_ctx, $intro_summary, 'USD');
@@ -1236,6 +1249,10 @@ check(
     strpos($range_intro, '.00') === false,
     'intro prices use whole numbers (no cents)'
 );
+check(
+    strpos($range_intro, ', and clarity') === false,
+    'intro range sentence does not Oxford-comma "cut, color, and clarity"'
+);
 
 // --- 13. carat ladder has an explanatory intro line (CP1) -------------------
 // Test intent: the carat ladder explains it compares this shape across carat
@@ -1254,9 +1271,10 @@ check(
 );
 
 // --- 15. all-shapes overview copy split (CP2) ----------------------------
-// Test intent: intro_text renders alone before the hero; trend analysis renders
-// before the chart; shape_analysis after; legacy keys are ignored.
-// Would fail if: analysis still rendered after the hero, or legacy duplicates leaked.
+// Test intent: each overview_*_dynamic id maps to one copy.json key; legacy
+// intro/ranking_summary keys are ignored.
+// Would fail if: overview_detail_dynamic still leaked intro_text, or analysis
+// mixed into the shape-gap block.
 $copy_bag = array(
     'copy' => array('sections' => array(
         'intro_text'      => 'Opening paragraph about prices.',
@@ -1272,19 +1290,19 @@ $intro_only = $renderer->copy_dynamic_html('overview_intro_dynamic', $all_shapes
 check(
     strpos($intro_only, 'Opening paragraph') !== false
         && strpos($intro_only, 'Trend paragraph') === false,
-    'overview_intro_dynamic renders intro_text only (before hero)'
+    'overview_intro_dynamic renders intro_text only'
 );
 $analysis_before = $renderer->copy_dynamic_html('overview_analysis_dynamic', $all_shapes_ctx, $copy_bag);
 check(
     strpos($analysis_before, 'Trend paragraph') !== false
         && strpos($analysis_before, 'Oval leads') === false,
-    'overview_analysis_dynamic renders trend analysis before the hero chart'
+    'overview_analysis_dynamic renders trend analysis only'
 );
 $detail_copy = $renderer->copy_dynamic_html('overview_detail_dynamic', $all_shapes_ctx, $copy_bag);
 check(
     strpos($detail_copy, 'Trend paragraph') === false
         && strpos($detail_copy, 'Oval leads') !== false,
-    'overview_detail_dynamic renders shape_analysis only after hero'
+    'overview_detail_dynamic renders shape_analysis only'
 );
 check(
     strpos($detail_copy, 'Legacy duplicate') === false,
@@ -1334,6 +1352,140 @@ $two_shape_html = $renderer->copy_dynamic_html('overview_detail_dynamic', $all_s
 check(
     strpos($two_shape_html, 'Oval leads') !== false,
     'overview_detail_dynamic still paints shape_analysis when two shapes differ'
+);
+
+// --- 15b. ranking H2 sits on the chart; table follows shape-gap copy ----------
+// Test intent: the ranked-by-shape heading titles the bar chart, not the table,
+// so Loupe can put shape_analysis between them. Combined bar_chart_links still
+// emits H2 then chart then table with one heading.
+// Would fail if: the H2 stayed on the table, or the chart kept a "Prices by shape" H3.
+$ranking_chart_bag = $ranking_bag;
+$ranking_chart_bag['ranking_chart'] = array(
+    'data'   => array(array('x' => array('Round', 'Oval'), 'y' => array(6000, 5200), 'type' => 'bar')),
+    'layout' => array('title' => array('text' => 'Prices by shape')),
+);
+$chart_block = $renderer->shapes_ranking_chart_html($all_shapes_ctx, $ranking_chart_bag);
+$h2_in_chart = strpos($chart_block, 'ranked by shape');
+$figure_in_chart = strpos($chart_block, 'ldn-chart');
+check(
+    $chart_block !== ''
+        && $h2_in_chart !== false
+        && $figure_in_chart !== false
+        && $h2_in_chart < $figure_in_chart,
+    'shapes_ranking_chart_html puts the ranked-by-shape H2 above the bar chart'
+);
+check(
+    strpos($chart_block, 'ldn-chart__title') === false,
+    'ranking chart does not repeat a Prices by shape H3 under the page H2'
+);
+$table_no_h2 = $renderer->shapes_ranking_table_html($all_shapes_ctx, $ranking_chart_bag, false, false);
+check(
+    strpos($table_no_h2, '<h2>') === false
+        && strpos($table_no_h2, 'ldn-data-table') !== false,
+    'shapes_ranking_table_html can omit the H2 when the chart already has it'
+);
+$combined_hub = $renderer->shapes_at_carat_hero_html($all_shapes_ctx, $ranking_chart_bag);
+$combined_h2 = strpos($combined_hub, 'ranked by shape');
+$combined_chart = strpos($combined_hub, 'id="ldn-shapes-ranking-chart"');
+$combined_table = strpos($combined_hub, 'ldn-data-table');
+check(
+    $combined_h2 !== false
+        && $combined_chart !== false
+        && $combined_table !== false
+        && $combined_h2 < $combined_chart
+        && $combined_chart < $combined_table
+        && substr_count($combined_hub, 'ranked by shape') === 1,
+    'bar_chart_links hub is H2, then chart, then table, with one ranking heading'
+);
+check(
+    $renderer->render_section('shapes_ranking_chart', $all_shapes_ctx, $ranking_chart_bag) === $chart_block,
+    'shapes_ranking_chart section id dispatches to the chart builder'
+);
+check(
+    $renderer->render_section('shapes_ranking_table', $all_shapes_ctx, $ranking_chart_bag) === $table_no_h2,
+    'shapes_ranking_table section id omits the H2'
+);
+
+if (!class_exists('LDN_Config_Loupe_All_Shapes_Order')) {
+    class LDN_Config_Loupe_All_Shapes_Order extends LDN_Config {
+        public function get_page_layout($site_id, $page_level, $country_code = null) {
+            return array(
+                'hero_component' => null,
+                'sections'       => array(
+                    'overview_intro_dynamic',
+                    'shapes_ranking_chart',
+                    'overview_detail_dynamic',
+                    'shapes_ranking_table',
+                    'overview_analysis_dynamic',
+                ),
+                'ad_slots'       => array(),
+            );
+        }
+    }
+}
+if (!class_exists('LDN_Fetcher_Loupe_All_Shapes_Order')) {
+    class LDN_Fetcher_Loupe_All_Shapes_Order extends LDN_Data_Fetcher {
+        public function fetch_artefact($artefact_id, $ctx) {
+            if ($artefact_id === 'templated_copy_json') {
+                return array('sections' => array(
+                    'intro_text'     => 'A 1 carat natural diamond currently sits at $3,184.',
+                    'shape_analysis' => 'Marquise leads on price at $3,620.',
+                    'analysis'       => 'Overall, the price trend is mixed.',
+                ));
+            }
+            if ($artefact_id === 'all_shapes_summary_json') {
+                return array(
+                    'distribution' => array(
+                        'median_price' => 3184,
+                        'sample_size'  => 88321,
+                        'price_range'  => array('min' => 886, 'max' => 19270),
+                    ),
+                    'aggregate' => array('shape_count' => 10),
+                );
+            }
+            if ($artefact_id === 'shapes_ranking_json') {
+                return array(
+                    'currency_symbol' => '$',
+                    'change_period'   => '12_months',
+                    'shapes' => array(
+                        array('shape' => 'Marquise', 'median_price' => 3620, 'price_change' => -17.37),
+                        array('shape' => 'Princess cut', 'median_price' => 2439, 'price_change' => -21.83),
+                    ),
+                );
+            }
+            if ($artefact_id === 'shapes_at_carat_chart') {
+                return array(
+                    'data'   => array(array('x' => array('Marquise', 'Princess'), 'y' => array(3620, 2439), 'type' => 'bar')),
+                    'layout' => array('title' => array('text' => 'Prices by shape')),
+                );
+            }
+            return null;
+        }
+    }
+}
+$order_renderer = new LDN_Renderer(
+    new LDN_Fetcher_Loupe_All_Shapes_Order(),
+    new LDN_Config_Loupe_All_Shapes_Order()
+);
+$order_html = $order_renderer->render($all_shapes_ctx);
+$pos_intro = strpos($order_html, 'currently sits at $3,184');
+$pos_cards = strpos($order_html, 'ldn-stats');
+$pos_h2 = strpos($order_html, 'ranked by shape');
+$pos_chart = strpos($order_html, 'id="ldn-shapes-ranking-chart"');
+$pos_gap = strpos($order_html, 'Marquise leads on price');
+$pos_table = strpos($order_html, 'ldn-data-table');
+$pos_trend = strpos($order_html, 'Overall, the price trend is mixed');
+check(
+    $pos_intro !== false && $pos_cards !== false && $pos_h2 !== false
+        && $pos_chart !== false && $pos_gap !== false && $pos_table !== false
+        && $pos_trend !== false
+        && $pos_intro < $pos_cards
+        && $pos_cards < $pos_h2
+        && $pos_h2 < $pos_chart
+        && $pos_chart < $pos_gap
+        && $pos_gap < $pos_table
+        && $pos_table < $pos_trend,
+    'Loupe all-shapes page order is intro, cards, H2, chart, shape gap, table, trend'
 );
 
 // --- 16. diamond-type intro from type_summary fallback (CP3) -----------------
@@ -1460,14 +1612,15 @@ check(
     'Ringspo carat tiers table does not nest the Loupe 1/2/3 ct history chart'
 );
 
-// Test intent: Loupe diamond-type hub nests 1/2/3 ct history + analysis, not PPC.
+// Test intent: Loupe diamond-type hub renders 1/2/3 ct history + analysis as its
+// own section (before the carat table), not nested under the table.
 // Would fail if: history chart required the Ringspo PPC artefact, or analysis copy
 // was dropped.
-$loupe_history_html = $renderer->carat_tiers_table_html(
+$loupe_history_html = $renderer->type_carat_history_section_html(
     $type_ctx,
     array_merge($type_summary_bag, array(
         'type_carat_history_chart' => array(
-            'data' => array(array('x' => array('2026-01-01'), 'y' => array(5000), 'type' => 'scatter')),
+            'data' => array(array('x' => array('2026-01-01'), 'y' => array(-3.1), 'type' => 'scatter')),
             'layout' => array('margin' => array('t' => 150)),
         ),
         'copy' => array(
@@ -1475,20 +1628,23 @@ $loupe_history_html = $renderer->carat_tiers_table_html(
                 'chart_analysis' => 'At 1 carat, typical natural prices have decreased by 3.1%.',
             ),
         ),
-    )),
-    'Natural diamond prices by carat weight'
+    ))
 );
 check(
     strpos($loupe_history_html, 'ldn-type-carat-history-chart') !== false,
-    'Loupe diamond-type table nests the 1/2/3 ct history chart'
+    'Loupe diamond-type history section renders the 1/2/3 ct chart'
 );
 check(
     strpos($loupe_history_html, 'decreased by 3.1%') !== false,
-    'Loupe diamond-type history chart nests templated chart_analysis copy'
+    'Loupe diamond-type history section nests templated chart_analysis copy'
+);
+check(
+    strpos($tiers_html, 'ldn-type-carat-history-chart') === false,
+    'Loupe carat tiers table does not nest the history chart'
 );
 check(
     strpos($loupe_history_html, 'ldn-price-per-carat-block') === false,
-    'Loupe diamond-type table does not nest Ringspo price-per-carat when that artefact is absent'
+    'Loupe diamond-type history section does not nest Ringspo price-per-carat'
 );
 check(
     strpos($tiers_html, 'ldn-row-highlight') !== false,
@@ -1534,6 +1690,91 @@ $combined_section = $renderer->render_section(
 check(
     strpos($combined_section, 'ldn-carat-tiers-table') !== false,
     'comparison_chart section renders the combined carat tiers section'
+);
+
+// Test intent: Loupe diamond-type page leads with the history chart, then the table,
+// then ladder intro copy. Would fail if: type_carat_history_chart still nested under
+// the table or intro still precedes the chart.
+if (!class_exists('LDN_Config_Loupe_Type_Order')) {
+    class LDN_Config_Loupe_Type_Order extends LDN_Config {
+        public function get_page_layout($site_id, $page_level, $country_code = null) {
+            return array(
+                'hero_component' => null,
+                'sections'       => array(
+                    'type_carat_history_chart',
+                    'comparison_chart',
+                    'type_overview_dynamic',
+                    'type_buyer_context_dynamic',
+                ),
+                'ad_slots'       => array(),
+            );
+        }
+    }
+}
+if (!class_exists('LDN_Fetcher_Loupe_Type_Order')) {
+    class LDN_Fetcher_Loupe_Type_Order extends LDN_Data_Fetcher {
+        public function fetch_artefact($artefact_id, $ctx) {
+            if ($artefact_id === 'type_summary_json') {
+                return array(
+                    'analysis_date' => '2026-07-28',
+                    'aggregate' => array(
+                        'carat_count'           => 2,
+                        'most_popular_carat'    => '1',
+                        'weighted_median_price' => 5412,
+                        'total_sample_size'     => 456637,
+                    ),
+                    'carat_tiers' => array(
+                        array(
+                            'carat_weight' => '1',
+                            'median_price' => 3107,
+                            'sample_size'  => 91399,
+                        ),
+                        array(
+                            'carat_weight' => '2',
+                            'median_price' => 14553,
+                            'sample_size'  => 27449,
+                        ),
+                    ),
+                );
+            }
+            if ($artefact_id === 'type_carat_history_chart') {
+                return array(
+                    'data' => array(array(
+                        'x' => array('2026-01-01'),
+                        'y' => array(-3.1),
+                        'type' => 'scatter',
+                    )),
+                    'layout' => array('margin' => array('t' => 150)),
+                );
+            }
+            if ($artefact_id === 'templated_copy_json') {
+                return array(
+                    'sections' => array(
+                        'intro' => 'Natural diamond prices span 2 carat weights in our index.',
+                        'buyer_context' => 'Use it to set a budget before you compare shapes.',
+                        'chart_analysis' => 'At 1 carat, typical natural prices have decreased by 3.1%.',
+                    ),
+                );
+            }
+            return null;
+        }
+    }
+}
+$loupe_type_order_renderer = new LDN_Renderer(
+    new LDN_Fetcher_Loupe_Type_Order(),
+    new LDN_Config_Loupe_Type_Order()
+);
+$loupe_type_order_html = $loupe_type_order_renderer->render($type_ctx);
+$pos_history = strpos($loupe_type_order_html, 'ldn-type-carat-history-chart');
+$pos_table = strpos($loupe_type_order_html, 'ldn-carat-tiers-table');
+$pos_intro = strpos($loupe_type_order_html, 'Natural diamond prices span 2 carat weights');
+$pos_buyer = strpos($loupe_type_order_html, 'set a budget before you compare shapes');
+check(
+    $pos_history !== false && $pos_table !== false && $pos_intro !== false && $pos_buyer !== false
+        && $pos_history < $pos_table
+        && $pos_table < $pos_intro
+        && $pos_intro < $pos_buyer,
+    'Loupe diamond-type page order is history chart, carat table, intro, buyer context'
 );
 
 $toggle_html = $renderer->nat_lab_toggle_html($ringspo_type_ctx);
@@ -2211,6 +2452,35 @@ $chart_with_fallback = $renderer->chart_html(
     'ldn-price-chart',
     'Price over time',
     $fallback_text
+);
+
+// Test intent: the price-over-time H3 names carat, shape, type and country
+// when the Plotly payload has a blank title (the live S3 contract today).
+// Would fail if: render_hero still passed __('Price over time') as the fallback.
+$hero_ref = new ReflectionMethod($renderer, 'render_hero');
+$hero_ref->setAccessible(true);
+$blank_title_bag = array(
+    'price'   => array(
+        'data'   => array(array('x' => array(1, 2), 'y' => array(3, 4), 'type' => 'scatter')),
+        'layout' => array('title' => array('text' => '')),
+    ),
+    'summary' => array(),
+);
+$hero_chart = $hero_ref->invoke($renderer, 'price_graph', $shape_ctx, $blank_title_bag, 'USD');
+check(
+    strpos($hero_chart, '1 carat Round Natural diamond prices in United States') !== false,
+    'price_graph H3 names the carat, shape, type and country when Plotly title is blank'
+);
+check(
+    strpos($hero_chart, 'Price over time') === false,
+    'price_graph H3 no longer falls back to the generic Price over time label'
+);
+$named_title_bag = $blank_title_bag;
+$named_title_bag['price']['layout']['title']['text'] = '1ct Round Natural Diamond Price Chart in United States (2026-08-23)';
+$named_hero = $hero_ref->invoke($renderer, 'price_graph', $shape_ctx, $named_title_bag, 'USD');
+check(
+    strpos($named_hero, '1ct Round Natural Diamond Price Chart in United States (2026-08-23)') !== false,
+    'price_graph H3 prefers a non-empty Plotly layout.title.text over the PHP fallback'
 );
 $target_pos = strpos($chart_with_fallback, 'class="ldn-chart-target"');
 $fallback_pos = strpos($chart_with_fallback, 'ldn-chart-fallback');

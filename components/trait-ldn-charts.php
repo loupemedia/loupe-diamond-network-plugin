@@ -24,9 +24,10 @@ trait LDN_Trait_Charts {
      * @param string $title
      * @param string $fallback Plain-text description of the chart's data.
      * @param string $fallback_class CSS class(es) on the fallback paragraph.
+     * @param bool   $show_html_title When false, skip the H3 (page H2 already titles the chart).
      * @return string
      */
-    public function chart_html($payload, $dom_id, $title, $fallback = '', $fallback_class = 'ldn-chart-fallback') {
+    public function chart_html($payload, $dom_id, $title, $fallback = '', $fallback_class = 'ldn-chart-fallback', $show_html_title = true) {
         if (!is_array($payload) || empty($payload['data']) || !is_array($payload['data'])) {
             return '';
         }
@@ -43,7 +44,7 @@ trait LDN_Trait_Charts {
 
         $html = $this->plotly_loader();
         $html .= '<figure class="ldn-chart">';
-        if ($resolved_title !== '') {
+        if ($show_html_title && $resolved_title !== '') {
             $html .= '<h3 class="ldn-chart__title">' . esc_html($resolved_title) . '</h3>';
         }
         $fallback_html = (is_string($fallback) && $fallback !== '')

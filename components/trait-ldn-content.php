@@ -346,13 +346,13 @@ trait LDN_Trait_Content {
             $paragraph .= '.';
         } elseif ($change_value == 0.0) {
             $paragraph .= sprintf(
-                ', and has remained stable %s.',
+                ' and has remained stable %s.',
                 esc_html($change_phrase)
             );
         } else {
             $direction = $change_value > 0 ? 'increased' : 'decreased';
             $paragraph .= sprintf(
-                ', and has %s by %s %s.',
+                ' and has %s by %s %s.',
                 esc_html($direction),
                 esc_html(sprintf('%.2f%%', abs($change_value))),
                 esc_html($change_phrase)
@@ -362,7 +362,7 @@ trait LDN_Trait_Content {
         $range_paragraph = '';
         if (is_numeric($min_price) && is_numeric($max_price) && (float) $max_price > 0) {
             $range_paragraph = sprintf(
-                'Individual stones range from %s to %s, with the difference driven by cut, %s, and clarity.',
+                'Individual stones range from %s to %s, with the difference driven by cut, %s and clarity.',
                 esc_html($symbol . number_format((float) $min_price, 0)),
                 esc_html($symbol . number_format((float) $max_price, 0)),
                 esc_html($color_word)
@@ -967,6 +967,18 @@ trait LDN_Trait_Content {
         $html .= '</div>';
 
         return $html;
+    }
+
+    /**
+     * Whether the hub anchor carat row gets Ringspo-only table highlight styling.
+     *
+     * Loupe hubs use the anchor for hero stats and type nav only — not a tinted row.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return bool
+     */
+    protected function should_highlight_hub_anchor_row(LDN_Page_Context $ctx) {
+        return $ctx->site_id === 'ringspo';
     }
 
     /**

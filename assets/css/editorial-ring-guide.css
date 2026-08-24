@@ -14,8 +14,22 @@ body.ldn-editorial-ring-guide {
 	overflow-x: clip;
 }
 
-/* Legacy GenerateBlocks colour bands stop short inside `.entry-content`. */
-body.ldn-editorial-ring-guide .entry-content > .gb-container {
+/* Legacy GenerateBlocks colour bands stop short inside `.entry-content`.
+ *
+ * Direct children (hero, some purple blocks) use the first selector.
+ * Later bands (Best Place To Buy, popularity) sit inside one colourless
+ * wrapper whose inner container is still ~800px. Pull only those nested
+ * containers that paint white-on-colour copy. The Alon review card uses
+ * contrast colour on a white surface and stays inset.
+ *
+ * The wrapper inside-container must not clip the nested negative margin.
+ */
+body.ldn-editorial-ring-guide .entry-content > .gb-container > .gb-inside-container {
+	overflow: visible;
+}
+
+body.ldn-editorial-ring-guide .entry-content > .gb-container,
+body.ldn-editorial-ring-guide .entry-content > .gb-container > .gb-inside-container > .gb-container:has(:is(.has-white-color, .has-base-3-color, .links-color-white)) {
 	margin-left: calc(50% - 50vw);
 	margin-right: calc(50% - 50vw);
 	padding-left: calc(50vw - 50%);
@@ -48,18 +62,27 @@ body.ldn-editorial-ring-guide .entry-content > .gb-container {
 	margin: 0 0 0.75rem;
 }
 
-.ldn-ring-guide__figure img {
+.ldn-ring-guide__figure img,
+.ldn-ring-guide__figure .ldn-ring-guide__chart {
 	display: block;
 	width: 100%;
 	height: auto;
 	border-radius: 12px;
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+	background: #fff;
 }
 
-.ldn-ring-guide__figure figcaption {
-	margin-top: 0.4rem;
-	font-size: 0.9rem;
+.ldn-ring-guide__figure figcaption,
+.ldn-ring-guide__figure-note {
+	margin: 0.4rem 0 0;
+	font-size: inherit;
+	font-style: normal;
+	line-height: 1.5;
 	color: #4a4a68;
+}
+
+.ldn-ring-guide__chart--distribution {
+	min-height: 12rem;
 }
 
 .ldn-ring-guide__cta {

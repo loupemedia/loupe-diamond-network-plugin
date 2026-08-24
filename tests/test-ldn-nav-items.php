@@ -265,8 +265,8 @@ foreach ($items as $item) {
 check($prices !== null, 'the Diamond Prices parent item is emitted');
 if ($prices !== null) {
     check(
-        in_array('ldn-nav-mega-3-col', $prices->classes, true),
-        'mega_menu_columns: 3 becomes a 3-column class on the parent'
+        in_array('ldn-nav-mega-2-col', $prices->classes, true),
+        'mega_menu_columns: 2 becomes a 2-column class on the parent'
     );
     check(
         in_array('menu-item-has-children', $prices->classes, true),
@@ -308,18 +308,8 @@ foreach (ldn_urls($items) as $url) {
     }
 }
 check(
-    $level_4 !== array(),
-    'the anchored by-shape column does emit level-4 shape URLs'
-);
-$all_anchored = true;
-foreach ($level_4 as $url) {
-    if (strpos($url, '/1-carat/') === false) {
-        $all_anchored = false;
-    }
-}
-check(
-    $all_anchored,
-    'every level-4 URL sits at the declared anchor carat, not some other weight'
+    $level_4 === array(),
+    'primary nav links to carat hubs only, not per-shape price pages'
 );
 
 // An unanchored level-4 entry must be refused outright.

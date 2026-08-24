@@ -823,6 +823,16 @@ msgstr "Price distribution"
 msgid "Price over time"
 msgstr "Price over time"
 
+#: components/trait-ldn-sections.php:373
+#, php-format
+msgid "Diamond prices in %s"
+msgstr "Diamond prices in %s"
+
+#: components/trait-ldn-sections.php:379
+#, php-format
+msgid "%1$s diamond prices in %2$s"
+msgstr "%1$s diamond prices in %2$s"
+
 #: components/trait-ldn-sections.php:52 components/trait-ldn-sections.php:179
 #, php-format
 msgid "%s diamond prices by carat weight"

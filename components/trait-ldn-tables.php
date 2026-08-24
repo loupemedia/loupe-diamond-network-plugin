@@ -11,20 +11,63 @@ if (!defined('ABSPATH')) {
 
 trait LDN_Trait_Tables {
     /**
-     * Bar chart + linked ranking table for all-shapes hero.
+     * Ranking H2 used above the bar chart (and on the table when the chart is absent).
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    private function shapes_ranking_heading(LDN_Page_Context $ctx) {
+        $carat_label = $this->format_carat_label($ctx->carat);
+        return sprintf(
+            /* translators: 1: carat label, 2: country name */
+            __('%1$s carat diamond prices in %2$s, ranked by shape', 'loupe-diamond-network'),
+            $carat_label !== '' ? $carat_label : '1',
+            $this->country_full_name($ctx)
+        );
+    }
+
+    /**
+     * Ranking H2 + bar chart. The table is a separate section so shape-gap copy
+     * can sit between them.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @return string
+     */
+    public function shapes_ranking_chart_html(LDN_Page_Context $ctx, array $bag) {
+        $chart = $this->chart_html(
+            isset($bag['ranking_chart']) && is_array($bag['ranking_chart'])
+                ? $bag['ranking_chart']
+                : array(),
+            'ldn-shapes-ranking-chart',
+            '',
+            '',
+            'ldn-chart-fallback',
+            false
+        );
+        if ($chart === '') {
+            return '';
+        }
+        return '<section class="ldn-section ldn-shapes-ranking-chart">'
+            . '<h2>' . esc_html($this->shapes_ranking_heading($ctx)) . '</h2>'
+            . $chart
+            . '</section>';
+    }
+
+    /**
+     * Bar chart + linked ranking table for the combined `bar_chart_links` widget.
+     *
+     * H2 sits on the chart; the table omits its own heading so the page does not
+     * repeat "ranked by shape".
      *
      * @param LDN_Page_Context $ctx
      * @param array            $bag
      * @return string
      */
     public function shapes_at_carat_hero_html(LDN_Page_Context $ctx, array $bag) {
-        $html = $this->chart_html(
-            is_array($bag['ranking_chart']) ? $bag['ranking_chart'] : array(),
-            'ldn-shapes-ranking-chart',
-            __('Prices by shape', 'loupe-diamond-network')
-        );
-        $html .= $this->shapes_ranking_table_html($ctx, $bag);
-        return $html;
+        $chart = $this->shapes_ranking_chart_html($ctx, $bag);
+        $table = $this->shapes_ranking_table_html($ctx, $bag, false, $chart === '');
+        return $chart . $table;
     }
 
     /**
@@ -33,9 +76,10 @@ trait LDN_Trait_Tables {
      * @param LDN_Page_Context $ctx
      * @param array            $bag
      * @param bool             $extended When true, include rank, sample size, and price range.
+     * @param bool             $include_heading When false, the ranking H2 is omitted (already on the chart).
      * @return string
      */
-    public function shapes_ranking_table_html(LDN_Page_Context $ctx, array $bag, $extended = false) {
+    public function shapes_ranking_table_html(LDN_Page_Context $ctx, array $bag, $extended = false, $include_heading = true) {
         $payload = is_array($bag['ranking']) ? $bag['ranking'] : array();
         $rows = isset($payload['shapes']) && is_array($payload['shapes']) ? $payload['shapes'] : array();
         if (empty($rows)) {
@@ -43,8 +87,6 @@ trait LDN_Trait_Tables {
         }
 
         $currency = isset($payload['currency_symbol']) ? (string) $payload['currency_symbol'] : '$';
-        $carat_label = $this->format_carat_label($ctx->carat);
-        $country_name = $this->country_full_name($ctx);
 
         // The change column tracks the same period as the intro (C5.1 writes the
         // resolved label to `change_period`). An explicit null means the family
@@ -105,12 +147,9 @@ trait LDN_Trait_Tables {
             return '';
         }
 
-        $heading = sprintf(
-            /* translators: 1: carat label, 2: country name */
-            __('%1$s carat diamond prices in %2$s, ranked by shape', 'loupe-diamond-network'),
-            $carat_label !== '' ? $carat_label : '1',
-            $country_name
-        );
+        $heading_html = $include_heading
+            ? '<h2>' . esc_html($this->shapes_ranking_heading($ctx)) . '</h2>'
+            : '';
 
         $change_header = '';
         if ($show_change_col) {
@@ -139,7 +178,7 @@ trait LDN_Trait_Tables {
 
         return '<section class="ldn-section ldn-shapes-ranking-table'
             . ($extended ? ' ldn-shapes-ranking-table--extended' : '') . '">'
-            . '<h2>' . esc_html($heading) . '</h2>'
+            . $heading_html
             . '<p>' . esc_html__('Click on any diamond shape to see more detailed pricing information.', 'loupe-diamond-network') . '</p>'
             . '<table class="ldn-data-table"><thead><tr>'
             . $rank_header
@@ -440,7 +479,8 @@ trait LDN_Trait_Tables {
                 ? '<a href="' . esc_url($url) . '">' . esc_html($carat . ' ct') . '</a>'
                 : esc_html($carat . ' ct');
             $row_class = '';
-            if (is_numeric($carat) && (float) $carat === $anchor_carat) {
+            if ($this->should_highlight_hub_anchor_row($ctx)
+                && is_numeric($carat) && (float) $carat === $anchor_carat) {
                 $row_class = ' class="ldn-row-highlight"';
             }
             $body .= '<tr' . $row_class . '><td data-label="' . esc_attr__('Carat', 'loupe-diamond-network') . '">'
@@ -459,7 +499,6 @@ trait LDN_Trait_Tables {
         }
 
         $chart_block = $this->build_price_per_carat_chart_block($ctx, $bag);
-        $history_block = $this->build_type_carat_history_chart_block($ctx, $bag);
 
         return '<section class="ldn-section ldn-carat-tiers-table">'
             . '<h2>' . esc_html($title) . '</h2>'
@@ -473,7 +512,24 @@ trait LDN_Trait_Tables {
             . '</tr></thead><tbody>' . $body . '</tbody></table>'
             . '</div>'
             . $chart_block
-            . $history_block
+            . '</section>';
+    }
+
+    /**
+     * 1/2/3 ct price-change chart section for Loupe diamond-type hubs.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $bag
+     * @return string
+     */
+    public function type_carat_history_section_html(LDN_Page_Context $ctx, array $bag) {
+        $block = $this->build_type_carat_history_chart_block($ctx, $bag);
+        if ($block === '') {
+            return '';
+        }
+
+        return '<section class="ldn-section ldn-type-carat-history">'
+            . $block
             . '</section>';
     }
 
@@ -876,7 +932,9 @@ trait LDN_Trait_Tables {
             return '';
         }
 
-        $highlight_carat = $ctx->page_level === 'top-level' ? (float) $this->hub_anchor_carat() : null;
+        $highlight_carat = ($ctx->page_level === 'top-level' && $this->should_highlight_hub_anchor_row($ctx))
+            ? (float) $this->hub_anchor_carat()
+            : null;
         $body = '';
         foreach ($rows as $row) {
             if (!is_array($row) || !isset($row['carat_weight']) || (string) $row['carat_weight'] === '') {
@@ -1114,7 +1172,7 @@ trait LDN_Trait_Tables {
     }
 
     /**
-     * 1/2/3 ct price-over-time chart for the diamond-type hub (Loupe history).
+     * 1/2/3 ct price-change chart for the diamond-type hub (Loupe history).
      *
      * @param LDN_Page_Context $ctx
      * @param array            $bag
@@ -1126,7 +1184,7 @@ trait LDN_Trait_Tables {
                 ? $bag['type_carat_history_chart']
                 : array(),
             'ldn-type-carat-history-chart',
-            __('1, 2 and 3 carat prices over time', 'loupe-diamond-network')
+            __('1, 2 and 3 carat price change (%)', 'loupe-diamond-network')
         );
         if ($chart === '') {
             return '';
@@ -1138,7 +1196,7 @@ trait LDN_Trait_Tables {
             : '';
 
         return '<div class="ldn-hub-chart ldn-hub-chart--type-history">'
-            . '<h3>' . esc_html__('How prices have moved at 1, 2 and 3 carats', 'loupe-diamond-network') . '</h3>'
+            . '<h2>' . esc_html__('How prices have moved at 1, 2 and 3 carats', 'loupe-diamond-network') . '</h2>'
             . $intro
             . $chart
             . '</div>';

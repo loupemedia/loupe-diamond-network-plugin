@@ -253,16 +253,6 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 	}
 }
 
-.ldn-carat-price-table .ldn-row-highlight {
-	background: rgba(112, 108, 200, 0.08);
-	font-weight: 600;
-}
-
-.ldn-carat-price-table .ldn-row-highlight td:first-child::after {
-	content: " ★";
-	font-size: 0.85em;
-}
-
 /* ----- Price calculator / position checker (CP 123) ----- */
 
 /* White card for interactive controls. On Ringspo tint/accent bands the heading

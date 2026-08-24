@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.39.6] — 2026-08-24
+
+- **Shape guides replace stale price and size sections like carat posts.** On `/cushion-cut-engagement-rings/` (and the other nine `/{shape}-engagement-rings/` posts), the well-priced / most-expensive / less-expensive H3 block and the buying-guide carat-weight H3 block are now removed in full and swapped for the live compare table plus price card, and the size card respectively. Stale retailer tables, dollar ranges, carat-scaling prose and affiliate tails in those sections no longer sit under the inject. Carat `/N-carat-…-diamond-ring/` posts are unchanged (Price/Size H2 replace). The pear/marquise "look large for their carat weight" pro section is not touched.
+
+## [0.39.5] — 2026-08-23
+
+- **Nested ring-guide colour bands span the viewport.** Best Place To Buy and the other mint/purple blocks sit inside a colourless GenerateBlocks wrapper whose inner container is still ~800px, so a top-level `50vw` breakout never reached them. Nested containers that paint white-on-colour copy now break out the same way; the white Alon review card (contrast colour, deeper nesting) stays inset.
+- **Shape-guide injects land in the sections they belong to.** `/cushion-cut-engagement-rings/` (and the other nine `/{shape}-engagement-rings/` posts) do not have a "diamond prices" / "diamond size" H2, so the live cards were prepended into the intro. The price card now follows the replaced Gutenberg comparison (or the well-priced / most-expensive / less-expensive heading). The size card follows the buying-guide carat-weight heading. Named Price/Size H2s on `/N-carat-…-diamond-ring/` posts still replace in place.
+- **Carat × shape ring guides get a readable price histogram.** `/4-carat-cushion-cut-diamond-ring/` (and the other shape guides) now plot `market_index_bins_json` inline with a dark title, IQR band and a larger median badge instead of scaling the 1200×630 OG social card. The note under the chart inherits body typography (`Live US asking prices as of …`) and no longer says "open the full chart".
+- **"How big it looks" on carat × shape guides.** The size card on `/N-carat-…-diamond-ring/` posts now draws that carat at true scale next to a US quarter, using the same mega-hub matrix as the carat hub and shape engagement guides.
+
+## [0.39.4] — 2026-08-23
+
+- **Ring-guide carat hubs show a by-shape price chart.** `/4-carat-diamond-ring/` has no shape-level OG PNG, so Current US prices now plots live all-shapes medians. Shape guides still use `og-preview.png`. Heading-section splice now treats `$` in the insert as a literal so `$3,510` is not eaten as a PCRE backref.
+- **Loupe diamond-type hub reading order.** The 1/2/3 ct price-change chart and its analysis now lead the page. The carat ladder table follows, then the intro and buyer-context copy that explain how to use the table.
+- **Loupe diamond-type history chart plots % change.** C5.2 now rebases 1, 2 and 3 carat lines at the start of each selected period (1/3/12 months) so all three weights are readable on one axis. Period buttons swap both the traces and the y-axis range.
+
+## [0.39.3] — 2026-08-23
+
+- Shape price-over-time charts now title themselves with carat, shape, type and country (for example "1 carat Round Natural diamond prices in United States") instead of the generic "Price over time". After C5 republishes, a non-empty Plotly title still wins.
+- Intro copy no longer puts a comma before "and has decreased" / "cut, color and clarity".
+- **Hub carat table highlight is Ringspo-only.** Loupe top-level hubs no longer tint the 1 ct row. Removed the star glyph from anchor-row styling — Ringspo keeps a subtle background tint only.
+
+## [0.39.2] — 2026-08-23
+
+- **Loupe all-shapes reading order.** The median intro and stat cards lead. The ranked-by-shape heading now titles the bar chart, the shape-gap sentence sits under the chart, and the linked table follows. Trend copy moves below the table so it does not split that block.
+
 ## [0.39.1] — 2026-08-23
 
 - Fix PHP 8.1 fatal on every request (front and wp-admin): move nav constants off `trait-ldn-nav-items.php` onto `LDN_Nav`. Trait constants are PHP 8.2+ only; Kinsta staging (Modern Jeweler) runs 8.1. Same pattern as the earlier content-trait fix.

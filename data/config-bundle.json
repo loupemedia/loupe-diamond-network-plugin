@@ -1,6 +1,6 @@
 {
-  "version": "68b8ccc",
-  "generated_at": "2026-08-22T02:17:30.639312+00:00",
+  "version": "2ee5d41",
+  "generated_at": "2026-08-24T04:22:54.890282+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -8444,12 +8444,13 @@
           ]
         },
         "all_shapes": {
-          "hero_component": "table_chart",
+          "hero_component": null,
           "sections": [
             "overview_intro_dynamic",
-            "overview_analysis_dynamic",
-            "hero",
+            "shapes_ranking_chart",
             "overview_detail_dynamic",
+            "shapes_ranking_table",
+            "overview_analysis_dynamic",
             "shape_breakdown_static",
             "faq_static",
             "cross_site_comparison"
@@ -8460,10 +8461,11 @@
           ]
         },
         "diamond_type": {
-          "hero_component": "comparison_chart",
+          "hero_component": null,
           "sections": [
+            "type_carat_history_chart",
+            "comparison_chart",
             "type_overview_dynamic",
-            "hero",
             "type_buyer_context_dynamic",
             "faq_static",
             "partner_spotlight",
@@ -8501,8 +8503,7 @@
         "height": 390,
         "time_periods": [
           "1_month",
-          "3_months",
-          "12_months"
+          "3_months"
         ],
         "long_horizon_downsample": "weekly",
         "default_view": "price",
@@ -8518,16 +8519,15 @@
       },
       "templated_copy": {
         "all_shapes": {
-          "intro_change_period": "12_months",
+          "intro_change_period": "3_months",
           "analysis_periods": [
             "1_month",
-            "3_months",
-            "12_months"
+            "3_months"
           ],
           "show_change": true
         },
         "individual_shape": {
-          "intro_change_period": "12_months",
+          "intro_change_period": "3_months",
           "show_change": true
         }
       },
@@ -9253,9 +9253,7 @@
           ],
           "section_bands": {
             "market_overview_table": "tint",
-            "type_nav_links": "accent",
-            "most_traded_table": "tint",
-            "faq_static": "tint"
+            "most_traded_table": "tint"
           },
           "ad_slots": [
             "triple_horizontal"
@@ -9865,7 +9863,7 @@
                 "kind": "generated",
                 "page_family": "price_top_level"
               },
-              "mega_menu_columns": 3,
+              "mega_menu_columns": 2,
               "gate": {
                 "module": "price"
               },
@@ -9886,27 +9884,6 @@
                       "3",
                       "4",
                       "5"
-                    ]
-                  }
-                },
-                {
-                  "heading_key": "nav.prices_by_shape",
-                  "entries": {
-                    "kind": "generated",
-                    "page_family": "price_individual_shape",
-                    "diamond_type": "natural",
-                    "anchor_carat": "1",
-                    "shapes": [
-                      "round",
-                      "oval",
-                      "cushion",
-                      "emerald",
-                      "princess",
-                      "pear",
-                      "radiant",
-                      "marquise",
-                      "asscher",
-                      "heart"
                     ]
                   }
                 },
@@ -11515,7 +11492,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11543,7 +11519,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11571,7 +11546,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11599,7 +11573,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11627,7 +11600,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11655,7 +11627,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11683,7 +11654,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11711,7 +11681,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11739,7 +11708,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11767,7 +11735,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11795,7 +11762,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11823,7 +11789,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11851,7 +11816,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11879,7 +11843,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11907,7 +11870,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11935,7 +11897,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11963,7 +11924,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -11991,7 +11951,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12019,7 +11978,6 @@
           "nav.price_calculator": "価格計算ツール",
           "nav.price_tools": "ツール",
           "nav.prices_by_carat": "カラット別価格",
-          "nav.prices_by_shape": "シェイプ別価格",
           "nav.prices_lab_grown": "ラボグロウンダイヤモンド価格",
           "nav.select_country": "国を選択",
           "nav.size_comparison": "サイズ比較",
@@ -12047,7 +12005,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12075,7 +12032,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12103,7 +12059,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12131,7 +12086,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12159,7 +12113,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12187,7 +12140,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12215,7 +12167,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12243,7 +12194,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12271,7 +12221,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12299,7 +12248,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -12327,7 +12275,6 @@
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_by_shape": "Prices by Shape",
           "nav.prices_lab_grown": "Lab-Grown Prices",
           "nav.select_country": "Select Country",
           "nav.size_comparison": "Size Comparison",
@@ -23661,7 +23608,7 @@
         "gate": "site_entitlement",
         "status": "live",
         "filename": "type-carat-history-chart.html (+ .json)",
-        "description": "Line chart of typical price over time at 1, 2 and 3 carats for one diamond type — Loupe hub history, not Ringspo's price-per-carat snapshot.",
+        "description": "Line chart of % price change over time at 1, 2 and 3 carats for one diamond type — Loupe hub history, not Ringspo's price-per-carat snapshot.",
         "wp_widgets": [],
         "related_artefacts": [
           "type_summary_json"

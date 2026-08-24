@@ -33,7 +33,7 @@ trait LDN_Trait_Sections {
                 return $this->chart_html(
                     $bag['price'],
                     'ldn-price-chart',
-                    __('Price over time', 'loupe-diamond-network'),
+                    $this->price_over_time_title($ctx),
                     $this->chart_fallback_text($ctx, $bag, $currency)
                 );
             case 'table_chart':
@@ -101,7 +101,7 @@ trait LDN_Trait_Sections {
             return $this->chart_html(
                 $bag['price'],
                 'ldn-price-chart',
-                __('Price over time', 'loupe-diamond-network'),
+                $this->price_over_time_title($ctx),
                 $this->chart_fallback_text($ctx, $bag, $currency)
             );
         }
@@ -167,6 +167,9 @@ trait LDN_Trait_Sections {
         if ($section_id === 'price_per_carat_chart') {
             return $this->price_per_carat_chart_html($ctx, $bag);
         }
+        if ($section_id === 'type_carat_history_chart') {
+            return $this->type_carat_history_section_html($ctx, $bag);
+        }
         if ($section_id === 'comparison_chart') {
             $type_label = isset(self::$TYPE_LABELS[$ctx->diamond_type])
                 ? self::$TYPE_LABELS[$ctx->diamond_type]
@@ -189,6 +192,12 @@ trait LDN_Trait_Sections {
         }
         if ($section_id === 'shapes_at_carat') {
             return $this->shapes_at_carat_html($ctx, $bag);
+        }
+        if ($section_id === 'shapes_ranking_chart') {
+            return $this->shapes_ranking_chart_html($ctx, $bag);
+        }
+        if ($section_id === 'shapes_ranking_table') {
+            return $this->shapes_ranking_table_html($ctx, $bag, false, false);
         }
         if (substr($section_id, -8) === '_dynamic') {
             if ($ctx->page_level !== 'shape') {
@@ -336,5 +345,43 @@ trait LDN_Trait_Sections {
         }
 
         return $parts === array() ? null : implode("\n\n", $parts);
+    }
+
+    /**
+     * Visible price-over-time H3 when the Plotly payload has no title text.
+     *
+     * C5 writes a specific title into layout.title.text; older JSON blanks it,
+     * and the previous fallback was the generic "Price over time".
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    private function price_over_time_title(LDN_Page_Context $ctx) {
+        $carat_label = $this->format_carat_label($ctx->carat);
+        $shape_label = $ctx->shape !== null
+            ? ucwords(str_replace('-', ' ', $ctx->shape))
+            : '';
+        $type_label = $ctx->diamond_type !== null && isset(self::$TYPE_LABELS[$ctx->diamond_type])
+            ? self::$TYPE_LABELS[$ctx->diamond_type]
+            : ($ctx->diamond_type !== null ? ucwords(str_replace('-', ' ', $ctx->diamond_type)) : '');
+        $subject = trim(implode(' ', array_filter(array(
+            $carat_label !== '' ? $carat_label . ' carat' : '',
+            $shape_label,
+            $type_label,
+        ))));
+        $country = $this->country_full_name($ctx);
+        if ($subject === '') {
+            return sprintf(
+                /* translators: %s: country name */
+                __('Diamond prices in %s', 'loupe-diamond-network'),
+                $country
+            );
+        }
+        return sprintf(
+            /* translators: 1: carat, shape and type (e.g. "1 carat Round Natural"); 2: country name */
+            __('%1$s diamond prices in %2$s', 'loupe-diamond-network'),
+            $subject,
+            $country
+        );
     }
 }

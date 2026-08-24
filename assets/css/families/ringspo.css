@@ -412,6 +412,13 @@
 	margin-top: var(--ldn-space-4, 1rem);
 }
 
+/* Hub anchor carat (1 ct) — subtle row tint on Ringspo only; no star glyph. */
+.ldn-chrome--ringspo-classic .ldn-carat-price-table .ldn-row-highlight,
+.ldn-chrome--ringspo-classic .ldn-carat-tiers-table .ldn-row-highlight {
+	background: rgba(112, 108, 200, 0.08);
+	font-weight: 600;
+}
+
 /* The hero band already carries bottom padding, so the first body band opens
    tighter than the standing rhythm. */
 .ldn-chrome--ringspo-classic .ldn-hero-band + .ldn-section {
