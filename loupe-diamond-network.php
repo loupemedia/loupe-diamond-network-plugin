@@ -3,7 +3,7 @@
  * Plugin Name:       Loupe Diamond Network
  * Plugin URI:        https://loupemedianetwork.com/
  * Description:       Renders the diamond pricing network's pages (price + size modules) via dynamic routes, fetching pipeline artefacts from S3 at request time. Rollout (which site × country × module is live) is driven centrally — see docs/architecture/network-rollout-hub.md.
- * Version:           0.39.6
+ * Version:           0.42.1
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            Loupe Media Network
@@ -31,7 +31,7 @@ if (defined('LDN_VERSION')) {
     return;
 }
 
-define('LDN_VERSION', '0.39.6');
+define('LDN_VERSION', '0.42.1');
 define('LDN_PLUGIN_FILE', __FILE__);
 define('LDN_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('LDN_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -89,6 +89,7 @@ function ldn_bootstrap() {
     if (class_exists('LDN_Plugin')) {
         require_once LDN_INCLUDES_DIR . 'class-ldn-size-module.php';
         require_once LDN_INCLUDES_DIR . 'class-ldn-calculator-module.php';
+        require_once LDN_INCLUDES_DIR . 'class-ldn-standard-pages-module.php';
         LDN_Locale::load_textdomain();
         LDN_Assets::register_performance_compat();
         LDN_Plugin::instance()->init();

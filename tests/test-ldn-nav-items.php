@@ -265,12 +265,20 @@ foreach ($items as $item) {
 check($prices !== null, 'the Diamond Prices parent item is emitted');
 if ($prices !== null) {
     check(
-        in_array('ldn-nav-mega-2-col', $prices->classes, true),
-        'mega_menu_columns: 2 becomes a 2-column class on the parent'
+        in_array('ldn-nav-mega-3-col', $prices->classes, true),
+        'mega_menu_columns: 3 becomes a 3-column class on Diamond Prices'
     );
+    /*
+     * Rule: LDN never declares `menu-item-has-children` itself. WordPress's
+     * walker derives it from the items parented below, and GeneratePress paints
+     * one dropdown arrow per occurrence - so declaring it too gave five of the
+     * six top-level items a second 45px chevron and wrapped the bar onto a
+     * second row. Parenting is the contract; the class is the theme's business.
+     */
     check(
-        in_array('menu-item-has-children', $prices->classes, true),
-        'a mega parent is marked as having children so the theme renders a submenu'
+        !in_array('menu-item-has-children', $prices->classes, true),
+        'a mega parent does NOT declare menu-item-has-children: the walker adds it, '
+            . 'and a second copy renders a second dropdown arrow'
     );
 
     $children = 0;
@@ -279,7 +287,11 @@ if ($prices !== null) {
             $children++;
         }
     }
-    check($children > 0, 'the Diamond Prices item has children parented to it');
+    check(
+        $children > 0,
+        'the Diamond Prices item has children parented to it, which is what makes '
+            . 'the walker add menu-item-has-children'
+    );
 }
 
 $orders = array();
@@ -310,6 +322,17 @@ foreach (ldn_urls($items) as $url) {
 check(
     $level_4 === array(),
     'primary nav links to carat hubs only, not per-shape price pages'
+);
+
+$carat_size_leaves = array();
+foreach (ldn_urls($items) as $url) {
+    if (preg_match('#/diamond-size/[^/]+/[0-9.]+-carat/#', $url)) {
+        $carat_size_leaves[] = $url;
+    }
+}
+check(
+    $carat_size_leaves === array(),
+    'size mega does not pin carat pages to round: ' . implode(', ', $carat_size_leaves)
 );
 
 // An unanchored level-4 entry must be refused outright.
@@ -461,7 +484,7 @@ check(
 );
 check(
     !in_array('Learn', $jp_filtered_titles, true)
-        && !in_array('Sell jewelry', $jp_filtered_titles, true),
+        && !in_array('Sell Jewelry', $jp_filtered_titles, true),
     'and does NOT inherit the US editorial items, which point at US slugs'
 );
 
@@ -810,7 +833,7 @@ check(
     'with price OFF the rest of the menu is intact'
 );
 check(
-    in_array('Sell jewelry', $no_price_titles, true),
+    in_array('Sell Jewelry', $no_price_titles, true),
     'an UNGATED entry is unaffected by another module being off'
 );
 
@@ -835,7 +858,7 @@ check(
 $none = ldn_gated_items(array());
 $none_titles = ldn_titles($none);
 check(
-    in_array('Sell jewelry', $none_titles, true)
+    in_array('Sell Jewelry', $none_titles, true)
         && in_array('Learn', $none_titles, true),
     'with NO module live the ungated editorial entries remain, got: ' . implode(', ', $none_titles)
 );
@@ -891,7 +914,7 @@ $no_reader_titles = ldn_titles(
     $nav_no_reader->nav_items($scope_nr, $navigation['menus']['primary'])
 );
 check(
-    in_array('Sell jewelry', $no_reader_titles, true)
+    in_array('Sell Jewelry', $no_reader_titles, true)
         && !in_array('Diamond Prices', $no_reader_titles, true),
     'an empty rollout state omits gated entries rather than defaulting them visible'
 );
@@ -995,11 +1018,13 @@ check(
 // Country switcher (CP126_01)
 //
 // Test intent: the switcher lists exactly the markets the register declares
-// live, each linking to that market's own pricing hub as a root-relative path.
+// live, each linking to that market's own pricing hub as a root-relative path,
+// and the parent carries ldn-nav-countries-2-col once eight live markets paint.
 // Would fail if: the list were hardcoded, as the nine hand-built subsite copies
 // were, so 21 of 30 configured markets stayed unreachable and nothing broke; or
 // if a switcher link went through home_url(), which on the /us/ install turns
-// /jp/... into /us/jp/... and sends every market switch to a 404.
+// /jp/... into /us/jp/... and sends every market switch to a 404; or if nine
+// live markets still stacked in a single 12rem column with no two-col class.
 // -----------------------------------------------------------------------------
 
 /**
@@ -1028,9 +1053,26 @@ check(
     $switcher_us !== null && $switcher_us->url !== '' && $switcher_us->url !== '#',
     'the switcher parent has a real destination, not "#": on a phone it is what gets tapped'
 );
+// Desktop flyout is two columns once eight live markets paint. Ringspo has
+// nine today, so the class must be present; a market with seven would not.
+$two_col_min = 8;
+$has_two_col = $switcher_us !== null
+    && in_array('ldn-nav-countries-2-col', $switcher_us->classes, true);
 check(
-    $switcher_us !== null && in_array('menu-item-has-children', $switcher_us->classes, true),
-    'the switcher parent is marked as having children so the theme renders a submenu'
+    (count($markets_us) >= $two_col_min && $has_two_col)
+        || (count($markets_us) < $two_col_min && !$has_two_col),
+    'the switcher parent carries ldn-nav-countries-2-col once eight live markets paint'
+);
+// Same rule as the mega parents: parent the markets, leave the class to the walker.
+check(
+    $switcher_us !== null && !in_array('menu-item-has-children', $switcher_us->classes, true),
+    'the switcher parent does NOT declare menu-item-has-children, so it gets one '
+        . 'dropdown arrow rather than two'
+);
+check(
+    $markets_us !== array(),
+    'the switcher parent has markets parented below it, which is what makes the '
+        . 'walker add menu-item-has-children'
 );
 
 $market_titles = array();
@@ -1281,6 +1323,86 @@ check(
     'the same markets are listed whatever the locale; only the wording changes'
 );
 
+// Fan-out rows (shape, carat, type) must follow the same locale, or a Japanese
+// hub sits over English Round / 1 Carat. That is the rest of CP124_03.
+check(
+    !empty($jp_terms['shape']['round']) && !empty($jp_terms['carat']['1'])
+        && !empty($jp_terms['diamond_type']['lab-grown']),
+    'the bundle ships resolved shape, carat and type terms for ja-JP'
+);
+check(
+    in_array($jp_terms['carat']['1'], $jp_primary_titles, true),
+    'on a Japanese path a carat row uses the Japanese template, got: '
+        . $jp_terms['carat']['1']
+);
+check(
+    !in_array('1 Carat', $jp_primary_titles, true),
+    'and does NOT also render the English carat label'
+);
+check(
+    in_array($jp_terms['diamond_type']['natural'], $jp_primary_titles, true),
+    'on a Japanese path a type row uses the Japanese term'
+);
+check(
+    in_array($jp_terms['diamond_type']['lab-grown'], $jp_primary_titles, true),
+    'including lab-grown'
+);
+check(
+    in_array('Round', $us_primary_titles, true)
+        && in_array('1 Carat', $us_primary_titles, true)
+        && in_array('Cushion', $us_primary_titles, true),
+    'on a US path the same fan-out stays English, from the i18n tree'
+);
+check(
+    !in_array('Cushion Cut', $us_primary_titles, true),
+    'US mega rows use the i18n trade term (Cushion), not the size-page Cut suffix'
+);
+
+/*
+ * Size is US-only on Ringspo, so Japan never paints the shape column in the
+ * live menu. An ungated probe still has to resolve shapes from nav_terms,
+ * or the day size launches in Japan the rows would come out English.
+ */
+$shape_probe = array(
+    'items' => array(
+        array(
+            'id' => 'jp_shape_probe',
+            'label_key' => 'nav.diamond_sizes',
+            'countries' => array('jp'),
+            'target' => array(
+                'kind' => 'generated',
+                'page_family' => 'size_mega_hub',
+            ),
+            'columns' => array(
+                array(
+                    'heading_key' => 'nav.sizes_by_shape',
+                    'entries' => array(
+                        'kind' => 'generated',
+                        'page_family' => 'size_shape_hub',
+                        'shapes' => array('round', 'cushion'),
+                    ),
+                ),
+            ),
+        ),
+    ),
+);
+$GLOBALS['__ldn_nav_path'] = '/jp/daiyamondo-kakaku/';
+$nav_shapes = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
+$shape_titles = ldn_titles(
+    $nav_shapes->nav_items($nav_shapes->resolve_request_scope(), $shape_probe)
+);
+check(
+    in_array($jp_terms['shape']['round'], $shape_titles, true)
+        && in_array($jp_terms['shape']['cushion'], $shape_titles, true),
+    'an ungated size fan-out on a Japanese path uses the Japanese shape terms'
+);
+check(
+    !in_array('Round', $shape_titles, true)
+        && !in_array('Cushion', $shape_titles, true)
+        && !in_array('Cushion Cut', $shape_titles, true),
+    'and does not fall back to English slug title-case'
+);
+
 // A locale the tree does not cover must fall back to the plugin's English rather
 // than emitting the Translator's [key] marker or an empty label.
 $GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
@@ -1315,20 +1437,20 @@ foreach (array('<ul', '<li', '<nav', '<a href') as $markup) {
 }
 
 // -----------------------------------------------------------------------------
-// Footer (US replace only; theme widgets elsewhere)
+// Footer (US shell; theme widgets elsewhere)
 //
 // Test intent: the US footer is the price and size hubs plus the migrated
-// widget links, painted by LDN when no WordPress menu is assigned to the
-// location, and Japan keeps the theme footer.
-// Would fail if: auto-render ran on augment markets (US legal URLs under /jp/),
-// or the James Allen offer were copied in.
+// widget links, painted by the LDN shell, and Japan keeps the theme footer.
+// Would fail if: the shell ran on theme markets (US legal URLs under /jp/),
+// or the James Allen offer were copied in, or legal links still pointed at
+// /privacy-policy/.
 // -----------------------------------------------------------------------------
 
 $GLOBALS['ldn_preview_menu_locations'] = array('primary' => 77, 'secondary' => 78);
 $GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
 $nav_footer = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
 $footer_html = $nav_footer->footer_menu_html();
-check($footer_html !== '', 'the US footer paints when no menu is assigned to the location');
+check($footer_html !== '', 'the US footer paints when LDN owns the shell');
 check(
     strpos($footer_html, 'Diamond Prices') !== false
         && strpos($footer_html, '/us/diamond-prices/') !== false
@@ -1337,9 +1459,11 @@ check(
     'the US footer starts with the price and size hubs, the same destinations as the header'
 );
 check(
-    strpos($footer_html, 'Privacy Policy') !== false
-        && strpos($footer_html, '/privacy-policy/') !== false,
-    'the US footer includes the privacy link from config'
+    strpos($footer_html, 'Privacy') !== false
+        && strpos($footer_html, '/privacy/') !== false
+        && strpos($footer_html, '/cookies/') !== false
+        && strpos($footer_html, '/privacy-policy/') === false,
+    'the US footer links to the new legal URLs, not the old WordPress slugs'
 );
 check(
     strpos($footer_html, 'James Allen') === false
@@ -1347,15 +1471,16 @@ check(
     'the James Allen offer is not migrated into the footer'
 );
 check(
-    strpos($footer_html, 'class="ldn-nav-footer"') !== false,
-    'the footer strip uses the plugin class the stylesheet owns'
+    strpos($footer_html, 'class="ldn-shell-footer"') !== false
+        || strpos($footer_html, 'ldn-shell-footer') !== false,
+    'the US footer is the purple shell band, not the old strip'
 );
 
 $GLOBALS['__ldn_nav_path'] = '/jp/daiyamondo-kakaku/';
 $nav_footer_jp = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
 check(
     $nav_footer_jp->footer_menu_html() === '',
-    'Japan does not receive the US footer strip; the theme still owns that footer'
+    'Japan does not receive the US footer band; the theme still owns that footer'
 );
 
 $GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
@@ -1366,8 +1491,8 @@ $GLOBALS['ldn_preview_menu_locations'] = array(
 );
 $nav_footer_assigned = new LDN_Nav('ringspo', $config, $fetcher, ldn_rollout_all_on());
 check(
-    $nav_footer_assigned->footer_menu_html() === '',
-    'auto-render stays silent when a WordPress menu is assigned to footer, so the strip is not painted twice'
+    strpos($nav_footer_assigned->footer_menu_html(), 'ldn-shell-footer') !== false,
+    'an assigned WordPress footer menu does not suppress the LDN shell footer'
 );
 
 $footer_menu = new stdClass();
@@ -1385,7 +1510,7 @@ $theme_offer->classes = array();
 $footer_injected = $nav_footer_assigned->filter_menu_items(array($theme_offer), $footer_menu, array());
 $footer_injected_titles = array_map(function ($i) { return $i->title; }, $footer_injected);
 check(
-    in_array('Privacy Policy', $footer_injected_titles, true)
+    in_array('Privacy', $footer_injected_titles, true)
         && !in_array('James Allen offer (theme)', $footer_injected_titles, true),
     'an assigned footer location still uses replace, so the leftover offer widget is dropped'
 );
@@ -1404,8 +1529,9 @@ $no_legal = ldn_gated_items(
 $no_legal_titles = ldn_titles($no_legal);
 check(
     in_array('About', $no_legal_titles, true)
-        && !in_array('Privacy Policy', $no_legal_titles, true)
-        && !in_array('Terms of Service', $no_legal_titles, true),
+        && !in_array('Privacy', $no_legal_titles, true)
+        && !in_array('Terms', $no_legal_titles, true)
+        && !in_array('Cookies', $no_legal_titles, true),
     'legal footer links hide when standard_pages is off; the rest of the strip stays'
 );
 check(
@@ -1439,8 +1565,8 @@ foreach (array('<ul', '<li', '<nav', '<a href') as $markup) {
     check(
         stripos($source, $markup) === false,
         sprintf(
-            'the item builder must not emit %s: GP Premium owns the slide-out, its '
-                . 'JavaScript and its accessibility',
+            'the item builder must not emit %s: markup lives in trait-ldn-nav-markup.php, '
+                . 'so this file can stay a pure item builder',
             $markup
         )
     );

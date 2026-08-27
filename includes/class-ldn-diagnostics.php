@@ -246,7 +246,7 @@ final class LDN_Diagnostics {
             $html .= '</td></tr>';
         }
         $html .= '</tbody></table>';
-        $html .= '<p style="margin:.75rem 0 0;font-size:11px;color:#666;">Visible on staging only. Schema behind = S3 artefact predates the plugin contract — re-run the producer (or wait for schema catch-up). Pull fresh rollout: wp-admin → Tools → Loupe Diamond Network.</p>';
+        $html .= '<p style="margin:.75rem 0 0;font-size:11px;color:#666;">Visible on staging only. Schema behind = S3 artefact predates the plugin contract — re-run the producer (or wait for schema catch-up). Pull fresh rollout: wp-admin → Loupe Diamond Network.</p>';
         $html .= '</aside>';
         return $html;
     }

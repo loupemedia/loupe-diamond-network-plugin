@@ -1,0 +1,384 @@
+/*
+ * LDN site shell — header, utility bar, drawer and footer (PRD-018 CP125).
+ *
+ * Colours come from `:root` tokens the plugin emits (`--ldn-primary`,
+ * `--ldn-text`, `--ldn-shell-on-primary`). No hex values here: the same file
+ * skins every content profile.
+ *
+ * Regions use `ldn-shell-*`. Menus inside them keep `ldn-nav-*`. Theme class
+ * names are not used.
+ */
+
+.ldn-shell {
+	background: var(--ldn-shell-surface);
+	color: var(--ldn-text);
+}
+
+.ldn-shell a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.ldn-shell-utility a:hover,
+.ldn-shell-utility a:focus-visible {
+	color: var(--ldn-text);
+}
+
+.ldn-shell-utility .ldn-shell-utility__list > li > a:hover,
+.ldn-shell-utility .ldn-shell-utility__list > li > a:focus-visible {
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.ldn-shell-primary__list > li > a:hover,
+.ldn-shell-primary__list > li > a:focus-visible,
+.ldn-shell-primary__list > .ldn-nav-mega:hover > a,
+.ldn-shell-primary__list > .ldn-nav-mega:focus-within > a,
+.ldn-shell-drawer a:hover,
+.ldn-shell-drawer a:focus-visible {
+	color: var(--ldn-primary);
+}
+
+.ldn-shell-utility {
+	border-bottom: 1px solid var(--ldn-shell-rule);
+	min-height: 37px;
+}
+
+.ldn-shell-utility__nav,
+.ldn-shell-header__inner,
+.ldn-shell-footer__inner {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 1rem;
+	box-sizing: border-box;
+}
+
+.ldn-shell-utility__list {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 13px;
+	color: var(--ldn-secondary-text);
+}
+
+.ldn-shell-utility .ldn-shell-utility__list > li > a {
+	display: flex;
+	align-items: center;
+	min-height: 37px;
+	padding: 0 10px;
+}
+
+.ldn-shell-utility .ldn-nav-has-children {
+	position: relative;
+}
+
+.ldn-shell-utility .ldn-nav-sub {
+	display: none;
+	position: absolute;
+	right: 0;
+	top: 100%;
+	z-index: 20;
+	min-width: 12rem;
+	padding: 0.5rem 0;
+	background: var(--ldn-shell-surface);
+	box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
+}
+
+.ldn-shell-utility .ldn-nav-has-children:hover > .ldn-nav-sub,
+.ldn-shell-utility .ldn-nav-has-children:focus-within > .ldn-nav-sub {
+	display: block;
+}
+
+.ldn-shell-utility .ldn-nav-countries-2-col > .ldn-nav-sub {
+	min-width: 20rem;
+	max-width: min(24rem, calc(100vw - 2rem));
+}
+
+.ldn-shell-utility .ldn-nav-countries-2-col:hover > .ldn-nav-sub,
+.ldn-shell-utility .ldn-nav-countries-2-col:focus-within > .ldn-nav-sub {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ldn-shell-utility .ldn-nav-countries-2-col > .ldn-nav-sub > li {
+	min-width: 0;
+}
+
+.ldn-shell-utility .ldn-nav-sub a {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	min-width: 0;
+	padding: 0 10px;
+}
+
+.ldn-shell-utility .ldn-nav-country-current > a {
+	color: var(--ldn-text);
+}
+
+.ldn-shell-utility .ldn-nav-sub a:hover,
+.ldn-shell-utility .ldn-nav-sub a:focus-visible {
+	color: var(--ldn-text);
+	background: var(--ldn-shell-rule);
+	text-decoration: none;
+}
+
+.ldn-shell-header__inner {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	min-height: 90px;
+	gap: 1rem;
+}
+
+.ldn-shell-brand,
+.ldn-shell-brand a {
+	display: flex;
+	align-items: center;
+}
+
+.ldn-shell-brand img {
+	width: 150px;
+	height: 51px;
+	object-fit: contain;
+}
+
+.ldn-shell-primary {
+	position: relative;
+	min-width: 0;
+}
+
+.ldn-shell-primary__list {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.ldn-shell-primary__list > li > a {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	padding-left: 20px;
+	font-size: 15px;
+	letter-spacing: 1px;
+	line-height: 60px;
+	color: var(--ldn-text);
+}
+
+.ldn-shell-drawer-toggle {
+	display: none;
+	min-width: 44px;
+	min-height: 44px;
+	margin-left: auto;
+	padding: 0 0.75rem;
+	border: 1px solid var(--ldn-shell-rule);
+	background: var(--ldn-shell-surface);
+	color: var(--ldn-text);
+	font: inherit;
+	cursor: pointer;
+}
+
+.ldn-shell-disclose {
+	display: none;
+	min-width: 44px;
+	min-height: 44px;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+}
+
+.ldn-shell-disclose::before {
+	content: "+";
+}
+
+.ldn-nav-has-children.ldn-nav-open > .ldn-shell-disclose::before {
+	content: "\2212";
+}
+
+.ldn-shell-drawer {
+	display: none;
+}
+
+.ldn-shell-footer {
+	background: var(--ldn-primary);
+	color: var(--ldn-shell-on-primary);
+}
+
+.ldn-shell-footer a {
+	color: var(--ldn-shell-on-primary);
+	text-decoration: none;
+}
+
+.ldn-shell-footer a:hover,
+.ldn-shell-footer a:focus-visible {
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.ldn-shell-footer__inner {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 2rem;
+	padding: 2.5rem 1rem;
+	align-items: start;
+}
+
+.ldn-shell-footer__brand .ldn-shell-brand,
+.ldn-shell-footer__brand .ldn-shell-brand a {
+	color: var(--ldn-shell-on-primary);
+}
+
+.ldn-shell-footer__columns {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1.5rem;
+}
+
+.ldn-shell-footer__col {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.ldn-shell-footer__col a {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	font-size: 15px;
+}
+
+.ldn-nav-list,
+.ldn-nav-sub {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.ldn-nav-item {
+	min-width: 0;
+}
+
+.screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+/* Theme chrome is suppressed in PHP; this is the backstop for leftover widgets. */
+body.ldn-shell-owned .site-header,
+body.ldn-shell-owned .site-footer,
+body.ldn-shell-owned #site-navigation,
+body.ldn-shell-owned #mobile-header,
+body.ldn-shell-owned .mobile-header-navigation,
+body.ldn-shell-owned .main-navigation {
+	display: none;
+}
+
+@media (max-width: 992px) {
+	.ldn-shell-primary__list > li > a {
+		padding-left: 12px;
+		letter-spacing: 0;
+	}
+}
+
+@media (max-width: 768px) {
+	.ldn-shell-utility {
+		display: none;
+	}
+
+	.ldn-shell-drawer-toggle {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.ldn-shell-primary__list {
+		display: none;
+	}
+
+	.ldn-shell-drawer {
+		display: none;
+		position: absolute;
+		top: 100%;
+		right: 0;
+		left: 0;
+		z-index: 30;
+		background: var(--ldn-shell-surface);
+		box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
+		padding: 0.5rem 0 1rem;
+	}
+
+	.ldn-shell--drawer-open .ldn-shell-drawer {
+		display: block;
+	}
+
+	.ldn-shell-drawer__list > li > a,
+	.ldn-shell-drawer .ldn-shell-disclose {
+		min-height: 44px;
+	}
+
+	.ldn-shell-drawer .ldn-nav-has-children {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+	}
+
+	.ldn-shell-drawer .ldn-nav-has-children > a {
+		min-width: 0;
+	}
+
+	.ldn-shell-drawer .ldn-shell-disclose {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.ldn-shell-drawer .ldn-nav-sub {
+		display: none;
+		grid-column: 1 / -1;
+		padding-left: 1rem;
+	}
+
+	/* Country list stays one column in the drawer. Two columns are desktop-only. */
+	.ldn-shell-drawer .ldn-nav-open > .ldn-nav-sub {
+		display: block;
+	}
+
+	.ldn-shell-footer__inner {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.ldn-shell-footer__columns {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 400px) {
+	.ldn-shell-footer__columns {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.ldn-shell-header__inner {
+		min-height: 72px;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.ldn-shell a {
+		transition: color 160ms ease, text-decoration-color 160ms ease;
+	}
+}

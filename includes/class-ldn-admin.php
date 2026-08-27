@@ -20,19 +20,57 @@ final class LDN_Admin {
      */
     public static function register() {
         add_action('admin_menu', array(__CLASS__, 'menu'));
+        add_action('admin_head', array(__CLASS__, 'menu_icon_css'));
+    }
+
+    /**
+     * @return string
+     */
+    public static function menu_icon_url() {
+        return LDN_PLUGIN_URL . 'assets/img/loupe-admin-icon.png';
     }
 
     /**
      * @return void
      */
     public static function menu() {
-        add_management_page(
+        add_menu_page(
             __('Loupe Diamond Network', 'loupe-diamond-network'),
             __('Loupe Diamond Network', 'loupe-diamond-network'),
             'manage_options',
             self::PAGE_SLUG,
-            array(__CLASS__, 'render_page')
+            array(__CLASS__, 'render_page'),
+            self::menu_icon_url(),
+            58
         );
+    }
+
+    /**
+     * Keep the navy Loupe mark opaque in the sidebar (WP fades custom PNGs)
+     * and show it on the Plugins list row.
+     *
+     * @return void
+     */
+    public static function menu_icon_css() {
+        $url = esc_url(self::menu_icon_url());
+        echo '<style>
+#adminmenu #toplevel_page_' . esc_attr(self::PAGE_SLUG) . ' .wp-menu-image img {
+    padding: 6px 0 0;
+    opacity: 1;
+    width: 20px;
+    height: 20px;
+}
+.plugins tr[data-slug="loupe-diamond-network"] .plugin-title strong::before {
+    content: "";
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    margin: 0 8px 0 0;
+    vertical-align: middle;
+    background: url("' . $url . '") center / contain no-repeat;
+    border-radius: 50%;
+}
+</style>';
     }
 
     /**

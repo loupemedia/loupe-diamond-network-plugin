@@ -296,6 +296,9 @@
 			var analysis = quoteAnalysisText(labels, p, quote);
 			if (analysis) {
 				region.appendChild(paragraph(analysis, 'ldn-price-calculator__analysis'));
+				if (typeof window.ldnTrackCalculatorSubmit === 'function') {
+					window.ldnTrackCalculatorSubmit(true);
+				}
 			}
 		}
 	}

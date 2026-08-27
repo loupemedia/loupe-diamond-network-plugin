@@ -28,6 +28,7 @@ $handles = LDN_Assets::INTERACTIVE_SCRIPT_HANDLES;
 check(in_array('ldn-chart-init', $handles, true), 'ldn-chart-init is in INTERACTIVE_SCRIPT_HANDLES');
 check(in_array('ldn-price-calculator', $handles, true), 'ldn-price-calculator remains excluded from Rocket delay');
 check(in_array('ldn-nat-lab-toggle', $handles, true), 'ldn-nat-lab-toggle is excluded from Rocket delay');
+check(in_array('ldn-analytics', $handles, true), 'ldn-analytics is excluded from Rocket delay');
 
 $delay_exclusions = LDN_Assets::exclude_interactive_scripts_from_rocket(array());
 check(
@@ -37,6 +38,10 @@ check(
 check(
     in_array('ldn-nat-lab-toggle', $delay_exclusions, true),
     'rocket_delay_js_exclusions includes ldn-nat-lab-toggle'
+);
+check(
+    in_array('ldn-analytics', $delay_exclusions, true),
+    'rocket_delay_js_exclusions includes ldn-analytics'
 );
 check(
     in_array('chart-init', $delay_exclusions, true),

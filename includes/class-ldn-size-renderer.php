@@ -2489,8 +2489,19 @@ final class LDN_Size_Renderer {
     public function breadcrumb_trail(LDN_Page_Context $ctx, $canonical_url = '') {
         $trail = array();
         $home = function_exists('home_url') ? (string) home_url('/') : '';
-        if ($home !== '') {
-            $trail[] = array('name' => 'Home', 'url' => $home);
+        $brand = '';
+        if (method_exists($this->config, 'site_brand_name')) {
+            $brand = trim((string) $this->config->site_brand_name($ctx->site_id));
+        } elseif (method_exists($this->config, 'get_site')) {
+            $site = $this->config->get_site($ctx->site_id);
+            if (is_array($site) && !empty($site['brand_name'])) {
+                $brand = trim((string) $site['brand_name']);
+            } elseif (is_array($site) && !empty($site['n'])) {
+                $brand = trim((string) $site['n']);
+            }
+        }
+        if ($home !== '' && $brand !== '') {
+            $trail[] = array('name' => $brand, 'url' => $home);
         }
 
         $mega_url = $this->build_size_mega_hub_url($ctx->site_id);
@@ -2573,7 +2584,7 @@ final class LDN_Size_Renderer {
         }
 
         return array_values(array_filter($trail, static function ($crumb) {
-            return !empty($crumb['url']);
+            return !empty($crumb['url']) && !empty($crumb['name']);
         }));
     }
 

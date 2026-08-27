@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.42.1] — 2026-08-25
+
+- **Breadcrumb root crumb is the site brand name (PRD-018 CP124_03).** Price and size trails start with `brand_name` from the site bundle (then `n`), never the literal Home, and never gettext. A missing brand omits that crumb rather than leaving a blank one. The launch guard that requires authored `nav_*` terms now runs for every site with a `navigation:` key, not Ringspo alone, so a later French DPE is gated the same way as Japan.
+
+## [0.42.0] — 2026-08-25
+
+- **Mega-menu rows resolve from the i18n tree (PRD-018 CP124_03).** Shape, diamond-type and carat fan-out in primary, secondary and footer now ship in `nav_terms` next to the hub labels. A Japanese path paints ラウンド ブリリアント カット and 1カラット rather than English `Round` / `1 Carat`. Rolling out a language is authoring those keys; CI fails a live non-English market that still inherits them. Gettext stays the English fallback for a bundle with no fan-out terms.
+
+## [0.41.2] — 2026-08-25
+
+- **Flipping a country to `renderer: ldn` owns its menus the same way as US.** The plugin hides GeneratePress and paints from config. Emptying WordPress menus is not part of the cutover. Generated footer price/size and legal links are network-wide so a flipped market is not an empty purple band.
+
+## [0.41.1] — 2026-08-25
+
+- **Select Country has a rollover, and the flyout splits at eight markets.** Country links fill on hover and focus. Nine live markets already pass the threshold, so the desktop panel is two columns; the 768px drawer stays one column.
+
+## [0.41.0] — 2026-08-25
+
+- **GTM bootstrap for product analytics.** LDN can inject one Google Tag Manager container per existing GA4 install (Ringspo vs Loupe). Empty `gtm_container_id` in `config/analytics.yaml` means off. Production only; staging and the local preview harness never send hits. Calculator quote-check pushes `calculator_submit` on `dataLayer`. Point the Ringspo container at the existing Ringspo GA4 property and remove a duplicate theme `gtag` Config tag or pageviews will double-count. Cookie copy on a site with a container id discloses GTM; sites still off keep the previous "no analytics pixels" wording.
+
+## [0.40.3] — 2026-08-25
+
+- **Diamond Prices mega is three columns.** Natural and lab type hubs sit in the middle; Tools is the calculator only. Lab-grown is no longer a Tools item.
+- **Diamond Sizes drops the carat column.** Those links all opened the round page for that weight. The mega is shapes plus tools.
+- **Footer links are 15px** so "Intro to diamond rings" stays on one line in the four-column band.
+
+## [0.40.2] — 2026-08-25
+
+- **US shell polish: utility spacing, bundled logos, footer columns.** Top-level utility links have 10px horizontal padding so About / Contact / reviews no longer run together. Header and footer fall back to plugin-bundled Ringspo marks when WordPress has no custom logo (preview included). Footer content is four declared columns: explore, buy/sell, identity, legal.
+
+## [0.40.1] — 2026-08-25
+
+- **Nav links have a hover state, and mega column headings read as labels.** Primary items shift to the brand colour; panel and footer links underline. Heading weight, size and a hairline sit on the heading link only, so nested options stay regular weight instead of inheriting 600.
+
+## [0.40.0] — 2026-08-25
+
+- **LDN emits the Ringspo US site shell.** Header, utility bar and a one-band purple footer are plugin markup (`ldn-shell-*`), so they no longer depend on GP Premium menu locations. `site_shell.renderer.us: ldn`; the other eight live markets stay on the theme until that market is flipped. Empty slots (`account`, `shortlist`, `search`) stay empty.
+- **Legal pages are new network routes.** `/privacy/`, `/terms/`, `/cookies/` and `/affiliate-disclosure/` are LDN templates (noindex), not the old WordPress `/privacy-policy/` and `/terms-conditions/` posts. Footer links point at the new URLs. Cookie copy does not offer a preference centre while that capability is off.
+
+## [0.39.9] — 2026-08-25
+
+- **Nine markets' menus are config, not nine hand-built WordPress menus.** Every live Ringspo subsite's editorial nav is now declared in `config/navigation/ringspo.yaml`, so all nine are eligible for `replace` / `renderer: ldn`. Five of them (au, nz, sg, hk, ie) were the same four-item template with naming drift, so the shared labels became keys: adding a country is a set of URLs. About and Contact moved to the utility bar, which is where us, uk, ca and jp already had them. `injection_mode` still says `replace` for the US alone; other markets flip `site_shell.renderer` without emptying WordPress menus.
+- **Ten more structural labels translate.** `Learn`, `Sell Jewelry`, `Where to Buy`, the new `Rings by Carat` column, the shared `Importing a Ring` and `Retailer Guides`, and the four utility-bar items are now `label_key`s resolved from the i18n tree instead of literal English in config. Japan's About and Contact resolve to 企業情報 and お問い合わせ, taken from its live site rather than invented. en-AU and en-GB pick up "Sell Jewellery" from the spelling layer with nothing authored for either. Note the wording shifted to title case to match the existing nav terms: "Sell jewelry" now reads "Sell Jewelry".
+- **An uncovered locale no longer paints blank menu items.** `nav_structural_label()` had no English fallback for the new keys, so on a locale the i18n tree does not carry, three top-level items rendered as empty strings - a header with unclickable gaps rather than a visibly wrong word. All eleven new keys now have one, and a test asserts every key the config references has a fallback.
+- **The carat ring guides are a Learn column.** The top-level "Ring guides" item held 80 links across eight carat columns. It is now one `Rings by Carat` column of eight carat hub links inside Learn, so the US bar carries five top-level items instead of six.
+
+## [0.39.8] — 2026-08-24
+
+- **Primary menu fits on one row again.** LDN was declaring `menu-item-has-children` on its own mega parents and on the country switcher, which WordPress's walker already adds from the items parented below. GeneratePress paints one dropdown arrow per occurrence, so five of the six top-level items carried a second 45px chevron - 225px of a 1010px bar, which pushed "Where to buy" onto a second line. Measured 1171px before, 946px after.
+- **Mega panels show their columns without hovering a heading.** GeneratePress hides a submenu with `height: 0; overflow: hidden; pointer-events: none` as well as position and opacity, and the port of the old Customizer rule reset only the second group. The panel was therefore clipped to its own padding and a column's links appeared only while that heading was rolled over, which is the theme's flyout behaviour surviving inside the panel. Both levels now lift the clip explicitly, so `:focus-within` opens a full panel for keyboard users too rather than a padding-high sliver.
+- **Narrow menus open on GeneratePress free.** The slide-out and mobile-header hooks are GP Premium, which is not installed on every site in the network; the free theme's accordion marks the open submenu with `.toggled-on`. That is now a reveal trigger as well, and an opened drawer panel takes pointer events again.
+
+## [0.39.7] — 2026-08-24
+
+- **wp-admin sidebar uses the Loupe logo.** The plugin now has its own top-level menu (no longer under Tools) with the Loupe mark, so operators can find it without opening Tools.
+
 ## [0.39.6] — 2026-08-24
 
 - **Shape guides replace stale price and size sections like carat posts.** On `/cushion-cut-engagement-rings/` (and the other nine `/{shape}-engagement-rings/` posts), the well-priced / most-expensive / less-expensive H3 block and the buying-guide carat-weight H3 block are now removed in full and swapped for the live compare table plus price card, and the size card respectively. Stale retailer tables, dollar ranges, carat-scaling prose and affiliate tails in those sections no longer sit under the inject. Carat `/N-carat-…-diamond-ring/` posts are unchanged (Price/Size H2 replace). The pear/marquise "look large for their carat weight" pro section is not touched.

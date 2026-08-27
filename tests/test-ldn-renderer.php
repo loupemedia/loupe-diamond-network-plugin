@@ -345,6 +345,66 @@ check(
     'freshness_html is omitted when no analysis date is present'
 );
 
+// --- 5c. breadcrumb root crumb is the brand name (CP124_03 / CP52_03) -------
+// Test intent: the first crumb is $site['brand_name'] (or n), never the literal
+// Home, and a missing brand omits that crumb rather than emitting a blank one.
+// Would fail if: the trail still hardcoded Home, or wrapped the brand in __().
+class LDN_Config_Brand_Stub extends LDN_Config {
+    public $brand_name = '';
+    public function get_site($site_id) {
+        $site = parent::get_site($site_id);
+        if ($this->brand_name !== '') {
+            $site['brand_name'] = $this->brand_name;
+        }
+        return $site;
+    }
+}
+$brand_canonical = 'https://example.com/us/diamond-prices/natural/1-carat/round/';
+$missing_brand_trail = $renderer->breadcrumb_trail($shape_ctx, $brand_canonical);
+$missing_brand_names = array();
+foreach ($missing_brand_trail as $crumb) {
+    $missing_brand_names[] = isset($crumb['name']) ? (string) $crumb['name'] : '';
+}
+check(
+    $missing_brand_names !== array() && $missing_brand_names[0] === 'Diamond Prices',
+    'missing brand omits the root crumb and starts at Diamond Prices'
+);
+check(
+    !in_array('Home', $missing_brand_names, true),
+    'missing brand does not fall back to the literal Home'
+);
+check(
+    !in_array('', $missing_brand_names, true),
+    'missing brand does not emit a blank crumb'
+);
+
+$ringspo_cfg = new LDN_Config_Brand_Stub();
+$ringspo_cfg->brand_name = 'Ringspo';
+$ringspo_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), $ringspo_cfg);
+$ringspo_trail = $ringspo_renderer->breadcrumb_trail($shape_ctx, $brand_canonical);
+check(
+    isset($ringspo_trail[0]['name']) && $ringspo_trail[0]['name'] === 'Ringspo',
+    'Ringspo brand_name becomes the root crumb'
+);
+
+$jeweler_cfg = new LDN_Config_Brand_Stub();
+$jeweler_cfg->brand_name = 'Modern Jeweler';
+$jeweler_renderer = new LDN_Renderer(new LDN_Data_Fetcher(), $jeweler_cfg);
+$jeweler_trail = $jeweler_renderer->breadcrumb_trail($shape_ctx, $brand_canonical);
+check(
+    isset($jeweler_trail[0]['name']) && $jeweler_trail[0]['name'] === 'Modern Jeweler',
+    'Modern Jeweler brand_name becomes the root crumb'
+);
+
+$nav_php = (string) file_get_contents(LDN_PLUGIN_DIR . 'components/trait-ldn-navigation.php');
+$brand_fn_start = strpos($nav_php, 'function breadcrumb_brand_name');
+check($brand_fn_start !== false, 'breadcrumb_brand_name is present for the source assertion');
+$brand_fn = $brand_fn_start !== false ? substr($nav_php, $brand_fn_start, 900) : '';
+check(
+    strpos($brand_fn, '__(') === false && strpos($brand_fn, '_x(') === false,
+    'brand crumb is not wrapped in gettext'
+);
+
 // --- 6. carat_price_table_html navigation table (top-level nav) -------------
 // Rule: emits one row per carat with a lab-grown discount, and links each price
 // down to that type+carat all-shapes page; returns '' when the C5.3

@@ -1,6 +1,6 @@
 {
-  "version": "2ee5d41",
-  "generated_at": "2026-08-24T04:22:54.890282+00:00",
+  "version": "12bb064",
+  "generated_at": "2026-08-26T12:10:04.483682+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -7004,16 +7004,16 @@
     },
     "diamondadvisors": {
       "site_id": "diamondadvisors",
-      "domain": "diamondadvisors.com",
-      "brand_name": "Diamond Advisors",
+      "domain": "thediamondadvisors.com",
+      "brand_name": "The Diamond Advisors",
       "brand_tokens": {
-        "primary": "#F1C1B2",
-        "secondary": "#D4908A",
-        "accent": "#E8A99A",
-        "background": "#FEFEFE",
-        "box_fill": "rgba(241, 193, 178, 0.35)",
-        "text": "#1A1A2E",
-        "secondary_text": "#4A4A5A"
+        "primary": "#4A1F24",
+        "secondary": "#7A3A40",
+        "accent": "#C9A8A4",
+        "background": "#F4F1EC",
+        "box_fill": "rgba(74, 31, 36, 0.12)",
+        "text": "#2A1718",
+        "secondary_text": "#6B4A4C"
       },
       "page_chrome": {
         "max_width": "900px",
@@ -7027,12 +7027,16 @@
         ],
         "heading_style": "minimal"
       },
-      "brand_positioning": "Your trusted diamond advisor",
-      "tagline": "Expert guidance for discerning buyers",
+      "brand_positioning": "Independent diamond advisory",
+      "tagline": "Choose your centre stone well.",
       "target_audience": {
-        "primary": "Discerning buyers seeking premium guidance",
-        "secondary": "Those wanting reassurance in their diamond purchase",
-        "knowledge_level": "Intermediate to advanced"
+        "primary": "Discerning buyers, usually women, researching an engagement-ring centre stone",
+        "secondary": "Couples who want a calm second opinion on quality, cut and a fair price",
+        "knowledge_level": "Intermediate to advanced",
+        "segment_ids": [
+          "CONS-RESEARCHER",
+          "CONS-JEWELLERY"
+        ]
       },
       "content_tone": "trusted_advisor_premium",
       "writing_style": {
@@ -7062,7 +7066,10 @@
           "where confidence comes from",
           "the reassuring thing here is",
           "this is where the choice pays off",
-          "what to look for at this carat weight"
+          "what to look for at this carat weight",
+          "choose with clear eyes",
+          "the grade you can see",
+          "price as a range"
         ],
         "avoid_words": [
           "cheap",
@@ -7080,12 +7087,67 @@
           "overpriced",
           "waste of money",
           "amazing",
-          "stunning"
+          "stunning",
+          "shop now",
+          "book a consult",
+          "we sell nothing",
+          "we take no commission",
+          "gift for her"
+        ]
+      },
+      "editorial_shell": {
+        "visual": "atelier_journal",
+        "primary_cta": "See live prices",
+        "secondary_cta": "Colour and clarity",
+        "headlines": {
+          "home": "Choose your centre stone well.",
+          "home_alt": "Know what to look for, and what to pay.",
+          "prices": "What a stone in your shape actually costs",
+          "method": "How we advise",
+          "promise": "What we publish that retailers hide",
+          "natural_vs_lab": "The honest comparison, without the agenda",
+          "colour_clarity": "Buy the grade you can see",
+          "faq": "The questions we hear most",
+          "close": "Price your stone, then decide with clear eyes"
+        },
+        "promise_line": "We are an independent advisory, not a jeweller and not a shop. We publish live market prices and quality guidance from a premium index, so you can price your shape and carat, understand colour and clarity, and choose with clear eyes.\n",
+        "how_we_advise": [
+          "Independent of any one retailer. The index is ours.",
+          "We publish the market as a range, never a single figure.",
+          "We support your shape. We help you buy the best version of it."
+        ],
+        "faqs": [
+          {
+            "q": "Why do you show prices as a range?",
+            "a": "Cut, colour, clarity and proportions all move the price. A range is how you recognise a fair figure. A single number is a guess.\n"
+          },
+          {
+            "q": "Is your index really independent?",
+            "a": "We are not a jeweller and not a shop. The index is built from a premium retailer mix, not the mass-market set, so the range is not one store's list.\n"
+          },
+          {
+            "q": "Do you only advise on natural diamonds?",
+            "a": "We advise on both. We lay out the trade-offs and let you decide.\n"
+          },
+          {
+            "q": "What if I am not sure of my shape?",
+            "a": "We can talk through how shapes sit on the hand and in a setting. We will not tell you to pick a different one. We help you choose the best version of the shape you want.\n"
+          }
+        ],
+        "photography": "Metal on skin, cut light, settings, real hands. Daylight, desaturated. Never stock brides, sparkle overlays or a pink grade.\n",
+        "never": [
+          "millennial pink fills (#F1C1B2 and kin)",
+          "rose gold, marble, script fonts, pill buttons",
+          "centred SaaS hero, three equal feature cards",
+          "ring builder, product catalogue, Shop now",
+          "gift-default H1s",
+          "claiming we take no commission or sell nothing"
         ]
       },
       "prompt_rules": [
         "Write as a senior advisor guiding a client through a considered purchase. Recommendations should feel bespoke, not generic.",
-        "Frame engagement ring decisions as investments in craftsmanship and personal meaning — not financial investments, but choices worth making well.",
+        "Frame engagement ring decisions as choices in craftsmanship and personal meaning. Not financial investments. Choices worth making well.",
+        "Never claim we take no commission or sell nothing. Independence means we are not a jeweller. Ads and affiliate still exist.",
         "When presenting trade-offs, always lead with the positive outcome of the recommended path before explaining what was traded away."
       ],
       "content_angles": [
@@ -7131,12 +7193,13 @@
         ]
       },
       "female_perspective": {
-        "description": "Written as if by an experienced female diamond advisor",
+        "description": "Written as an experienced advisor speaking to a capable adult, usually a woman buying for herself. Warmth lives in the copy and in wear photography (metal on skin, setting, light). It does not live in blush fills.\n",
         "tone_notes": [
           "Warm but authoritative",
           "Reassuring without being condescending",
           "Understands emotional significance of purchase",
-          "Practical advice with empathy"
+          "Practical advice with empathy",
+          "Treat her as someone with taste and judgment, not a feminine persona"
         ],
         "example_phrases": [
           "When I'm advising clients...",
@@ -7271,10 +7334,13 @@
         "width": 800,
         "height": 420,
         "color_scheme": {
-          "primary": "#F1C1B2",
-          "box_fill": "rgba(241, 193, 178, 0.35)",
-          "median_line": "#D4908A",
-          "whisker": "#E8A99A"
+          "primary": "#4A1F24",
+          "box_fill": "rgba(74, 31, 36, 0.12)",
+          "median_line": "#7A3A40",
+          "whisker": "#C9A8A4",
+          "font_color": "#2A1718",
+          "paper_bgcolor": "#F4F1EC",
+          "plot_bgcolor": "#F4F1EC"
         },
         "labels": {
           "title_template": "{carat} Carat {shape} {type} Diamond Price Distribution",
@@ -8066,7 +8132,10 @@
       "target_audience": {
         "primary": "Value-conscious diamond buyers",
         "secondary": "First-time engagement ring shoppers",
-        "knowledge_level": "Beginner to intermediate"
+        "knowledge_level": "Beginner to intermediate",
+        "segment_ids": [
+          "CONS-RESEARCHER"
+        ]
       },
       "content_tone": "data_nerd_value_hunter",
       "writing_style": {
@@ -8100,7 +8169,12 @@
           "how much is a {carat}-carat {shape} worth",
           "is a {carat}-carat {shape} worth it",
           "value of a {carat}-carat diamond",
-          "what a {carat}-carat {shape} should cost"
+          "what a {carat}-carat {shape} should cost",
+          "the prices are in",
+          "nicest look for the spend",
+          "typical vs high",
+          "what $X actually buys",
+          "where the extra money stops showing up"
         ],
         "avoid_words": [
           "aggregated",
@@ -8120,13 +8194,79 @@
           "price percentile",
           "amazing",
           "incredible",
-          "stunning"
+          "stunning",
+          "shop now",
+          "book a consult",
+          "choose well",
+          "trusted advisor",
+          "clear eyes",
+          "not a jeweller, not a shop",
+          "not a jeweller. not a shop",
+          "we never talk you out of your shape",
+          "keep the shape you want",
+          "don't pay for a grade you can't see",
+          "guess you cannot use in a store",
+          "the book",
+          "the feed"
+        ]
+      },
+      "editorial_shell": {
+        "visual": "printed_poster",
+        "primary_cta": "See if it's a good deal",
+        "secondary_cta": "What $X actually buys",
+        "headlines": {
+          "home": "The prices are in. Let's not overpay.",
+          "home_alt": "Find the nicest diamond your number can buy.",
+          "prices": "Same carat. Wildly different tags.",
+          "value": "Which upgrades you can see. Which ones you just paid for.",
+          "natural_vs_lab": "Same look. A lot less money. Here's the gap.",
+          "jumps": "The step to 1.5 costs more than it looks.",
+          "close": "Check the typical price, then go shopping."
+        },
+        "promise_line": "We track what these stones actually sell for. Nicest look for the spend. That's the job.\n",
+        "prices_body": "A 1-carat round can cost half as much as another 1-carat round. Most of that gap is cut and grade, not magic. Live numbers belong on the price strip, not frozen in this file.\n",
+        "jumps_body": "Diamond prices don't climb evenly. Some carat steps cost a lot more than they look. We show you where the curve bends.\n",
+        "close_body": "Before you buy, see what the stone you want actually sells for. Then you'll know a good deal when you see one.\n",
+        "how_this_site_helps": [
+          "Typical vs high, for the shape they already want",
+          "What the same budget buys in lab vs natural",
+          "The last upgrade that still shows on a finger"
+        ],
+        "faqs": [
+          {
+            "q": "What does a good deal mean here?",
+            "a": "A stone that looks the part without paying for upgrades that only show up on the report. Typical vs high, for the shape you already want.\n"
+          },
+          {
+            "q": "Why do two 1-carat stones cost so differently?",
+            "a": "Cut and grade. Same carat on the tag can be wildly different money. We show the spread so a high listing is obvious.\n"
+          },
+          {
+            "q": "Natural or lab: which is the value play?",
+            "a": "Same look on a finger. Lab usually buys more stone for the same spend. We show the gap. You decide if that matters.\n"
+          },
+          {
+            "q": "Is the step to the next carat worth it?",
+            "a": "Not always. Some jumps cost more than they look. Check the curve before you pay for the bigger stone.\n"
+          }
+        ],
+        "photography": "Two stones at the same spend, or a close look at what you can actually see. Yellow masthead may use the guru character. Not a lone stock diamond on linen as the hero.\n",
+        "never": [
+          "mustard, gold or ochre in place of Guru Yellow #FFC52F",
+          "Playfair, Times or Garamond as the display face (Fraunces / Windsor)",
+          "three equal icon cards as the homepage",
+          "black full-bleed as the brand surface (yellow bar or cream paper)",
+          "not a jeweller, not a shop as a slogan",
+          "choose well, clear eyes, trusted advisor",
+          "ring builder, product catalogue, Shop now"
         ]
       },
       "prompt_rules": [
         "Always ground advice in what the data shows — avoid opinions that cannot be supported by price patterns, grade distributions, or sample sizes.",
         "Frame every quality recommendation as a value decision: what do you gain vs what do you pay for the upgrade?",
-        "When a buyer is choosing an engagement ring, help them find the combination that looks best for the budget — not the 'best' stone in abstract terms."
+        "When a buyer is choosing an engagement ring, help them find the combination that looks best for the budget — not the 'best' stone in abstract terms.",
+        "Job is 'is this a good deal' and 'where does the extra money stop showing.' Headlines may have recap energy. The next sentence must be a number or a visible cutoff a first-time buyer understands.",
+        "Do not use advisor-magazine lines: choose well, clear eyes, trusted advisor, not a jeweller not a shop, we never talk you out of your shape, don't pay for a grade you can't see."
       ],
       "content_angles": [
         "Focus on the price sweet spot at this carat weight — where quality meets value and diminishing returns begin.",
@@ -9032,6 +9172,8 @@
           "Open Sans"
         ],
         "heading_style": "ringspo_classic",
+        "header_logo": "ringspo-logo.png",
+        "footer_logo": "ringspo-logo-white.png",
         "hero_band": true,
         "intro_style": "cards"
       },
@@ -9842,6 +9984,19 @@
         "sg": "augment",
         "uk": "augment"
       },
+      "site_shell": {
+        "renderer": {
+          "us": "ldn",
+          "au": "theme",
+          "ca": "theme",
+          "hk": "theme",
+          "ie": "theme",
+          "jp": "theme",
+          "nz": "theme",
+          "sg": "theme",
+          "uk": "theme"
+        }
+      },
       "menus": {
         "primary": {
           "mobile_item_budget": 60,
@@ -9863,7 +10018,7 @@
                 "kind": "generated",
                 "page_family": "price_top_level"
               },
-              "mega_menu_columns": 2,
+              "mega_menu_columns": 3,
               "gate": {
                 "module": "price"
               },
@@ -9888,6 +10043,17 @@
                   }
                 },
                 {
+                  "heading_key": "nav.prices_by_type",
+                  "entries": {
+                    "kind": "generated",
+                    "page_family": "price_diamond_type",
+                    "diamond_types": [
+                      "natural",
+                      "lab-grown"
+                    ]
+                  }
+                },
+                {
                   "heading_key": "nav.price_tools",
                   "entries": {
                     "kind": "list",
@@ -9897,14 +10063,6 @@
                         "target": {
                           "kind": "generated",
                           "page_family": "price_calculator"
-                        }
-                      },
-                      {
-                        "label_key": "nav.prices_lab_grown",
-                        "target": {
-                          "kind": "generated",
-                          "page_family": "price_diamond_type",
-                          "diamond_type": "lab-grown"
                         }
                       }
                     ]
@@ -9919,7 +10077,7 @@
                 "kind": "generated",
                 "page_family": "size_mega_hub"
               },
-              "mega_menu_columns": 3,
+              "mega_menu_columns": 2,
               "gate": {
                 "module": "size"
               },
@@ -9940,25 +10098,6 @@
                       "marquise",
                       "asscher",
                       "heart"
-                    ]
-                  }
-                },
-                {
-                  "heading_key": "nav.sizes_by_carat",
-                  "entries": {
-                    "kind": "generated",
-                    "page_family": "size_individual",
-                    "anchor_shape": "round",
-                    "carats": [
-                      "0.5",
-                      "0.7",
-                      "1",
-                      "1.5",
-                      "2",
-                      "2.5",
-                      "3",
-                      "4",
-                      "5"
                     ]
                   }
                 },
@@ -9991,12 +10130,12 @@
               "countries": [
                 "us"
               ],
-              "label": "Learn",
+              "label_key": "nav.learn",
               "target": {
                 "kind": "editorial",
                 "url": "/diamond-engagement-rings/"
               },
-              "mega_menu_columns": 5,
+              "mega_menu_columns": 6,
               "columns": [
                 {
                   "heading": "Diamond Information",
@@ -10261,639 +10400,66 @@
                       }
                     ]
                   }
-                }
-              ]
-            },
-            {
-              "id": "carat_weight_guides",
-              "countries": [
-                "us"
-              ],
-              "label": "Ring guides",
-              "target": {
-                "kind": "editorial",
-                "url": "/3-carat-diamond-ring/"
-              },
-              "columns": [
-                {
-                  "heading": "3 carat",
-                  "entries": {
-                    "kind": "list",
-                    "items": [
-                      {
-                        "label": "3 Carat Asscher",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-asscher-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 Carat Cushion Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-cushion-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 carat Emerald Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-emerald-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 Carat Heart",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-heart-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 Carat Marquise",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-marquise-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 Carat Oval",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-oval-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 Carat Pear",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-pear-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 Carat Princess Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-princess-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 Carat Radiant",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-radiant-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "3 Carat Round",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/3-carat-round-diamond-ring/"
-                        }
-                      }
-                    ]
-                  }
                 },
                 {
-                  "heading": "4 Carat",
+                  "heading_key": "nav.rings_by_carat",
                   "entries": {
                     "kind": "list",
                     "items": [
                       {
-                        "label": "4 Carat Asscher Cut",
+                        "label": "3 Carat Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/4-carat-asscher-cut-diamond-ring/"
+                          "url": "/3-carat-diamond-ring/"
                         }
                       },
                       {
-                        "label": "4 Carat Cushion Cut",
+                        "label": "4 Carat Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/4-carat-cushion-cut-diamond-ring/"
+                          "url": "/4-carat-diamond-ring/"
                         }
                       },
                       {
-                        "label": "4 carat Emerald Cut",
+                        "label": "5 Carat Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/4-carat-emerald-cut-diamond-ring/"
+                          "url": "/5-carat-diamond-ring/"
                         }
                       },
                       {
-                        "label": "4 Carat Heart",
+                        "label": "6 Carat Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/4-carat-heart-shaped-diamond-ring/"
+                          "url": "/6-carat-diamond-ring/"
                         }
                       },
                       {
-                        "label": "4 Carat Marquise",
+                        "label": "7 Carat Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/4-carat-marquise-diamond-ring/"
+                          "url": "/7-carat-diamond-ring/"
                         }
                       },
                       {
-                        "label": "4 Carat Oval",
+                        "label": "8 Carat Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/4-carat-oval-diamond-ring/"
+                          "url": "/8-carat-diamond-ring/"
                         }
                       },
                       {
-                        "label": "4 Carat Pear",
+                        "label": "9 Carat Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/4-carat-pear-shaped-diamond-ring/"
+                          "url": "/9-carat-diamond-ring/"
                         }
                       },
                       {
-                        "label": "4 Carat Princess Cut",
+                        "label": "10 Carat Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/4-carat-princess-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "4 Carat Radiant",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/4-carat-radiant-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "4 Carat Round",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/4-carat-round-diamond-ring/"
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "heading": "5 Carat",
-                  "entries": {
-                    "kind": "list",
-                    "items": [
-                      {
-                        "label": "5 Carat Asscher Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-asscher-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 Carat Cushion Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-cushion-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 carat Emerald Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-emerald-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 Carat Heart",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-heart-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 Carat Marquise",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-marquise-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 Carat Oval",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-oval-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 Carat Pear",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-pear-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 Carat Princess Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-princess-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 Carat Radiant Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-radiant-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "5 Carat Round",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/5-carat-round-diamond-ring/"
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "heading": "6 Carat",
-                  "entries": {
-                    "kind": "list",
-                    "items": [
-                      {
-                        "label": "6 Carat Asscher Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-asscher-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Cushion Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-cushion-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Emerald Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-emerald-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Heart",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-heart-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Marquise",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-marquise-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Oval",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-oval-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Pear",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-pear-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Princess Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-princess-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Radiant Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-radiant-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "6 Carat Round",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/6-carat-round-diamond-ring/"
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "heading": "7 Carat",
-                  "entries": {
-                    "kind": "list",
-                    "items": [
-                      {
-                        "label": "7 Carat Asscher Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-asscher-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Cushion Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-cushion-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Emerald Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-emerald-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Heart",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-heart-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Marquise",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-marquise-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Oval",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-oval-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Pear",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-pear-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Princess Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-princess-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Radiant Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-radiant-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "7 Carat Round",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/7-carat-round-diamond-ring/"
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "heading": "8 Carat",
-                  "entries": {
-                    "kind": "list",
-                    "items": [
-                      {
-                        "label": "8 Carat Asscher Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-asscher-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 Carat Cushion Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-cushion-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 carat Emerald Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-emerald-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 Carat Heart",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-heart-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 Carat Marquise",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-marquise-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 Carat Oval",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-oval-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 Carat Pear",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-pear-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 Carat Princess Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-princess-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 Carat Radiant Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-radiant-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "8 Carat Round",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/8-carat-round-diamond-ring/"
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "heading": "9 Carat",
-                  "entries": {
-                    "kind": "list",
-                    "items": [
-                      {
-                        "label": "9 Carat Asscher Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-asscher-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Cushion Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-cushion-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Emerald Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-emerald-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Heart",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-heart-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Marquise",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-marquise-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Oval",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-oval-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Pear",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-pear-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Princess Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-princess-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Radiant Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-radiant-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "9 Carat Round",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/9-carat-round-diamond-ring/"
-                        }
-                      }
-                    ]
-                  }
-                },
-                {
-                  "heading": "10 carat",
-                  "entries": {
-                    "kind": "list",
-                    "items": [
-                      {
-                        "label": "10 Carat Asscher cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-asscher-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Cushion Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-cushion-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Emerald",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-emerald-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Heart",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-heart-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Marquise",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-marquise-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Oval",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-oval-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Pear",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-pear-shaped-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Princess Cut",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-princess-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Radiant",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-radiant-cut-diamond-ring/"
-                        }
-                      },
-                      {
-                        "label": "10 Carat Round",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/10-carat-round-diamond-ring/"
+                          "url": "/10-carat-diamond-ring/"
                         }
                       }
                     ]
@@ -10906,7 +10472,7 @@
               "countries": [
                 "us"
               ],
-              "label": "Sell jewelry",
+              "label_key": "nav.sell_jewelry",
               "target": {
                 "kind": "editorial",
                 "url": "/sell-jewelry/"
@@ -11020,7 +10586,7 @@
               "countries": [
                 "us"
               ],
-              "label": "Where to buy",
+              "label_key": "nav.where_to_buy",
               "target": {
                 "kind": "editorial",
                 "url": "/recommended-retailers/"
@@ -11191,6 +10757,970 @@
                   }
                 }
               ]
+            },
+            {
+              "id": "au_importing_a_diamond_ring",
+              "countries": [
+                "au"
+              ],
+              "label_key": "nav.importing_ring",
+              "target": {
+                "kind": "editorial",
+                "url": "/au/importing-diamond-engagement-ring-australia/"
+              }
+            },
+            {
+              "id": "au_retailer_importing_guides",
+              "countries": [
+                "au"
+              ],
+              "label_key": "nav.retailer_guides",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "Brilliant Earth Australia",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/au/brilliant-earth-australia/"
+                        }
+                      },
+                      {
+                        "label": "James Allen Australia",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/au/james-allen-australia/"
+                        }
+                      },
+                      {
+                        "label": "Blue Nile Australia",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/au/blue-nile-australia/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "ca_retailer_reviews",
+              "countries": [
+                "ca"
+              ],
+              "label": "Retailer reviews",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "Ann Louise Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/ann-louise-jewellers/"
+                        }
+                      },
+                      {
+                        "label": "Ben Moss Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/ben-moss-review/"
+                        }
+                      },
+                      {
+                        "label": "Birks Review 2025",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/birks-review/"
+                        }
+                      },
+                      {
+                        "label": "Bogarts Jewellers Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/bogarts-jewellers-review/"
+                        }
+                      },
+                      {
+                        "label": "Charm Diamond Centre Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/charm-diamond-centre/"
+                        }
+                      },
+                      {
+                        "label": "Crescent Gold & Diamonds Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/crescent-gold-diamonds/"
+                        }
+                      },
+                      {
+                        "label": "Ecksand Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/ecksand/"
+                        }
+                      },
+                      {
+                        "label": "Micheal Hill Canada Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/micheal-hill-review/"
+                        }
+                      },
+                      {
+                        "label": "Paris Jewellers review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/paris-jewellers-review/"
+                        }
+                      },
+                      {
+                        "label": "Peoples review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/peoples-review/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "ca_diamond_shapes",
+              "countries": [
+                "ca"
+              ],
+              "label": "Diamond shapes",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "Princess cut",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/princess-cut-diamond-engagement-rings-canada/"
+                        }
+                      },
+                      {
+                        "label": "Cushion cut",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/cushion-cut-engagement-rings-in-canada/"
+                        }
+                      },
+                      {
+                        "label": "Asscher cut",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/asscher-cut-engagement-rings-in-canada/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "ca_importing_a_ring_into_canada",
+              "countries": [
+                "ca"
+              ],
+              "label_key": "nav.importing_ring",
+              "target": {
+                "kind": "editorial",
+                "url": "/ca/importing-diamond-engagement-ring-canada/"
+              },
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "James Allen Canada: Buying Guide & Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/james-allen-canada/"
+                        }
+                      },
+                      {
+                        "label": "Brilliant Earth Canada",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/brilliant-earth-canada/"
+                        }
+                      },
+                      {
+                        "label": "Whiteflash Canada",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/whiteflash-canada/"
+                        }
+                      },
+                      {
+                        "label": "Blue Nile Canada",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/blue-nile-canada/"
+                        }
+                      },
+                      {
+                        "label": "Ritani Canada",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ca/ritani-canada/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "ca_recommended_retailers",
+              "countries": [
+                "ca"
+              ],
+              "label": "Recommended retailers",
+              "target": {
+                "kind": "editorial",
+                "url": "/ca/where-to-buy-diamond-engagement-ring/"
+              }
+            },
+            {
+              "id": "uk_guides",
+              "countries": [
+                "uk"
+              ],
+              "label": "Guides",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "Best place to buy a diamond ring",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/best-place-to-buy-a-diamond-engagement-ring/"
+                        }
+                      },
+                      {
+                        "label": "Best place to buy a lab grown ring",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/best-place-to-buy-lab-grown-diamonds/"
+                        }
+                      },
+                      {
+                        "label": "Pendant necklaces buying guide",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/diamond-pendant-necklace/"
+                        }
+                      },
+                      {
+                        "label": "Vintage Rings",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/vintage-diamond-engagement-ring/"
+                        }
+                      },
+                      {
+                        "label": "Victorian diamond rings",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/victorian-diamond-ring/"
+                        }
+                      },
+                      {
+                        "label": "Edwardian diamond rings",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/edwardian-diamond-rings/"
+                        }
+                      },
+                      {
+                        "label": "Art deco engagement rings",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/art-deco-engagement-ring/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "uk_carat_weights",
+              "countries": [
+                "uk"
+              ],
+              "label": "Carat weights",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "0.5 Carat Diamond Prices",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/0-5-carat-diamond-price/"
+                        }
+                      },
+                      {
+                        "label": "1 Carat Diamond Prices",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/1-carat-diamond-price/"
+                        }
+                      },
+                      {
+                        "label": "2 Carat Diamond Prices",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/2-carat-diamond-price/"
+                        }
+                      },
+                      {
+                        "label": "3 Carat Diamond Prices",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/3-carat-diamond-price/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "uk_retailer_reviews",
+              "countries": [
+                "uk"
+              ],
+              "label": "Retailer reviews",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "Recommended UK retailers",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/recommended-retailers-uk/"
+                        }
+                      },
+                      {
+                        "label": "Beaverbrooks Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/beaverbrooks-review/"
+                        }
+                      },
+                      {
+                        "label": "H Samuel Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/h-samuel-review"
+                        }
+                      },
+                      {
+                        "label": "Rox review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/rox-review/"
+                        }
+                      },
+                      {
+                        "label": "Vashi Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/vashi-review/"
+                        }
+                      },
+                      {
+                        "label": "77 Diamonds Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/77-diamonds-review/"
+                        }
+                      },
+                      {
+                        "label": "Taylor and Hart Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/taylor-and-hart-review/"
+                        }
+                      },
+                      {
+                        "label": "Mappin & Webb Review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/mappin-webb/"
+                        }
+                      },
+                      {
+                        "label": "Boodles review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/boodles-review/"
+                        }
+                      },
+                      {
+                        "label": "Goldsmiths review",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/goldsmiths-review/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "uk_importing_into_uk",
+              "countries": [
+                "uk"
+              ],
+              "label_key": "nav.importing_ring",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "Importing FAQ",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/importing-diamond-engagement-ring-uk/"
+                        }
+                      },
+                      {
+                        "label": "James Allen UK Guide",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/james-allen-uk/"
+                        }
+                      },
+                      {
+                        "label": "Blue Nile UK Guide",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/blue-nile-uk/"
+                        }
+                      },
+                      {
+                        "label": "Brilliant Earth UK Guide",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/brilliant-earth/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "uk_diamond_education",
+              "countries": [
+                "uk"
+              ],
+              "label": "Diamond Education",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "Diamond Clarity",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/diamond-clarity-chart/"
+                        }
+                      },
+                      {
+                        "label": "VS2 Diamonds",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/vs2-diamonds/"
+                        }
+                      },
+                      {
+                        "label": "VS2 vs. SI1 diamonds",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/vs2-vs-si1-diamond-clarity/"
+                        }
+                      },
+                      {
+                        "label": "VS1 vs. VS2 diamonds",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/uk/vs1-vs-vs2-diamond-clarity/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "nz_importing_a_ring_into_nz",
+              "countries": [
+                "nz"
+              ],
+              "label_key": "nav.importing_ring",
+              "target": {
+                "kind": "editorial",
+                "url": "/nz/importing-a-diamond-ring-into-new-zealand/"
+              }
+            },
+            {
+              "id": "nz_retailer_guides",
+              "countries": [
+                "nz"
+              ],
+              "label_key": "nav.retailer_guides",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "James Allen New Zealand",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/nz/james-allen-new-zealand/"
+                        }
+                      },
+                      {
+                        "label": "Blue Nile New Zealand",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/nz/blue-nile-new-zealand/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "sg_importing_a_ring_into_sg",
+              "countries": [
+                "sg"
+              ],
+              "label_key": "nav.importing_ring",
+              "target": {
+                "kind": "editorial",
+                "url": "/sg/importing-a-diamond-or-engagement-ring-into-singapore/"
+              }
+            },
+            {
+              "id": "sg_retailer_guides",
+              "countries": [
+                "sg"
+              ],
+              "label_key": "nav.retailer_guides",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "James Allen Singapore",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/sg/james-allen-singapore/"
+                        }
+                      },
+                      {
+                        "label": "Blue Nile Singapore",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/sg/blue-nile-singapore/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "hk_importing_a_ring_into_hk",
+              "countries": [
+                "hk"
+              ],
+              "label_key": "nav.importing_ring",
+              "target": {
+                "kind": "editorial",
+                "url": "/hk/importing-a-diamond-ring-into-hong-kong/"
+              }
+            },
+            {
+              "id": "hk_retailer_guides",
+              "countries": [
+                "hk"
+              ],
+              "label_key": "nav.retailer_guides",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "James Allen Hong Kong",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/hk/james-allen-hong-kong/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "ie_import_a_ring_into_ireland",
+              "countries": [
+                "ie"
+              ],
+              "label_key": "nav.importing_ring",
+              "target": {
+                "kind": "editorial",
+                "url": "/ie/importing-a-diamond-ring-into-ireland/"
+              }
+            },
+            {
+              "id": "ie_retailer_specific_guides",
+              "countries": [
+                "ie"
+              ],
+              "label_key": "nav.retailer_guides",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "James Allen Ireland",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/ie/james-allen-ireland/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "jp_",
+              "countries": [
+                "jp"
+              ],
+              "label": "ダイヤモンド情報",
+              "target": {
+                "kind": "editorial",
+                "url": "/jp/engagement-ring"
+              },
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "ダイヤモンド カット",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/diamond-cut/"
+                        }
+                      },
+                      {
+                        "label": "ダイヤモンド カラット",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/diamond-carat/"
+                        }
+                      },
+                      {
+                        "label": "ダイヤモンド カラー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/diamond-color/"
+                        }
+                      },
+                      {
+                        "label": "ダイヤモンド クラリティ",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/diamond-clarity/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "jp_",
+              "countries": [
+                "jp"
+              ],
+              "label": "レビュー",
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "ブルーナイルジャパン",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/blue-nile-nippon/"
+                        }
+                      },
+                      {
+                        "label": "ビジュピコのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/bijoupiko-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "アイプリモのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/i-primo-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "ブリリアンスのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/brilliance-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "ルシエのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/lucie-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "カフェリングのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/cafering-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "コラニーのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/colany-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "オレッキオのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/orecchio-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "ニワカのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/niwaka-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "ダイヤモンドシライシのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/diamond-shiraishi-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "ケイウノのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/k-uno-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "ポンテヴェキオのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/ponte-vecchio-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "トレセンテのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/trecenti-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "4℃ブライダルのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/4c-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "エクセルコダイヤモンドのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/excelco-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "スタージュエリーのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/star-jewelry-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "ラザールのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/lazare-rebyu/"
+                        }
+                      },
+                      {
+                        "label": "QDMマーケットのレビュー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/qdm-market-rebyu/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "id": "jp_",
+              "countries": [
+                "jp"
+              ],
+              "label": "誕生石",
+              "target": {
+                "kind": "editorial",
+                "url": "/jp/birthstones/"
+              },
+              "columns": [
+                {
+                  "entries": {
+                    "kind": "list",
+                    "items": [
+                      {
+                        "label": "1月誕生石：ガーネット",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/01-january-birthstone-garnet/"
+                        }
+                      },
+                      {
+                        "label": "2月誕生石: アメジス",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/02-february-birthstone-amethyst/"
+                        }
+                      },
+                      {
+                        "label": "3月誕生石: アクアマリン",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/03-march-birthstone-aquamarine/"
+                        }
+                      },
+                      {
+                        "label": "4月誕生石: ダイヤモンド",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/04-april-birthstone-diamond/"
+                        }
+                      },
+                      {
+                        "label": "5月誕生石: エメラルド",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/05-may-birthstone-emerald/"
+                        }
+                      },
+                      {
+                        "label": "6月誕生石: パール",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/06-june-birthstone-pearl/"
+                        }
+                      },
+                      {
+                        "label": "7月誕生石: ルビー",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/07-july-birthstone-ruby/"
+                        }
+                      },
+                      {
+                        "label": "8月誕生石: ペリドット",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/08-august-birthstone-peridot/"
+                        }
+                      },
+                      {
+                        "label": "9月誕生石: サファイア",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/09-september-birthstone-sapphire/"
+                        }
+                      },
+                      {
+                        "label": "10月誕生石: オパール",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/10-october-birthstone-opal/"
+                        }
+                      },
+                      {
+                        "label": "11月誕生石: シトリン",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/11-november-birthstone-citrine/"
+                        }
+                      },
+                      {
+                        "label": "12月誕生石: ブルートパーズ",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/jp/12-december-birthstone-topaz/"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           ]
         },
@@ -11202,7 +11732,7 @@
               "countries": [
                 "us"
               ],
-              "label": "About",
+              "label_key": "nav.about",
               "target": {
                 "kind": "editorial",
                 "url": "/about/"
@@ -11213,7 +11743,7 @@
               "countries": [
                 "us"
               ],
-              "label": "Contact",
+              "label_key": "nav.contact",
               "target": {
                 "kind": "editorial",
                 "url": "/contact/"
@@ -11224,7 +11754,7 @@
               "countries": [
                 "us"
               ],
-              "label": "Reviews of Ringspo",
+              "label_key": "nav.reviews_of_ringspo",
               "target": {
                 "kind": "editorial",
                 "url": "https://www.trustspot.io/store/Ringspo"
@@ -11235,10 +11765,219 @@
               "countries": [
                 "us"
               ],
-              "label": "Why do we do this?",
+              "label_key": "nav.why_do_we_do_this",
               "target": {
                 "kind": "editorial",
                 "url": "/why-does-ringspo-provide-information-and-advice-for-free/"
+              }
+            },
+            {
+              "id": "au_about",
+              "countries": [
+                "au"
+              ],
+              "label_key": "nav.about",
+              "target": {
+                "kind": "editorial",
+                "url": "/au/about/"
+              }
+            },
+            {
+              "id": "au_contact",
+              "countries": [
+                "au"
+              ],
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/au/contact/"
+              }
+            },
+            {
+              "id": "ca_about",
+              "countries": [
+                "ca"
+              ],
+              "label_key": "nav.about",
+              "target": {
+                "kind": "editorial",
+                "url": "/ca/about/"
+              }
+            },
+            {
+              "id": "ca_contact",
+              "countries": [
+                "ca"
+              ],
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/ca/contact"
+              }
+            },
+            {
+              "id": "ca_reviews",
+              "countries": [
+                "ca"
+              ],
+              "label_key": "nav.reviews_of_ringspo",
+              "target": {
+                "kind": "editorial",
+                "url": "https://www.trustspot.io/store/Ringspo"
+              }
+            },
+            {
+              "id": "uk_about",
+              "countries": [
+                "uk"
+              ],
+              "label_key": "nav.about",
+              "target": {
+                "kind": "editorial",
+                "url": "/uk/about-uk"
+              }
+            },
+            {
+              "id": "uk_contact",
+              "countries": [
+                "uk"
+              ],
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/uk/contact-uk"
+              }
+            },
+            {
+              "id": "uk_reviews",
+              "countries": [
+                "uk"
+              ],
+              "label_key": "nav.reviews_of_ringspo",
+              "target": {
+                "kind": "editorial",
+                "url": "https://www.trustspot.io/store/Ringspo"
+              }
+            },
+            {
+              "id": "uk_why_free",
+              "countries": [
+                "uk"
+              ],
+              "label_key": "nav.why_do_we_do_this",
+              "target": {
+                "kind": "editorial",
+                "url": "/uk/why-ringspo-provides-information-for-free"
+              }
+            },
+            {
+              "id": "nz_about",
+              "countries": [
+                "nz"
+              ],
+              "label_key": "nav.about",
+              "target": {
+                "kind": "editorial",
+                "url": "/nz/about/"
+              }
+            },
+            {
+              "id": "nz_contact",
+              "countries": [
+                "nz"
+              ],
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/nz/contact/"
+              }
+            },
+            {
+              "id": "sg_contact",
+              "countries": [
+                "sg"
+              ],
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/sg/contact/"
+              }
+            },
+            {
+              "id": "sg_about",
+              "countries": [
+                "sg"
+              ],
+              "label_key": "nav.about",
+              "target": {
+                "kind": "editorial",
+                "url": "/sg/about/"
+              }
+            },
+            {
+              "id": "hk_about",
+              "countries": [
+                "hk"
+              ],
+              "label_key": "nav.about",
+              "target": {
+                "kind": "editorial",
+                "url": "/hk/about/"
+              }
+            },
+            {
+              "id": "hk_contact",
+              "countries": [
+                "hk"
+              ],
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/hk/contact/"
+              }
+            },
+            {
+              "id": "ie_about",
+              "countries": [
+                "ie"
+              ],
+              "label_key": "nav.about",
+              "target": {
+                "kind": "editorial",
+                "url": "/ie/about/"
+              }
+            },
+            {
+              "id": "ie_contact",
+              "countries": [
+                "ie"
+              ],
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/ie/contact-us/"
+              }
+            },
+            {
+              "id": "jp_about",
+              "countries": [
+                "jp"
+              ],
+              "label_key": "nav.about",
+              "target": {
+                "kind": "editorial",
+                "url": "/jp/kigyo-joho/"
+              }
+            },
+            {
+              "id": "jp_contact",
+              "countries": [
+                "jp"
+              ],
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/jp/contact/"
               }
             },
             {
@@ -11353,10 +12092,20 @@
           "theme_location": "footer",
           "items": [
             {
-              "id": "footer_diamond_prices",
+              "id": "footer_intro_rings",
+              "column": 1,
               "countries": [
                 "us"
               ],
+              "label": "Intro to diamond rings",
+              "target": {
+                "kind": "editorial",
+                "url": "/diamond-engagement-rings/"
+              }
+            },
+            {
+              "id": "footer_diamond_prices",
+              "column": 1,
               "label_key": "nav.diamond_prices",
               "target": {
                 "kind": "generated",
@@ -11368,9 +12117,7 @@
             },
             {
               "id": "footer_diamond_sizes",
-              "countries": [
-                "us"
-              ],
+              "column": 1,
               "label_key": "nav.diamond_sizes",
               "target": {
                 "kind": "generated",
@@ -11381,22 +12128,12 @@
               }
             },
             {
-              "id": "footer_intro_rings",
-              "countries": [
-                "us"
-              ],
-              "label": "Intro to diamond rings",
-              "target": {
-                "kind": "editorial",
-                "url": "/diamond-engagement-rings/"
-              }
-            },
-            {
               "id": "footer_sell_ring",
+              "column": 2,
               "countries": [
                 "us"
               ],
-              "label": "Where to sell a diamond ring",
+              "label": "Where to sell",
               "target": {
                 "kind": "editorial",
                 "url": "/sell-diamond-engagement-ring/"
@@ -11404,32 +12141,68 @@
             },
             {
               "id": "footer_where_to_buy",
+              "column": 2,
               "countries": [
                 "us"
               ],
-              "label": "Best place to buy diamond ring",
+              "label": "Best place to buy",
               "target": {
                 "kind": "editorial",
                 "url": "/recommended-retailers/"
               }
             },
             {
-              "id": "footer_about",
+              "id": "footer_contact",
+              "column": 3,
               "countries": [
                 "us"
               ],
-              "label": "About",
+              "label_key": "nav.contact",
+              "target": {
+                "kind": "editorial",
+                "url": "/contact/"
+              }
+            },
+            {
+              "id": "footer_about",
+              "column": 3,
+              "countries": [
+                "us"
+              ],
+              "label_key": "nav.about",
               "target": {
                 "kind": "editorial",
                 "url": "/about/"
               }
             },
             {
+              "id": "footer_privacy",
+              "column": 4,
+              "label_key": "nav.privacy",
+              "target": {
+                "kind": "editorial",
+                "url": "/privacy/"
+              },
+              "gate": {
+                "module": "standard_pages"
+              }
+            },
+            {
+              "id": "footer_terms",
+              "column": 4,
+              "label_key": "nav.terms",
+              "target": {
+                "kind": "editorial",
+                "url": "/terms/"
+              },
+              "gate": {
+                "module": "standard_pages"
+              }
+            },
+            {
               "id": "footer_disclosure",
-              "countries": [
-                "us"
-              ],
-              "label": "Affiliate disclosure",
+              "column": 4,
+              "label_key": "nav.disclosure",
               "target": {
                 "kind": "editorial",
                 "url": "/affiliate-disclosure/"
@@ -11439,28 +12212,12 @@
               }
             },
             {
-              "id": "footer_privacy",
-              "countries": [
-                "us"
-              ],
-              "label": "Privacy Policy",
+              "id": "footer_cookies",
+              "column": 4,
+              "label_key": "nav.cookies",
               "target": {
                 "kind": "editorial",
-                "url": "/privacy-policy/"
-              },
-              "gate": {
-                "module": "standard_pages"
-              }
-            },
-            {
-              "id": "footer_terms",
-              "countries": [
-                "us"
-              ],
-              "label": "Terms of Service",
-              "target": {
-                "kind": "editorial",
-                "url": "/terms-conditions/"
+                "url": "/cookies/"
               },
               "gate": {
                 "module": "standard_pages"
@@ -11475,6 +12232,17 @@
   "nav_terms": {
     "ringspo": {
       "en-US": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11486,22 +12254,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-GB": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11513,22 +12321,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-AU": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11540,22 +12388,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-CA": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11567,22 +12455,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-NZ": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11594,22 +12522,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-SG": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11621,22 +12589,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-ZA": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11648,22 +12656,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-IN": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11675,22 +12723,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-HK": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11702,22 +12790,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "en-IE": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11729,22 +12857,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natural"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewellery",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Heart",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Round"
         }
       },
       "fr-FR": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11756,22 +12924,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Diamant de laboratoire",
+          "natural": "Diamants naturels"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Coussin",
+          "emerald": "Émeraude",
+          "heart": "Cœur",
+          "marquise": "Marquise",
+          "oval": "Ovale",
+          "pear": "Poire",
+          "princess": "Princesse",
+          "radiant": "Radiant",
+          "round": "Rond"
         }
       },
       "de-DE": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11783,22 +12991,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Labor-Diamant",
+          "natural": "Natürliche Diamanten"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Kissenschliff",
+          "emerald": "Smaragdschliff",
+          "heart": "Herz",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Tropfenschliff",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Rund"
         }
       },
       "nl-NL": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11810,22 +13058,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Natuurlijke diamanten"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Smaragd",
+          "heart": "Hart",
+          "marquise": "Marquise",
+          "oval": "Ovaal",
+          "pear": "Peer",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Rond"
         }
       },
       "es-ES": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11837,22 +13125,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Diamante de laboratorio",
+          "natural": "Diamantes Naturales"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cojín",
+          "emerald": "Esmeralda",
+          "heart": "Corazón",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pera",
+          "princess": "Princesa",
+          "radiant": "Radiante",
+          "round": "Redondo"
         }
       },
       "it-IT": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11864,22 +13192,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Diamanti Naturali"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cuscino",
+          "emerald": "Smeraldo",
+          "heart": "Cuore",
+          "marquise": "Marquise",
+          "oval": "Ovale",
+          "pear": "Goccia",
+          "princess": "Princess",
+          "radiant": "Radiante",
+          "round": "Rotondo"
         }
       },
       "pt-PT": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11891,22 +13259,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Diamantes naturais"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Almofada",
+          "emerald": "Esmeralda",
+          "heart": "Coração",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pera",
+          "princess": "Princesa",
+          "radiant": "Radiante",
+          "round": "Redondo"
         }
       },
       "el-GR": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11918,22 +13326,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Διαμάντι εργαστηρίου",
+          "natural": "Φυσικά διαμάντια"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Άσσερ",
+          "cushion": "Μαξιλάρι",
+          "emerald": "Σμαράγδι",
+          "heart": "Καρδιά",
+          "marquise": "Μαρκίζα",
+          "oval": "Οβάλ",
+          "pear": "Αχλάδι",
+          "princess": "Πριγκίπισσα",
+          "radiant": "Ακτινωτό",
+          "round": "Στρογγυλό"
         }
       },
       "fi-FI": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11945,22 +13393,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Laboratoriotimanti",
+          "natural": "Luonnon timantit"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Sydän",
+          "marquise": "Marquise",
+          "oval": "Soikea",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Pyöreä"
         }
       },
       "ja-JP": {
+        "carat": {
+          "0.5": "0.5カラット",
+          "0.7": "0.7カラット",
+          "1": "1カラット",
+          "1.5": "1.5カラット",
+          "2": "2カラット",
+          "2.5": "2.5カラット",
+          "3": "3カラット",
+          "4": "4カラット",
+          "5": "5カラット"
+        },
         "country": {
           "au": "オーストラリア",
           "ca": "カナダ",
@@ -11972,22 +13460,62 @@
           "uk": "イギリス",
           "us": "アメリカ合衆国"
         },
+        "diamond_type": {
+          "lab-grown": "ラボグロウン",
+          "natural": "天然ダイヤモンド"
+        },
         "label": {
+          "nav.about": "企業情報",
+          "nav.contact": "お問い合わせ",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "ダイヤモンド価格",
           "nav.diamond_sizes": "ダイヤモンドのサイズ",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "価格計算ツール",
           "nav.price_tools": "ツール",
           "nav.prices_by_carat": "カラット別価格",
-          "nav.prices_lab_grown": "ラボグロウンダイヤモンド価格",
+          "nav.prices_by_type": "天然とラボグロウン",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "国を選択",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "サイズ比較",
           "nav.size_methodology": "測定方法",
           "nav.size_tools": "ツール",
-          "nav.sizes_by_carat": "カラット別サイズ",
-          "nav.sizes_by_shape": "シェイプ別サイズ"
+          "nav.sizes_by_shape": "シェイプ別サイズ",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "アッシャーカット",
+          "cushion": "クッションカット",
+          "emerald": "エメラルドカット",
+          "heart": "ハートシェイプ",
+          "marquise": "マーキスカット",
+          "oval": "オーバルカット",
+          "pear": "ペアシェイプ",
+          "princess": "プリンセスカット",
+          "radiant": "ラディアントカット",
+          "round": "ラウンド ブリリアント カット"
         }
       },
       "ko-KR": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -11999,22 +13527,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "랩 그로운 다이아몬드",
+          "natural": "천연 다이아몬드"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "아셔",
+          "cushion": "쿠션",
+          "emerald": "에메랄드",
+          "heart": "하트",
+          "marquise": "마퀴즈",
+          "oval": "오벌",
+          "pear": "페어",
+          "princess": "프린세스",
+          "radiant": "래디언트",
+          "round": "라운드"
         }
       },
       "ar-AE": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12026,22 +13594,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "الماس المصنع في المختبر",
+          "natural": "الماس الطبيعي"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "أسشر",
+          "cushion": "وسادة",
+          "emerald": "زمردي",
+          "heart": "قلب",
+          "marquise": "ماركيز",
+          "oval": "بيضاوي",
+          "pear": "كمثرى",
+          "princess": "أميرة",
+          "radiant": "مشع",
+          "round": "دائري"
         }
       },
       "ar-SA": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12053,22 +13661,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "الماس المصنع في المختبر",
+          "natural": "الماس الطبيعي"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "أسشر",
+          "cushion": "وسادة",
+          "emerald": "زمردي",
+          "heart": "قلب",
+          "marquise": "ماركيز",
+          "oval": "بيضاوي",
+          "pear": "كمثرى",
+          "princess": "أميرة",
+          "radiant": "مشع",
+          "round": "دائري"
         }
       },
       "da-DK": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12080,22 +13728,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Naturlige diamanter"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Hjerte",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Rund"
         }
       },
       "sv-SE": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12107,22 +13795,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Naturliga diamanter"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Hjärta",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Rund"
         }
       },
       "nb-NO": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12134,22 +13862,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Naturlige diamanter"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cushion",
+          "emerald": "Emerald",
+          "heart": "Hjerte",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pear",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Rund"
         }
       },
       "pt-BR": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12161,22 +13929,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Lab-Grown",
+          "natural": "Diamantes naturais"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Almofada",
+          "emerald": "Esmeralda",
+          "heart": "Coração",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pera",
+          "princess": "Princesa",
+          "radiant": "Radiante",
+          "round": "Redondo"
         }
       },
       "tr-TR": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12188,22 +13996,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Laboratuvar elması",
+          "natural": "Doğal elmaslar"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Yastık",
+          "emerald": "Zümrüt",
+          "heart": "Kalp",
+          "marquise": "Markiz",
+          "oval": "Oval",
+          "pear": "Armut",
+          "princess": "Prenses",
+          "radiant": "Parlak",
+          "round": "Yuvarlak"
         }
       },
       "es-MX": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12215,22 +14063,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Diamante de laboratorio",
+          "natural": "Diamantes Naturales"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Cojín",
+          "emerald": "Esmeralda",
+          "heart": "Corazón",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Pera",
+          "princess": "Princesa",
+          "radiant": "Radiante",
+          "round": "Redondo"
         }
       },
       "he-IL": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12242,22 +14130,62 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "יהלום מעבדה",
+          "natural": "יהלומים טבעיים"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "אסשר",
+          "cushion": "כרית",
+          "emerald": "אמרלד",
+          "heart": "לב",
+          "marquise": "מרקיזה",
+          "oval": "אובלי",
+          "pear": "אגס",
+          "princess": "נסיכה",
+          "radiant": "זוהר",
+          "round": "עגול"
         }
       },
       "de-CH": {
+        "carat": {
+          "0.5": "0.5 Carat",
+          "0.7": "0.7 Carat",
+          "1": "1 Carat",
+          "1.5": "1.5 Carat",
+          "2": "2 Carat",
+          "2.5": "2.5 Carat",
+          "3": "3 Carat",
+          "4": "4 Carat",
+          "5": "5 Carat"
+        },
         "country": {
           "au": "Australia",
           "ca": "Canada",
@@ -12269,19 +14197,48 @@
           "uk": "United Kingdom",
           "us": "United States"
         },
+        "diamond_type": {
+          "lab-grown": "Labor-Diamant",
+          "natural": "Natürliche Diamanten"
+        },
         "label": {
+          "nav.about": "About",
+          "nav.contact": "Contact",
+          "nav.cookies": "Cookies",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
+          "nav.disclosure": "Affiliate Disclosure",
+          "nav.importing_ring": "Importing a Ring",
+          "nav.learn": "Learn",
           "nav.price_calculator": "Price Calculator",
           "nav.price_tools": "Tools",
           "nav.prices_by_carat": "Prices by Carat",
-          "nav.prices_lab_grown": "Lab-Grown Prices",
+          "nav.prices_by_type": "Natural and Lab",
+          "nav.privacy": "Privacy",
+          "nav.retailer_guides": "Retailer Guides",
+          "nav.reviews_of_ringspo": "Reviews of Ringspo",
+          "nav.rings_by_carat": "Rings by Carat",
           "nav.select_country": "Select Country",
+          "nav.sell_jewelry": "Sell Jewelry",
           "nav.size_comparison": "Size Comparison",
           "nav.size_methodology": "How We Measure",
           "nav.size_tools": "Tools",
-          "nav.sizes_by_carat": "Sizes by Carat",
-          "nav.sizes_by_shape": "Sizes by Shape"
+          "nav.sizes_by_shape": "Sizes by Shape",
+          "nav.terms": "Terms",
+          "nav.where_to_buy": "Where to Buy",
+          "nav.why_do_we_do_this": "Why Do We Do This?"
+        },
+        "shape": {
+          "asscher": "Asscher",
+          "cushion": "Kissenschliff",
+          "emerald": "Smaragdschliff",
+          "heart": "Herz",
+          "marquise": "Marquise",
+          "oval": "Oval",
+          "pear": "Tropfenschliff",
+          "princess": "Princess",
+          "radiant": "Radiant",
+          "round": "Rund"
         }
       }
     }
@@ -24294,6 +26251,30 @@
     },
     "network_sitemap_index": "/sitemaps/network.xml"
   },
+  "analytics": {
+    "containers": {
+      "ringspo": {
+        "gtm_container_id": "",
+        "site_ids": [
+          "ringspo"
+        ]
+      },
+      "loupe": {
+        "gtm_container_id": "",
+        "site_ids": [
+          "modernjeweler",
+          "jewellerymonthly",
+          "jewellerysingapore",
+          "jewellerycanada",
+          "jewelleryaustralia",
+          "jewelleryindia",
+          "jewelleryireland",
+          "jewellerynz",
+          "jewellerysouthafrica"
+        ]
+      }
+    }
+  },
   "ad_slots": {
     "version": "1.0.0",
     "last_updated": "2026-08-04",
@@ -24436,7 +26417,7 @@
   },
   "standard_pages": {
     "version": "1.0.0",
-    "last_updated": "2026-08-22",
+    "last_updated": "2026-08-25",
     "rollout_modules": [
       "price",
       "size",
@@ -24485,22 +26466,27 @@
     "pages": {
       "privacy": {
         "page_class": "legal",
+        "path": "/privacy/",
         "description": "What is processed, on what basis, retention, rights, representatives"
       },
       "terms": {
         "page_class": "legal",
-        "description": "Website terms of use: liability, pricing-accuracy disclaimer, IP. Not terms of sale — nothing on the network transacts"
+        "path": "/terms/",
+        "description": "Website terms of use: liability, pricing-accuracy disclaimer, IP. Not terms of sale. Nothing on the network transacts"
       },
       "cookie_notice": {
         "page_class": "legal",
+        "path": "/cookies/",
         "description": "What is stored on the device and why. First-party only today"
       },
       "disclosure": {
         "page_class": "legal",
+        "path": "/affiliate-disclosure/",
         "description": "Affiliate and display-advertising disclosure, plus editorial independence"
       },
       "impressum": {
         "page_class": "legal",
+        "path": "/impressum/",
         "description": "Provider identification. Statutory in DE (TMG/DDG); see country_extra_pages"
       },
       "about": {

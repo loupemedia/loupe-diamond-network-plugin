@@ -112,6 +112,9 @@
 			spectrum.appendChild(analysisEl);
 		}
 		region.appendChild(spectrum);
+		if (typeof window.ldnTrackCalculatorSubmit === 'function') {
+			window.ldnTrackCalculatorSubmit(true);
+		}
 	}
 
 	function parseQuote(raw) {

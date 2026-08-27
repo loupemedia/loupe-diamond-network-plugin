@@ -5,9 +5,15 @@ HTML builders for the price module live in **trait files** under this folder.
 loads these traits, holds shared constants, and implements `render()` /
 `render_head_content()`.
 
+**Navigation and site shell (PRD-018)** live in `includes/class-ldn-nav.php`,
+not in `LDN_Renderer`: item resolution traits below are mixed into `LDN_Nav`.
+Legal page rendering is `includes/class-ldn-standard-pages-*.php` (PRD-021).
+
 | Trait file | Responsibility |
 |------------|----------------|
 | `trait-ldn-chrome.php` | Brand tokens, page chrome CSS vars |
+| `trait-ldn-nav-items.php` | Nav item resolution (no markup; PRD-018) |
+| `trait-ldn-nav-markup.php` | Site shell HTML walker (header, utility bar, footer; PRD-018) |
 | `trait-ldn-head.php` | Canonical, Open Graph meta |
 | `trait-ldn-charts.php` | Inline Plotly chart blocks |
 | `trait-ldn-content.php` | Intro, stats, FAQ, static copy |

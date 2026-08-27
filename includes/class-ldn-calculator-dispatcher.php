@@ -93,6 +93,9 @@ final class LDN_Calculator_Dispatcher {
         if ($country === '') {
             return null;
         }
+        if (class_exists('LDN_Analytics')) {
+            LDN_Analytics::set_page_type('calculator');
+        }
         return new LDN_Page_Context(
             $this->site_id,
             'calculator',

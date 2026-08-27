@@ -113,7 +113,7 @@ trait LDN_Trait_Navigation {
     }
 
     /**
-     * Progressive breadcrumb trail (Home → Diamond Prices → … → current page).
+     * Progressive breadcrumb trail (brand → Diamond Prices → … → current page).
      *
      * Reuses build_price_page_url() so intermediate URLs come from the site's
      * url_structure (single source of truth). Crumbs whose URL can't be resolved
@@ -127,8 +127,9 @@ trait LDN_Trait_Navigation {
         $trail = array();
 
         $home = function_exists('home_url') ? (string) home_url('/') : '';
-        if ($home !== '') {
-            $trail[] = array('name' => 'Home', 'url' => $home);
+        $brand = $this->breadcrumb_brand_name($ctx->site_id);
+        if ($home !== '' && $brand !== '') {
+            $trail[] = array('name' => $brand, 'url' => $home);
         }
 
         $trail[] = array(
@@ -161,8 +162,37 @@ trait LDN_Trait_Navigation {
         }
 
         return array_values(array_filter($trail, static function ($crumb) {
-            return !empty($crumb['url']);
+            return !empty($crumb['url']) && !empty($crumb['name']);
         }));
+    }
+
+    /**
+     * Site brand from config, never a gettext msgid.
+     *
+     * A proper noun is already correct in every locale. Wrapping it in `__()`
+     * would make it *translatable* and leave it English until a catalogue ships.
+     *
+     * @param string $site_id
+     * @return string Empty when the brand is missing, so the caller omits the crumb.
+     */
+    private function breadcrumb_brand_name($site_id) {
+        if (method_exists($this->config, 'site_brand_name')) {
+            return trim((string) $this->config->site_brand_name($site_id));
+        }
+        if (!method_exists($this->config, 'get_site')) {
+            return '';
+        }
+        $site = $this->config->get_site($site_id);
+        if (!is_array($site)) {
+            return '';
+        }
+        if (!empty($site['brand_name'])) {
+            return trim((string) $site['brand_name']);
+        }
+        if (!empty($site['n'])) {
+            return trim((string) $site['n']);
+        }
+        return '';
     }
 
     /**

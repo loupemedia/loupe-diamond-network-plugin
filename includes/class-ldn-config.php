@@ -249,6 +249,26 @@ final class LDN_Config {
     }
 
     /**
+     * Display brand for crumbs and chrome. A proper noun, never gettext.
+     *
+     * @param string $site_id
+     * @return string
+     */
+    public function site_brand_name($site_id) {
+        $site = $this->get_site($site_id);
+        if (!is_array($site)) {
+            return '';
+        }
+        if (!empty($site['brand_name'])) {
+            return trim((string) $site['brand_name']);
+        }
+        if (!empty($site['n'])) {
+            return trim((string) $site['n']);
+        }
+        return '';
+    }
+
+    /**
      * Raw url_structures bundle section.
      *
      * @return array
@@ -615,6 +635,18 @@ final class LDN_Config {
     }
 
     /**
+     * GTM container map (config/analytics.yaml).
+     *
+     * @return array
+     */
+    public function get_analytics() {
+        $bundle = $this->get_bundle();
+        return isset($bundle['analytics']) && is_array($bundle['analytics'])
+            ? $bundle['analytics']
+            : array();
+    }
+
+    /**
      * ad_slots.yaml slice from the bundle.
      *
      * @return array
@@ -931,12 +963,25 @@ final class LDN_Config {
     }
 
     /**
+     * Standard-pages catalogue from config/standard_pages.yaml (bundled).
+     *
+     * @return array
+     */
+    public function get_standard_pages() {
+        $bundle = $this->get_bundle();
+        return isset($bundle['standard_pages']) && is_array($bundle['standard_pages'])
+            ? $bundle['standard_pages']
+            : array();
+    }
+
+    /**
      * Resolved navigation wording for one site and locale.
      *
      * Built from `i18n/{locale}/common.json` by the bundle builder, so the menu
      * word is the page word and PHP never parses the i18n tree at request time.
-     * Returns `array('label' => …, 'country' => …)`, either key possibly absent
-     * when that locale carries none of those terms.
+     * Returns `array('label' => …, 'country' => …, 'shape' => …, 'diamond_type' => …,
+     * 'carat' => …)`, any key possibly absent when that locale carries none of
+     * those terms.
      *
      * @param string $site_id
      * @param string $locale

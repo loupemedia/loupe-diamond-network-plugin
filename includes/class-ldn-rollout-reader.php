@@ -190,7 +190,24 @@ final class LDN_Rollout_Reader {
         $country = strtolower(trim((string) $country));
         $module = strtolower(trim((string) $module));
 
-        return isset($slice[$country][$module]) && $slice[$country][$module] === true;
+        if (isset($slice[$country][$module]) && $slice[$country][$module] === true) {
+            return true;
+        }
+
+        /*
+         * A hub file published before `standard_pages` existed has no key. The
+         * publish path implies the flag wherever price or size is on; do the
+         * same here so a legal page is not 404 on a live pricing market. An
+         * explicit false still wins.
+         */
+        if ($module === 'standard_pages'
+            && (!isset($slice[$country]) || !array_key_exists('standard_pages', $slice[$country]))
+        ) {
+            return (isset($slice[$country]['price']) && $slice[$country]['price'] === true)
+                || (isset($slice[$country]['size']) && $slice[$country]['size'] === true);
+        }
+
+        return false;
     }
 
     /**

@@ -33,6 +33,7 @@ final class LDN_Assets {
 		'ldn-size-carat-explorer',
 		'ldn-type-carat-lookup',
 		'ldn-nat-lab-toggle',
+		'ldn-analytics',
 	);
 
 	/**
@@ -71,6 +72,7 @@ final class LDN_Assets {
 		$excluded[] = 'ldn-size-carat-explorer';
 		$excluded[] = 'ldn-type-carat-lookup';
 		$excluded[] = 'ldn-nat-lab-toggle';
+		$excluded[] = 'ldn-analytics';
 		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/price-calculator';
 		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/size-';
 		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/type-carat-lookup';
@@ -98,6 +100,8 @@ final class LDN_Assets {
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/type-carat-lookup.js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/nat-lab-toggle.js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/nat-lab-toggle.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/analytics.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/analytics.js';
 		return $excluded;
 	}
 

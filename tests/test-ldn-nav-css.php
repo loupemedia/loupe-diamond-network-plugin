@@ -219,13 +219,97 @@ check(
     'focus is styled, so a keyboard user can see where they are'
 );
 
+/*
+ * Test intent: column headings read as labels, not as another option in the list,
+ * and a pointer user can see which link they are over.
+ * Would fail if: font-weight 600 sat on the heading <li> (it cascades into every
+ * nested option) or panel links had no :hover.
+ */
 check(
-    strpos($code, '.ldn-nav-column-heading > .sub-menu') !== false
+    preg_match(
+        '/\.ldn-nav-column-heading\s*>\s*a[^{]*\{[^}]*font-weight:\s*600/s',
+        $code
+    ) === 1
         && preg_match(
-            '/\.ldn-nav-column-heading\s*>\s*\.sub-menu[^{]*\{[^}]*display:\s*block/s',
+            '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*a[^{]*\{[^}]*font-weight:\s*400/s',
+            $code
+        ) === 1
+        && !preg_match(
+            '/\.ldn-nav-column-heading\s*\{[^}]*font-weight:\s*600/s',
+            $code
+        ),
+    'heading weight is on the heading link only; nested options reset to 400'
+);
+
+check(
+    preg_match('/\.ldn-nav-mega[^,{]*:is\([^)]+\)\s*a:hover/', $code) === 1
+        || preg_match('/a:hover/', $code) === 1,
+    'panel links have a hover state, not only a panel-open :hover'
+);
+
+check(
+    strpos($code, '.ldn-nav-column-heading > :is(.sub-menu, .ldn-nav-sub)') !== false
+        && preg_match(
+            '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)[^{]*\{[^}]*display:\s*block/s',
             $code
         ),
     'nested column lists are display:block, so a mega panel shows more than headings'
+);
+
+/*
+ * Test intent: every property GeneratePress uses to hide a submenu is answered
+ * here, not just the ones that are obvious from looking at the panel.
+ * `.main-navigation ul ul` sets position, left, opacity, float, width AND
+ * `height: 0; overflow: hidden; pointer-events: none`. The port of the old
+ * Customizer rule carried the first group and dropped the second, so the panel
+ * was clipped to its own padding and a column's links only appeared while its
+ * heading was hovered - the theme's flyout, surviving inside the mega panel.
+ *
+ * Would fail if: someone reset position/left/display on the nested list but left
+ * `height` at the theme's 0, which looks correct in the stylesheet and renders as
+ * headings-only in the browser.
+ */
+foreach (array('height:\s*auto', 'overflow:\s*visible') as $needed) {
+    check(
+        preg_match(
+            '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)[^{]*\{[^}]*' . $needed . '/s',
+            $code
+        ) === 1,
+        sprintf(
+            'nested column lists undo the theme\'s "%s" clip; without it the panel '
+                . 'shows headings only',
+            str_replace('\s*', ' ', $needed)
+        )
+    );
+}
+
+/*
+ * The panel opens on :hover OR :focus-within. GeneratePress only lifts its own
+ * clip on :hover, so relying on the theme leaves the keyboard path clipped.
+ */
+check(
+    preg_match('/\.ldn-nav-mega\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*\{[^}]*height:\s*auto/s', $code) === 1
+        && preg_match('/\.ldn-nav-mega\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*\{[^}]*overflow:\s*visible/s', $code) === 1,
+    'the panel itself undoes the clip unconditionally, so :focus-within opens a '
+        . 'full-height panel and not a padding-high sliver'
+);
+
+check(
+    preg_match('/pointer-events:\s*none/', $code) === 1
+        && preg_match('/:focus-within\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)[^{]*\{[^}]*pointer-events:\s*auto/s', $code) === 1,
+    'a closed panel takes no pointer events and an open one does, since the clip '
+        . 'that used to do that job by collapsing the box is gone'
+);
+
+/*
+ * GP Premium owns the slide-out and the mobile header, and is not installed on
+ * every site in the network. The free theme's accordion marks the open submenu
+ * with `.toggled-on`, so that hook has to be a reveal trigger too.
+ */
+check(
+    strpos($code, '.sub-menu.toggled-on') !== false,
+    'the narrow layout also opens on GeneratePress free\'s .toggled-on, not only '
+        . 'on GP Premium\'s slide-out state classes'
 );
 
 check(

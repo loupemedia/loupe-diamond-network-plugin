@@ -31,6 +31,12 @@ if (!defined('ABSPATH')) {
 trait LDN_Trait_Nav_Country_Switcher {
 
     /**
+     * Desktop flyout becomes two columns once this many live markets paint.
+     * The drawer at 768px stays one column regardless.
+     */
+    private const COUNTRY_SWITCHER_TWO_COL_MIN = 8;
+
+    /**
      * Expand a country_switcher entry into a parent plus one item per live market.
      *
      * @param array $scope     From LDN_Nav::resolve_request_scope().
@@ -63,8 +69,10 @@ trait LDN_Trait_Nav_Country_Switcher {
             $parent_id,
             $entry
         );
-        $parent->classes[] = 'menu-item-has-children';
+        // No `menu-item-has-children` here either: the walker adds it from the
+        // market items parented below, and a second copy doubles the arrow.
         $items = array($parent);
+        $emitted = 0;
 
         foreach ($live as $code) {
             $url = $this->country_switcher_url($site_id, $code);
@@ -90,6 +98,11 @@ trait LDN_Trait_Nav_Country_Switcher {
             }
 
             $items[] = $item;
+            $emitted++;
+        }
+
+        if ($emitted >= self::COUNTRY_SWITCHER_TWO_COL_MIN) {
+            $parent->classes[] = 'ldn-nav-countries-2-col';
         }
 
         return $items;

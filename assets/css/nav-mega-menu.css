@@ -34,7 +34,7 @@
 	position: static;
 }
 
-.ldn-nav-mega > .sub-menu {
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) {
 	--ldn-nav-cols: 4;
 
 	position: absolute;
@@ -49,6 +49,17 @@
 	width: min(calc(100vw - 2rem), var(--ldn-nav-panel-max, 1140px));
 	max-width: calc(100vw - 2rem);
 	box-sizing: border-box;
+
+	/*
+	 * GeneratePress hides a submenu with `height: 0; overflow: hidden;
+	 * pointer-events: none` as well as position and opacity, and the only thing
+	 * that lifts it is the theme's own `li:hover > ul`. This panel also opens on
+	 * `:focus-within`, so the clip has to go unconditionally and the closed state
+	 * has to be carried by visibility/opacity/pointer-events below. Left to the
+	 * theme, a keyboard user reached a panel clipped to its own padding.
+	 */
+	height: auto;
+	overflow: visible;
 
 	display: grid;
 	/*
@@ -75,32 +86,56 @@
 }
 
 /* Column counts match the config vocabulary (2-5). */
-.ldn-nav-mega.ldn-nav-mega-2-col > .sub-menu { --ldn-nav-cols: 2; }
-.ldn-nav-mega.ldn-nav-mega-3-col > .sub-menu { --ldn-nav-cols: 3; }
-.ldn-nav-mega.ldn-nav-mega-4-col > .sub-menu { --ldn-nav-cols: 4; }
-.ldn-nav-mega.ldn-nav-mega-5-col > .sub-menu { --ldn-nav-cols: 5; }
+.ldn-nav-mega.ldn-nav-mega-2-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 2; }
+.ldn-nav-mega.ldn-nav-mega-3-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 3; }
+.ldn-nav-mega.ldn-nav-mega-4-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 4; }
+.ldn-nav-mega.ldn-nav-mega-5-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 5; }
 
 /*
  * Column headings are menu items too (CP125_02 emits them), so they need to break
  * the grid flow and start a new column rather than sitting in one cell.
+ *
+ * Weight, size and the hairline live on the heading's own `> a`, never on the
+ * `<li>`: a font-weight on the list item cascades into every nested option, which
+ * is how "Prices by Carat" and "1 Carat" ended up looking like the same row.
  */
-.ldn-nav-mega > .sub-menu > .ldn-nav-column-heading {
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) > .ldn-nav-column-heading {
 	grid-column: auto;
 	grid-row: 1;
-	font-weight: 600;
 	text-transform: none;
 	padding-bottom: 0.25rem;
 }
 
-.ldn-nav-mega > .sub-menu li {
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) > .ldn-nav-column-heading > a {
+	font-weight: 600;
+	font-size: 0.8125rem;
+	letter-spacing: 0.05em;
+	line-height: 1.3;
+	padding: 0.1rem 0 0.5rem;
+	margin-bottom: 0.2rem;
+	border-bottom: 1px solid rgb(0 0 0 / 18%);
+}
+
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) > .ldn-nav-column-heading > :is(.sub-menu, .ldn-nav-sub) a {
+	font-weight: 400;
+	font-size: inherit;
+	letter-spacing: normal;
+	line-height: inherit;
+	padding: 0.4rem 0;
+	margin: 0;
+	border-bottom: 0;
+}
+
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) li {
 	min-width: 0;
 	list-style: none;
 }
 
-.ldn-nav-mega > .sub-menu a {
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) a {
 	display: block;
 	padding: 0.4rem 0;
 	color: inherit;
+	text-decoration: none;
 	/*
 	 * Normal wrapping. Never overflow-wrap: anywhere in a narrow column - it
 	 * produces one character per line.
@@ -109,30 +144,47 @@
 	hyphens: none;
 }
 
-/* The panel is hidden until the parent is hovered or focus is inside it. */
-.ldn-nav-mega > .sub-menu {
-	visibility: hidden;
-	opacity: 0;
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) a:hover,
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) a:focus-visible {
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
 }
 
-.ldn-nav-mega:hover > .sub-menu,
-.ldn-nav-mega:focus-within > .sub-menu {
+/* The panel is hidden until the parent is hovered or focus is inside it. */
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) {
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.ldn-nav-mega:hover > :is(.sub-menu, .ldn-nav-sub),
+.ldn-nav-mega:focus-within > :is(.sub-menu, .ldn-nav-sub) {
 	display: grid;
 	visibility: visible;
 	opacity: 1;
+	pointer-events: auto;
 }
 
 /*
  * Column lists live in a nested .sub-menu under each heading. Superfish and
  * GeneratePress hide every .sub-menu until hover, which is right for a flyout
  * and wrong inside a mega panel. The Customizer rule this replaces was
- * `.mega-menu ul .sub-menu { position: static; display: block; }`. Without the
- * equivalent here the panel only shows the column headings.
+ * `.mega-menu ul .sub-menu { position: static; display: block; height: auto;
+ * pointer-events: auto; }`. Dropping the last two from the port is what left the
+ * panel showing headings only, with a column's links appearing when that heading
+ * was rolled over - the theme's flyout behaviour surviving inside the panel.
+ *
+ * `visibility: inherit`, not `visible`: a hardcoded `visible` here out-lives the
+ * closed panel's `visibility: hidden`, leaving the link text in the a11y tree
+ * (and one stacking-context change away from being on screen) with the menu shut.
  */
-.ldn-nav-mega > .sub-menu > .ldn-nav-column-heading > .sub-menu {
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) > .ldn-nav-column-heading > :is(.sub-menu, .ldn-nav-sub) {
 	display: block;
 	position: static;
-	visibility: visible;
+	height: auto;
+	overflow: visible;
+	visibility: inherit;
+	pointer-events: inherit;
 	opacity: 1;
 	width: auto;
 	max-width: none;
@@ -159,7 +211,7 @@
    ========================================================================= */
 
 .ldn-nav-item > a:focus-visible,
-.ldn-nav-mega > .sub-menu a:focus-visible {
+.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) a:focus-visible {
 	outline: 2px solid currentColor;
 	outline-offset: 2px;
 }
@@ -176,8 +228,8 @@
    grids, which are wrong in a vertical drawer, so both triggers undo them.
    ========================================================================= */
 
-#generate-slideout-menu .ldn-nav-mega > .sub-menu,
-#mobile-header .ldn-nav-mega > .sub-menu {
+#generate-slideout-menu .ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub),
+#mobile-header .ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) {
 	position: static;
 	width: auto;
 	max-width: none;
@@ -199,10 +251,21 @@
 	display: none;
 }
 
+/*
+ * `.toggled-on` is GeneratePress WITHOUT Premium: the free theme's accordion puts
+ * that class on the .sub-menu itself rather than a state class on the parent, and
+ * Premium (which owns the slide-out and the mobile header) is not installed on
+ * every site in the network. Without it the drawer's chevron opened nothing.
+ * `pointer-events` has to come back too, because the closed desktop state above
+ * suppresses it and a drawer panel is revealed by display, not by hover.
+ */
 #generate-slideout-menu .ldn-nav-mega.ldn-nav-open > .sub-menu,
 #generate-slideout-menu .ldn-nav-mega[aria-expanded="true"] > .sub-menu,
-#mobile-header .ldn-nav-mega.ldn-nav-open > .sub-menu {
+#generate-slideout-menu .ldn-nav-mega > .sub-menu.toggled-on,
+#mobile-header .ldn-nav-mega.ldn-nav-open > .sub-menu,
+#mobile-header .ldn-nav-mega > .sub-menu.toggled-on {
 	display: grid;
+	pointer-events: auto;
 }
 
 /* Tap targets: 44px minimum, per the mobile rule and WCAG target size. */
@@ -221,7 +284,7 @@
 	 * the slide-out. Without this the absolutely positioned panel would sit on
 	 * top of the page content at phone width.
 	 */
-	.ldn-nav-mega > .sub-menu {
+	.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) {
 		position: static;
 		width: auto;
 		max-width: none;
@@ -240,14 +303,16 @@
 		display: none;
 	}
 
-	.ldn-nav-mega.ldn-nav-open > .sub-menu,
-	.ldn-nav-mega[aria-expanded="true"] > .sub-menu {
+	.ldn-nav-mega.ldn-nav-open > :is(.sub-menu, .ldn-nav-sub),
+	.ldn-nav-mega[aria-expanded="true"] > :is(.sub-menu, .ldn-nav-sub),
+	.ldn-nav-mega > .sub-menu.toggled-on {
 		display: grid;
 		visibility: visible;
 		opacity: 1;
+		pointer-events: auto;
 	}
 
-	.ldn-nav-mega > .sub-menu > .ldn-nav-column-heading {
+	.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) > .ldn-nav-column-heading {
 		grid-row: auto;
 		padding-top: 0.75rem;
 	}
@@ -266,7 +331,7 @@
  */
 @media (max-width: 400px) {
 	#generate-slideout-menu .ldn-nav-mega > .sub-menu,
-	.ldn-nav-mega > .sub-menu {
+	.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) {
 		padding-left: 0.75rem;
 	}
 }
@@ -310,6 +375,11 @@
 	color: inherit;
 }
 
+.ldn-nav-footer a:hover {
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
 .ldn-nav-footer a:focus-visible {
 	outline: 2px solid;
 	outline-offset: 2px;
@@ -328,9 +398,14 @@
 	}
 }
 
-/* Respect a reduced-motion preference: the panel reveal is the only transition. */
+/* Respect a reduced-motion preference: skip the panel fade and link colour shift. */
 @media (prefers-reduced-motion: no-preference) {
-	.ldn-nav-mega > .sub-menu {
+	.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) {
 		transition: opacity 120ms ease-out;
+	}
+
+	.ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) a,
+	.ldn-nav-footer a {
+		transition: color 160ms ease, text-decoration-color 160ms ease;
 	}
 }

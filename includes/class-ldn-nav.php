@@ -29,11 +29,13 @@ if (!defined('ABSPATH')) {
 
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-nav-items.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-nav-country-switcher.php';
+require_once LDN_PLUGIN_DIR . 'components/trait-ldn-nav-markup.php';
 
 final class LDN_Nav {
 
     use LDN_Trait_Nav_Items;
     use LDN_Trait_Nav_Country_Switcher;
+    use LDN_Trait_Nav_Markup;
 
     /**
      * Theme location used when a menu block does not name one. GeneratePress
@@ -88,9 +90,10 @@ final class LDN_Nav {
      * Keying on family alone sent both columns of a menu to one URL, which put two
      * identically-linked items in the drawer.
      */
-    const NAV_FAMILY_HUB = array(
+        const NAV_FAMILY_HUB = array(
         // family => array(fan-out dimension => hub family)
         'price_all_shapes' => array('carats' => 'price_diamond_type'),
+        'price_diamond_type' => array('diamond_types' => 'price_top_level'),
         'price_individual_shape' => array('shapes' => 'price_all_shapes'),
         'size_shape_hub' => array('shapes' => 'size_mega_hub'),
         'size_individual' => array('carats' => 'size_shape_hub'),
@@ -278,23 +281,15 @@ final class LDN_Nav {
             return;
         }
         add_filter('wp_get_nav_menu_items', array($this, 'filter_menu_items'), 20, 3);
-
-        /*
-         * A second, later hook purely to swap in the narrow set. `wp_get_nav_menu_items`
-         * receives the item-query args, which cannot tell the slide-out render from the
-         * desktop one; `wp_nav_menu_objects` receives the wp_nav_menu() args, which can.
-         * Injection stays in the first hook so there is one source of items.
-         */
         add_filter('wp_nav_menu_objects', array($this, 'filter_menu_objects'), 20, 2);
+        add_filter('generate_navigation_location', array($this, 'suppress_generatepress_nav'));
+        add_filter('body_class', array($this, 'filter_body_class'));
 
         if (function_exists('add_action')) {
             add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
+            add_action('wp_head', array($this, 'print_shell_tokens'), 1);
+            add_action('wp_body_open', array($this, 'render_header'), 1);
             add_action('init', array($this, 'register_footer_location'));
-            // Ringspo's live footer is GeneratePress widgets, not a menu
-            // assigned to `theme_location: footer`. Injection only runs when a
-            // menu is assigned, so this paints the config strip when the
-            // request country is `replace`. wp_footer is the fallback if the
-            // theme hook is absent.
             add_action('generate_after_footer_widgets', array($this, 'render_footer_menu'), 10);
             add_action('wp_footer', array($this, 'render_footer_menu'), 8);
         }
@@ -338,6 +333,84 @@ final class LDN_Nav {
             array(),
             defined('LDN_VERSION') ? LDN_VERSION : '0.1.0'
         );
+
+        if (!$this->site_declares_ldn_shell()) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'ldn-nav-chrome',
+            LDN_PLUGIN_URL . 'assets/css/nav-chrome.css',
+            array('ldn-nav-mega-menu'),
+            defined('LDN_VERSION') ? LDN_VERSION : '0.1.0'
+        );
+        if (function_exists('wp_enqueue_script')) {
+            wp_enqueue_script(
+                'ldn-nav-chrome',
+                LDN_PLUGIN_URL . 'assets/js/nav-chrome.js',
+                array(),
+                defined('LDN_VERSION') ? LDN_VERSION : '0.1.0',
+                true
+            );
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    private function site_declares_ldn_shell() {
+        $navigation = $this->config->get_navigation($this->site_id);
+        if (!is_array($navigation) || empty($navigation['site_shell']['renderer'])
+            || !is_array($navigation['site_shell']['renderer'])
+        ) {
+            return false;
+        }
+        return in_array('ldn', $navigation['site_shell']['renderer'], true);
+    }
+
+    /**
+     * @return void
+     */
+    public function print_shell_tokens() {
+        if (!$this->owns_shell()) {
+            return;
+        }
+        echo $this->shell_token_block(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    }
+
+    /**
+     * @return void
+     */
+    public function render_header() {
+        $html = $this->header_html();
+        if ($html === '') {
+            return;
+        }
+        echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    }
+
+    /**
+     * GeneratePress removes its primary navigation when this filter returns ''.
+     *
+     * @param mixed $location
+     * @return mixed
+     */
+    public function suppress_generatepress_nav($location) {
+        return $this->owns_shell() ? '' : $location;
+    }
+
+    /**
+     * @param array $classes
+     * @return array
+     */
+    public function filter_body_class($classes) {
+        if (!is_array($classes)) {
+            $classes = array();
+        }
+        if ($this->owns_shell()) {
+            $classes[] = 'ldn-shell-owned';
+        }
+        return $classes;
     }
 
     /**
@@ -369,6 +442,10 @@ final class LDN_Nav {
      * @return string
      */
     public function footer_menu_html() {
+        if ($this->owns_shell()) {
+            return $this->shell_footer_html();
+        }
+
         if ($this->footer_location_has_assigned_menu()) {
             return '';
         }
@@ -516,6 +593,12 @@ final class LDN_Nav {
      * @return string
      */
     private function injection_mode_for(array $navigation, $country_code) {
+        // renderer: ldn is the cutover. The theme header is suppressed, so this
+        // market is replace even when YAML still lists it as augment.
+        if ($this->shell_renderer_for($navigation, $country_code) === 'ldn') {
+            return 'replace';
+        }
+
         $declared = isset($navigation['injection_mode'])
             ? $navigation['injection_mode']
             : 'augment';

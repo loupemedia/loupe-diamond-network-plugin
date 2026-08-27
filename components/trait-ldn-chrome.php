@@ -64,7 +64,25 @@ trait LDN_Trait_Chrome {
             return '';
         }
 
-        return '<style>.ldn-page-shell,.ldn-price-page,.ldn-size-page{' . $decls . '}</style>';
+        return '<style>.ldn-page-shell,.ldn-price-page,.ldn-size-page,.ldn-legal-page{' . $decls . '}</style>';
+    }
+
+    /**
+     * Brand tokens on `:root` so the site shell can use them on every page,
+     * including editorial posts and 404s where the page-body selectors never match.
+     *
+     * @param array $profile
+     * @return string
+     */
+    public function root_style_block(array $profile) {
+        $decls = $this->brand_token_declarations($profile);
+        $decls .= '--ldn-shell-on-primary:#ffffff;';
+        $decls .= '--ldn-shell-surface:#ffffff;';
+        $decls .= '--ldn-shell-rule:#e4e4e4;';
+        if ($decls === '') {
+            return '';
+        }
+        return '<style>:root{' . $decls . '}</style>';
     }
 
     /**

@@ -2,10 +2,9 @@
 /**
  * Navigation item construction — PRD-018 CP125_02.
  *
- * Expands a declared menu (from the config bundle) into WP_Post-like menu items
- * that the active theme's walker renders. Ringspo runs GeneratePress, whose mega
- * menus are produced by CSS classes on the menu item rather than by a plugin, so
- * emitting items and classes is enough and this must never emit markup.
+ * Expands a declared menu (from the config bundle) into WP_Post-like menu items.
+ * This trait emits no markup. On `renderer: theme` markets the theme walker
+ * paints them; on `renderer: ldn` markets `trait-ldn-nav-markup.php` does.
  *
  * Every URL is delegated to the builder that already serves that page family:
  * `build_price_page_url()` for prices, `LDN_Size_Renderer`'s builders for sizes.
@@ -324,7 +323,7 @@ trait LDN_Trait_Nav_Items {
     }
 
     /**
-     * Expand a fan-out (shapes or carats) into one item per value.
+     * Expand a fan-out (shapes, carats or diamond types) into one item per value.
      *
      * @param array $target
      * @param array $scope
@@ -361,6 +360,30 @@ trait LDN_Trait_Nav_Items {
                     continue;
                 }
                 $items[] = $this->nav_item($this->nav_carat_label($carat), $url, $parent_id, array());
+            }
+            return $items;
+        }
+
+        if (!empty($target['diamond_types']) && is_array($target['diamond_types'])) {
+            foreach ($target['diamond_types'] as $diamond_type) {
+                $one = $target;
+                unset($one['diamond_types']);
+                $one['diamond_type'] = $diamond_type;
+                $url = $this->nav_generated_url($one, $scope);
+                if ($url === '') {
+                    $this->nav_log(sprintf(
+                        'dropping %s diamond type "%s": no URL',
+                        $family,
+                        (string) $diamond_type
+                    ));
+                    continue;
+                }
+                $items[] = $this->nav_item(
+                    $this->nav_diamond_type_label($diamond_type),
+                    $url,
+                    $parent_id,
+                    array()
+                );
             }
             return $items;
         }
@@ -657,6 +680,9 @@ trait LDN_Trait_Nav_Items {
         $item->post_type = 'nav_menu_item';
         $item->post_status = 'publish';
         $item->classes = $this->nav_item_classes($entry);
+        if (isset($entry['column'])) {
+            $item->ldn_column = (int) $entry['column'];
+        }
 
         return $item;
     }
@@ -676,7 +702,13 @@ trait LDN_Trait_Nav_Items {
 
         if (!empty($entry['mega_menu_columns'])) {
             $columns = (int) $entry['mega_menu_columns'];
-            $classes[] = 'menu-item-has-children';
+            /*
+             * Deliberately NOT `menu-item-has-children`. WordPress's walker adds
+             * that from the parent/child relationships it already has, and
+             * GeneratePress paints one 45px dropdown arrow per occurrence - so a
+             * second copy cost five items 225px of a 1010px bar and pushed the
+             * last one onto a second row.
+             */
             $classes[] = 'ldn-nav-mega';
             $classes[] = 'ldn-nav-mega-' . $columns . '-col';
             // GP Premium's own hook, so the theme's existing mega CSS applies.
@@ -762,6 +794,7 @@ trait LDN_Trait_Nav_Items {
             'nav.diamond_sizes' => _x('Diamond Sizes', 'navigation', 'loupe-diamond-network'),
             'nav.prices_by_carat' => _x('Prices by Carat', 'navigation', 'loupe-diamond-network'),
             'nav.prices_by_shape' => _x('Prices by Shape', 'navigation', 'loupe-diamond-network'),
+            'nav.prices_by_type' => _x('Natural and Lab', 'navigation', 'loupe-diamond-network'),
             'nav.price_tools' => _x('Tools', 'navigation', 'loupe-diamond-network'),
             'nav.price_calculator' => _x('Price Calculator', 'navigation', 'loupe-diamond-network'),
             'nav.prices_lab_grown' => _x('Lab-Grown Prices', 'navigation', 'loupe-diamond-network'),
@@ -771,6 +804,20 @@ trait LDN_Trait_Nav_Items {
             'nav.size_comparison' => _x('Size Comparison', 'navigation', 'loupe-diamond-network'),
             'nav.size_methodology' => _x('How We Measure', 'navigation', 'loupe-diamond-network'),
             'nav.select_country' => _x('Select Country', 'navigation', 'loupe-diamond-network'),
+            'nav.learn' => _x('Learn', 'navigation', 'loupe-diamond-network'),
+            'nav.rings_by_carat' => _x('Rings by Carat', 'navigation', 'loupe-diamond-network'),
+            'nav.sell_jewelry' => _x('Sell Jewelry', 'navigation', 'loupe-diamond-network'),
+            'nav.where_to_buy' => _x('Where to Buy', 'navigation', 'loupe-diamond-network'),
+            'nav.importing_ring' => _x('Importing a Ring', 'navigation', 'loupe-diamond-network'),
+            'nav.retailer_guides' => _x('Retailer Guides', 'navigation', 'loupe-diamond-network'),
+            'nav.about' => _x('About', 'navigation', 'loupe-diamond-network'),
+            'nav.contact' => _x('Contact', 'navigation', 'loupe-diamond-network'),
+            'nav.reviews_of_ringspo' => _x('Reviews of Ringspo', 'navigation', 'loupe-diamond-network'),
+            'nav.why_do_we_do_this' => _x('Why Do We Do This?', 'navigation', 'loupe-diamond-network'),
+            'nav.privacy' => _x('Privacy', 'navigation', 'loupe-diamond-network'),
+            'nav.terms' => _x('Terms', 'navigation', 'loupe-diamond-network'),
+            'nav.cookies' => _x('Cookies', 'navigation', 'loupe-diamond-network'),
+            'nav.disclosure' => _x('Affiliate Disclosure', 'navigation', 'loupe-diamond-network'),
         );
 
         if (isset($labels[$key])) {
@@ -782,22 +829,25 @@ trait LDN_Trait_Nav_Items {
     }
 
     /**
-     * Shape label from the shared shape vocabulary, never a literal in config.
+     * Shape label from the i18n tree (via the bundle), never a title-cased slug.
      *
      * @param string $shape
      * @return string
      */
     private function nav_shape_label($shape) {
-        // The size renderer owns shape wording (it derives the "cut" suffix from
-        // the S3 slug map), so reuse it rather than title-casing a slug here.
+        $shape = (string) $shape;
+        if (!empty($this->nav_terms['shape'][$shape])) {
+            return (string) $this->nav_terms['shape'][$shape];
+        }
+        // Uncovered locale, or a bundle built before fan-out terms shipped.
         $renderer = $this->nav_size_renderer();
         if (is_object($renderer) && method_exists($renderer, 'size_shape_label')) {
-            $label = $renderer->size_shape_label((string) $shape);
+            $label = $renderer->size_shape_label($shape);
             if (is_string($label) && $label !== '') {
                 return $label;
             }
         }
-        return ucwords(str_replace('-', ' ', (string) $shape));
+        return ucwords(str_replace('-', ' ', $shape));
     }
 
     /**
@@ -805,6 +855,11 @@ trait LDN_Trait_Nav_Items {
      * @return string
      */
     private function nav_carat_label($carat) {
+        $key = (string) $carat;
+        if (!empty($this->nav_terms['carat'][$key])) {
+            return (string) $this->nav_terms['carat'][$key];
+        }
+
         $value = (float) $carat;
         $number = ($value === (float) (int) $value)
             ? (string) (int) $value
@@ -815,6 +870,24 @@ trait LDN_Trait_Nav_Items {
             _x('%s Carat', 'navigation carat label', 'loupe-diamond-network'),
             $number
         );
+    }
+
+    /**
+     * @param string $diamond_type Canonical natural|lab-grown.
+     * @return string
+     */
+    private function nav_diamond_type_label($diamond_type) {
+        $diamond_type = (string) $diamond_type;
+        if (!empty($this->nav_terms['diamond_type'][$diamond_type])) {
+            return (string) $this->nav_terms['diamond_type'][$diamond_type];
+        }
+        if ($diamond_type === 'lab-grown') {
+            return _x('Lab-Grown', 'navigation', 'loupe-diamond-network');
+        }
+        if ($diamond_type === 'natural') {
+            return _x('Natural', 'navigation', 'loupe-diamond-network');
+        }
+        return ucwords(str_replace('-', ' ', $diamond_type));
     }
 
     // =========================================================================

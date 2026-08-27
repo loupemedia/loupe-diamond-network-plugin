@@ -2,9 +2,11 @@
 /**
  * Size renderer unit checks (CP106).
  *
- * Test intent: size individual pages emit a four-level breadcrumb trail, adjacent
- * carat neighbours from CARAT_BANDS, and JSON-LD containing Dataset + FAQPage nodes.
- * Would fail if: breadcrumb omitted the shape hub level or JSON-LD was title-only.
+ * Test intent: size individual pages emit a four-level breadcrumb trail (brand
+ * name, Diamond Size, shape, carat), adjacent carat neighbours from CARAT_BANDS,
+ * and JSON-LD containing Dataset + FAQPage nodes.
+ * Would fail if: breadcrumb omitted the shape hub level, used the literal Home,
+ * or JSON-LD was title-only.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-size-renderer.php
  */
@@ -224,7 +226,8 @@ $summary = array(
 
 $canonical = $renderer->build_size_individual_url('ringspo', 'round', '1');
 $trail = $renderer->breadcrumb_trail($ctx, $canonical);
-check(count($trail) === 4, 'individual breadcrumb has Home + Diamond Size + shape + carat');
+check(count($trail) === 4, 'individual breadcrumb has brand + Diamond Size + shape + carat');
+check(isset($trail[0]['name']) && $trail[0]['name'] === 'Ringspo', 'breadcrumb root crumb is the site brand');
 check(strpos($trail[1]['name'], 'Diamond Size') !== false, 'breadcrumb level 2 is Diamond Size');
 
 $adj = $renderer->adjacent_carat_bands('1');

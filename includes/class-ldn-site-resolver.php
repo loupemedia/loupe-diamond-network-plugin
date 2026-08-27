@@ -9,7 +9,7 @@
  * Resolution order (first match wins):
  *   1. `LDN_SITE_ID` constant (wp-config.php) — optional escape hatch.
  *   2. `LDN_SITE_ID` environment variable (Kinsta / host env).
- *   3. WordPress option `ldn_site_id` — set via Tools → Loupe Diamond Network
+ *   3. WordPress option `ldn_site_id` — set via Loupe Diamond Network in wp-admin
  *      (recommended on staging; no file edits).
  *   4. `ldn_resolve_site_id` filter — alias domains / custom maps.
  *   5. Domain match — request host against each site config's `domain`.
@@ -86,7 +86,7 @@ final class LDN_Site_Resolver {
             return $env_id;
         }
 
-        // 3. wp-admin dropdown (Tools → Loupe Diamond Network).
+        // 3. wp-admin dropdown (Loupe Diamond Network).
         $saved = get_option(self::OPTION_KEY, '');
         if (is_string($saved) && $saved !== '' && $this->config->get_site($saved) !== null) {
             $this->last_resolution_source = 'wp-admin site setting';
