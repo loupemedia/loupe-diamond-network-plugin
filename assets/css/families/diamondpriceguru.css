@@ -18,6 +18,7 @@
 .ldn-price-page {
 	--ldn-table-border: #0a0a0a;
 	--ldn-table-header-bg: var(--ldn-primary, #ffc52f);
+	--ldn-table-header-fg: var(--ldn-text, #0a0a0a);
 	--ldn-table-row-alt: #f3e6c4;
 	--guru-red: var(--ldn-accent, #ef5544);
 	--guru-blue: var(--ldn-secondary, #59a9ee);

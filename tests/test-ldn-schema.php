@@ -19,6 +19,8 @@
  *   4. Dataset carries dateModified + spatialCoverage when date + country known,
  *      and a price PropertyValue carries the ISO currency in unitText.
  *   5. variableMeasured resolves nested (C5) and legacy-flat summary shapes.
+ *   6. Size-page helpers: keywords_for() is module-scoped (no price fallback),
+ *      analysis_date reads generated_date, page_item_list_node is WebPage-only.
  *
  * Each test would fail for a concrete, documented reason — see asserts below.
  */
@@ -316,6 +318,46 @@ $json = trim(str_replace(array('<script type="application/ld+json">', '</script>
 $decoded = json_decode($json, true);
 check(json_last_error() === JSON_ERROR_NONE, 'render() output must be valid JSON');
 check(isset($decoded['@context']) && isset($decoded['@graph']), 'render() must wrap nodes in @context + @graph');
+
+// === Size helpers: keywords, generated_date, WebPage ItemList ==============
+// Test intent: size pages get size-chart keywords (never the price fallback),
+// analysis_date reads generated_date, and page_item_list_node emits WebPages.
+// Would fail if: keywords() fell through to "diamond prices", DATE_PATHS
+// skipped generated_date, or the list reused Product/Offer.
+$size_kw_ctx = new LDN_Page_Context('ringspo', 'size-shape-hub', 'us', null, null, 'oval', 'size');
+$size_kw = $schema->keywords_for($size_kw_ctx);
+check(in_array('oval diamond size chart', $size_kw, true), 'size-shape-hub keywords include the chart phrase');
+check(!in_array('diamond prices', $size_kw, true), 'size-shape-hub keywords must not include diamond prices');
+$price_kw = $schema->keywords_for($ctx);
+check(in_array('diamond prices', $price_kw, true), 'price shape keywords still include diamond prices');
+
+check(
+    $schema->analysis_date(array('generated_date' => '2026-08-18')) === '2026-08-18',
+    'analysis_date reads size-artefact generated_date'
+);
+check(
+    $schema->analysis_date(array('analysis_date' => '2026-06-22', 'generated_date' => '2026-08-18')) === '2026-06-22',
+    'analysis_date prefers analysis_date over generated_date'
+);
+
+$page_list = $schema->page_item_list_node(
+    'Oval Diamond Size Chart',
+    array(
+        array('name' => '1 carat Oval diamond size', 'url' => 'https://ringspo.test/diamond-size/oval/1-carat/'),
+    ),
+    'https://ringspo.test/diamond-size/oval/'
+);
+check($page_list !== null && ($page_list['@type'] ?? '') === 'ItemList', 'page_item_list_node emits ItemList');
+check(
+    isset($page_list['itemListElement'][0]['item']['@type'])
+        && $page_list['itemListElement'][0]['item']['@type'] === 'WebPage',
+    'page_item_list_node items are WebPages'
+);
+check(
+    !isset($page_list['itemListElement'][0]['item']['offers']),
+    'page_item_list_node must not attach Offer'
+);
+check($schema->page_item_list_node('Empty', array(), '') === null, 'page_item_list_node is null when there are no pages');
 
 // --- Summary ----------------------------------------------------------------
 $total = $GLOBALS['__tests'];

@@ -5,8 +5,9 @@
  *   .mega-menu > ul { width: 1140px; left: -34% !important; }
  * whose offset was calibrated to the position of the old top-level items, so it
  * misaligns the moment the item set changes - which is exactly what PRD-018 does.
- * Panel geometry here derives from the viewport and a custom property, never from
- * item order.
+ * Panel geometry hugs the columns, then clamps to the viewport and a custom
+ * property. Each panel hangs from the item that opened it (`position: relative`
+ * on the item, `left: 0`), never a percentage offset tuned to item order.
  *
  * COLOURS ARE INHERITED, NOT IMPOSED. The menu lives in the theme's header, and
  * this stylesheet loads on every page including legacy editorial posts, where
@@ -24,14 +25,12 @@
    ========================================================================= */
 
 /*
- * `static` lets the panel escape the item and anchor to the navigation container
- * instead, which is what removes the dependency on where the item sits in the bar.
- * GeneratePress positions `.main-navigation`; if a theme does not, the panel falls
- * back to the page box, which is still on screen because the width is clamped
- * below.
+ * Hang the panel from the item that opened it. `static` used to pin every
+ * panel to the nav container so a 1140px mega stayed on screen; content-sized
+ * panels belong under the label, the same as any other dropdown.
  */
 .ldn-nav-item.ldn-nav-mega {
-	position: static;
+	position: relative;
 }
 
 .ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) {
@@ -40,14 +39,17 @@
 	position: absolute;
 	top: 100%;
 	left: 0;
+	right: auto;
 	z-index: 20;
 
 	/*
-	 * Bounded by the viewport first, the site's preferred panel width second.
-	 * A fixed 1140px overflows a 1024px laptop; this cannot.
+	 * Hug the columns, then clamp. A fixed 1140px (or even min(100vw, 1140px))
+	 * makes a two-column panel as wide as Learn's six, with empty track to the
+	 * right of the last heading. Content width is the usual model for mixed
+	 * 2-col / 6-col bars; the cap is only an overflow guard.
 	 */
-	width: min(calc(100vw - 2rem), var(--ldn-nav-panel-max, 1140px));
-	max-width: calc(100vw - 2rem);
+	width: max-content;
+	max-width: min(calc(100vw - 2rem), var(--ldn-nav-panel-max, 1140px));
 	box-sizing: border-box;
 
 	/*
@@ -63,11 +65,12 @@
 
 	display: grid;
 	/*
-	 * minmax(0, 1fr), never 1fr: a bare 1fr track refuses to shrink below its
-	 * longest label, which pushes the row wider than the viewport.
+	 * max-content so a short "Tools" column is only as wide as its labels, not
+	 * an equal share of 1140px. minmax(0, …) still lets a long localised label
+	 * shrink when the panel hits the viewport cap.
 	 * See .cursor/rules/mobile-execution.mdc.
 	 */
-	grid-template-columns: repeat(var(--ldn-nav-cols), minmax(0, 1fr));
+	grid-template-columns: repeat(var(--ldn-nav-cols), minmax(0, max-content));
 	gap: 0.25rem 1.5rem;
 	align-items: start;
 
@@ -85,11 +88,35 @@
 	box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
 }
 
-/* Column counts match the config vocabulary (2-5). */
+/*
+ * Last items sit on the right of a flex-end bar. Hang those panels from the
+ * item's right edge so a 400px box does not run off the viewport. Counted from
+ * the end of the list, not a pixel offset, so adding a label does not retune it.
+ */
+.ldn-shell-primary__list > .ldn-nav-mega:nth-last-child(-n+2) > :is(.sub-menu, .ldn-nav-sub),
+.main-navigation > ul > .ldn-nav-mega:nth-last-child(-n+2) > :is(.sub-menu, .ldn-nav-sub) {
+	left: auto;
+	right: 0;
+}
+
+/*
+ * Six columns is almost the header width. Hanging that from the Learn label
+ * would run off the viewport, so this one still pins to the nav container.
+ */
+.ldn-nav-item.ldn-nav-mega-6-col {
+	position: static;
+}
+
+.ldn-nav-mega-6-col > :is(.sub-menu, .ldn-nav-sub) {
+	max-width: min(100%, calc(100vw - 2rem), var(--ldn-nav-panel-max, 1140px));
+}
+
+/* Column counts match the config vocabulary (2-6). */
 .ldn-nav-mega.ldn-nav-mega-2-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 2; }
 .ldn-nav-mega.ldn-nav-mega-3-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 3; }
 .ldn-nav-mega.ldn-nav-mega-4-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 4; }
 .ldn-nav-mega.ldn-nav-mega-5-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 5; }
+.ldn-nav-mega.ldn-nav-mega-6-col > :is(.sub-menu, .ldn-nav-sub) { --ldn-nav-cols: 6; }
 
 /*
  * Column headings are menu items too (CP125_02 emits them), so they need to break
@@ -108,8 +135,8 @@
 
 .ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) > .ldn-nav-column-heading > a {
 	font-weight: 600;
-	font-size: 0.8125rem;
-	letter-spacing: 0.05em;
+	font-size: 0.875rem;
+	letter-spacing: 0.02em;
 	line-height: 1.3;
 	padding: 0.1rem 0 0.5rem;
 	margin-bottom: 0.2rem;
@@ -118,12 +145,18 @@
 
 .ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) > .ldn-nav-column-heading > :is(.sub-menu, .ldn-nav-sub) a {
 	font-weight: 400;
-	font-size: inherit;
+	/*
+	 * Explicit size, never inherit: inherit walked past the heading <a> to the
+	 * bar's 15px, so "Sell gold" read larger than "General selling".
+	 */
+	font-size: 0.75rem;
 	letter-spacing: normal;
-	line-height: inherit;
-	padding: 0.4rem 0;
+	line-height: 1.35;
+	padding: 0.22rem 0;
 	margin: 0;
 	border-bottom: 0;
+	width: max-content;
+	max-width: 100%;
 }
 
 .ldn-nav-mega > :is(.sub-menu, .ldn-nav-sub) li {

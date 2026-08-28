@@ -57,7 +57,8 @@ final class LDN_Editorial_Bridge {
     }
 
     /**
-     * Scope full-bleed band CSS to legacy ring-guide permalinks only.
+     * Mark ring-guide permalinks so the inject stylesheet can load.
+     * Do not restyle GenerateBlocks colour bands from this class.
      *
      * @param string[] $classes
      * @return string[]
@@ -110,9 +111,15 @@ final class LDN_Editorial_Bridge {
             return;
         }
         wp_enqueue_style(
+            'ldn-shared',
+            $base_url . 'assets/css/shared.css',
+            array(),
+            $version
+        );
+        wp_enqueue_style(
             'ldn-editorial-ring-guide',
             $base_url . 'assets/css/editorial-ring-guide.css',
-            array(),
+            array('ldn-shared'),
             $version
         );
     }
@@ -575,19 +582,6 @@ final class LDN_Editorial_Bridge {
             ),
             self::colour_word($guides)
         );
-        $anchor = $match['kind'] === 'hub'
-            ? sprintf(
-                /* translators: %s: carat weight */
-                __('%s carat diamond prices by shape', 'loupe-diamond-network'),
-                $match['carat']
-            )
-            : sprintf(
-                /* translators: 1: carat weight, 2: shape */
-                __('%1$s carat %2$s diamond prices', 'loupe-diamond-network'),
-                $match['carat'],
-                $this->shape_label($match['shape'])
-            );
-
         $out = '<section class="ldn-ring-guide__card ldn-ring-guide__card--price">';
         $out .= '<h2>' . esc_html($heading) . '</h2>';
         $out .= '<p>' . esc_html($lead) . '</p>';
@@ -598,33 +592,57 @@ final class LDN_Editorial_Bridge {
         if ($figure === '' && $match['kind'] === 'hub') {
             $figure = $this->hub_ranking_figure_html($match, $guides, $url, $figure_note);
         }
-        if ($figure === '') {
-            $og_url = $this->og_preview_url($match, $guides);
-            if ($og_url !== null && $og_url !== '') {
-                $alt = sprintf(
-                    /* translators: 1: carat, 2: shape or "all shapes", 3: market label */
-                    __('Price distribution for %1$s carat %2$s diamonds (%3$s)', 'loupe-diamond-network'),
-                    $match['carat'],
-                    $match['kind'] === 'hub' ? __('all shapes', 'loupe-diamond-network') : $this->shape_label($match['shape']),
-                    $market
-                );
-                $figure = '<figure class="ldn-ring-guide__figure">';
-                $figure .= '<a href="' . esc_url($url) . '">';
-                $figure .= '<img src="' . esc_url($og_url) . '" alt="' . esc_attr($alt) . '" width="1200" height="630" loading="lazy">';
-                $figure .= '</a>';
-                if ($figure_note !== '') {
-                    $figure .= $figure_note; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-                }
-                $figure .= '</figure>';
-            }
-        }
+        // Never fall back to og-preview.png. That file is a social card: C5 has
+        // uploaded it with the wrong carat and, on staging, the wrong shape.
+        // A missing histogram is an empty figure, not another combo's chart.
         $out .= $figure; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         $out .= $ladder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        $out .= '<p><a class="ldn-ring-guide__cta" href="' . esc_url($url) . '">'
-            . esc_html($anchor)
-            . ' <span aria-hidden="true">→</span></a></p>';
+        $out .= $this->price_follow_html($match, $guides, $url);
         $out .= '</section>';
         return $out;
+    }
+
+    /**
+     * Sentence under the price chart. The destination sits in the middle of
+     * a line of body copy, same type as the rest of the post.
+     *
+     * @param array  $match
+     * @param array  $guides
+     * @param string $url
+     * @return string
+     */
+    private function price_follow_html(array $match, array $guides, $url) {
+        if ($match['kind'] === 'shape_hub') {
+            return '';
+        }
+        if ($match['kind'] === 'hub') {
+            $phrase = sprintf(
+                /* translators: %s: carat weight */
+                __('price chart of all %s carat diamonds', 'loupe-diamond-network'),
+                $match['carat']
+            );
+            $link = '<a class="ldn-ring-guide__cta" href="' . esc_url($url) . '">'
+                . esc_html($phrase) . '</a>';
+            return '<p>' . sprintf(
+                /* translators: %s: HTML link whose text is "price chart of all N carat diamonds" */
+                __('See a live %s and learn more about each shape', 'loupe-diamond-network'),
+                $link
+            ) . '</p>';
+        }
+        $phrase = sprintf(
+            /* translators: 1: carat weight, 2: shape in prose (cushion cut) */
+            __('live price chart of %1$s carat %2$s diamonds', 'loupe-diamond-network'),
+            $match['carat'],
+            $this->shape_prose($match)
+        );
+        $link = '<a class="ldn-ring-guide__cta" href="' . esc_url($url) . '">'
+            . esc_html($phrase) . '</a>';
+        return '<p>' . sprintf(
+            /* translators: 1: HTML link, 2: color or colour */
+            __('See a %1$s and learn how %2$s and clarity affect the price you\'ll pay', 'loupe-diamond-network'),
+            $link,
+            strtolower(self::colour_word($guides))
+        ) . '</p>';
     }
 
     /**
@@ -640,30 +658,11 @@ final class LDN_Editorial_Bridge {
             'Carat is weight, not diameter. How large the stone looks depends on shape, depth and whether it is square or elongated.',
             'loupe-diamond-network'
         );
-        if ($match['kind'] === 'hub') {
-            $anchor = __('Diamond size chart (all shapes)', 'loupe-diamond-network');
-        } elseif ($match['kind'] === 'shape_hub') {
-            $anchor = sprintf(
-                /* translators: %s: shape name */
-                __('%s diamond size chart', 'loupe-diamond-network'),
-                $this->shape_label($match['shape'])
-            );
-        } else {
-            $anchor = sprintf(
-                /* translators: 1: carat weight, 2: shape */
-                __('%1$s carat %2$s diamond size', 'loupe-diamond-network'),
-                $match['carat'],
-                $this->shape_label($match['shape'])
-            );
-        }
 
         $out = '<section class="ldn-ring-guide__card ldn-ring-guide__card--size">';
         $out .= '<h2>' . esc_html($heading) . '</h2>';
         $out .= '<p>' . esc_html($lead) . '</p>';
-        $out .= $this->size_chart_html($match, $guides);
-        $out .= '<p><a class="ldn-ring-guide__cta" href="' . esc_url($url) . '">'
-            . esc_html($anchor)
-            . ' <span aria-hidden="true">→</span></a></p>';
+        $out .= $this->size_chart_html($match, $guides, $url);
         $out .= '</section>';
         return $out;
     }
@@ -672,10 +671,12 @@ final class LDN_Editorial_Bridge {
      * True-scale 4 ct (etc.) shape row from the size mega-hub matrix: live
      * median L×W plus outline SVGs, with a US quarter for reference.
      *
-     * @param array $match
+     * @param array  $match
+     * @param array  $guides
+     * @param string $url Size-page href for the caption link, or ''.
      * @return string
      */
-    private function size_chart_html(array $match, array $guides = array()) {
+    private function size_chart_html(array $match, array $guides = array(), $url = '') {
         if ($match['kind'] === 'hub') {
             $cells = $this->hub_size_shapes($match['carat']);
             $kicker = sprintf(
@@ -722,10 +723,7 @@ final class LDN_Editorial_Bridge {
 
         $quarter_mm = self::US_QUARTER_DIAMETER_MM;
         $quarter_url = class_exists('LDN_Assets') ? LDN_Assets::us_quarter_image_url() : '';
-        $caption = __(
-            'Typical face-up size from live US listings, drawn at true scale next to a US quarter for reference.',
-            'loupe-diamond-network'
-        );
+        $caption = $this->size_caption_html($match, $url);
 
         $out = '<figure class="ldn-ring-guide__size-chart">';
         $out .= '<p class="ldn-ring-guide__size-chart-kicker">' . esc_html($kicker) . '</p>';
@@ -773,9 +771,96 @@ final class LDN_Editorial_Bridge {
         }
 
         $out .= '</div></div>';
-        $out .= '<figcaption>' . esc_html($caption) . '</figcaption>';
+        $out .= '<figcaption>' . $caption . '</figcaption>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
         $out .= '</figure>';
         return $out;
+    }
+
+    /**
+     * Caption under the true-scale size row.
+     *
+     * Shape hubs put the destination in the sentence ("cushion cut diamond
+     * sizing"). Carat posts keep a trailing "learn more on our … here".
+     *
+     * @param array  $match
+     * @param string $url
+     * @return string Escaped HTML.
+     */
+    private function size_caption_html(array $match, $url) {
+        if ($match['kind'] === 'shape_hub') {
+            $phrase = sprintf(
+                /* translators: %s: shape in prose (cushion cut) */
+                __('%s diamond sizing', 'loupe-diamond-network'),
+                $this->shape_prose($match)
+            );
+            if ($url !== '') {
+                $link = '<a class="ldn-ring-guide__cta" href="' . esc_url($url) . '">'
+                    . esc_html($phrase) . '</a>';
+            } else {
+                $link = esc_html($phrase);
+            }
+            return sprintf(
+                /* translators: %s: "cushion cut diamond sizing", possibly wrapped in a link */
+                __(
+                    'Typical face-up %s from real diamonds, drawn at true scale next to a US quarter for reference.',
+                    'loupe-diamond-network'
+                ),
+                $link
+            );
+        }
+
+        $caption = esc_html(__(
+            'Typical face-up size from real diamonds, drawn at true scale next to a US quarter for reference.',
+            'loupe-diamond-network'
+        ));
+        if ($url === '') {
+            return $caption;
+        }
+        $link = '<a class="ldn-ring-guide__cta" href="' . esc_url($url) . '">'
+            . esc_html($this->size_link_phrase($match)) . '</a>';
+        return $caption . ' ' . sprintf(
+            /* translators: %s: HTML link whose text is e.g. "4 carat cushion cut diamond size chart" */
+            __('Learn more on our %s here', 'loupe-diamond-network'),
+            $link
+        );
+    }
+
+    /**
+     * Linked phrase inside "Learn more on our %s here".
+     *
+     * @param array $match
+     * @return string
+     */
+    private function size_link_phrase(array $match) {
+        if ($match['kind'] === 'hub') {
+            return sprintf(
+                /* translators: %s: carat weight */
+                __('%s carat diamond size chart', 'loupe-diamond-network'),
+                $match['carat']
+            );
+        }
+        return sprintf(
+            /* translators: 1: carat weight, 2: shape in prose (cushion cut) */
+            __('%1$s carat %2$s diamond size chart', 'loupe-diamond-network'),
+            $match['carat'],
+            $this->shape_prose($match)
+        );
+    }
+
+    /**
+     * Shape name as it reads in a sentence ("cushion cut", "round").
+     *
+     * Prefers the URL infix when the permalink carries one, so cushion is
+     * "cushion cut" rather than the knowledge-base slug "cushion".
+     *
+     * @param array $match
+     * @return string
+     */
+    private function shape_prose(array $match) {
+        if (!empty($match['infix'])) {
+            return str_replace('-', ' ', strtolower((string) $match['infix']));
+        }
+        return str_replace('-', ' ', strtolower((string) $match['shape']));
     }
 
     /**
@@ -957,14 +1042,16 @@ final class LDN_Editorial_Bridge {
             return '';
         }
 
-        $out = '<div class="ldn-ring-guide__ladder-wrap">';
-        $out .= '<table class="ldn-ring-guide__ladder">';
-        $out .= '<caption>' . esc_html(sprintf(
+        $heading = sprintf(
             /* translators: 1: shape name, 2: market label */
             __('%1$s diamonds: median %2$s asking price by carat weight', 'loupe-diamond-network'),
             $this->shape_label($match['shape']),
             self::market_label($guides)
-        )) . '</caption>';
+        );
+        $out = '<div class="ldn-ring-guide__ladder-wrap">';
+        $out .= '<p class="ldn-ring-guide__table-heading">' . esc_html($heading) . '</p>';
+        $out .= '<div class="ldn-table-card">';
+        $out .= '<table class="ldn-data-table ldn-ring-guide__ladder">';
         $out .= '<thead><tr>'
             . '<th scope="col">' . esc_html(__('Carat', 'loupe-diamond-network')) . '</th>'
             . '<th scope="col">' . esc_html(__('Median price', 'loupe-diamond-network')) . '</th>'
@@ -979,13 +1066,13 @@ final class LDN_Editorial_Bridge {
             $cell = $row['url'] !== ''
                 ? '<a href="' . esc_url($row['url']) . '">' . esc_html($label) . '</a>'
                 : esc_html($label);
-            $out .= '<tr' . ($row['carat'] === $match['carat'] ? ' class="is-anchor"' : '') . '>';
+            $out .= '<tr' . ($row['carat'] === $match['carat'] ? ' class="ldn-row-highlight"' : '') . '>';
             $out .= '<th scope="row">' . $cell . '</th>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
             $out .= '<td>' . esc_html(self::format_money($row['median'], $currency)) . '</td>';
             $out .= '<td>' . esc_html($row['sample'] !== null ? number_format($row['sample']) : '') . '</td>';
             $out .= '</tr>';
         }
-        $out .= '</tbody></table></div>';
+        $out .= '</tbody></table></div></div>';
         $out .= $this->updated_line($dates);
         return $out;
     }
@@ -1046,13 +1133,14 @@ final class LDN_Editorial_Bridge {
         $shape_name = $this->shape_label($match['shape']);
 
         $out = '<div class="ldn-ring-guide__compare">';
-        $out .= '<table class="ldn-ring-guide__ladder ldn-ring-guide__compare-table">';
-        $out .= '<caption>' . esc_html(sprintf(
+        $out .= '<p class="ldn-ring-guide__table-heading">' . esc_html(sprintf(
             /* translators: 1: carat weight, 2: shape name */
             __('%1$s carat prices today: %2$s against the market', 'loupe-diamond-network'),
             $match['carat'],
             $shape_name
-        )) . '</caption>';
+        )) . '</p>';
+        $out .= '<div class="ldn-table-card">';
+        $out .= '<table class="ldn-data-table ldn-ring-guide__compare-table">';
         $out .= '<thead><tr>'
             . '<th scope="col">' . esc_html(__('Shape', 'loupe-diamond-network')) . '</th>'
             . '<th scope="col">' . esc_html(__('Median price', 'loupe-diamond-network')) . '</th>'
@@ -1066,7 +1154,7 @@ final class LDN_Editorial_Bridge {
             $out .= '<td>' . esc_html($row['sample'] !== null ? number_format($row['sample']) : '') . '</td>';
             $out .= '</tr>';
         }
-        $out .= '</tbody></table>';
+        $out .= '</tbody></table></div>';
 
         if (!$same) {
             $verdict = $diff_pct < 0
@@ -1199,6 +1287,38 @@ final class LDN_Editorial_Bridge {
     }
 
     /**
+     * Bins belong to this page, or they are not plotted.
+     *
+     * Identity lives in the S3 key (folder prefix). When the JSON itself
+     * names a shape or carat, a mismatch is a refusal rather than a plot of
+     * another combo. Missing keys are not a mismatch: artefacts written
+     * before those fields existed only carry edges/counts.
+     *
+     * @param mixed $bins
+     * @param array $match
+     * @return bool
+     */
+    private static function bins_match_page($bins, array $match) {
+        if (!is_array($bins) || empty($bins['edges']) || empty($bins['counts']) || !is_array($bins['edges'])) {
+            return false;
+        }
+        $meta = (isset($bins['_meta']) && is_array($bins['_meta'])) ? $bins['_meta'] : array();
+        $shape = isset($bins['shape']) ? $bins['shape'] : (isset($meta['shape']) ? $meta['shape'] : null);
+        $carat = isset($bins['carat']) ? $bins['carat'] : (isset($meta['carat']) ? $meta['carat'] : null);
+        if ($shape !== null && $shape !== ''
+            && self::squash((string) $shape) !== self::squash((string) $match['shape'])
+        ) {
+            return false;
+        }
+        if ($carat !== null && $carat !== ''
+            && self::normalise_carat_label((string) $carat) !== self::normalise_carat_label((string) $match['carat'])
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @param mixed $summary
      * @return float|null
      */
@@ -1304,6 +1424,23 @@ final class LDN_Editorial_Bridge {
         $symbol = isset($symbols[$code]) ? $symbols[$code] : '';
         $amount = number_format((float) $value, 0);
         return $symbol !== '' ? $symbol . $amount : $code . ' ' . $amount;
+    }
+
+    /**
+     * ViewBox width for a bold system-ui SVG pill, including horizontal padding.
+     *
+     * 7.5px per character was too tight for 14px weight 700, so "Median: $63,260"
+     * clipped and the overflowing white digits vanished on the white chart.
+     *
+     * @param string $label
+     * @param int    $font_size
+     * @param int    $pad_x     Total left+right padding.
+     * @return int
+     */
+    private static function svg_label_badge_width($label, $font_size = 14, $pad_x = 16) {
+        $per_char = ((int) $font_size) * 0.82;
+        $text_w = (int) ceil(strlen((string) $label) * $per_char);
+        return max(((int) $font_size) * 8, $text_w + (int) $pad_x);
     }
 
     /**
@@ -1503,20 +1640,35 @@ final class LDN_Editorial_Bridge {
         $market = self::market_label($guides);
         $title = sprintf(
             /* translators: 1: carat weight, 2: market label */
-            __('Median %2$s asking price by shape for %1$s carat diamonds', 'loupe-diamond-network'),
+            __('Median %2$s asking prices by shape for %1$s carat diamonds', 'loupe-diamond-network'),
             $match['carat'],
             $market
         );
+        $date = self::summary_analysis_date($payload);
+        $updated = $date !== ''
+            ? sprintf(
+                /* translators: %s: date the prices were last rebuilt */
+                __('Last updated %s', 'loupe-diamond-network'),
+                self::format_date($date)
+            )
+            : '';
         $row_h = 36;
         $bar_x = 140;
         $bar_max_w = 470;
         $price_x = 620;
         $width = 760;
-        $top = 16;
+        $top = $updated !== '' ? 56 : 40;
         $height = $top + (count($bars) * $row_h) + 12;
         $svg = '<svg class="ldn-ring-guide__chart" viewBox="0 0 ' . (int) $width . ' ' . (int) $height
             . '" role="img" xmlns="http://www.w3.org/2000/svg">';
-        $svg .= '<title>' . esc_html($title) . '</title>';
+        $accessible = $updated !== '' ? $title . '. ' . $updated : $title;
+        $svg .= '<title>' . esc_html($accessible) . '</title>';
+        $svg .= '<text x="16" y="22" fill="#1a1a2e" font-size="15" font-weight="700"'
+            . ' font-family="system-ui, sans-serif">' . esc_html($title) . '</text>';
+        if ($updated !== '') {
+            $svg .= '<text x="16" y="40" fill="#4a4a68" font-size="12"'
+                . ' font-family="system-ui, sans-serif">' . esc_html($updated) . '</text>';
+        }
         foreach ($bars as $i => $bar) {
             $y = $top + ($i * $row_h);
             $bar_w = max(4, (int) round(($bar['value'] / $max) * $bar_max_w));
@@ -1556,7 +1708,7 @@ final class LDN_Editorial_Bridge {
         $ctx = $this->shape_price_context($match, $guides);
         $bins = $this->fetcher->fetch_artefact('market_index_bins_json', $ctx);
         $summary = $this->fetcher->fetch_artefact('summary_data_json', $ctx);
-        if (!is_array($bins) || empty($bins['edges']) || empty($bins['counts']) || !is_array($bins['edges'])) {
+        if (!self::bins_match_page($bins, $match)) {
             return '';
         }
         $edges = array_values($bins['edges']);
@@ -1598,10 +1750,10 @@ final class LDN_Editorial_Bridge {
         $height = 320;
 
         $title = sprintf(
-            /* translators: 1: carat weight, 2: shape name */
+            /* translators: 1: carat weight, 2: shape in prose (cushion cut) */
             __('%1$s carat %2$s diamond prices', 'loupe-diamond-network'),
             $match['carat'],
-            $this->shape_label($match['shape'])
+            $this->shape_prose($match)
         );
 
         $svg = '<svg class="ldn-ring-guide__chart ldn-ring-guide__chart--distribution" viewBox="0 0 '
@@ -1643,15 +1795,20 @@ final class LDN_Editorial_Bridge {
                 $currency,
                 number_format($p50, 0)
             );
-            $label_w = max(96, (int) (strlen($median_label) * 7.5));
-            $badge_x = max($chart_left, min($median_x - (int) ($label_w / 2), $chart_right - $label_w));
+            $label_w = self::svg_label_badge_width($median_label, 14, 24);
+            $inset = 8;
+            $max_badge_x = $width - $inset - $label_w;
+            $title_right = 16 + (int) ceil(strlen($title) * 9.5);
+            $min_badge_x = min($title_right + 8, $max_badge_x);
+            $min_badge_x = max($inset, $min_badge_x);
+            $badge_x = (int) max($min_badge_x, min($median_x - (int) ($label_w / 2), $max_badge_x));
             $svg .= '<line x1="' . (int) $median_x . '" y1="' . (int) ($chart_top - 4)
                 . '" x2="' . (int) $median_x . '" y2="' . (int) $chart_bottom
                 . '" stroke="#5249a3" stroke-width="2" stroke-dasharray="5 4"></line>';
             $svg .= '<rect x="' . (int) $badge_x . '" y="8" width="' . (int) $label_w
                 . '" height="22" rx="4" fill="#5249a3"></rect>';
-            $svg .= '<text x="' . (int) ($badge_x + 8) . '" y="24" fill="#ffffff" font-size="14"'
-                . ' font-weight="700" font-family="system-ui, sans-serif">'
+            $svg .= '<text x="' . (int) ($badge_x + (int) ($label_w / 2)) . '" y="24" fill="#ffffff" font-size="14"'
+                . ' font-weight="700" text-anchor="middle" font-family="system-ui, sans-serif">'
                 . esc_html($median_label) . '</text>';
         }
 
@@ -1708,40 +1865,11 @@ final class LDN_Editorial_Bridge {
     /**
      * @param array $match
      * @param array $guides
-     * @return string|null
-     */
-    private function og_preview_url(array $match, array $guides) {
-        $shape_kinds = array('shape', 'shape_hub');
-        if (empty($guides['embed_og_preview'])
-            || !in_array($match['kind'], $shape_kinds, true)
-            || $match['shape'] === null
-        ) {
-            return null;
-        }
-        $country = isset($guides['default_country']) ? (string) $guides['default_country'] : 'us';
-        $type = isset($guides['default_type']) ? (string) $guides['default_type'] : 'natural';
-        $ctx = new LDN_Page_Context(
-            $this->site_id,
-            'shape',
-            $country,
-            $type,
-            $match['carat'],
-            $match['shape'],
-            'price'
-        );
-        return $this->fetcher->resolve_artefact_url('og_preview_png', $ctx);
-    }
-
-    /**
-     * @param array $match
-     * @param array $guides
      * @return string HTML note paragraph, or ''.
      */
     private function price_figure_note(array $match, array $guides) {
-        if ($match['kind'] === 'hub') {
-            return $this->figure_note_html(
-                esc_html(__('Open the live chart of prices by shape', 'loupe-diamond-network'))
-            );
+        if (in_array($match['kind'], array('hub', 'shape', 'shape_hub'), true)) {
+            return '';
         }
         if (!in_array($match['kind'], array('shape', 'shape_hub'), true) || $match['shape'] === null) {
             return $this->figure_note_html(

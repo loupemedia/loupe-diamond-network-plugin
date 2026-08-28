@@ -82,6 +82,14 @@ final class LDN_Nav {
     const FAN_OUT_DIMENSIONS = array('shapes', 'carats', 'diamond_types');
 
     /**
+     * Desktop flyout becomes two columns once this many live markets paint.
+     * The drawer at 768px stays one column regardless. Lives here (not on the
+     * country-switcher trait): trait constants require PHP 8.2+; Kinsta
+     * staging runs 8.1.
+     */
+    const COUNTRY_SWITCHER_TWO_COL_MIN = 8;
+
+    /**
      * The hub that lists what a truncated column omits.
      *
      * Keyed by family AND by the dimension the column fans out over, because those

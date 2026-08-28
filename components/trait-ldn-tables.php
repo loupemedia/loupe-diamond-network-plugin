@@ -180,6 +180,7 @@ trait LDN_Trait_Tables {
             . ($extended ? ' ldn-shapes-ranking-table--extended' : '') . '">'
             . $heading_html
             . '<p>' . esc_html__('Click on any diamond shape to see more detailed pricing information.', 'loupe-diamond-network') . '</p>'
+            . '<div class="ldn-table-card">'
             . '<table class="ldn-data-table"><thead><tr>'
             . $rank_header
             . '<th>' . esc_html__('Shape', 'loupe-diamond-network') . '</th>'
@@ -187,7 +188,8 @@ trait LDN_Trait_Tables {
             . $sample_header
             . $range_header
             . $change_header
-            . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
+            . '</tr></thead><tbody>' . $body . '</tbody></table>'
+            . '</div></section>';
     }
 
     /**
@@ -276,10 +278,12 @@ trait LDN_Trait_Tables {
             . $intro_line
             . $compare_link
             . $chart_html
+            . '<div class="ldn-table-card">'
             . '<table class="ldn-data-table"><thead><tr>'
             . '<th>' . esc_html__('Carat', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Median price', 'loupe-diamond-network') . '</th>'
-            . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
+            . '</tr></thead><tbody>' . $body . '</tbody></table>'
+            . '</div></section>';
     }
 
     /**
@@ -458,7 +462,6 @@ trait LDN_Trait_Tables {
         }
 
         $currency = $this->currency_symbol(isset($payload['currency']) ? $payload['currency'] : null);
-        $anchor_carat = (float) $this->hub_anchor_carat($ctx, $bag);
         $body = '';
         foreach ($tiers as $tier) {
             if (!is_array($tier) || empty($tier['carat_weight'])) {
@@ -478,12 +481,7 @@ trait LDN_Trait_Tables {
             $link = $url !== ''
                 ? '<a href="' . esc_url($url) . '">' . esc_html($carat . ' ct') . '</a>'
                 : esc_html($carat . ' ct');
-            $row_class = '';
-            if ($this->should_highlight_hub_anchor_row($ctx)
-                && is_numeric($carat) && (float) $carat === $anchor_carat) {
-                $row_class = ' class="ldn-row-highlight"';
-            }
-            $body .= '<tr' . $row_class . '><td data-label="' . esc_attr__('Carat', 'loupe-diamond-network') . '">'
+            $body .= '<tr><td data-label="' . esc_attr__('Carat', 'loupe-diamond-network') . '">'
                 . $link . '</td><td data-label="' . esc_attr__('Typical price', 'loupe-diamond-network') . '">'
                 . $price_cell . '</td><td data-label="' . esc_attr__('Price per carat', 'loupe-diamond-network') . '">'
                 . $ppc_cell . '</td><td data-label="' . esc_attr__('Diamonds analyzed', 'loupe-diamond-network') . '">'
@@ -731,11 +729,12 @@ trait LDN_Trait_Tables {
             }
             $blocks .= '<div class="ldn-most-traded-group">'
                 . '<h3>' . esc_html($group_label) . '</h3>'
+                . '<div class="ldn-table-card">'
                 . '<table class="ldn-data-table ldn-data-table--stacked"><thead><tr>'
                 . '<th>' . esc_html__('Diamond', 'loupe-diamond-network') . '</th>'
                 . '<th>' . esc_html__('Median price', 'loupe-diamond-network') . '</th>'
                 . '<th>' . esc_html__('Diamonds analyzed', 'loupe-diamond-network') . '</th>'
-                . '</tr></thead><tbody>' . $body . '</tbody></table></div>';
+                . '</tr></thead><tbody>' . $body . '</tbody></table></div></div>';
         }
 
         if ($blocks === '') {
@@ -932,9 +931,6 @@ trait LDN_Trait_Tables {
             return '';
         }
 
-        $highlight_carat = ($ctx->page_level === 'top-level' && $this->should_highlight_hub_anchor_row($ctx))
-            ? (float) $this->hub_anchor_carat()
-            : null;
         $body = '';
         foreach ($rows as $row) {
             if (!is_array($row) || !isset($row['carat_weight']) || (string) $row['carat_weight'] === '') {
@@ -958,11 +954,7 @@ trait LDN_Trait_Tables {
             }
             $samples_cell = $samples > 0 ? esc_html(number_format($samples)) : '—';
 
-            $row_class = '';
-            if ($highlight_carat !== null && (float) $carat === $highlight_carat) {
-                $row_class = ' class="ldn-row-highlight"';
-            }
-            $body .= '<tr' . $row_class . '><td>' . esc_html($carat_label . ' ct') . '</td><td>' . $nat_cell
+            $body .= '<tr><td>' . esc_html($carat_label . ' ct') . '</td><td>' . $nat_cell
                 . '</td><td>' . $lab_cell . '</td><td>' . $discount_cell . '</td><td>'
                 . $samples_cell . '</td></tr>';
         }
@@ -982,13 +974,15 @@ trait LDN_Trait_Tables {
             . '<h2>' . esc_html($heading) . '</h2>'
             . ($intro_html !== '' ? '<div class="ldn-carat-price-table-intro">' . $intro_html . '</div>' : '')
             . '<p class="ldn-carat-price-table-hint">' . esc_html__('Select any price to explore that carat weight in more detail.', 'loupe-diamond-network') . '</p>'
+            . '<div class="ldn-table-card">'
             . '<table class="ldn-data-table"><thead><tr>'
             . '<th>' . esc_html__('Carat weight', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Natural', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Lab-grown', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Lab-grown discount', 'loupe-diamond-network') . '</th>'
             . '<th>' . esc_html__('Diamonds analyzed', 'loupe-diamond-network') . '</th>'
-            . '</tr></thead><tbody>' . $body . '</tbody></table></section>';
+            . '</tr></thead><tbody>' . $body . '</tbody></table>'
+            . '</div></section>';
     }
 
     /**

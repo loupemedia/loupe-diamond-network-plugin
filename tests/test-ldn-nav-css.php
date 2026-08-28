@@ -2,14 +2,16 @@
 /**
  * Navigation stylesheet guards (PRD-018 CP125_03 / CP125_04).
  *
- * Test intent: Mega-menu panel geometry derives from the viewport and a custom
- * property, never from a fixed pixel width or a percentage offset tuned to the
- * current item order, and the stylesheet forks neither the brand palette nor the
- * mobile rules.
+ * Test intent: Mega-menu panel geometry hugs the columns, then clamps to the
+ * viewport and a custom property. Each panel hangs from the item that opened
+ * it, never a fixed pixel width or a percentage offset tuned to item order.
+ * Nested options are smaller than column headings. The stylesheet forks
+ * neither the brand palette nor the mobile rules.
  *
  * Would fail if: the stylesheet reproduced `width: 1140px; left: -34% !important`,
- * so adding "Diamond Prices" as a new first item pushed every panel off-centre and
- * the panel overflowed a 1024px laptop.
+ * mega items were `position: static` so Diamond Prices opened under the logo,
+ * a two-column "Sell Jewelry" panel stretched as wide as Learn, or option links
+ * inherited the 15px bar size and read larger than their subheads.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-nav-css.php
  */
@@ -76,6 +78,39 @@ check(
     'the site-tunable panel width is a custom property, so widening it needs no CSS edit'
 );
 
+check(
+    preg_match(
+        '/\.ldn-nav-mega\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*\{[^}]*width:\s*max-content/s',
+        $code
+    ) === 1,
+    'the desktop panel hugs its columns rather than stretching every mega to 1140px'
+);
+
+check(
+    preg_match(
+        '/\.ldn-nav-item\.ldn-nav-mega\s*\{[^}]*position:\s*relative/s',
+        $code
+    ) === 1
+        && !preg_match(
+            '/\.ldn-nav-item\.ldn-nav-mega\s*\{[^}]*position:\s*static/s',
+            $code
+        ),
+    'desktop mega items are position:relative so the panel hangs under the label, '
+        . 'not under the left of the nav bar'
+);
+
+check(
+    preg_match(
+        '/nth-last-child\(\s*-n\+2\s*\)[^{]*\{[^}]*left:\s*auto/s',
+        $code
+    ) === 1
+        && preg_match(
+            '/nth-last-child\(\s*-n\+2\s*\)[^{]*\{[^}]*right:\s*0/s',
+            $code
+        ) === 1,
+    'the last two items hang the panel from the right edge so they stay on screen'
+);
+
 // -----------------------------------------------------------------------------
 // Palette is inherited, not forked
 // -----------------------------------------------------------------------------
@@ -104,9 +139,17 @@ foreach (array('red', 'blue', 'green', 'purple', 'orange', 'teal') as $named) {
 // -----------------------------------------------------------------------------
 
 check(
+    preg_match(
+        '/repeat\(\s*var\(--ldn-nav-cols\),\s*minmax\(0,\s*max-content\)\)/',
+        $code
+    ) === 1,
+    'desktop tracks are minmax(0, max-content) so a short column is only as wide '
+        . 'as its labels, and a long label can still shrink at the viewport cap'
+);
+
+check(
     strpos($code, 'minmax(0, 1fr)') !== false,
-    'grid tracks use minmax(0, 1fr) so a long label cannot push the row wider than '
-        . 'the viewport'
+    'the narrow layout still uses minmax(0, 1fr) so a drawer column can shrink'
 );
 
 /*
@@ -231,14 +274,42 @@ check(
         $code
     ) === 1
         && preg_match(
+            '/\.ldn-nav-column-heading\s*>\s*a[^{]*\{[^}]*font-size:\s*0\.875rem/s',
+            $code
+        ) === 1
+        && preg_match(
             '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*a[^{]*\{[^}]*font-weight:\s*400/s',
+            $code
+        ) === 1
+        && preg_match(
+            '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*a[^{]*\{[^}]*font-size:\s*0\.75rem/s',
+            $code
+        ) === 1
+        && !preg_match(
+            '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*a[^{]*\{[^}]*font-size:\s*inherit/s',
+            $code
+        )
+        && preg_match(
+            '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*a[^{]*\{[^}]*width:\s*max-content/s',
             $code
         ) === 1
         && !preg_match(
             '/\.ldn-nav-column-heading\s*\{[^}]*font-weight:\s*600/s',
             $code
         ),
-    'heading weight is on the heading link only; nested options reset to 400'
+    'heading weight and size sit on the heading link only; nested options are '
+        . '0.75rem/400 and width max-content so a column is as wide as its longest label'
+);
+
+check(
+    strpos($code, 'ldn-nav-mega-6-col') !== false
+        && preg_match('/ldn-nav-mega-6-col[^{]*\{[^}]*--ldn-nav-cols:\s*6/', $code) === 1
+        && preg_match(
+            '/\.ldn-nav-item\.ldn-nav-mega-6-col\s*\{[^}]*position:\s*static/s',
+            $code
+        ) === 1,
+    'Learn declares 6 columns; that panel pins to the nav bar so 1085px does not '
+        . 'run off the viewport'
 );
 
 check(

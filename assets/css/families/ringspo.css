@@ -224,20 +224,13 @@
 	color: var(--ringspo-ink);
 }
 
-/* Hero-band data tables (carat tiers, market overview) as white cards. */
-.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table,
-.ldn-chrome--ringspo-classic .ldn-carat-tiers-table .ldn-table-card {
+/* Unwrapped tables in the green hero. Body tables use `.ldn-table-card` from
+   shared.css; do not restyle those cards or their cells here. */
+.ldn-chrome--ringspo-classic .ldn-hero-band .ldn-data-table {
 	background-color: #fff;
 	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
 	overflow: hidden;
-}
-
-/* Match size-matrix card chrome: clipped corners, no inner scrollbar. */
-.ldn-chrome--ringspo-classic .ldn-carat-tiers-table .ldn-table-card .ldn-data-table {
-	width: 100%;
-	border: none;
-	margin: 0;
 }
 
 .ldn-chrome--ringspo-classic .ldn-diamond-type-explore .ldn-type-nav-card {
@@ -329,7 +322,7 @@
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
 	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
-	:is(table, .ldn-chart, .ldn-chart-target:not(.ldn-chart-target--on-purple), .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
+	:is(table, .ldn-table-card, .ldn-chart, .ldn-chart-target:not(.ldn-chart-target--on-purple), .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
 		.ldn-size-price-card, .ldn-price-size-card,
 		.ldn-size-matrix-scroll, .ldn-size-checker__surface, .ldn-size-checker-panel, .ldn-size-checker-results,
 		.ldn-size-checker-card, .ldn-size-scale-controls, .ldn-size-checker-cta,
@@ -410,13 +403,6 @@
 
 .ldn-chrome--ringspo-classic .ldn-carat-price-table-intro + .ldn-carat-price-table-hint {
 	margin-top: var(--ldn-space-4, 1rem);
-}
-
-/* Hub anchor carat (1 ct) — subtle row tint on Ringspo only; no star glyph. */
-.ldn-chrome--ringspo-classic .ldn-carat-price-table .ldn-row-highlight,
-.ldn-chrome--ringspo-classic .ldn-carat-tiers-table .ldn-row-highlight {
-	background: rgba(112, 108, 200, 0.08);
-	font-weight: 600;
 }
 
 /* The hero band already carries bottom padding, so the first body band opens
@@ -515,7 +501,7 @@
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
 	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
-	:is(table:not(.ldn-size-matrix), .ldn-cc-table) {
+	:is(table:not(.ldn-size-matrix):not(.ldn-data-table), .ldn-cc-table) {
 	border-radius: var(--ringspo-card-radius);
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 	overflow: hidden;

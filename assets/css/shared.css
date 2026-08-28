@@ -62,9 +62,10 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 }
 
 .ldn-price-page {
-	--ldn-table-border: #ddd;
-	--ldn-table-header-bg: #f2f2f2;
-	--ldn-table-row-alt: #f3f3f3;
+	--ldn-table-border: var(--ldn-border, #e5e7eb);
+	--ldn-table-header-bg: var(--ldn-primary, #706cc8);
+	--ldn-table-header-fg: var(--ldn-shell-on-primary, #fff);
+	--ldn-table-row-alt: var(--ldn-surface-muted, #f8f7fc);
 	--ldn-title-size: 1.75rem;
 	--ldn-title-size-mobile: 1.25rem;
 
@@ -139,10 +140,102 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 	transition: border-color 0.15s ease;
 }
 
-/* Full-height price table shell (no inner scrollport). */
+/* Full-height price table shell.
+ *
+ * House data table: every LDN-generated table is `.ldn-table-card` wrapping
+ * `table.ldn-data-table`. The look is the size-hub chart on
+ * `/diamond-size/{shape}/`: brand-colour header, hairline rows, muted zebra,
+ * 12px card, no drop shadow. Cell chrome lives here so a style change is
+ * reproduced on price pages, size pages and editorial ring-guide injects.
+ * Family skins may tint tokens or the highlight row; they must not invent
+ * a second cell style.
+ *
+ * Colour/clarity heatmaps (`.ldn-cc-table`) are a different component and
+ * do not use this wrapper. Size-matrix extras (sticky header, outline
+ * column) stay on `.ldn-size-matrix`.
+ */
 .ldn-table-card {
 	margin: 0 0 1.25rem;
 	overflow: hidden;
+	background-color: #fff;
+	border-radius: 12px;
+	box-shadow: none;
+}
+
+/* Hub nat/lab table is five columns; allow sideways scroll at ~320px rather
+   than clipping the discount and sample cells inside the rounded card. */
+.ldn-carat-price-table .ldn-table-card {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.ldn-data-table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	margin: 0;
+	font-size: 0.95rem;
+}
+
+.ldn-data-table th,
+.ldn-data-table td {
+	border: 0;
+	border-bottom: 1px solid var(--ldn-table-border, var(--ldn-border, #e5e7eb));
+	padding: 0.6rem 0.55rem;
+	text-align: center;
+	vertical-align: middle;
+}
+
+/* Paint the header on cells only. A `thead tr` fill is a square box and
+   hides the 12px radii (the natural-prices purple bar looked cut). */
+.ldn-data-table thead th {
+	background-color: var(--ldn-table-header-bg, var(--ldn-primary, #706cc8));
+	color: var(--ldn-table-header-fg, var(--ldn-shell-on-primary, #fff));
+	font-weight: 700;
+}
+
+/* Tables do not clip to a parent’s border-radius. Paint the 12px card
+   corners on the header and last row, same as the size-hub matrix. */
+.ldn-data-table thead th:first-child {
+	border-top-left-radius: 12px;
+}
+
+.ldn-data-table thead th:last-child {
+	border-top-right-radius: 12px;
+}
+
+.ldn-data-table tbody tr:last-child > :first-child {
+	border-bottom-left-radius: 12px;
+}
+
+.ldn-data-table tbody tr:last-child > :last-child {
+	border-bottom-right-radius: 12px;
+}
+
+.ldn-data-table tbody tr:nth-of-type(even) td,
+.ldn-data-table tbody tr:nth-of-type(even) th {
+	background-color: var(--ldn-table-row-alt, var(--ldn-surface-muted, #f8f7fc));
+}
+
+.ldn-data-table tbody tr:nth-of-type(odd) td,
+.ldn-data-table tbody tr:nth-of-type(odd) th {
+	background-color: #fff;
+}
+
+.ldn-data-table tbody th {
+	text-align: left;
+	font-weight: 600;
+}
+
+.ldn-data-table tbody tr:last-child th,
+.ldn-data-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.ldn-data-table tbody tr.ldn-row-highlight td,
+.ldn-data-table tbody tr.ldn-row-highlight th {
+	background-color: var(--ldn-table-row-highlight, rgba(112, 108, 200, 0.12));
+	font-weight: 600;
 }
 
 .ldn-type-nav-card:hover,
@@ -236,13 +329,15 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 		background: #fff;
 	}
 
-	.ldn-data-table--stacked tbody td {
+	.ldn-data-table--stacked tbody td,
+	.ldn-data-table--stacked tbody th {
 		display: flex;
 		justify-content: space-between;
 		gap: 1rem;
 		padding: 0.35rem 0;
 		border: none;
 		text-align: right;
+		background: transparent;
 	}
 
 	.ldn-data-table--stacked tbody td::before {
@@ -250,6 +345,11 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 		font-weight: 600;
 		text-align: left;
 		color: var(--ldn-secondary-text, inherit);
+	}
+
+	.ldn-data-table--stacked tbody tr:last-child > :first-child,
+	.ldn-data-table--stacked tbody tr:last-child > :last-child {
+		border-radius: 0;
 	}
 }
 
@@ -1501,28 +1601,37 @@ button.ldn-shape-picker__option:focus-visible {
 	color: var(--ldn-text, #333);
 }
 
-/* ----- Tables ----- */
+/* ----- Tables -----
+ *
+ * House cell chrome is `.ldn-data-table` above. `.ldn-price-page table` is
+ * the back-compat alias for any unmarked table inside the price shell.
+ */
 
 .ldn-price-page table {
 	width: 100%;
-	border-collapse: collapse;
+	border-collapse: separate;
+	border-spacing: 0;
 	margin: 1rem 0;
 	font-size: 0.95rem;
 }
 
 .ldn-price-page th,
 .ldn-price-page td {
-	border: 1px solid var(--ldn-table-border);
-	padding: 0.65rem 0.85rem;
+	border: 0;
+	border-bottom: 1px solid var(--ldn-table-border);
+	padding: 0.6rem 0.55rem;
 	text-align: center;
+	vertical-align: middle;
 }
 
-.ldn-price-page thead th,
-.ldn-price-page thead tr {
+.ldn-price-page thead th {
 	background-color: var(--ldn-table-header-bg);
+	color: var(--ldn-table-header-fg, var(--ldn-shell-on-primary, #fff));
+	font-weight: 700;
 }
 
-.ldn-price-page tbody tr:nth-of-type(even) {
+.ldn-price-page tbody tr:nth-of-type(even) td,
+.ldn-price-page tbody tr:nth-of-type(even) th {
 	background-color: var(--ldn-table-row-alt);
 }
 
@@ -1943,6 +2052,7 @@ button.ldn-shape-picker__option:focus-visible {
 	margin: 0;
 }
 
+/* Size layout only. Cell chrome is `.ldn-data-table` (house table). */
 .ldn-size-table th,
 .ldn-size-table td {
 	text-align: left;
@@ -1953,9 +2063,11 @@ button.ldn-shape-picker__option:focus-visible {
 	font-variant-numeric: tabular-nums;
 }
 
-.ldn-size-table th {
-	background-color: var(--ldn-table-header-bg, #f2f2f2);
-	font-weight: 600;
+.ldn-size-segmentation .ldn-table-card,
+.ldn-size-comparison-table .ldn-table-card,
+.ldn-size-hub-table .ldn-table-card:not(.ldn-size-matrix-scroll) {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 .ldn-size-hub-table a {
@@ -2002,31 +2114,7 @@ button.ldn-shape-picker__option:focus-visible {
 	font-size: 0.9em;
 }
 
-.ldn-size-hub-table .ldn-size-table {
-	width: 100%;
-	border-collapse: separate;
-	border-spacing: 0;
-	border: 1px solid var(--ldn-border, #e5e7eb);
-	border-radius: 10px;
-	overflow: hidden;
-}
-
-/* Mega-hub / shape-hub ladder use the matrix scroll shell — no second card outline. */
-.ldn-size-hub-table .ldn-size-table.ldn-size-matrix {
-	border: none;
-	border-radius: 0;
-	overflow: visible;
-}
-
-.ldn-size-hub-table .ldn-size-table th,
-.ldn-size-hub-table .ldn-size-table td {
-	border-bottom: 1px solid var(--ldn-border, #e5e7eb);
-}
-
-.ldn-size-hub-table .ldn-size-table tbody tr:last-child th,
-.ldn-size-hub-table .ldn-size-table tbody tr:last-child td {
-	border-bottom: none;
-}
+/* Hub tables use the house card. Do not add a second outline on the table. */
 
 .ldn-size-comparison-visual,
 .ldn-size-comparison-table,
@@ -2675,14 +2763,12 @@ button.ldn-shape-picker__option:focus-visible {
 .ldn-size-matrix-scroll {
 	/* overflow:auto + max-height keeps the purple carat header sticky while the
 	   reader scrolls through shapes. overflow-x alone would still trap sticky
-	   inside this box; a capped height makes vertical scroll happen here. */
+	   inside this box; a capped height makes vertical scroll happen here.
+	   The house card supplies radius, shadow and white surface. */
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
 	max-width: 100%;
 	max-height: min(70vh, 36rem);
-	border: none;
-	border-radius: 10px;
-	background: #fff;
 }
 
 @media screen and (max-width: 640px) {

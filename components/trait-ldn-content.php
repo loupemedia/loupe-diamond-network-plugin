@@ -970,19 +970,7 @@ trait LDN_Trait_Content {
     }
 
     /**
-     * Whether the hub anchor carat row gets Ringspo-only table highlight styling.
-     *
-     * Loupe hubs use the anchor for hero stats and type nav only — not a tinted row.
-     *
-     * @param LDN_Page_Context $ctx
-     * @return bool
-     */
-    protected function should_highlight_hub_anchor_row(LDN_Page_Context $ctx) {
-        return $ctx->site_id === 'ringspo';
-    }
-
-    /**
-     * Anchor carat for hub entry points (hero stats, type nav, table highlight).
+     * Anchor carat for hub entry points (hero stats, type nav).
      *
      * On diamond-type pages, prefer an explicit `?carat=` query (so Natural ↔
      * Lab-grown preserves the slider weight) when it matches a published tier;

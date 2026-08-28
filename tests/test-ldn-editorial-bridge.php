@@ -23,9 +23,16 @@
  * ranking chart (the shape OG PNG does not exist at all-shapes), or a
  * heading-section splice ate `$3,510` because preg_replace treated `$3` as
  * a backreference, or a shape guide with no "diamond prices" H2 prepended
- * both cards above the intro, or nested mint/purple GB bands only broke out
- * when they were direct children of `.entry-content` (Best Place To Buy sits
- * inside an 800px wrapper on every ring guide).
+ * both cards above the intro, or editorial CSS 50vw-broke GenerateBlocks
+ * colour bands and split the teal behind the Alon card, or a carat
+ * hub ranking chart had no visible title/date, or the size caption used a
+ * smaller muted figcaption instead of body type, or a 4 ct cushion guide
+ * embedded og-preview.png (the 8 ct social card) because bins.json had no
+ * S3 basename, or the median pill used 7.5px per character and clipped
+ * "Median: $63,260" on a 4 ct cushion histogram, or a shape hub fell back
+ * to og-preview.png (a 2 ct oval social card) when 1 ct cushion bins were
+ * missing, or ring-guide tables used a private cell style instead of
+ * `.ldn-table-card` > `.ldn-data-table`.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-editorial-bridge.php
  */
@@ -167,7 +174,7 @@ if (!class_exists('LDN_Data_Fetcher')) {
 
         public function resolve_artefact_url($artefact_id, $ctx) {
             return $artefact_id === 'og_preview_png'
-                ? 'https://s3.example/us/natural/4-carat/cushion/og-preview.png'
+                ? 'https://s3.example/us/natural/2-carat/oval/og-preview.png'
                 : null;
         }
         public function fetch_artefact($artefact_id, $ctx) {
@@ -175,8 +182,10 @@ if (!class_exists('LDN_Data_Fetcher')) {
                 && is_object($ctx)
                 && isset($ctx->page_level)
                 && $ctx->page_level === 'shape'
+                && isset($ctx->shape)
+                && strtolower((string) $ctx->shape) === 'cushion'
                 && isset($ctx->carat)
-                && (string) $ctx->carat === '4'
+                && isset($this->medians[(string) $ctx->carat])
             ) {
                 return array(
                     'edges'  => array(15000, 18000, 21000, 24000, 27000, 30000, 33000),
@@ -290,6 +299,20 @@ if (!class_exists('LDN_Data_Fetcher')) {
     }
 }
 
+class LDN_Mismatched_Bins_Fetcher extends LDN_Data_Fetcher {
+    public function fetch_artefact($artefact_id, $ctx) {
+        if ($artefact_id === 'market_index_bins_json') {
+            return array(
+                'shape'  => 'oval',
+                'carat'  => '2',
+                'edges'  => array(5000, 10000, 15000, 20000, 25000),
+                'counts' => array(10, 40, 80, 20),
+            );
+        }
+        return parent::fetch_artefact($artefact_id, $ctx);
+    }
+}
+
 require_once __DIR__ . '/../includes/class-ldn-page-context.php';
 require_once __DIR__ . '/../includes/class-ldn-test-combos.php';
 require_once __DIR__ . '/../includes/class-ldn-editorial-bridge.php';
@@ -392,14 +415,41 @@ check(strpos($out, 'ldn-ring-guide__chart--distribution') !== false,
     '4 ct cushion price card embeds the readable distribution histogram');
 check(strpos($out, 'Median: $24,500') !== false,
     'distribution chart labels the median in readable type');
-check(strpos($out, 'ldn-ring-guide__figure-note') !== false,
-    'price figure note uses body typography, not a theme figcaption');
-check(strpos($out, 'Live US asking prices as of') !== false,
-    'price figure note names the market and analysis date');
+check(
+    preg_match(
+        '/<rect x="(\d+)" y="8" width="(\d+)" height="22" rx="4" fill="#5249a3">/',
+        $out,
+        $badge
+    ) === 1,
+    'distribution chart draws a median badge rect'
+);
+$median_label = 'Median: $24,500';
+$old_tight = (int) (strlen($median_label) * 7.5);
+$comfort = (int) ceil(strlen($median_label) * 14 * 0.82) + 24;
+check(
+    (int) $badge[2] > $old_tight,
+    'median badge is wider than the 7.5px/char formula that clipped $63,260'
+);
+check(
+    (int) $badge[2] >= $comfort,
+    'median badge includes 12px side padding so the last digit is not on the pill edge'
+);
+check(
+    ((int) $badge[1] + (int) $badge[2]) <= 760,
+    'median badge stays inside the 760px viewBox'
+);
+check(strpos($out, 'live price chart of 4 carat cushion cut diamonds') !== false,
+    'price follow copy links the 4 ct cushion live chart in the sentence');
+check(strpos($out, 'learn how color and clarity affect the price you\'ll pay') !== false
+    || strpos($out, "learn how color and clarity affect the price you'll pay") !== false,
+    'price follow copy explains color and clarity in the same sentence');
+check(strpos($out, 'Live US asking prices as of') === false,
+    '4 ct cushion does not keep the old dated figure note');
+check(strpos($out, '4 carat Cushion diamond prices →') === false
+    && strpos($out, '4 carat Cushion diamond prices <span') === false,
+    '4 ct cushion does not keep the old trailing price CTA');
 check(strpos($out, 'open the full chart') === false,
-    'price figure note does not use the old awkward caption wording');
-check(strpos($out, '<time datetime="2026-08-20">') !== false,
-    'price figure note marks up the analysis date for machines');
+    'price follow copy does not use the old awkward caption wording');
 check(strpos($out, 'Current US prices') !== false, 'replaced price heading is not the old exact-match H2');
 check_house_style($out, 'cushion');
 
@@ -414,42 +464,49 @@ check(strpos($hub_out, '/diamond-size/') !== false, 'hub panel links to the size
 check(strpos($hub_out, 'og-preview.png') === false, 'hub does not embed the shape-level OG card');
 check(strpos($hub_out, 'ldn-ring-guide__chart') !== false, 'hub price card embeds a by-shape ranking chart');
 check(strpos($hub_out, '$3,510') !== false, 'hub ranking chart uses live all-shapes medians');
-check(strpos($hub_out, 'Open the live chart of prices by shape') !== false,
-    'hub chart caption points at the all-shapes price page');
-check(strpos($hub_out, 'color/clarity grid') === false,
-    'hub caption does not point at a colour grid the all-shapes page does not have');
+check(strpos($hub_out, 'Median US asking prices by shape for 4 carat diamonds') !== false,
+    'hub ranking chart has a visible title');
+check(strpos($hub_out, 'Last updated 18 August 2026') !== false,
+    'hub ranking chart title includes the analysis date');
+check(strpos($hub_out, 'See a live') !== false
+    && strpos($hub_out, 'price chart of all 4 carat diamonds') !== false,
+    'hub follow copy names the live all-shapes chart in the sentence');
+check(strpos($hub_out, 'Open the live chart of prices by shape') === false,
+    'hub does not keep the old stacked caption');
+check(strpos($hub_out, '4 carat diamond prices by shape') === false,
+    'hub does not keep the old trailing CTA as the whole link');
 check(strpos($hub_out, 'ldn-ring-guide__chart--distribution') === false,
     'hub keeps the by-shape bar chart instead of the shape histogram');
 check(strpos($hub_out, 'ldn-ring-guide__size-chart') !== false, 'hub size card renders the live comparison figure');
 $_SERVER['REQUEST_URI'] = '/4-carat-diamond-ring/';
 check(in_array('ldn-editorial-ring-guide', $bridge->body_class(array()), true),
-    'ring-guide pages get a body class that scopes full-bleed band CSS');
+    'ring-guide pages get a body class that scopes the inject stylesheet');
 unset($_SERVER['REQUEST_URI']);
 
-// Nested colour bands (Best Place To Buy) are not entry-content children.
-// Would fail if: the stylesheet only broke out `.entry-content > .gb-container`,
-// or used a descendant `.gb-container` rule that stretched the white review card.
+// Colour bands are GenerateBlocks. Would fail if: editorial CSS 50vw-broke
+// `.gb-container` and split the teal behind the Alon card (as 0.39.5–0.42.10 did).
 $band_css_path = dirname(__DIR__) . '/assets/css/editorial-ring-guide.css';
 check(is_readable($band_css_path), 'editorial ring-guide stylesheet exists');
 $band_css = preg_replace('#/\*.*?\*/#s', '', (string) file_get_contents($band_css_path));
 check(
-    strpos($band_css, '.entry-content > .gb-container > .gb-inside-container > .gb-container:has(') !== false,
-    'nested GB colour bands get the same 50vw breakout as top-level bands'
+    strpos($band_css, '50vw') === false,
+    'editorial CSS does not full-bleed GenerateBlocks containers'
 );
 check(
-    strpos($band_css, ':is(.has-white-color, .has-base-3-color, .links-color-white)') !== false,
-    'nested breakout is limited to white-on-colour copy so the Alon review card stays inset'
+    strpos($band_css, '.gb-container') === false,
+    'editorial CSS does not select GenerateBlocks colour bands'
 );
 check(
-    preg_match(
-        '/\.entry-content > \.gb-container > \.gb-inside-container\s*\{[^}]*overflow:\s*visible/',
-        $band_css
-    ) === 1,
-    'the wrapper inside-container does not clip the nested negative margin'
+    preg_match('/\.ldn-ring-guide__figure\s*\{[^}]*overflow:\s*hidden/', $band_css) === 1,
+    'the price chart figure clips its own paint so it cannot cover the table heading'
 );
 check(
-    !preg_match('/\.entry-content\s+\.gb-container\s*\{/', $band_css),
-    'breakout is not a descendant .gb-container rule that would stretch inset cards'
+    strpos($band_css, 'caption-side') === false,
+    'ring-guide tables do not use a clipped table caption'
+);
+check(
+    !preg_match('/\.ldn-ring-guide__ladder\s+(th|td)\s*\{[^}]*border-bottom/', $band_css),
+    'ring-guide CSS does not invent a second cell style for the price ladder'
 );
 check(strpos($hub_out, 'ldn-ring-guide__size-chart-kicker') !== false, 'hub size chart has an actual-size kicker');
 check(strpos($hub_out, 'ldn-ring-guide__size-chart-shapes') !== false, 'hub size chart puts shapes in a two-row grid beside the quarter');
@@ -458,12 +515,31 @@ check(strpos($hub_out, 'us-quarter.png') !== false, 'hub size chart includes the
 check(strpos($hub_out, 'ldn-test-round') !== false, 'hub size chart uses the mega-hub round outline');
 check(strpos($hub_out, '10.32') !== false, 'hub size chart shows the matrix median millimetres');
 check(strpos($hub_out, '/diamond-size/cushion/4-carat/') !== false, 'hub size chart links cushion to the live size page');
+check(strpos($hub_out, 'Typical face-up size from real diamonds') !== false,
+    'hub size caption talks about real diamonds, not live US listings');
+check(strpos($hub_out, 'Learn more on our') !== false
+    && strpos($hub_out, '4 carat diamond size chart') !== false,
+    'hub size caption links 4 carat diamond size chart in the sentence');
+check(strpos($hub_out, 'Diamond size chart (all shapes)') === false,
+    'hub does not keep the old trailing size CTA');
+check(
+    preg_match(
+        '/\.ldn-ring-guide__size-chart figcaption\s*\{[^}]*font-size:\s*inherit/',
+        $band_css
+    ) === 1,
+    'size caption uses the page body type, not a smaller muted figcaption'
+);
 check(strpos($out, 'ldn-ring-guide__size-chart') !== false,
     '4 ct cushion size card renders the single-shape true-scale figure');
 check(strpos($out, 'ldn-test-cushion') !== false,
     '4 ct cushion size figure uses the mega-hub outline for that carat');
 check(strpos($out, '9.25 × 9.25 mm') !== false,
     '4 ct cushion size figure shows live matrix millimetres');
+check(strpos($out, '4 carat cushion cut diamond size chart') !== false,
+    '4 ct cushion size caption links the size chart in the sentence');
+check(strpos($out, '4 carat Cushion diamond size →') === false
+    && strpos($out, '4 carat Cushion diamond size <span') === false,
+    '4 ct cushion does not keep the old trailing size CTA');
 check_house_style($hub_out, 'hub');
 
 // Carat-free shape guides (/{shape}-engagement-rings/).
@@ -505,9 +581,30 @@ check(strpos($shape_out, 'ldn-ring-guide__compare-table') !== false, 'comparison
 check(preg_match('/<table class="[^"]*ldn-ring-guide__compare-table[^"]*"[\s\S]*?<\/table>/', $shape_out, $compare_table)
     && strpos($compare_table[0], 'is-anchor') === false,
     'the comparison table does not highlight a row');
-check(preg_match('/ldn-ring-guide__ladder-wrap[\s\S]*?<tr class="is-anchor"/', $shape_out),
+check(preg_match('/ldn-ring-guide__ladder-wrap[\s\S]*?<tr class="ldn-row-highlight"/', $shape_out),
     'the carat ladder still marks the anchor weight row');
-check(strpos($shape_out, 'og-preview.png') !== false, 'shape guide embeds the anchor-carat OG preview');
+check(strpos($shape_out, 'og-preview.png') === false,
+    'shape hub never embeds og-preview.png even when the fetcher would return a 2 ct oval card');
+check(strpos($shape_out, '2-carat/oval') === false, 'shape hub does not mention the oval 2 ct artefact');
+check(strpos($shape_out, 'ldn-ring-guide__chart--distribution') !== false,
+    'shape hub plots the 1 ct cushion histogram from bins.json');
+check(strpos($shape_out, '1 carat cushion cut diamond prices') !== false,
+    'shape hub histogram is titled for 1 ct cushion, not another combo');
+check(strpos($shape_out, 'ldn-table-card') !== false && strpos($shape_out, 'ldn-data-table') !== false,
+    'shape hub tables use the house .ldn-table-card > .ldn-data-table markup');
+check(strpos($shape_out, '<caption>') === false,
+    'shape hub tables put the title above the card, not in a clipped caption');
+
+$wrong_bins = new LDN_Editorial_Bridge(
+    'ringspo',
+    new LDN_Config(),
+    new LDN_Mismatched_Bins_Fetcher()
+);
+$wrong_out = $wrong_bins->transform($shape_html, '/cushion-cut-engagement-rings/');
+check(strpos($wrong_out, 'ldn-ring-guide__chart--distribution') === false,
+    'bins JSON stamped oval/2 ct is refused on the cushion shape hub');
+check(strpos($wrong_out, 'og-preview.png') === false,
+    'a refused histogram does not fall back to the oval OG card');
 
 check(strpos($shape_out, 'ldn-ring-guide__size-chart') !== false, 'shape guide gets a true-scale size row');
 check(strpos($shape_out, 'ldn-test-cushion-2') !== false,
@@ -605,8 +702,18 @@ check(strpos(strip_tags($shape_out), 'Prices updated between 17 August 2026 and 
     'the ladder spans the oldest and newest row dates');
 check(strpos($shape_out, '<time datetime="2026-08-18">18 August 2026</time>') !== false,
     'dates are machine readable and reader formatted');
-check(strpos(strip_tags($shape_out), 'as of 18 August 2026') !== false,
-    'the chart note is dated from time_series.analysis_date');
+check(strpos($shape_out, 'live price chart of 1 carat cushion cut diamonds') === false
+    && strpos($shape_out, '1 carat Cushion diamond prices') === false,
+    'shape hub does not trail the ladder with a price-page CTA');
+check(strpos($shape_out, 'cushion cut diamond sizing') !== false,
+    'shape hub size caption links cushion cut diamond sizing');
+check(strpos($shape_out, 'Typical face-up') !== false
+    && strpos($shape_out, 'from real diamonds, drawn at true scale next to a US quarter for reference.') !== false,
+    'shape hub size caption is one sentence around that link');
+check(strpos($shape_out, 'Cushion diamond size chart') === false,
+    'shape hub does not keep the old trailing size CTA');
+check(strpos(strip_tags($shape_out), 'as of 18 August 2026') === false,
+    'shape hub does not keep the old dated figure note');
 check(strpos($shape_out, 'Open the live chart and color/clarity grid') === false,
     'the undated caption fallback is not used when the artefact carries a date');
 check_house_style($shape_out, 'shape guide');
@@ -741,8 +848,10 @@ check(strpos($dh_cut_out, '/mined-diamonds/1-carat/round/') !== false,
 check(strpos($dh_cut_out, '/{lab}/') === false, 'leftover cert tokens are not left in the href');
 check(strpos($dh_cut_out, 'ldn-ring-guide__size-chart') === false,
     'diamondhunt omits the size card when include_size is false');
-check(strpos($dh_cut_out, 'us-quarter.png') === false,
-    'diamondhunt does not render a US quarter');
+check(strpos($dh_cut_out, 'learn how colour and clarity affect the price') !== false,
+    'diamondhunt follow copy uses British spelling in the price sentence');
+check(strpos($dh_cut_out, 'learn how color and clarity affect the price') === false,
+    'diamondhunt follow copy does not use American spelling in the price sentence');
 
 $dh_carat_out = $dh->transform(
     '<h2>How carat weight affects price</h2><p>Stale Blue Nile line.</p>',

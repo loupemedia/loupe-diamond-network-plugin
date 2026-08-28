@@ -29,12 +29,9 @@ if (!defined('ABSPATH')) {
 }
 
 trait LDN_Trait_Nav_Country_Switcher {
-
-    /**
-     * Desktop flyout becomes two columns once this many live markets paint.
-     * The drawer at 768px stays one column regardless.
-     */
-    private const COUNTRY_SWITCHER_TWO_COL_MIN = 8;
+    // COUNTRY_SWITCHER_TWO_COL_MIN lives on LDN_Nav (not here): trait constants
+    // require PHP 8.2+; Kinsta staging runs 8.1. self:: in trait methods
+    // resolves to the composing class.
 
     /**
      * Expand a country_switcher entry into a parent plus one item per live market.

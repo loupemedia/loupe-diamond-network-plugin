@@ -427,6 +427,74 @@ $carat_overview = array(
     ),
 );
 $carat_html = $renderer->carat_price_table_html($top_ctx, $carat_overview, '$');
+// Test intent: the hub carat table uses the house `.ldn-table-card` >
+// `.ldn-data-table` from shared.css. Family CSS must not invent a second
+// card or cell style, and must not tint a 1 ct row.
+// Would fail if: the table was a bare <table>, or ringspo.css restyled
+// `.ldn-carat-price-table .ldn-table-card`.
+check(
+    strpos($carat_html, 'ldn-table-card') !== false && strpos($carat_html, 'ldn-data-table') !== false,
+    'hub carat price table uses the house .ldn-table-card > .ldn-data-table markup'
+);
+$shared_css = file_get_contents(dirname(__DIR__) . '/assets/css/shared.css');
+check(
+    preg_match('/\.ldn-table-card\s*\{[^}]*border-radius:\s*12px/s', $shared_css) === 1,
+    'house table card radius lives in shared.css'
+);
+check(
+    preg_match(
+        '/\.ldn-carat-price-table\s+\.ldn-table-card\s*\{[^}]*overflow-x:\s*auto/s',
+        $shared_css
+    ) === 1,
+    'hub carat-price card scrolls sideways at phone width instead of clipping columns'
+);
+check(
+    preg_match(
+        '/\.ldn-data-table\s+th,\s*\.ldn-data-table\s+td\s*\{[^}]*border-bottom:\s*1px solid/s',
+        $shared_css
+    ) === 1,
+    'house table cell chrome lives on .ldn-data-table, not only .ldn-price-page table'
+);
+check(
+    preg_match(
+        '/\.ldn-data-table\s+thead\s+th[\s\S]*?background-color:\s*var\(--ldn-table-header-bg/s',
+        $shared_css
+    ) === 1
+    && strpos($shared_css, '--ldn-table-header-bg: #f2f2f2') === false,
+    'house table header is the brand colour (size-hub look), not a grey fill'
+);
+check(
+    preg_match('/\.ldn-table-card\s*\{[^}]*box-shadow:\s*none/s', $shared_css) === 1,
+    'house table card has no drop shadow (size-hub look)'
+);
+check(
+    preg_match(
+        '/\.ldn-data-table\s+thead\s+th:first-child\s*\{[^}]*border-top-left-radius:\s*12px/s',
+        $shared_css
+    ) === 1,
+    'house table paints 12px corners on the header cells so a price table is not square'
+);
+check(
+    preg_match(
+        '/\.ldn-data-table\s+thead\s+th\s*\{[^}]*background-color:\s*var\(--ldn-table-header-bg/s',
+        $shared_css
+    ) === 1
+    && preg_match(
+        '/\.ldn-data-table\s+thead\s+th,\s*\.ldn-data-table\s+thead\s+tr\s*\{/s',
+        $shared_css
+    ) !== 1,
+    'house table header fill is on cells only so the 12px radii are not hidden by a square tr'
+);
+$ringspo_css = file_get_contents(dirname(__DIR__) . '/assets/css/families/ringspo.css');
+check(
+    strpos($ringspo_css, '.ldn-carat-price-table .ldn-table-card') === false
+        && strpos($ringspo_css, '.ldn-carat-tiers-table .ldn-table-card') === false,
+    'Ringspo family does not restyle the house table card; that chrome is shared.css'
+);
+check(
+    preg_match('/table:not\(\.ldn-size-matrix\):not\(\.ldn-data-table\)/', $ringspo_css) === 1,
+    'Ringspo tint-band table chrome skips .ldn-data-table so the house card is not double-styled'
+);
 check(
     strpos($carat_html, 'https://example.com/us/diamond-prices/natural/1-carat/') !== false,
     'carat table links natural price down to the type+carat all-shapes page'
@@ -802,14 +870,17 @@ $market_bag['market_overview']['carat_price_table'] = array(
     ),
 );
 $carat_table_html = $renderer->carat_price_table_html($ringspo_top, $market_bag['market_overview'], '$', '');
+// Test intent: price hub tables do not tint a 1 ct (or any) row. Anchor carat
+// is for hero stats and type nav, not a highlighted table row.
+// Would fail if: should_highlight_hub_anchor_row still wrapped the 1 ct <tr>.
 check(
-    strpos($carat_table_html, 'ldn-row-highlight') !== false,
-    'Ringspo top-level carat table highlights the 1 ct anchor row'
+    strpos($carat_table_html, 'ldn-row-highlight') === false,
+    'Ringspo top-level carat table does not tint the 1 ct row'
 );
 $loupe_carat_table_html = $renderer->carat_price_table_html($top_ctx, $market_bag['market_overview'], '$', '');
 check(
     strpos($loupe_carat_table_html, 'ldn-row-highlight') === false,
-    'Loupe top-level carat table does not highlight the anchor row'
+    'Loupe top-level carat table does not tint an anchor row'
 );
 
 $type_nav_html = $renderer->type_nav_links_html($ringspo_top, $market_bag);
@@ -1707,8 +1778,8 @@ check(
     'Loupe diamond-type history section does not nest Ringspo price-per-carat'
 );
 check(
-    strpos($tiers_html, 'ldn-row-highlight') !== false,
-    'carat_tiers_table_html highlights the anchor carat row'
+    strpos($tiers_html, 'ldn-row-highlight') === false,
+    'carat_tiers_table_html does not tint the anchor carat row'
 );
 check(
     strpos($tiers_html, 'ldn-data-table--stacked') !== false
@@ -1912,7 +1983,7 @@ check(
     'type_carat_lookup defaults to most_popular_carat when no ?carat= query'
 );
 
-// Test intent: ?carat= overrides most_popular_carat for slider + table highlight.
+// Test intent: ?carat= overrides most_popular_carat for slider + sibling toggle.
 // Would fail if: hub_anchor_carat ignored the query and stayed on popular=1.
 $_GET['carat'] = '2';
 $lookup_from_query = $renderer->type_carat_lookup_html($ringspo_type_ctx, $type_summary_bag, 'USD');
@@ -1933,15 +2004,8 @@ check(
     'nat_lab_toggle carries ?carat= from the request onto the sibling URL'
 );
 check(
-    preg_match(
-        '/ldn-row-highlight[^>]*>.*?>2 ct<|>2 ct<\/a><\/td>/s',
-        $tiers_from_query
-    ) === 1
-        || (
-            strpos($tiers_from_query, 'ldn-row-highlight') !== false
-            && strpos($tiers_from_query, '>2 ct<') !== false
-        ),
-    'carat_tiers_table_html highlights the ?carat= row'
+    strpos($tiers_from_query, 'ldn-row-highlight') === false,
+    'carat_tiers_table_html does not tint the ?carat= row'
 );
 
 $explore_html = $renderer->diamond_type_explore_html($ringspo_type_ctx, $type_summary_bag);

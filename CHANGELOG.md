@@ -1,5 +1,64 @@
 # Changelog
 
+## [0.42.14] — 2026-08-28
+
+- **PHP 8.1 header load.** `COUNTRY_SWITCHER_TWO_COL_MIN` lives on `LDN_Nav`, not the country-switcher trait. Trait constants are a fatal on Kinsta staging (8.1) and silent on 8.2+.
+
+## [0.42.13] — 2026-08-28
+
+- **Size JSON-LD matches the price Dataset contract.** Size pages now give Dataset an `@id`, `WebPage.mainEntity`, `publisher`, `isPartOf`, size-scoped `keywords`, `spatialCoverage` and `temporalCoverage`. Shape and carat hubs add an `ItemList` of child `WebPage`s (not Product/Offer) for each ladder row.
+
+## [0.42.12] — 2026-08-28
+
+- **House table header fill is on cells only.** `/us/diamond-prices/natural/` still looked square after 0.42.10 because `thead tr` painted a full-width purple bar behind the 12px radii. Header, zebra and highlight fills now sit on `th`/`td`, same paint path as the oval size-hub matrix.
+
+## [0.42.11] — 2026-08-28
+
+- **Ring-guide colour bands are left to GenerateBlocks.** `editorial-ring-guide.css` no longer 50vw-breakouts `.gb-container`. That rule full-bled Best Place To Buy and left the Alon wrap in the 800px column, so the teal stopped behind the card on staging. Production Ringspo never needed the hack.
+
+## [0.42.10] — 2026-08-28
+
+- **House table corners live on the header cells.** `/us/diamond-prices/natural/` looked square because a `<table>` does not clip to `.ldn-table-card`’s radius, and a `thead tr` fill painted a square purple bar behind the rounded cells. Header and zebra fills are on cells only, with the same 12px corners as the oval size-hub chart.
+
+## [0.42.9] — 2026-08-28
+
+- **Price tables do not tint a 1 ct row.** Hub and diamond-type carat ladders use the same zebra as every other row. Ring-guide ladders still mark the page's own carat.
+
+## [0.42.8] — 2026-08-28
+
+- **House data table is the size-hub look.** `/diamond-size/oval/` (purple header, hairline rows, muted zebra, 12px card, no drop shadow) is the single cell style. Price pages, size pages and ring-guide injects all use it. Family skins tint via `--ldn-table-header-bg` / `--ldn-table-header-fg`.
+
+## [0.42.7] — 2026-08-28
+
+- **Hub carat table uses the house `shared.css` card.** Ringspo family CSS no longer restyles `.ldn-carat-price-table .ldn-table-card`; radius, cells and the phone sideways scroll come from `.ldn-table-card` / `.ldn-data-table` in `shared.css`.
+- **Size pages use the house data table.** Dimensions, hub ladders, the mega matrix, segmentation and comparison tables are `.ldn-table-card` > `.ldn-data-table`, same shell as price pages. Size layout classes (`ldn-size-table`, `ldn-size-matrix`) stay for alignment and the purple matrix header.
+
+## [0.42.6] — 2026-08-27
+
+- **Ring-guide histogram median badge shows the full price.** `strlen * 7.5` was too tight for 14px bold, so "Median: $63,260" on `/4-carat-cushion-cut-diamond-ring/` clipped and the overflowing white digits vanished on the white chart.
+- **Ring-guide charts never fall back to `og-preview.png`.** `/cushion-cut-engagement-rings/` was showing a 2 ct oval social card when 1 ct cushion `bins.json` was missing. Shape and shape-hub figures plot that page's histogram or nothing; a missing artefact is an empty figure, not another combo's chart. Bins JSON that names a different shape or carat is refused.
+- **House data table.** Every LDN-generated table is `.ldn-table-card` > `.ldn-data-table` (cell chrome in `shared.css`). Ring-guide price ladders and comparison tables use it, so they match `/us/diamond-prices/natural/`. Colour/clarity heatmaps stay their own component.
+- **Shape-hub copy.** The carat ladder drops the trailing "1 carat Cushion diamond prices" link. The size caption is one sentence with "cushion cut diamond sizing" as the link. The table title sits outside the overflow wrap so the chart cannot clip it.
+
+## [0.42.5] — 2026-08-27
+
+- **Mega panels hang from the item that opened them.** `position: static` had pinned every dropdown to the left of the nav bar, so Diamond Prices opened under the logo. The last two items hang from the right so a 400px panel does not run off the viewport. Learn's six-column panel still pins to the nav bar, because 1085px cannot sit under a 64px label.
+
+## [0.42.4] — 2026-08-27
+
+- **Hub carat table matches the natural-page card.** `/us/diamond-prices/` wraps the natural-vs-lab table in the same rounded white card as `/us/diamond-prices/natural/`. On a phone the five columns scroll sideways inside the card so the discount and sample cells are not clipped.
+
+## [0.42.3] — 2026-08-27
+
+- **4 ct cushion ring guides plot that carat's histogram.** `/4-carat-cushion-cut-diamond-ring/` was falling back to `og-preview.png` because `market_index_bins_json` had no S3 basename, and the 4 ct cushion social card is titled 8 carat. The resolver now maps bins to `{site_id}-market-index-bins.json`, and carat × shape guides no longer embed the OG PNG.
+- **Price and size follow copy is a body-type sentence with an inline link.** Shape guides: "See a live price chart of 4 carat cushion cut diamonds and learn how color and clarity affect the price you'll pay", and "Learn more on our 4 carat cushion cut diamond size chart here". Carat hubs keep the all-shapes wording.
+- **Carat-hub ranking charts name the date.** The by-shape bar on `/4-carat-diamond-ring/` has a visible title and "Last updated" line from `shapes-ranking.json`.
+- **Best Place To Buy teal continues behind the Alon card.** The mint wrap after the white-on-colour Best Place band now uses the same 50vw breakout, so the white review card sits on teal instead of the page background.
+
+## [0.42.2] — 2026-08-27
+
+- **Mega-menu options are smaller than their column headings, and panels hug the columns.** Nested links were inheriting the 15px bar size so "Sell gold" read larger than "General selling". They are now 12px under 14px headings. The panel is `max-content` (capped by the viewport) instead of stretching every mega to 1140px, so a two-column item is only as wide as its labels.
+
 ## [0.42.1] — 2026-08-25
 
 - **Breadcrumb root crumb is the site brand name (PRD-018 CP124_03).** Price and size trails start with `brand_name` from the site bundle (then `n`), never the literal Home, and never gettext. A missing brand omits that crumb rather than leaving a blank one. The launch guard that requires authored `nav_*` terms now runs for every site with a `navigation:` key, not Ringspo alone, so a later French DPE is gated the same way as Japan.

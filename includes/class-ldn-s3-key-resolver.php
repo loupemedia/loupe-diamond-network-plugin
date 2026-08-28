@@ -58,6 +58,7 @@ final class LDN_S3_Key_Resolver {
         'all_shapes_summary_json' => 'summary-data.json',
         'all_shapes_content_json' => 'all-shapes-content.json',
         'og_preview_png'         => 'og-preview.png',
+        'market_index_bins_json' => '{site_id}-market-index-bins.json',
         'size_summary_json'      => 'size-summary.json',
         'size_distribution_json' => 'size-distribution.json',
         'size_distribution_html' => 'size-distribution.html',
@@ -280,7 +281,9 @@ final class LDN_S3_Key_Resolver {
         }
 
         if (isset(self::FIXED_BASENAMES[$artefact_id])) {
-            return self::FIXED_BASENAMES[$artefact_id];
+            return strtr(self::FIXED_BASENAMES[$artefact_id], array(
+                '{site_id}' => (string) $site_id,
+            ));
         }
 
         return null;

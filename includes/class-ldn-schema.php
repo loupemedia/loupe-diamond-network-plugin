@@ -92,6 +92,7 @@ final class LDN_Schema {
         array('metadata', 'open_graph', 'og:updated_time'),
         array('analysis_date'),
         array('analysis_date_iso'),
+        array('generated_date'),
     );
 
     /**
@@ -429,6 +430,50 @@ final class LDN_Schema {
     }
 
     /**
+     * ItemList of child WebPages (size hubs: one entry per carat/shape row).
+     *
+     * Distinct from item_list_node(), which emits Product + Offer for price pages.
+     *
+     * @param string $name
+     * @param array  $pages         [['name'=>, 'url'=>], ...]
+     * @param string $canonical_url
+     * @return array<string, mixed>|null
+     */
+    public function page_item_list_node($name, array $pages, $canonical_url = '') {
+        $elements = array();
+        $position = 1;
+        foreach ($pages as $page) {
+            if (!is_array($page) || empty($page['name']) || empty($page['url'])) {
+                continue;
+            }
+            $elements[] = array(
+                '@type'    => 'ListItem',
+                'position' => $position++,
+                'item'     => array(
+                    '@type' => 'WebPage',
+                    'name'  => (string) $page['name'],
+                    'url'   => (string) $page['url'],
+                ),
+            );
+        }
+        if ($elements === array()) {
+            return null;
+        }
+
+        $node = array(
+            '@type'           => 'ItemList',
+            'name'            => (string) $name,
+            'numberOfItems'   => count($elements),
+            'itemListElement' => $elements,
+        );
+        if ($canonical_url !== '') {
+            $node['@id'] = $canonical_url . '#itemlist';
+            $node['url'] = $canonical_url;
+        }
+        return $node;
+    }
+
+    /**
      * Schema.org FAQPage node from {question, answer} pairs, or null.
      *
      * @param array $faq_pairs
@@ -711,15 +756,30 @@ final class LDN_Schema {
     }
 
     /**
+     * Public wrapper for page-context keywords (price and size).
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string[]
+     */
+    public function keywords_for(LDN_Page_Context $ctx) {
+        return $this->keywords($ctx);
+    }
+
+    /**
      * SEO keywords from the page context.
      *
      * Phrases are level-scoped so adjacent hierarchy pages do not share the same
-     * primary keyword set (type ↔ all-shapes ↔ shape).
+     * primary keyword set (type ↔ all-shapes ↔ shape). Size pages never inherit
+     * the price-page fallback ("diamond prices").
      *
      * @param LDN_Page_Context $ctx
      * @return string[]
      */
     private function keywords(LDN_Page_Context $ctx) {
+        if ($ctx->module === 'size' || strpos($ctx->page_level, 'size-') === 0) {
+            return $this->size_keywords($ctx);
+        }
+
         if ($ctx->page_level === 'top-level') {
             return array_values(array_unique(array_filter(array(
                 'diamond prices',
@@ -769,6 +829,61 @@ final class LDN_Schema {
         }
         $words[] = 'diamond prices';
         return array_values(array_unique(array_filter($words)));
+    }
+
+    /**
+     * Size-module keyword set. Scoped by page_level so a shape hub does not
+     * share the individual-page primary phrase.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string[]
+     */
+    private function size_keywords(LDN_Page_Context $ctx) {
+        $carat = $ctx->carat !== null ? $this->format_carat_label($ctx->carat) : '';
+        $shape = $ctx->shape !== null
+            ? strtolower(str_replace('-', ' ', $ctx->shape))
+            : '';
+
+        if ($ctx->page_level === 'size-mega-hub') {
+            return array('diamond size chart', 'diamond sizes', 'diamond size');
+        }
+        if ($ctx->page_level === 'size-shape-hub') {
+            $words = array();
+            if ($shape !== '') {
+                $words[] = $shape . ' diamond size chart';
+                $words[] = $shape . ' diamond size';
+                $words[] = $shape . ' diamond mm';
+            }
+            return array_values(array_unique(array_filter($words)));
+        }
+        if ($ctx->page_level === 'size-carat-hub') {
+            $words = array();
+            if ($carat !== '') {
+                $words[] = $carat . ' carat diamond size';
+                $words[] = $carat . ' carat diamond size chart';
+            }
+            return array_values(array_unique(array_filter($words)));
+        }
+        if ($ctx->page_level === 'size-individual') {
+            $words = array();
+            if ($carat !== '' && $shape !== '') {
+                $words[] = $carat . ' carat ' . $shape . ' diamond size';
+            }
+            if ($shape !== '') {
+                $words[] = $shape . ' diamond size chart';
+            }
+            return array_values(array_unique(array_filter($words)));
+        }
+        if ($ctx->page_level === 'size-comparison-tool') {
+            return array('diamond size checker', 'diamond size comparison');
+        }
+        if ($ctx->page_level === 'size-methodology') {
+            return array('diamond size methodology', 'how diamond size is measured');
+        }
+        if ($ctx->page_level === 'size-comparison') {
+            return array('diamond size comparison');
+        }
+        return array('diamond size chart');
     }
 
     /**
@@ -822,7 +937,7 @@ final class LDN_Schema {
      * @param array $site
      * @return array<string, string>|null
      */
-    private function website_ref(array $site) {
+    public function website_ref(array $site) {
         $domain = isset($site['domain']) ? trim((string) $site['domain']) : '';
         $base = $domain !== '' ? 'https://' . $domain : $this->home();
         if ($base === '') {
@@ -895,7 +1010,7 @@ final class LDN_Schema {
      * @param array            $site
      * @return string
      */
-    private function country_full_name(LDN_Page_Context $ctx, array $site) {
+    public function country_full_name(LDN_Page_Context $ctx, array $site) {
         if (!empty($site['countries']) && is_array($site['countries'])) {
             foreach ($site['countries'] as $entry) {
                 if (is_array($entry) && isset($entry['code']) && $entry['code'] === $ctx->country_code) {

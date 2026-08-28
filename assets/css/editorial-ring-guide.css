@@ -6,36 +6,15 @@
  * Do not invent a tinted outlined box (AI tell). Follow Ringspo: unboxed
  * sections, theme headings, white chart surface with 12px radius + shadow.
  *
- * The inject paints no band of its own. Any colour behind it belongs to the
- * post's own GenerateBlocks container and is a WordPress edit, not a CSS one.
+ * The inject paints no band of its own. Colour sections (Best Place To Buy,
+ * the Alon card, purple blocks) are GenerateBlocks in the WordPress post.
+ * Do not 50vw-breakout `.gb-container`: that split the teal wrap on staging
+ * while production Ringspo, which leaves those blocks to GeneratePress, still
+ * paints teal behind the card.
  */
 
 body.ldn-editorial-ring-guide {
 	overflow-x: clip;
-}
-
-/* Legacy GenerateBlocks colour bands stop short inside `.entry-content`.
- *
- * Direct children (hero, some purple blocks) use the first selector.
- * Later bands (Best Place To Buy, popularity) sit inside one colourless
- * wrapper whose inner container is still ~800px. Pull only those nested
- * containers that paint white-on-colour copy. The Alon review card uses
- * contrast colour on a white surface and stays inset.
- *
- * The wrapper inside-container must not clip the nested negative margin.
- */
-body.ldn-editorial-ring-guide .entry-content > .gb-container > .gb-inside-container {
-	overflow: visible;
-}
-
-body.ldn-editorial-ring-guide .entry-content > .gb-container,
-body.ldn-editorial-ring-guide .entry-content > .gb-container > .gb-inside-container > .gb-container:has(:is(.has-white-color, .has-base-3-color, .links-color-white)) {
-	margin-left: calc(50% - 50vw);
-	margin-right: calc(50% - 50vw);
-	padding-left: calc(50vw - 50%);
-	padding-right: calc(50vw - 50%);
-	max-width: none;
-	width: auto;
 }
 
 .ldn-ring-guide,
@@ -59,7 +38,8 @@ body.ldn-editorial-ring-guide .entry-content > .gb-container > .gb-inside-contai
 }
 
 .ldn-ring-guide__figure {
-	margin: 0 0 0.75rem;
+	margin: 0 0 1.5rem;
+	overflow: hidden;
 }
 
 .ldn-ring-guide__figure img,
@@ -83,6 +63,8 @@ body.ldn-editorial-ring-guide .entry-content > .gb-container > .gb-inside-contai
 
 .ldn-ring-guide__chart--distribution {
 	min-height: 12rem;
+	aspect-ratio: 760 / 320;
+	overflow: hidden;
 }
 
 .ldn-ring-guide__cta {
@@ -97,72 +79,49 @@ body.ldn-editorial-ring-guide .entry-content > .gb-container > .gb-inside-contai
 	text-decoration: underline;
 }
 
-/* Price ladder (shape guides): median price per carat weight.
+/* Price ladder and comparison tables use the house `.ldn-table-card` +
+ * `.ldn-data-table` from shared.css. Do not restyle cells here: a table
+ * style change belongs in shared.css so price pages and ring guides stay
+ * in lockstep.
  *
- * Three narrow columns survive 320px without a scroller, so the wrapper only
- * catches the overflow case where a locale renders long money strings.
+ * Three narrow columns survive 320px without a scroller. The wrap only
+ * catches a locale that renders long money strings, and the heading sits
+ * outside it so overflow cannot clip the title.
  */
 .ldn-ring-guide__ladder-wrap {
-	overflow-x: auto;
+	overflow: visible;
 	margin: 0 0 0.75rem;
 }
 
-.ldn-ring-guide__ladder {
-	width: 100%;
-	border-collapse: collapse;
-	font-size: 0.95rem;
-}
-
-.ldn-ring-guide__ladder caption {
-	caption-side: top;
-	padding: 0 0 0.4rem;
-	font-size: 0.9rem;
-	color: #4a4a68;
-	text-align: left;
-}
-
-.ldn-ring-guide__ladder th,
-.ldn-ring-guide__ladder td {
-	padding: 0.35rem 0.5rem;
-	border-bottom: 1px solid #e3e1f5;
-	text-align: right;
-}
-
-.ldn-ring-guide__ladder thead th {
-	font-size: 0.8rem;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	color: #4a4a68;
-}
-
-.ldn-ring-guide__ladder tbody th {
+.ldn-ring-guide__table-heading {
+	margin: 0 0 0.5rem;
+	font-size: inherit;
 	font-weight: 600;
-	text-align: left;
+	line-height: 1.4;
+}
+
+.ldn-ring-guide__ladder-wrap .ldn-table-card {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	margin-bottom: 0;
+}
+
+.ldn-ring-guide__ladder tbody th,
+.ldn-ring-guide__compare-table tbody th {
 	white-space: nowrap;
 }
 
-.ldn-ring-guide__ladder tbody th a {
-	color: #706cc8;
-	text-decoration: none;
-}
-
-.ldn-ring-guide__ladder tbody th a:hover,
-.ldn-ring-guide__ladder tbody th a:focus-visible {
-	text-decoration: underline;
-}
-
-.ldn-ring-guide__ladder:not(.ldn-ring-guide__compare-table) tr.is-anchor {
-	background: #f4f3fd;
-}
-
 @media (max-width: 400px) {
-	.ldn-ring-guide__ladder {
+	.ldn-ring-guide__ladder,
+	.ldn-ring-guide__compare-table {
 		font-size: 0.875rem;
 	}
 
 	.ldn-ring-guide__ladder th,
-	.ldn-ring-guide__ladder td {
-		padding: 0.3rem 0.35rem;
+	.ldn-ring-guide__ladder td,
+	.ldn-ring-guide__compare-table th,
+	.ldn-ring-guide__compare-table td {
+		padding: 0.5rem 0.55rem;
 	}
 }
 
@@ -329,9 +288,12 @@ a.ldn-ring-guide__size-item:focus-visible .ldn-ring-guide__size-stone svg {
 }
 
 .ldn-ring-guide__size-chart figcaption {
-	margin-top: 0.45rem;
-	font-size: 0.9rem;
-	color: #4a4a68;
+	margin-top: 1.15rem;
+	font-size: inherit;
+	font-family: inherit;
+	font-style: normal;
+	line-height: inherit;
+	color: inherit;
 }
 
 /* Narrow article or viewport: quarter on top, shapes in two columns. */
