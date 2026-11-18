@@ -43,11 +43,12 @@ trait LDN_Trait_Data {
         if ($ctx->page_level === 'diamond-type' && $ctx->site_id === 'ringspo') {
             return sprintf('%s %s Diamond Prices', $this->country_full_name($ctx), $subject);
         }
-        // Ringspo all-shapes: own "by shape" + full country — differentiate from the
-        // type hub (no carat) and shape pages (named cut + (CC) suffix).
+        // Ringspo all-shapes: "{carat} {type} Diamond in the {Country}".
+        // Distinct from the type hub ("{Country} … Prices") and shape pages
+        // (named cut + (CC) suffix).
         if ($ctx->page_level === 'all-shapes' && $ctx->site_id === 'ringspo') {
             return sprintf(
-                '%s Diamond Prices by Shape - %s',
+                '%s Diamond in the %s',
                 $subject,
                 $this->country_full_name($ctx)
             );
@@ -97,6 +98,30 @@ trait LDN_Trait_Data {
             default:
                 return (string) $value;
         }
+    }
+
+    /**
+     * Card-range currency: nearest thousand with a k suffix.
+     *
+     * Amounts under 1000 stay in full dollars so a $500 low is not published as
+     * $1k. The caller supplies the display symbol already resolved from the
+     * ranking payload (not an ISO code).
+     *
+     * @param mixed  $value
+     * @param string $symbol
+     * @return string
+     */
+    public function format_compact_thousands($value, $symbol) {
+        if (!is_numeric($value)) {
+            return '—';
+        }
+        $amount = (float) $value;
+        $prefix = (string) $symbol;
+        if (abs($amount) < 1000) {
+            return $prefix . number_format($amount, 0);
+        }
+        $thousands = (int) round($amount / 1000.0);
+        return $prefix . number_format($thousands, 0) . 'k';
     }
 
     /**

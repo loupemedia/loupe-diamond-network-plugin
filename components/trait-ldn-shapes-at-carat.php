@@ -109,13 +109,14 @@ trait LDN_Trait_Shapes_At_Carat {
                 }
             }
 
-            $card_heading = $shape;
+            $shape_label = $this->compact_shape_label($shape);
+            $card_heading = $shape_label;
             if (isset($row['rank']) && is_numeric($row['rank'])) {
                 $card_heading = sprintf(
-                    /* translators: 1: rank position, 2: shape name */
-                    __('#%1$d: %2$s', 'loupe-diamond-network'),
+                    /* translators: 1: rank position, 2: compact shape name */
+                    __('%1$d: %2$s', 'loupe-diamond-network'),
                     (int) $row['rank'],
-                    $shape
+                    $shape_label
                 );
             }
 
@@ -134,10 +135,13 @@ trait LDN_Trait_Shapes_At_Carat {
             $price_min = isset($row['price_min']) ? $row['price_min'] : null;
             $price_max = isset($row['price_max']) ? $row['price_max'] : null;
             if (is_numeric($price_min) && is_numeric($price_max) && (float) $price_max > 0) {
-                $range_html = '<span class="ldn-shape-card__range">'
+                $range_exact = $currency . number_format((float) $price_min, 0)
+                    . ' - ' . $currency . number_format((float) $price_max, 0);
+                $range_html = '<span class="ldn-shape-card__range" title="'
+                    . esc_attr($range_exact) . '">'
                     . esc_html(
-                        $currency . number_format((float) $price_min, 0)
-                        . ' - ' . $currency . number_format((float) $price_max, 0)
+                        $this->format_compact_thousands($price_min, $currency)
+                        . ' - ' . $this->format_compact_thousands($price_max, $currency)
                     )
                     . '</span>';
             }
@@ -160,10 +164,10 @@ trait LDN_Trait_Shapes_At_Carat {
             $cards .= '<div class="' . esc_attr($card_class) . '">'
                 . '<a class="ldn-shape-card__main" href="' . esc_url($url) . '">'
                 . '<span class="ldn-shape-card__shape">' . esc_html($card_heading) . '</span>'
-                . $sample_html
-                . $range_html
                 . '<span class="ldn-shape-card__price">' . $price_cell . '</span>'
+                . $range_html
                 . $change_html
+                . $sample_html
                 . '</a>'
                 . $size_link_html
                 . '</div>';

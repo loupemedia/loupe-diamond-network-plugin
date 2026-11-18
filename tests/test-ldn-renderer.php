@@ -109,6 +109,7 @@ if (!function_exists('number_format_i18n')) {
     function number_format_i18n($n, $decimals = 0) { return number_format((float) $n, (int) $decimals); }
 }
 
+require_once __DIR__ . '/../includes/class-ldn-stat-specs.php';
 require_once __DIR__ . '/../includes/class-ldn-page-context.php';
 
 // --- Minimal collaborator stubs (constructor type hints) ---------------------
@@ -216,19 +217,25 @@ check(
     'Ringspo lab-grown type headline includes full country name'
 );
 
-// Test intent: Ringspo all-shapes H1 owns "by shape" + full country, not competing
-// with the type hub (no carat) or a shape page (named cut).
-// Would fail if: all-shapes still used "1 Carat Lab-Grown Diamond Prices (US)".
+// Test intent: Ringspo all-shapes H1 is "{carat} {type} Diamond in the {Country}",
+// not "Prices by Shape" and not the type-hub "{Country} … Prices" form.
+// Would fail if: all-shapes still used "… Prices by Shape - United States".
 $ringspo_all = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'lab-grown', '1');
 check(
     $renderer->headline($ringspo_all, false)
-        === '1 Carat Lab-Grown Diamond Prices by Shape - United States',
-    'Ringspo all-shapes headline is "{carat} {type} … by Shape - {Country}"'
+        === '1 Carat Lab-Grown Diamond in the United States',
+    'Ringspo all-shapes headline is "{carat} {type} Diamond in the {Country}"'
 );
 check(
     $renderer->headline($ringspo_all, true)
-        === '1 Carat Lab-Grown Diamond Prices by Shape - United States',
+        === '1 Carat Lab-Grown Diamond in the United States',
     'Ringspo all-shapes headline keeps full country regardless of include_country'
+);
+$ringspo_all_nat = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'natural', '1');
+check(
+    $renderer->headline($ringspo_all_nat, false)
+        === '1 Carat Natural Diamond in the United States',
+    'Ringspo all-shapes natural headline drops Prices by Shape'
 );
 $loupe_all = new LDN_Page_Context('modernjeweler', 'all-shapes', 'us', 'lab-grown', '1');
 check(
@@ -485,6 +492,17 @@ check(
     ) !== 1,
     'house table header fill is on cells only so the 12px radii are not hidden by a square tr'
 );
+check(
+    preg_match(
+        '/\.ldn-data-table\.ldn-cc-table\s+tbody\s+tr:nth-of-type\(even\)\s+th/s',
+        $shared_css
+    ) === 1
+    && preg_match(
+        '/\.ldn-cc-table\s+thead\s+th[\s\S]*?color:\s*var\(--ldn-text/s',
+        $shared_css
+    ) === 1,
+    'colour/clarity heatmap headers keep readable ink when both table classes are present'
+);
 $ringspo_css = file_get_contents(dirname(__DIR__) . '/assets/css/families/ringspo.css');
 check(
     strpos($ringspo_css, '.ldn-carat-price-table .ldn-table-card') === false
@@ -494,6 +512,17 @@ check(
 check(
     preg_match('/table:not\(\.ldn-size-matrix\):not\(\.ldn-data-table\)/', $ringspo_css) === 1,
     'Ringspo tint-band table chrome skips .ldn-data-table so the house card is not double-styled'
+);
+check(
+    preg_match(
+        '/\.ldn-chrome--ringspo-classic\.ldn-price-page:has\(\.ldn-hero-band\)\s*\{[^}]*padding-top:\s*0/s',
+        $ringspo_css
+    ) === 1,
+    'Ringspo hero-band pricing pages drop top padding so the green band meets the shell'
+);
+check(
+    preg_match('/body:has\(\.ldn-page-shell\)[^{]*\{[^}]*padding-top:\s*0\s*!important/s', $shared_css) === 1,
+    'LDN pages flush theme content top padding so no white strip sits above a coloured band'
 );
 check(
     strpos($carat_html, 'https://example.com/us/diamond-prices/natural/1-carat/') !== false,
@@ -643,6 +672,20 @@ check(
 check(
     strpos($shape_method_html, '{') === false,
     'no unfilled copy tokens survive into rendered output'
+);
+
+// Test intent: methodology date uses the same analysis_date paths as freshness.
+// Would fail if: shape summary only has time_series.analysis_date and copy reads "as at .".
+$time_series_method_html = $method_renderer->data_methodology_html($method_shape_ctx, array(
+    'summary' => array(
+        'time_series' => array('analysis_date' => '2026-08-20'),
+        'distribution'  => array('sample_size' => 88),
+    ),
+));
+check(
+    strpos($time_series_method_html, 'as at .') === false
+        && strpos($time_series_method_html, 'as at') !== false,
+    'methodology resolves analysis_date from time_series when the top-level key is absent'
 );
 
 // The pool must never be identifiable from the copy.
@@ -1354,6 +1397,29 @@ check(
 check(
     strpos($loupe_stats, '12-month change') === false,
     'stats_html no longer renders a separate change row (trend lives in copy/chart)'
+);
+
+// --- 11b. all-shapes stats label composite as Typical price -----------------
+// Test intent: L3 distribution.median_price is a weighted mean of per-shape
+// medians, so the stats block must not say "Median price".
+// Would fail if: stat_specs still hard-coded "Median price" for every level.
+$composite_stats = $loupe_renderer->stats_html($all_shapes_ctx, array(
+    'distribution' => array(
+        'median_price' => 3350,
+        'sample_size'  => 57000,
+    ),
+), 'USD');
+check(
+    strpos($composite_stats, 'Typical price') !== false,
+    'all-shapes stats_html labels the composite figure Typical price'
+);
+check(
+    strpos($composite_stats, 'Median price') === false,
+    'all-shapes stats_html does not label the composite figure Median price'
+);
+check(
+    strpos($loupe_renderer->stats_html($shape_ctx, $median_summary, 'USD'), 'Median (all qualities)') !== false,
+    'shape stats_html keeps the true-median label on L4 pages'
 );
 
 // --- 12. intro_html range wording + whole numbers (CP1) ---------------------
@@ -2435,9 +2501,9 @@ check(
     'shapes_at_carat dispatches to shape_cards when entitled on all-shapes'
 );
 
-// Test intent: all-shapes shape cards expose rank, sample size, range, and chart;
-// partial coverage surfaces above the grid on staging.
-// Would fail if: cards stayed price-only or the ranking table were still appended.
+// Test intent: all-shapes shape cards use "1: Name" (no hash, compact cut),
+// then median, range, change, sample; the exact range stays on title.
+// Would fail if: titles still used "#1:" or "Princess cut", or sample sat above price.
 $rich_hub_bag = array(
     'ranking' => array(
         'currency_symbol' => '$',
@@ -2453,13 +2519,13 @@ $rich_hub_bag = array(
                 'price_max' => 8900,
             ),
             array(
-                'shape' => 'Oval',
-                'rank' => 2,
-                'median_price' => 3200,
-                'price_change' => 1.2,
-                'sample_size' => 12000,
-                'price_min' => 1500,
-                'price_max' => 7200,
+                'shape' => 'Princess cut',
+                'rank' => 10,
+                'median_price' => 2430,
+                'price_change' => 0.4,
+                'sample_size' => 8000,
+                'price_min' => 1200,
+                'price_max' => 5100,
             ),
         ),
     ),
@@ -2476,9 +2542,50 @@ $rich_hub_bag = array(
     ),
 );
 $rich_cards = $ringspo_renderer->shape_cards_html($all_shapes_ctx, $rich_hub_bag);
-check(strpos($rich_cards, '#1: Round') !== false, 'shape_cards show rank on each card');
+check(strpos($rich_cards, '>1: Round<') !== false, 'shape_cards show rank without a hash');
+check(strpos($rich_cards, '#1:') === false, 'shape_cards do not prefix rank with #');
+check(strpos($rich_cards, '10: Princess') !== false, 'shape_cards compact Princess cut to Princess');
+check(strpos($rich_cards, 'Princess cut') === false, 'shape_cards drop trailing cut on card titles');
 check(strpos($rich_cards, '45,000 diamonds') !== false, 'shape_cards show sample size');
-check(strpos($rich_cards, '$1,800 - $8,900') !== false, 'shape_cards show price range');
+if (preg_match('/<a class="ldn-shape-card__main"[^>]*>(.*?)<\/a>/s', $rich_cards, $card_main)) {
+    $main = $card_main[1];
+    $pos_shape = strpos($main, 'ldn-shape-card__shape');
+    $pos_price = strpos($main, 'ldn-shape-card__price');
+    $pos_range = strpos($main, 'ldn-shape-card__range');
+    $pos_change = strpos($main, 'ldn-shape-card__change');
+    $pos_sample = strpos($main, 'ldn-shape-card__sample');
+    check(
+        $pos_shape !== false && $pos_price !== false && $pos_range !== false
+            && $pos_change !== false && $pos_sample !== false
+            && $pos_shape < $pos_price && $pos_price < $pos_range
+            && $pos_range < $pos_change && $pos_change < $pos_sample,
+        'shape_cards order is name, price, range, change, sample'
+    );
+} else {
+    check(false, 'shape_cards order is name, price, range, change, sample');
+}
+check(
+    $renderer->format_compact_thousands(27960, '$') === '$28k'
+        && $renderer->format_compact_thousands(144419, '$') === '$144k',
+    'compact thousands rounds to nearest thousand with a k suffix'
+);
+check(
+    $renderer->format_compact_thousands(500, '$') === '$500',
+    'compact thousands keeps amounts under 1000 in full dollars'
+);
+check(
+    $renderer->format_compact_thousands(1234567, 'A$') === 'A$1,235k',
+    'compact thousands keeps the supplied symbol and nearest-thousand millions'
+);
+check(strpos($rich_cards, '$2k - $9k') !== false, 'shape_cards show a nearest-thousand compact range');
+check(
+    strpos($rich_cards, 'title="$1,800 - $8,900"') !== false,
+    'shape_cards keep the exact range on title for hover'
+);
+check(
+    strpos($rich_cards, '>$1,800 - $8,900<') === false,
+    'shape_cards do not show the exact dollar range as visible text'
+);
 check(strpos($rich_cards, 'ldn-shapes-ranking-chart') !== false, 'shape_cards append the ranking bar chart');
 check(strpos($rich_cards, 'ldn-chart__title') !== false, 'shape_cards chart uses an H3 title from the Plotly payload');
 check(strpos($rich_cards, 'United States 1 Carat Natural Diamond Prices by Shape') !== false, 'shape_cards chart title comes from layout.title.text');
@@ -2492,8 +2599,13 @@ $all_shapes_summary = array(
 );
 $hero_all_stats = $ringspo_renderer->hero_stats_html($all_shapes_ctx, $all_shapes_summary, 'USD');
 check(
-    strpos($hero_all_stats, 'Typical price (median)') !== false,
-    'all-shapes hero stats label the composite figure as typical median price'
+    strpos($hero_all_stats, 'Typical price') !== false,
+    'all-shapes hero stats label the composite figure as typical price'
+);
+check(
+    strpos($hero_all_stats, 'Median price') === false
+        && strpos($hero_all_stats, 'Typical price (median)') === false,
+    'all-shapes hero stats do not claim a stone median for the composite figure'
 );
 check(
     strpos($hero_all_stats, 'Shapes compared') !== false && strpos($hero_all_stats, '2') !== false,
@@ -2904,6 +3016,14 @@ if (!class_exists('LDN_Config_Declared_Bands')) {
                 'section_bands'  => array('faq_static' => 'tint'),
             );
         }
+
+        public function get_bundle() {
+            return array('entitlements' => array('sites' => array(
+                'modernjeweler' => array('pages' => array(
+                    'diamond-type' => array('wp_widgets' => array('faq' => true)),
+                )),
+            )));
+        }
     }
 }
 if (!class_exists('LDN_Fetcher_Banded_Copy')) {
@@ -2936,6 +3056,19 @@ check(
 // Test intent: all-shapes FAQ ranking comes from copy.json and sits ahead of C1.
 // Would fail if: schema_faq_pairs / faq_static still read only static-content.json,
 // so "Round is the price ceiling" could outrank the live Marquise median.
+if (!class_exists('LDN_Config_Faq_On')) {
+    class LDN_Config_Faq_On extends LDN_Config {
+        public function get_bundle() {
+            return array('entitlements' => array('sites' => array(
+                'ringspo' => array('pages' => array(
+                    'all-shapes' => array('wp_widgets' => array('faq' => true)),
+                )),
+            )));
+        }
+    }
+}
+$faq_off_renderer = $renderer;
+$renderer = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Faq_On());
 $faq_rank_ctx = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'natural', '1');
 $faq_rank_bag = array(
     'static' => array(
@@ -2992,6 +3125,28 @@ check(
     count($schema_only_live) === 1 && $schema_only_live[0]['question'] === 'Q live',
     'FAQPage schema still emits when only copy.json FAQ is present'
 );
+
+// Test intent: FAQs are off until a site's entitlements turn the `faq` widget on
+// for that page level; the visible section and FAQPage schema switch together.
+// Would fail if: faq_static rendered (or schema pairs were returned) for a site
+// with no `faq` widget, so pages launched with FAQs nobody had approved.
+check(
+    $faq_off_renderer->render_section('faq_static', $faq_rank_ctx, $faq_rank_bag) === '',
+    'faq_static renders nothing when the faq widget is not entitled'
+);
+check(
+    $faq_off_renderer->schema_faq_pairs($faq_rank_ctx, $faq_rank_bag) === array(),
+    'FAQPage schema gets no pairs when the faq widget is not entitled'
+);
+check(
+    $renderer->render_section(
+        'faq_static',
+        new LDN_Page_Context('ringspo', 'shape', 'us', 'natural', '1', 'round'),
+        $faq_rank_bag
+    ) === '',
+    'faq widget on all-shapes does not switch FAQs on for shape pages'
+);
+$renderer = $faq_off_renderer;
 
 // --- price_calculator (CP 123) -----------------------------------------------
 // Test intent: the calculator answers only from the cell the reader's exact

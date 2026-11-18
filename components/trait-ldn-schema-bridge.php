@@ -35,14 +35,15 @@ trait LDN_Trait_SchemaBridge {
     }
 
     /**
-     * Priced product items for an ItemList (hybrid/recommendation schema types).
+     * Child page items for an ItemList (hybrid/recommendation schema types).
      *
-     * Only the all-shapes ranking yields a meaningful product list today; other
-     * levels return [] (the schema generator then omits ItemList).
+     * Only the all-shapes ranking yields a list today; other levels return []
+     * (the schema generator then omits ItemList). Each row is a shape price
+     * page, not a Product.
      *
      * @param LDN_Page_Context $ctx
      * @param array            $bag
-     * @return array<int, array{name:string, price:mixed, currency:string, url:string}>
+     * @return array<int, array{name:string, url:string}>
      */
     public function schema_items(LDN_Page_Context $ctx, array $bag) {
         if ($ctx->page_level !== 'all-shapes' || empty($bag['ranking']) || !is_array($bag['ranking'])) {
@@ -51,23 +52,21 @@ trait LDN_Trait_SchemaBridge {
         $rows = isset($bag['ranking']['shapes']) && is_array($bag['ranking']['shapes'])
             ? $bag['ranking']['shapes']
             : array();
-        $currency = $this->config->get_currency($ctx->site_id, $ctx->country_code);
 
         $items = array();
         foreach ($rows as $row) {
             if (!is_array($row) || empty($row['shape'])) {
                 continue;
             }
-            $price = isset($row['median_price']) ? $row['median_price']
-                : (isset($row['current_price']) ? $row['current_price'] : null);
             $url = !empty($row['page_url'])
                 ? (string) $row['page_url']
                 : $this->build_price_page_url($ctx, 'shape', array('shape' => (string) $row['shape']));
+            if ($url === '') {
+                continue;
+            }
             $items[] = array(
-                'name'     => ucwords((string) $row['shape']),
-                'price'    => $price,
-                'currency' => $currency !== null ? (string) $currency : 'USD',
-                'url'      => $url,
+                'name' => ucwords((string) $row['shape']),
+                'url'  => $url,
             );
         }
         return $items;

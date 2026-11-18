@@ -5,13 +5,19 @@
  * Test intent: Mega-menu panel geometry hugs the columns, then clamps to the
  * viewport and a custom property. Each panel hangs from the item that opened
  * it, never a fixed pixel width or a percentage offset tuned to item order.
- * Nested options are smaller than column headings. The stylesheet forks
- * neither the brand palette nor the mobile rules.
+ * Column headings (theme <a> or shell <span class="ldn-nav-column-title">)
+ * render as compact uppercase eyebrow labels (0.75rem, weight 600), while
+ * clickable nested options render at full readable size (0.875rem, weight 400).
+ * Columns with 8+ items (.ldn-nav-column--split) flow into two shrinkable
+ * subcolumns inside 2- and 3-column desktop panels and collapse to one column
+ * on narrow viewports. The stylesheet forks neither the brand palette nor the
+ * mobile rules.
  *
  * Would fail if: the stylesheet reproduced `width: 1140px; left: -34% !important`,
  * mega items were `position: static` so Diamond Prices opened under the logo,
- * a two-column "Sell Jewelry" panel stretched as wide as Learn, or option links
- * inherited the 15px bar size and read larger than their subheads.
+ * a two-column "Sell Jewelry" panel stretched as wide as Learn, option links
+ * shrunk below 0.875rem or inherited heading weight, .ldn-nav-column-title had
+ * no eyebrow rule, or .ldn-nav-column--split failed to collapse on narrow widths.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-nav-css.php
  */
@@ -263,18 +269,26 @@ check(
 );
 
 /*
- * Test intent: column headings read as labels, not as another option in the list,
- * and a pointer user can see which link they are over.
- * Would fail if: font-weight 600 sat on the heading <li> (it cascades into every
- * nested option) or panel links had no :hover.
+ * Test intent: column headings (both theme `> a` and shell `> .ldn-nav-column-title`)
+ * read as compact uppercase eyebrow labels (0.75rem, weight 600), clickable nested
+ * options read at full readable UI size (0.875rem, weight 400) with a hover pill
+ * highlight, and 8+ item columns split into 2 subcolumns inside 2/3-col panels
+ * while collapsing on narrow screens.
+ * Would fail if: font-weight 600 sat on the heading <li> (cascading into every
+ * nested option), shell <span class="ldn-nav-column-title"> missed the heading
+ * rule, option links shrunk back to 12px, or split columns stayed 2-wide on phones.
  */
 check(
     preg_match(
-        '/\.ldn-nav-column-heading\s*>\s*a[^{]*\{[^}]*font-weight:\s*600/s',
+        '/\.ldn-nav-column-heading\s*>\s*:is\(a,\s*\.ldn-nav-column-title\)[^{]*\{[^}]*font-weight:\s*600/s',
         $code
     ) === 1
         && preg_match(
-            '/\.ldn-nav-column-heading\s*>\s*a[^{]*\{[^}]*font-size:\s*0\.875rem/s',
+            '/\.ldn-nav-column-heading\s*>\s*:is\(a,\s*\.ldn-nav-column-title\)[^{]*\{[^}]*font-size:\s*0\.75rem/s',
+            $code
+        ) === 1
+        && preg_match(
+            '/\.ldn-nav-column-heading\s*>\s*:is\(a,\s*\.ldn-nav-column-title\)[^{]*\{[^}]*text-transform:\s*uppercase/s',
             $code
         ) === 1
         && preg_match(
@@ -282,7 +296,7 @@ check(
             $code
         ) === 1
         && preg_match(
-            '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*a[^{]*\{[^}]*font-size:\s*0\.75rem/s',
+            '/\.ldn-nav-column-heading\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)\s*a[^{]*\{[^}]*font-size:\s*0\.875rem/s',
             $code
         ) === 1
         && !preg_match(
@@ -297,8 +311,17 @@ check(
             '/\.ldn-nav-column-heading\s*\{[^}]*font-weight:\s*600/s',
             $code
         ),
-    'heading weight and size sit on the heading link only; nested options are '
-        . '0.75rem/400 and width max-content so a column is as wide as its longest label'
+    'heading weight/uppercase eyebrow styles sit on > :is(a, .ldn-nav-column-title) only; '
+        . 'nested options are 0.875rem/400 and width max-content'
+);
+
+check(
+    strpos($code, 'ldn-nav-column--split') !== false
+        && preg_match(
+            '/ldn-nav-column--split\s*>\s*:is\(\.sub-menu,\s*\.ldn-nav-sub\)[^{]*\{[^}]*repeat\(2,\s*minmax\(0,\s*max-content\)\)/s',
+            $code
+        ) === 1,
+    '8+ item columns (.ldn-nav-column--split) flow into two shrinkable subcolumns on desktop'
 );
 
 check(

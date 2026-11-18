@@ -210,6 +210,7 @@ final class LDN_Config {
             'artefacts'        => array(),
             'network_consumer' => array(),
             'ad_slots'         => array(),
+            'indexnow_keys'    => array(),
         );
     }
 
@@ -266,6 +267,43 @@ final class LDN_Config {
             return trim((string) $site['n']);
         }
         return '';
+    }
+
+    /**
+     * IndexNow verification keys from config/indexnow_keys.yaml (domain => key).
+     *
+     * @return array<string, string>
+     */
+    public function get_indexnow_keys() {
+        $bundle = $this->get_bundle();
+        $section = isset($bundle['indexnow_keys']) && is_array($bundle['indexnow_keys'])
+            ? $bundle['indexnow_keys']
+            : array();
+        $keys = isset($section['keys']) && is_array($section['keys']) ? $section['keys'] : array();
+        $out = array();
+        foreach ($keys as $domain => $key) {
+            if (!is_string($domain) || !is_string($key) || $key === '') {
+                continue;
+            }
+            $out[$domain] = $key;
+        }
+        return $out;
+    }
+
+    /**
+     * IndexNow verification key for a site_id (via its configured domain).
+     *
+     * @param string $site_id
+     * @return string|null Null when the site or domain has no key.
+     */
+    public function indexnow_key_for_site($site_id) {
+        $site = $this->get_site($site_id);
+        if (!is_array($site) || empty($site['domain'])) {
+            return null;
+        }
+        $domain = (string) $site['domain'];
+        $keys = $this->get_indexnow_keys();
+        return isset($keys[$domain]) ? (string) $keys[$domain] : null;
     }
 
     /**

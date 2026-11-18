@@ -4,13 +4,20 @@
  *
  * Test intent: when site_shell.renderer is ldn, the plugin emits header and
  * footer with ldn-shell-* classes and no theme class names; a theme market
- * emits neither. Country flyout links have a hover fill, and the panel uses
- * two columns once eight live markets paint.
+ * emits neither. Desktop mega-menu column headings render as non-anchor
+ * <span class="ldn-nav-column-title"> labels (not duplicate <a href> links),
+ * the mobile drawer uses the collapsed narrow item set within mobile_item_budget
+ * with no nested disclosure button on short group headings, and the top-level
+ * primary item matching the current request path carries ldn-nav-current.
+ * Country flyout links have a hover fill, and the panel uses two columns once
+ * eight live markets paint.
  *
  * Would fail if: the US header still used main-navigation / menu-item-has-children,
- * so GeneratePress doubled the chevrons, or Japan received the US shell, or
- * Select Country items had no hover rule, or nine countries still stacked in one
- * 12rem column.
+ * so GeneratePress doubled the chevrons; desktop column headings emitted <a href>
+ * and hijacked first-link anchor text; header_html() copied the full desktop tree
+ * into the mobile drawer; Japan received the US shell; Select Country items had no
+ * hover rule; nine countries stacked in one 12rem column; or viewing a size/editorial
+ * page failed to mark its owning top-level nav branch with ldn-nav-current.
  *
  * Run: php loupe-diamond-network/tests/test-ldn-nav-shell.php
  */
@@ -129,6 +136,89 @@ check(
     'the drawer toggle exposes aria-expanded'
 );
 
+// Extract desktop primary list vs mobile drawer markup for targeted SEO & mobile checks.
+$desktop_ul = '';
+if (preg_match('#<ul class="ldn-nav-list ldn-shell-primary__list">(.*)</ul>\s*<div class="ldn-shell-drawer"#s', $header, $m_desk)) {
+    $desktop_ul = $m_desk[1];
+}
+$drawer_div = '';
+if (preg_match('#<div class="ldn-shell-drawer"[^>]*>(.*)</div>\s*</nav>#s', $header, $m_draw)) {
+    $drawer_div = $m_draw[1];
+}
+
+check(
+    $desktop_ul !== '' && $drawer_div !== '',
+    'desktop primary list and mobile drawer regions can both be isolated'
+);
+check(
+    strpos($desktop_ul, '<span class="ldn-nav-column-title">Prices by Carat</span>') !== false
+        && strpos($desktop_ul, '<span class="ldn-nav-column-title">Sizes by Shape</span>') !== false
+        && !preg_match('#<li[^>]*ldn-nav-column-heading[^>]*>\s*<a\s#', $desktop_ul),
+    'desktop column headings render as <span class="ldn-nav-column-title">, never duplicate <a href> links'
+);
+check(
+    strpos($desktop_ul, 'ldn-nav-column--split') !== false,
+    'columns with 8+ items carry ldn-nav-column--split on desktop so 2/3-col panels can flow two subcolumns'
+);
+
+$desktop_link_count = substr_count($desktop_ul, '<a href=');
+$drawer_link_count = substr_count($drawer_div, '<a href=');
+check(
+    $drawer_link_count > 0 && $drawer_link_count < $desktop_link_count,
+    sprintf(
+        'mobile drawer uses the collapsed narrow set + utility (%d links < %d desktop primary links)',
+        $drawer_link_count,
+        $desktop_link_count
+    )
+);
+check(
+    strpos($drawer_div, 'ldn-nav-narrow-hub') !== false
+        && preg_match('#<li[^>]*ldn-nav-narrow-hub[^>]*>\s*<a href=#', $drawer_div) === 1,
+    'collapsed fan-out columns in the mobile drawer remain real hub <a href> links'
+);
+check(
+    !preg_match('#<li[^>]*ldn-nav-column-heading[^>]*>\s*(?:<a[^>]*>[^<]*</a>|<span[^>]*>[^<]*</span>)\s*<button[^>]*ldn-shell-disclose#s', $drawer_div),
+    'column headings in the mobile drawer do not emit a nested + disclosure button (tools stay two-tap reachable)'
+);
+check(
+    preg_match('#<li class="[^"]*ldn-nav-current[^"]*">\s*<a href="[^"]*/us/diamond-prices/" aria-current="page">Diamond Prices</a>#', $desktop_ul) === 1,
+    'exact match on /us/diamond-prices/ marks Diamond Prices with ldn-nav-current and aria-current="page"'
+);
+
+$GLOBALS['__ldn_nav_path'] = '/diamond-size/round/1-carat/';
+$nav_size_leaf = new LDN_Nav('ringspo', $config, $fetcher, $rollout);
+$header_size_leaf = $nav_size_leaf->header_html();
+check(
+    preg_match('#<li class="[^"]*ldn-nav-current[^"]*">\s*<a href="[^"]*/diamond-size/">Diamond Sizes</a>#', $header_size_leaf) === 1
+        && !preg_match('#<li class="[^"]*ldn-nav-current[^"]*">\s*<a href="[^"]*/us/diamond-prices/"#', $header_size_leaf),
+    'a deep size leaf (/diamond-size/round/1-carat/) highlights the Diamond Sizes branch and not Diamond Prices'
+);
+
+$GLOBALS['__ldn_nav_path'] = '/diamond-cut/';
+$nav_editorial_leaf = new LDN_Nav('ringspo', $config, $fetcher, $rollout);
+$header_editorial_leaf = $nav_editorial_leaf->header_html();
+check(
+    preg_match('#<li class="[^"]*ldn-nav-current[^"]*">\s*<a href="[^"]*/diamond-engagement-rings/">Learn</a>#', $header_editorial_leaf) === 1
+        && strpos($header_editorial_leaf, 'href="http://example.org/diamond-cut/" aria-current="page"') !== false
+        || (
+            preg_match('#<li class="[^"]*ldn-nav-current[^"]*">\s*<a href="[^"]*/diamond-engagement-rings/">Learn</a>#', $header_editorial_leaf) === 1
+            && preg_match('#<a href="[^"]*/diamond-cut/" aria-current="page">Diamond Cut</a>#', $header_editorial_leaf) === 1
+        ),
+    'an editorial child post (/diamond-cut/) marks its item aria-current="page" and bubbles ldn-nav-current to Learn'
+);
+
+$prev_site_base = isset($GLOBALS['ldn_preview_site_base']) ? $GLOBALS['ldn_preview_site_base'] : '';
+$GLOBALS['ldn_preview_site_base'] = 'http://localhost:8080/s/ringspo';
+$GLOBALS['__ldn_nav_path'] = '/diamond-size/round/1-carat/';
+$nav_preview_mount = new LDN_Nav('ringspo', $config, $fetcher, $rollout);
+$header_preview_mount = $nav_preview_mount->header_html();
+$GLOBALS['ldn_preview_site_base'] = $prev_site_base;
+check(
+    preg_match('#<li class="[^"]*ldn-nav-current[^"]*">\s*<a href="[^"]*/s/ringspo/diamond-size/">Diamond Sizes</a>#', $header_preview_mount) === 1,
+    'active-branch detection strips a non-country preview home_url mount (/s/ringspo) so LDN preview shows the active underline'
+);
+$GLOBALS['__ldn_nav_path'] = '/us/diamond-prices/';
+
 $css = file_get_contents(LDN_PLUGIN_DIR . 'assets/css/nav-chrome.css');
 $code = preg_replace('#/\*.*?\*/#s', '', $css);
 check(
@@ -171,6 +261,20 @@ check(
     strpos($code, 'ldn-nav-countries-2-col') !== false
         && strpos($code, 'repeat(2, minmax(0, 1fr))') !== false,
     'the country flyout can paint two columns that shrink'
+);
+check(
+    preg_match('/\.ldn-shell-header\s*\{[^}]*border-bottom:\s*1px solid var\(--ldn-shell-rule\)/s', $code) === 1
+        && preg_match('/\.ldn-shell-primary\s*\{[^}]*align-self:\s*stretch/s', $code) === 1,
+    'the header carries a bottom rule and stretches the primary nav to full header height so mega panels drop flush'
+);
+check(
+    strpos($code, '.ldn-shell-primary__list > .ldn-nav-current > a') !== false
+        && strpos($code, '.ldn-shell-primary__list > .ldn-nav-has-children > a::after') !== false,
+    'top-level primary items show both an active-branch indicator and a dropdown chevron'
+);
+check(
+    strpos($code, '.ldn-shell-drawer .ldn-nav-column-heading > .ldn-nav-sub') !== false,
+    'short non-collapsed group headings (Tools) stay expanded inside the mobile drawer'
 );
 check(
     strpos($header, 'ldn-nav-countries-2-col') !== false,

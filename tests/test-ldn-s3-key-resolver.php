@@ -79,4 +79,15 @@ check(
 $og = $resolver->basename_for('og_preview_png', 'ringspo');
 check($og === 'og-preview.png', 'fixed basenames without tokens still resolve');
 
+$size_ctx = new LDN_Page_Context('ringspo', 'size-individual', 'us', null, '1', 'round', 'size');
+$size_og_key = $resolver->resolve_s3_key('size_og_preview_png', $size_ctx);
+check(
+    is_string($size_og_key) && substr($size_og_key, -strlen('size-og-preview.png')) === 'size-og-preview.png',
+    'size individual og preview resolves under the size prefix'
+);
+check(
+    strpos((string) $size_og_key, 'size/round/1-carat/') !== false,
+    'size og preview key uses shape-first folder layout'
+);
+
 fwrite(STDOUT, "OK {$checks} checks\n");

@@ -455,10 +455,11 @@
 	overflow: visible;
 }
 
-/* Matrix table: overflow:auto + max-height (shared.css) so the carat header
-   stays sticky while scrolling shapes; corner radii on header/footer cells. */
+/* Matrix table: full height (no max-height), sideways scroll only. Corner
+   radii on header/footer cells. */
 .ldn-chrome--ringspo-classic .ldn-size-matrix-scroll {
-	overflow: auto;
+	overflow-x: auto;
+	overflow-y: visible;
 	-webkit-overflow-scrolling: touch;
 	max-width: 100%;
 	border: none;
@@ -521,6 +522,12 @@
 
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-breadcrumbs {
 	text-align: left;
+}
+
+/* Hero-band pricing pages: the green band meets the shell; `--ldn-padding`
+   on `.ldn-price-page` would otherwise read as a white gutter above it. */
+.ldn-chrome--ringspo-classic.ldn-price-page:has(.ldn-hero-band) {
+	padding-top: 0;
 }
 
 .ldn-chrome--ringspo-classic.ldn-size-page,

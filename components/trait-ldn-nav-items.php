@@ -308,6 +308,9 @@ trait LDN_Trait_Nav_Items {
                 $first = $children[0];
                 $heading = $this->nav_item($heading_label, $first->url, $parent_id, array());
                 $heading->classes[] = 'ldn-nav-column-heading';
+                if (count($children) >= self::COLUMN_SPLIT_MIN) {
+                    $heading->classes[] = 'ldn-nav-column--split';
+                }
                 $items[] = $heading;
                 foreach ($children as $child) {
                     $child->menu_item_parent = (string) $heading->ID;

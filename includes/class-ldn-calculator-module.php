@@ -47,6 +47,7 @@ final class LDN_Calculator_Module {
         self::$dispatcher->register();
 
         LDN_Calculator_Rest::register($plugin);
+        LDN_Facet_Intelligence_Rest::register($plugin);
     }
 
     /**

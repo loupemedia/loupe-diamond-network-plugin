@@ -12,12 +12,14 @@
  *   1. schema_type drives the primary node set:
  *        market_data          → Dataset (no Article)
  *        market_data_article  → Dataset + Article (only when 'article' feature on)
- *        hybrid/recommendation→ Dataset + ItemList (only when items present)
+ *        hybrid/recommendation→ Dataset + ItemList of WebPages (not Product/Offer)
  *        educational_content  → Article (when 'article' on) instead of Dataset
  *   2. FAQPage is emitted ONLY when 'faq' is in schema_features AND pairs exist.
  *   3. BreadcrumbList is emitted ONLY with >= 2 crumbs.
  *   4. Dataset carries dateModified + spatialCoverage when date + country known,
- *      and a price PropertyValue carries the ISO currency in unitText.
+ *      license, measurementTechnique, and a price PropertyValue with unitCode.
+ *      WebPage.isPartOf references WebSite; WebPage.mainEntity references Dataset.
+ *      Headline measure is Median price (not Current price / trimmed mean).
  *   5. variableMeasured resolves nested (C5) and legacy-flat summary shapes.
  *   6. Size-page helpers: keywords_for() is module-scoped (no price fallback),
  *      analysis_date reads generated_date, page_item_list_node is WebPage-only.
@@ -46,6 +48,7 @@ if (!function_exists('__')) {
     function __($s, $d = null) { return $s; }
 }
 
+require_once __DIR__ . '/../includes/class-ldn-stat-specs.php';
 require_once __DIR__ . '/../includes/class-ldn-page-context.php';
 require_once __DIR__ . '/../includes/class-ldn-schema.php';
 
@@ -181,15 +184,23 @@ check(
 );
 check(
     strpos($all_desc, '949') !== false && strpos($all_desc, '10,370') !== false,
-    'all-shapes Dataset description includes weighted median and sample size'
+    'all-shapes Dataset description includes typical price and sample size'
+);
+check(
+    strpos($all_desc, 'Typical price') !== false,
+    'all-shapes Dataset description names the composite figure Typical price'
+);
+check(
+    stripos($all_desc, 'Weighted median') === false && stripos($all_desc, 'Median price') === false,
+    'all-shapes Dataset description does not claim a stone median'
 );
 
-// Test intent: Ringspo all-shapes Dataset.name / headline owns "by Shape" + country.
-// Would fail if: schema headline still emitted "1 Carat Lab-Grown Diamond Prices (US)".
+// Test intent: Ringspo all-shapes Dataset.name matches the page H1.
+// Would fail if: schema headline still said "Prices by Shape - United States".
 check(
     $schema->headline($all_ctx, $site)
-        === '1 Carat Lab-Grown Diamond Prices by Shape - United States',
-    'Ringspo all-shapes schema headline is "{carat} {type} … by Shape - {Country}"'
+        === '1 Carat Lab-Grown Diamond in the United States',
+    'Ringspo all-shapes schema headline is "{carat} {type} Diamond in the {Country}"'
 );
 
 // Test intent: all-shapes keywords differentiate from type (no bare type prices)
@@ -223,6 +234,23 @@ check(
     'all-shapes keywords omit named-shape phrases that belong on shape pages'
 );
 
+// Test intent: all-shapes JSON-LD cites Typical price, not Median price, for the
+// composite headline measure. Would fail if: measured_specs ignored page level.
+$all_measured = isset($all_dataset['variableMeasured']) ? $all_dataset['variableMeasured'] : array();
+$all_typical = null;
+$all_names = array();
+foreach ($all_measured as $pv) {
+    $all_names[] = $pv['name'] ?? '';
+    if (($pv['name'] ?? '') === 'Typical price') {
+        $all_typical = $pv;
+    }
+}
+check($all_typical !== null, 'all-shapes variableMeasured must include Typical price');
+check(!in_array('Median price', $all_names, true),
+    'all-shapes variableMeasured must not include Median price for the composite figure');
+check(isset($all_typical['value']) && $all_typical['value'] === 949,
+    'all-shapes Typical price value resolves from the composite summary field');
+
 // === Rule 4: Dataset enrichment ============================================
 check(isset($dataset['dateModified']) && $dataset['dateModified'] === '2026-06-22',
     'Dataset.dateModified must be the analysis date (freshness signal)');
@@ -232,22 +260,46 @@ check(isset($dataset['spatialCoverage']['name']) && $dataset['spatialCoverage'][
     'Dataset.spatialCoverage must use the country full name');
 check(isset($dataset['url']) && $dataset['url'] === $canonical, 'Dataset.url must be the canonical page URL');
 check(isset($dataset['publisher']['@id']), 'Dataset.publisher must reference the Organization @id');
-check(isset($dataset['isPartOf']['@id']) && strpos($dataset['isPartOf']['@id'], '#website') !== false,
-    'Dataset.isPartOf must reference the site WebSite @id');
+check(!isset($dataset['isPartOf']),
+    'Dataset must not use isPartOf → WebSite (that relation belongs on WebPage)');
 check(strpos((string) $dataset['name'], ' - Local Market Pricing') !== false,
     'Dataset.name must include the profile suffix');
+check(isset($dataset['license']) && $dataset['license'] === LDN_Schema::LICENSE_URL,
+    'Dataset.license must be the shared CC BY-NC URL');
+check(
+    isset($dataset['measurementTechnique'])
+        && $dataset['measurementTechnique'] === LDN_Schema::MEASUREMENT_TECHNIQUE,
+    'Dataset.measurementTechnique must declare the price-index method'
+);
 
-// price PropertyValue carries ISO unitText
+$webpage = node_of($g, 'WebPage');
+check($webpage !== null, 'graph must include a WebPage node');
+check(isset($webpage['isPartOf']['@id']) && strpos($webpage['isPartOf']['@id'], '#website') !== false,
+    'WebPage.isPartOf must reference the site WebSite @id');
+check(
+    isset($webpage['mainEntity']['@id']) && $webpage['mainEntity']['@id'] === $canonical . '#dataset',
+    'WebPage.mainEntity must point at the Dataset @id'
+);
+
+// Test intent: cited headline is Median price (p50), with ISO unitCode, not the
+// trimmed-mean current_price series. Would fail if Current price were still emitted
+// or Median read time_series.current_price (3730 vs 3700 in this fixture).
 $measured = isset($dataset['variableMeasured']) ? $dataset['variableMeasured'] : array();
-$current = null;
+$median = null;
+$names = array();
 foreach ($measured as $pv) {
-    if (($pv['name'] ?? '') === 'Current price') { $current = $pv; }
+    $names[] = $pv['name'] ?? '';
+    if (($pv['name'] ?? '') === 'Median price') { $median = $pv; }
 }
-check($current !== null, 'variableMeasured must include Current price');
-check(isset($current['unitText']) && $current['unitText'] === 'USD',
-    'Current price PropertyValue must carry ISO currency in unitText');
-check(isset($current['value']) && $current['value'] === 3730,
-    'Current price value must come from time_series.current_price (nested)');
+check($median !== null, 'variableMeasured must include Median price');
+check(!in_array('Current price', $names, true),
+    'variableMeasured must not include Current price (trimmed mean)');
+check(isset($median['unitCode']) && $median['unitCode'] === 'USD',
+    'Median price PropertyValue must carry ISO currency in unitCode');
+check(!isset($median['unitText']),
+    'Median price PropertyValue must not also carry unitText');
+check(isset($median['value']) && $median['value'] === 3700,
+    'Median price value must come from distribution.median_price, not current_price');
 
 // === Rule 2: FAQ gating ====================================================
 check(node_of($g, 'FAQPage') !== null, "FAQPage must emit when 'faq' feature on and pairs present");
@@ -278,18 +330,24 @@ $profile_article_off = array('schema_type' => 'market_data_article', 'schema_fea
 $g_art_off = $schema->build_graph($ctx, $summary_nested, $profile_article_off, $site, 'USD', $canonical, $breadcrumb, array());
 check(node_of($g_art_off, 'Article') === null, "Article must NOT emit when 'article' feature off");
 
-// === Rule 1: hybrid → Dataset + ItemList (only with items) ================
+// === Rule 1: hybrid → Dataset + ItemList of WebPages (not Product/Offer) ===
+// Test intent: all-shapes ranking rows are child price pages, not buyable SKUs.
+// Would fail if: item_list_node still emitted Product + Offer.
 $profile_hybrid = array('schema_type' => 'hybrid', 'schema_features' => array());
 $items = array(
-    array('name' => 'Round', 'price' => 3700, 'currency' => 'USD', 'url' => $canonical),
-    array('name' => 'Oval', 'price' => 3200, 'currency' => 'USD', 'url' => $canonical),
+    array('name' => 'Round', 'url' => $canonical . 'round/'),
+    array('name' => 'Oval', 'url' => $canonical . 'oval/'),
 );
 $g_hy = $schema->build_graph($ctx, $summary_nested, $profile_hybrid, $site, 'USD', $canonical, $breadcrumb, array(), $items);
 $list = node_of($g_hy, 'ItemList');
 check($list !== null, 'hybrid must emit an ItemList when items are present');
 check(isset($list['numberOfItems']) && $list['numberOfItems'] === 2, 'ItemList must count its items');
-check(isset($list['itemListElement'][0]['item']['offers']['priceCurrency']),
-    'ItemList products must carry an Offer with priceCurrency');
+$hy_item = isset($list['itemListElement'][0]['item']) && is_array($list['itemListElement'][0]['item'])
+    ? $list['itemListElement'][0]['item']
+    : array();
+check(($hy_item['@type'] ?? '') === 'WebPage', 'hybrid ItemList entries are WebPages, not Products');
+check(!isset($hy_item['offers']), 'hybrid ItemList must not attach Offer');
+check(($hy_item['url'] ?? '') === $canonical . 'round/', 'hybrid ItemList WebPage keeps the child URL');
 
 $g_hy_noitems = $schema->build_graph($ctx, $summary_nested, $profile_hybrid, $site, 'USD', $canonical, $breadcrumb, array(), array());
 check(node_of($g_hy_noitems, 'ItemList') === null, 'hybrid must NOT emit an empty ItemList');
@@ -310,6 +368,28 @@ foreach (($dataset_flat['variableMeasured'] ?? array()) as $pv) {
     if (($pv['name'] ?? '') === 'Diamonds analyzed' && ($pv['value'] ?? null) === 30155) { $has_sample = true; }
 }
 check($has_sample, 'flat payload: Diamonds analyzed must resolve from num_diamonds');
+
+// Test intent: currency PropertyValue values are whole dollars (same as on-page
+// format_stat). Would fail if value was left as a raw float (144865.88).
+$summary_float = $summary_nested;
+$summary_float['distribution']['price_range']['max'] = 144865.88;
+$g_round = $schema->build_graph($ctx, $summary_float, $profile_md, $site, 'USD', $canonical, $breadcrumb, array());
+$high = null;
+foreach ((node_of($g_round, 'Dataset')['variableMeasured'] ?? array()) as $pv) {
+    if (($pv['name'] ?? '') === 'Highest price') { $high = $pv; }
+}
+check($high !== null && $high['value'] === 144866,
+    'Highest price must round to the nearest whole dollar');
+
+// Test intent: educational Article pages still get a WebPage whose mainEntity
+// is the Article, not a Dataset. Would fail if WebPage always pointed at #dataset.
+$g_edu_page = $schema->build_graph($ctx, $summary_nested, $profile_edu, $site, 'USD', $canonical, $breadcrumb, array());
+$edu_page = node_of($g_edu_page, 'WebPage');
+check($edu_page !== null, 'educational_content still emits a WebPage');
+check(
+    isset($edu_page['mainEntity']['@id']) && strpos($edu_page['mainEntity']['@id'], '#article') !== false,
+    'educational WebPage.mainEntity points at Article when there is no Dataset'
+);
 
 // === Renders valid JSON =====================================================
 $html = $schema->render($ctx, $summary_nested, $profile_md, $site, 'USD', $canonical, $breadcrumb, $faq);
@@ -358,6 +438,45 @@ check(
     'page_item_list_node must not attach Offer'
 );
 check($schema->page_item_list_node('Empty', array(), '') === null, 'page_item_list_node is null when there are no pages');
+
+// Test intent: tool pages (calculator) emit WebPage.mainEntity → WebApplication
+// with a Google category, a free Offer, slashed @id, and breadcrumbs. No Dataset.
+// Would fail if: render_webapp still emitted only Organization + WebApplication,
+// or @id used calculator#webapp without the trailing slash.
+$calc_ctx = new LDN_Page_Context('ringspo', 'calculator', 'us', null, null, null, 'calculator');
+$calc_html = $schema->render_webapp(
+    $calc_ctx,
+    $site,
+    'Diamond Price Calculator',
+    'Free diamond price calculator.',
+    'https://modernjeweler.com/us/diamond-prices/calculator',
+    'FinanceApplication',
+    array(
+        array('name' => 'Modern Jeweler', 'url' => 'https://modernjeweler.com/'),
+        array('name' => 'Diamond Prices', 'url' => 'https://modernjeweler.com/us/diamond-prices/'),
+        array('name' => 'Calculator', 'url' => 'https://modernjeweler.com/us/diamond-prices/calculator/'),
+    )
+);
+$calc_json = trim(str_replace(array('<script type="application/ld+json">', '</script>'), '', $calc_html));
+$calc_doc = json_decode($calc_json, true);
+$calc_graph = (isset($calc_doc['@graph']) && is_array($calc_doc['@graph'])) ? $calc_doc['@graph'] : array();
+$calc_page = node_of($calc_graph, 'WebPage');
+$calc_app = node_of($calc_graph, 'WebApplication');
+check($calc_page !== null && $calc_app !== null, 'calculator render_webapp emits WebPage and WebApplication');
+check(node_of($calc_graph, 'Dataset') === null, 'calculator render_webapp does not emit Dataset');
+check(
+    isset($calc_app['@id']) && $calc_app['@id'] === 'https://modernjeweler.com/us/diamond-prices/calculator/#webapp',
+    'calculator WebApplication @id uses the slashed canonical'
+);
+check(
+    isset($calc_page['mainEntity']['@id']) && $calc_page['mainEntity']['@id'] === $calc_app['@id'],
+    'calculator WebPage.mainEntity points at WebApplication'
+);
+check(
+    isset($calc_app['offers']['price']) && (int) $calc_app['offers']['price'] === 0,
+    'calculator WebApplication offers a free price'
+);
+check(node_of($calc_graph, 'BreadcrumbList') !== null, 'calculator render_webapp emits BreadcrumbList');
 
 // --- Summary ----------------------------------------------------------------
 $total = $GLOBALS['__tests'];

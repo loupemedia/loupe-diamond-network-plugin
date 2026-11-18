@@ -483,18 +483,17 @@ check(in_array('ldn-editorial-ring-guide', $bridge->body_class(array()), true),
     'ring-guide pages get a body class that scopes the inject stylesheet');
 unset($_SERVER['REQUEST_URI']);
 
-// Colour bands are GenerateBlocks. Would fail if: editorial CSS 50vw-broke
-// `.gb-container` and split the teal behind the Alon card (as 0.39.5–0.42.10 did).
+// Colour bands are GenerateBlocks. Would fail if: breakout targets every
+// `.gb-container` (Alon card full-bleeds) or is removed (purple/teal stop at 800px).
 $band_css_path = dirname(__DIR__) . '/assets/css/editorial-ring-guide.css';
 check(is_readable($band_css_path), 'editorial ring-guide stylesheet exists');
 $band_css = preg_replace('#/\*.*?\*/#s', '', (string) file_get_contents($band_css_path));
 check(
-    strpos($band_css, '50vw') === false,
-    'editorial CSS does not full-bleed GenerateBlocks containers'
-);
-check(
-    strpos($band_css, '.gb-container') === false,
-    'editorial CSS does not select GenerateBlocks colour bands'
+    strpos($band_css, 'h3.gb-headline-text') !== false
+        && strpos($band_css, 'has-white-color') !== false
+        && strpos($band_css, 'calc(50% - 50vw)') !== false
+        && strpos($band_css, '.entry-content .gb-container:has(') !== false,
+    'editorial CSS full-bleeds band containers with a direct white title, not the Alon inset card'
 );
 check(
     preg_match('/\.ldn-ring-guide__figure\s*\{[^}]*overflow:\s*hidden/', $band_css) === 1,

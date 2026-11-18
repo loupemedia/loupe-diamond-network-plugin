@@ -1,6 +1,6 @@
 {
-  "version": "12bb064",
-  "generated_at": "2026-08-26T12:10:04.483682+00:00",
+  "version": "f477f70f",
+  "generated_at": "2026-11-17T06:08:28.757762+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -1558,7 +1558,7 @@
     },
     "5caratdiamondring": {
       "site_id": "5caratdiamondring",
-      "domain": "5caratdiamondring.com",
+      "domain": "5caratdiamond.com",
       "brand_name": "5 Carat Diamond Ring",
       "site_type": "carat-multisite",
       "template_folder": "carat-sites",
@@ -3143,7 +3143,7 @@
           "site_id": "4caratdiamondring"
         },
         {
-          "domain": "5caratdiamondring.com",
+          "domain": "5caratdiamond.com",
           "carat_weight": 5.0,
           "site_id": "5caratdiamondring"
         },
@@ -3955,9 +3955,15 @@
           "sparklescore.net"
         ]
       },
+      "jewellery_module": {
+        "rollout_countries": [
+          "us"
+        ]
+      },
       "s3": {
         "bucket": "diamondadvisors",
-        "graph_prefix": "{country}/{diamond_type}/{carat}-carat/{shape}/"
+        "graph_prefix": "{country}/{diamond_type}/{carat}-carat/{shape}/",
+        "jewellery_prefix": "jewellery/{country}/{diamond_type}/{jewelry_path}/"
       }
     },
     "diamondchart": {
@@ -5164,8 +5170,8 @@
     },
     "jewellerysouthafrica": {
       "site_id": "jewellerysouthafrica",
-      "domain": "jewellerysouthafrica.co.za",
-      "brand_name": "Jewellery South Africa",
+      "domain": "thejeweller.co.za",
+      "brand_name": "The Jeweller: South Africa",
       "site_type": "loupe",
       "template_folder": "loupe",
       "content_profile": "config/content_profiles/loupe_sites.yaml",
@@ -5675,10 +5681,16 @@
         "rollout_country": "us",
         "price_internal_links": true
       },
+      "jewellery_module": {
+        "rollout_countries": [
+          "us"
+        ]
+      },
       "s3": {
         "bucket": "ringspo",
         "graph_prefix": "{country}/{diamond_type}/{carat}-carat/{shape}/",
-        "size_prefix": "size"
+        "size_prefix": "size",
+        "jewellery_prefix": "jewellery/{country}/{diamond_type}/{jewelry_path}/"
       }
     },
     "sparklescore": {
@@ -5958,6 +5970,16 @@
         ],
         "heading_style": "minimal"
       },
+      "site_brief": {
+        "reader": "A buyer who has chosen lab-grown, often for environmental or ethical reasons.",
+        "arrives_with": "What should I look for in a lab-grown stone at this shape and weight?",
+        "job": "Treat lab-grown as its own category: what is different about it at this shape and weight, what lab-grown pricing makes possible and how to read its grading report.",
+        "never": [
+          "Comparing lab-grown with natural.",
+          "Telling the reader how to divide their budget."
+        ],
+        "voice": "Third person: educational and encouraging."
+      },
       "brand_positioning": "Making conscious diamond choices",
       "tagline": "Beautiful diamonds, better choices",
       "target_audience": {
@@ -5975,7 +5997,7 @@
         "formality": "informative_accessible",
         "technical_level": "accessible",
         "sentence_structure": "clear_educational",
-        "editorial_stance": "The reader has chosen lab-grown diamonds — that decision is fully supported. The content exists to help them find the best lab-grown stone within their chosen shape and carat weight. Practical watch outs (e.g. the importance of certification, how grading can vary between labs) are framed as empowering knowledge, not concerns — and every watch out must be paired with a clear positive: what a well-chosen lab-grown stone delivers. Environmental context can be mentioned briefly as part of the lab-grown story, but only in passing — it should never dominate, never cite specific statistics, and should never be framed as a comparison against natural diamonds. Content should not read as anti-natural or advocacy. The site sells lab-grown diamonds and some affiliated retailers also sell natural diamonds. Content must be warm and informative, not polemical.\n",
+        "editorial_stance": "The reader has chosen lab-grown diamonds and that decision is fully supported. Watch outs (the importance of certification, how grading can vary between labs) are framed as useful knowledge, not concerns. Environmental context can be mentioned briefly as part of the lab-grown story, but only in passing — it should never dominate, never cite specific statistics, and should never be framed as a comparison against natural diamonds. Content should not read as anti-natural or advocacy. The site sells lab-grown diamonds and some affiliated retailers also sell natural diamonds. Content must be warm and informative, not polemical.\n",
         "voice": {
           "educational": true,
           "ethical": true,
@@ -6019,7 +6041,7 @@
       },
       "prompt_rules": [
         "Never position lab-grown diamonds against natural diamonds — present lab-grown as its own category with its own strengths.",
-        "Frame engagement ring guidance around the freedom that lab-grown pricing offers: larger stones, better cuts, or savings redirected to setting and design.",
+        "State what lab-grown pricing makes possible at this shape and weight, such as a larger stone or a higher cut grade for the same spend. Do not tell the reader how to divide their budget.",
         "Emphasise transparency and traceability as positive qualities in their own right, not as criticisms of alternatives."
       ],
       "content_angles": [
@@ -6032,18 +6054,32 @@
       "section_prompts": {
         "quality_comparison_static": {
           "json_key": "quality_comparison",
+          "facts": [
+            "lab_grown_notes",
+            "quality_recommendations",
+            "grade_band"
+          ],
           "instruction": "How to identify a great lab-grown {carat}-carat {shape} diamond. Focus on what certification to look for (IGI, GCAL) and why grading rigour matters for lab-grown stones. Cover the key quality factors at this carat weight and what a well-certified stone actually delivers in terms of appearance. Frame entirely as empowering knowledge — what to look for to get a beautiful stone. Do not draw comparisons to mined diamonds.\n",
           "length": "3-4 sentences"
         },
         "buying_guidance_static": {
           "json_key": "buying_guidance",
-          "instruction": "Practical buying advice for lab-grown {carat}-carat {shape} diamonds. Cover which quality factors matter most at this size, what certification to prioritise and why, and where buyers can be selective to maximise their choice. Every watch out must be immediately paired with a concrete positive about what a well-chosen lab-grown stone at this size delivers.\n",
+          "facts": [
+            "context",
+            "quality_priorities",
+            "value_notes"
+          ],
+          "instruction": "Practical buying advice for lab-grown {carat}-carat {shape} diamonds. Cover which quality factors matter most at this size, what certification to prioritise and why, and where buyers can be selective to maximise their choice. Every watch out must be immediately paired with a concrete positive about what a well-chosen lab-grown stone at this size delivers. Write it as two to four short paragraphs separated by a blank line.\n",
           "length": "3-4 sentences"
         },
         "faq_static": {
           "json_key": "faq",
+          "facts": [
+            "finger_coverage",
+            "buyer_type_fit"
+          ],
           "output_type": "array",
-          "instruction": "Write for a buyer who has chosen lab-grown and wants practical knowledge to buy confidently. Generate questions specific to lab-grown {carat}-carat {shape} diamonds — certification questions, quality questions, and practical buying questions this audience genuinely has. Focus on empowering the buyer, not on comparisons to mined diamonds. Examples: \"Does IGI grade lab-grown {shape} diamonds the same way as natural ones?\", \"What certification should I look for in a lab-grown {carat}-carat {shape}?\", \"Is there a quality difference between HPHT and CVD lab-grown {shape} diamonds at {carat} carats?\". Do not draw comparisons to mined diamonds or reference mining. Answers should be factual, clear, and empowering — helping the buyer feel confident. Include lab-grown search forms: price, cost, how much, worth. No years or today.\n",
+          "instruction": "Write for a buyer who has chosen lab-grown and wants practical knowledge to buy confidently. Generate questions specific to lab-grown {carat}-carat {shape} diamonds — certification questions, quality questions, and practical buying questions this audience genuinely has. Focus on empowering the buyer, not on comparisons to mined diamonds. Examples: \"Does IGI grade lab-grown {shape} diamonds the same way as natural ones?\", \"What certification should I look for in a lab-grown {carat}-carat {shape}?\", \"Is there a quality difference between HPHT and CVD lab-grown {shape} diamonds at {carat} carats?\". Do not draw comparisons to mined diamonds or reference mining. Answers should be factual, clear, and empowering — helping the buyer feel confident. Word each question the way a lab-grown buyer would ask it. No years or today.\n",
           "length": "3 pairs"
         }
       },
@@ -6051,7 +6087,7 @@
         "static_content_no_calendar_dates": true,
         "query_phrase_emphasis": [
           "lab-grown diamond price {carat} carat",
-          "how much is a lab-grown {shape} worth",
+          "lab-grown {shape} diamond value",
           "laboratory-created diamond cost",
           "lab diamond price per carat"
         ]
@@ -6255,7 +6291,7 @@
         "2caratdiamondrings.com",
         "3caratdiamondring.com",
         "4caratdiamondrings.com",
-        "5caratdiamondring.com",
+        "5caratdiamond.com",
         "6caratdiamondring.com",
         "7caratdiamondring.com",
         "8caratdiamondring.com",
@@ -6282,6 +6318,17 @@
         ],
         "heading_style": "minimal"
       },
+      "site_brief": {
+        "reader": "A buyer shopping for a {carat} carat diamond ring, often for a proposal and new to diamonds.",
+        "arrives_with": "What will a {carat} carat ring look like on me, and what is involved in choosing one?",
+        "job": "Describe the finished ring at this weight: how the stone looks on the hand, which settings suit it and how the setting changes the total ring budget in relative words, then the few grades that matter.",
+        "never": [
+          "Setting-cost figures (the ring cost widget shows those).",
+          "Suggesting a different carat weight.",
+          "A trade term without saying what it means for how the ring looks."
+        ],
+        "voice": "Third person: simple and direct."
+      },
       "brand_positioning": "Your complete guide to {carat} carat diamond rings",
       "tagline": "What a {carat} carat diamond ring costs, looks like, and how to choose one",
       "homepage": {
@@ -6298,7 +6345,7 @@
         "formality": "straightforward",
         "technical_level": "accessible",
         "sentence_structure": "simple_direct",
-        "editorial_stance": "The reader is shopping for a diamond ring at this carat weight. They arrived by searching \"{carat} carat diamond ring\" — the finished ring is the product, not just the loose stone. Content should cover the complete ring: loose diamond pricing (our core data), setting styles and their costs, total ring budget, and what the ring looks like on a hand. The carat decision is fully supported — never suggest they reconsider it. At larger sizes, setting choice becomes especially important; at smaller sizes, cut quality and shape choice have the biggest visual impact. Every section should help the reader go from \"I want a {carat} carat diamond ring\" to \"I know exactly what to look for and what to pay.\" The tone is clear, helpful, and celebratory.\n",
+        "editorial_stance": "The reader is shopping for a diamond ring at this carat weight. They arrived by searching \"{carat} carat diamond ring\" — the finished ring is the product, not just the loose stone. Content should cover the complete ring: loose diamond pricing (our core data), setting styles and how each changes the total ring budget in relative words (the ring cost widget shows the figures), and what the ring looks like on a hand. At larger sizes, setting choice becomes especially important; at smaller sizes, cut quality and shape choice have the biggest visual impact. Every section should help the reader go from \"I want a {carat} carat diamond ring\" to \"I know exactly what to look for.\" The tone is clear and helpful.\n",
         "voice": {
           "informative": true,
           "neutral": true,
@@ -6448,7 +6495,7 @@
       "schema_dataset_name_suffix": " - Diamond Ring Price Guide",
       "prompt_rules": [
         "Always write about the complete ring, not just the loose diamond — settings, bands, and total cost matter as much as the stone.",
-        "This audience is buying a ring for a proposal or milestone. Frame every point as helping them choose confidently and celebrate the moment.",
+        "This audience is buying a ring for a proposal or milestone. Frame every point as helping them choose confidently.",
         "Avoid industry jargon without explanation — if you mention a technical term, immediately follow with what it means for how the ring looks on the hand."
       ],
       "content_angles": [
@@ -6462,23 +6509,41 @@
       "section_prompts": {
         "on_hand_appearance_static": {
           "json_key": "on_hand_appearance",
+          "facts": [
+            "finger_coverage",
+            "size_facts",
+            "size_context",
+            "size_vs_shapes"
+          ],
           "instruction": "Write clearly for a beginner buyer choosing a {carat}-carat {shape} diamond ring. Describe what this shape realistically looks like on a hand at {carat} carats: face-up size impression, how the proportions interact with finger width, and whether the shape appears larger or smaller than its carat weight suggests. Be specific to this shape — the length-to-width ratio for fancy shapes, the spread for rounds, the visual weight distribution. This is the context a buyer needs to picture the stone on their hand before committing. Frame positively: what makes a {carat}-carat {shape} look impressive on the hand, not what its limitations are.\n",
           "length": "3-4 sentences"
         },
         "setting_guide_static": {
           "json_key": "setting_guide",
+          "facts": [
+            "buyer_type_fit"
+          ],
           "instruction": "Write clearly for a beginner buyer choosing a setting for a {carat}-carat {shape} diamond ring. Cover the setting styles that work best for this shape at this size — which settings complement the stone's proportions, which offer practical protection for daily wear at this carat weight, and roughly how setting choice affects total ring cost. At larger carat weights, setting security becomes especially important; at smaller weights, the setting's contribution to overall visual size matters more. Give 2-3 specific setting recommendations with a one-line reason for each. Do not recommend against any setting categorically — frame as trade-offs.\n",
           "length": "4-5 sentences"
         },
         "buying_guidance_static": {
           "json_key": "buying_guidance",
-          "instruction": "Write clearly for a beginner buyer purchasing a {carat}-carat {shape} diamond ring. Give practical guidance on which quality factors to prioritise at this carat weight and shape: where to focus budget (cut vs colour vs clarity), what is visible to the naked eye at this size, and where a buyer can save without compromising how the ring looks in everyday wear. Every recommendation should consider the complete ring — not just the loose stone. Lead with the single most impactful piece of advice for someone buying a ring at this specific combination. Frame as confident, celebratory guidance — this is an exciting purchase and the content should help, not overwhelm.\n",
+          "facts": [
+            "quality_recommendations",
+            "grade_band",
+            "value_notes"
+          ],
+          "instruction": "Write clearly for a beginner buyer purchasing a {carat}-carat {shape} diamond ring. Give practical guidance on which quality factors to prioritise at this carat weight and shape: where to focus budget (cut vs colour vs clarity), what is visible to the naked eye at this size, and where a buyer can save without compromising how the ring looks in everyday wear. Every recommendation should consider the complete ring — not just the loose stone. Lead with the single most impactful piece of advice for someone buying a ring at this specific combination. Frame as confident, celebratory guidance — this is an exciting purchase and the content should help, not overwhelm. Write it as two to four short paragraphs separated by a blank line.\n",
           "length": "4-5 sentences"
         },
         "faq_static": {
           "json_key": "faq",
+          "facts": [
+            "context",
+            "trade_offs"
+          ],
           "output_type": "array",
-          "instruction": "Write for a beginner buyer researching {carat}-carat {shape} diamond rings. Generate questions that someone shopping for a ring at this carat weight would actually ask — about total ring cost, how the diamond looks in a setting, quality trade-offs, and practical concerns about wearing a ring at this size daily. Examples of the right register: \"How much does a {carat} carat {shape} diamond ring cost in total?\", \"What setting is best for a {carat}-carat {shape}?\", \"Can you tell the difference between VS1 and VS2 at {carat} carats?\", \"Is a {carat}-carat {shape} too big for everyday wear?\". Answers must be concise, helpful, and ring-focused — not just about the loose stone. At least one question must address total ring budget (stone + setting). Vary ring, price, cost, how much, on hand, and loose-diamond phrasing. No years or today.\n",
+          "instruction": "Write for a beginner buyer researching {carat}-carat {shape} diamond rings. Generate questions that someone shopping for a ring at this carat weight would actually ask — about total ring cost, how the diamond looks in a setting, quality trade-offs, and practical concerns about wearing a ring at this size daily. Examples of the right register: \"How much of a {carat}-carat {shape} ring's budget goes on the setting?\", \"What setting is best for a {carat}-carat {shape}?\", \"Can you tell the difference between VS1 and VS2 at {carat} carats?\", \"Is a {carat}-carat {shape} too big for everyday wear?\". Answers must be concise, helpful, and ring-focused — not just about the loose stone. At least one question must address how the setting choice changes the total ring budget (stone plus setting), answered in relative words with no price figure. Word each question the way a buyer would ask it. No years or today.\n",
           "length": "3 pairs"
         }
       },
@@ -6486,7 +6551,7 @@
         "static_content_no_calendar_dates": true,
         "query_phrase_emphasis": [
           "{carat} carat diamond ring price",
-          "how much does a {carat} carat {shape} ring cost",
+          "{carat} carat {shape} ring budget",
           "{carat} carat {shape} on hand",
           "engagement ring {carat} carats",
           "average cost of {carat} carat diamond ring"
@@ -6586,7 +6651,7 @@
         },
         "5caratdiamondring": {
           "site_id": "5caratdiamondring",
-          "domain": "5caratdiamondring.com",
+          "domain": "5caratdiamond.com",
           "carat_weight": 5.0,
           "brand_name": "5 Carat Diamond Ring"
         },
@@ -6660,6 +6725,16 @@
         ],
         "heading_style": "minimal"
       },
+      "site_brief": {
+        "reader": "An engagement-ring buyer who wants to know what a diamond costs in their country before choosing one.",
+        "arrives_with": "What does this cost here, and how big is it for that?",
+        "job": "Explain what drives the price of this shape at this weight and how big it looks for that price, using face-up size. The charts and tables give the figures; the copy explains them.",
+        "never": [
+          "Recommendations or worth-it judgements.",
+          "A price, a price range or a comparison of local prices with other countries."
+        ],
+        "voice": "You: clear and factual. Clarity over personality."
+      },
       "brand_positioning": "The definitive local diamond pricing reference",
       "tagline": "Real-time diamond prices in your currency",
       "homepage": {
@@ -6667,7 +6742,7 @@
       },
       "target_audience": {
         "primary": "Diamond buyers who want to know what they should pay",
-        "secondary": "Researchers, appraisers, and professionals needing current market pricing",
+        "secondary": "Couples comparing prices across shapes and weights before choosing an engagement ring",
         "knowledge_level": "All levels — the data does the work"
       },
       "content_tone": "direct_factual",
@@ -6717,7 +6792,7 @@
       "prompt_rules": [
         "This is a pricing reference site — prioritise clarity and directness over personality. Every sentence should help the reader understand what they will pay.",
         "Frame quality guidance through the lens of an engagement ring purchase — what looks good on the hand, not what scores well on a grading report.",
-        "Always acknowledge the local market context: currency, typical price range in that country, and how local prices compare to global benchmarks."
+        "Name the reader's currency where it reads naturally. Do not state a price, a price range or how local prices compare with other countries: the page's charts and tables show the figures."
       ],
       "content_angles": [
         "Focus on what drives the price at this carat weight in this country — the dominant factors that move the number up or down.",
@@ -6729,13 +6804,23 @@
       "section_prompts": {
         "pricing_context_static": {
           "json_key": "pricing_context",
+          "facts": [
+            "value_notes",
+            "grade_band"
+          ],
           "instruction": "Factual pricing context for {carat}-carat {shape} diamonds. Describe the general price range buyers encounter at this carat weight and shape, what factors cause the most variation in price (cut quality, colour, clarity), and where the steepest price jumps occur. Do not recommend specific grades or trade-offs — present the pricing landscape as factual observations that help the reader interpret the data. Ground all claims in general market patterns; this is static content without live data.\n",
           "length": "3-4 sentences"
         },
         "faq_static": {
           "json_key": "faq",
+          "facts": [
+            "context",
+            "size_facts",
+            "size_context",
+            "size_vs_shapes"
+          ],
           "output_type": "array",
-          "instruction": "Write as a neutral pricing reference. Generate questions that someone checking diamond prices would ask — questions about what drives the price, how prices differ by spec, and what to expect at this carat weight and shape. Answers should be factual and grounded in general market patterns — state what the data shows, do not advise. Use neutral price/cost/how much phrasing. No calendar years or today in static copy.\n",
+          "instruction": "Write as a neutral pricing reference. Generate questions that someone checking diamond prices would ask — questions about what drives the price, how prices differ by spec, and what to expect at this carat weight and shape. Answers should be factual and grounded in general market patterns — state what the data shows, do not advise. Word each question the way a buyer would ask it. No calendar years or today in static copy.\n",
           "length": "3 pairs"
         },
         "shape_preview": {
@@ -7027,6 +7112,17 @@
         ],
         "heading_style": "minimal"
       },
+      "site_brief": {
+        "reader": "A discerning buyer, usually a woman, researching an engagement-ring centre stone who wants a calm second opinion on how well it is cut.",
+        "arrives_with": "How do I check this one is well cut?",
+        "job": "Set out the cut and proportion thresholds a buyer can insist on at this shape and weight (cut grade, symmetry, depth and table, length-to-width), what shows more at this size, then the cautions, each paired with what to look for instead.",
+        "never": [
+          "Deal language or percentage price steps (Diamond Price Guru owns those).",
+          "Face-up size comparisons against other shapes (Ringspo owns those).",
+          "A claim that we take no commission or sell nothing."
+        ],
+        "voice": "We: calm and advisory, a senior advisor with a client. Female-first in who we picture wearing the ring, never in pink or gift framing."
+      },
       "brand_positioning": "Independent diamond advisory",
       "tagline": "Choose your centre stone well.",
       "target_audience": {
@@ -7044,7 +7140,7 @@
         "formality": "professional_warm",
         "technical_level": "expert",
         "sentence_structure": "confident_prescriptive",
-        "editorial_stance": "The reader has chosen a shape or is close to choosing one. Our role is to help them buy the best version of what they want — with confidence. We are their advisor, not a gatekeeper. Recommendations should reinforce their choice and equip them with the knowledge to select well. The \"cautions\" section exists to protect buyers from common mistakes, not to cast doubt on their decision: every caution must be paired with a clear positive — what to look for, not just what to avoid. Alternatives to the chosen shape should only appear as contextual comparisons, never as a suggestion to reconsider.\n",
+        "editorial_stance": "We are their advisor, not a gatekeeper: recommendations equip them to select with confidence. The cautions section protects buyers from common mistakes and never casts doubt on their decision.\n",
         "voice": {
           "authoritative": true,
           "reassuring": true,
@@ -7146,48 +7242,65 @@
       },
       "prompt_rules": [
         "Write as a senior advisor guiding a client through a considered purchase. Recommendations should feel bespoke, not generic.",
-        "Frame engagement ring decisions as choices in craftsmanship and personal meaning. Not financial investments. Choices worth making well.",
+        "Frame engagement ring decisions as choices about how the stone is cut and how it looks, not financial investments.",
         "Never claim we take no commission or sell nothing. Independence means we are not a jeweller. Ads and affiliate still exist.",
         "When presenting trade-offs, always lead with the positive outcome of the recommended path before explaining what was traded away."
       ],
       "content_angles": [
         "Focus on what separates an exceptional stone from a merely good one at this carat weight — the subtle quality indicators that connoisseurs notice.",
         "Focus on how setting and ring design choices can elevate this carat weight — making a considered stone look its absolute best.",
-        "Focus on the due diligence a discerning buyer should perform at this price point — what to verify, what to compare, and when to walk away.",
+        "Focus on the due diligence a discerning buyer should perform at this carat weight — what to verify, what to compare, and when to walk away.",
         "Focus on provenance and certification at this carat weight — which labs are most trusted and why certification matters more at higher values.",
         "Focus on long-term satisfaction: how this combination will look after years of wear, and what choices today ensure enduring beauty.",
         "Focus on the relationship between cut precision and light performance at this shape and size — where marginal differences yield dramatic visual results.",
-        "Focus on what to pay for a {carat}-carat {shape} — price, cost, and worth in buyer terms.",
+        "Focus on the proportion ranges that face up best at this shape and weight, and how to read them on a grading report.",
         "Focus on engagement ring decisions: {carat}-carat centre stone plus setting trade-offs."
       ],
       "section_prompts": {
         "recommendations_static": {
           "json_key": "recommendations",
+          "facts": [
+            "context",
+            "size_facts",
+            "vs_other_carats",
+            "size_vs_carats"
+          ],
           "instruction": "Clear, confident recommendations for buyers choosing {carat}-carat {shape} diamonds. Lead with what to prioritise and explain the reasoning plainly. Tone: authoritative but warm — a trusted advisor speaking directly, not a rulebook. Support the reader's choice; recommendations exist to help them buy the best version of what they want.\n",
           "length": "3-4 sentences"
         },
         "quality_standards_static": {
           "json_key": "quality_standards",
+          "facts": [
+            "quality_recommendations",
+            "quality_priorities",
+            "grade_band"
+          ],
           "instruction": "The quality standards that matter most at this shape and carat weight. What grades or proportion ranges should a discerning buyer look for, and why? Frame as practical thresholds a buyer can act on — what is worth paying more for, and what represents genuine quality at this size. Explain the reasoning behind each standard in accessible terms.\n",
           "length": "3-4 sentences"
         },
         "cautions_static": {
           "json_key": "cautions",
+          "facts": [
+            "why_quality_critical"
+          ],
           "instruction": "What discerning buyers should be aware of when choosing {carat}-carat {shape} diamonds. Frame each caution as protective knowledge that helps them buy with confidence — not as a reason to doubt their choice. Every caution must be immediately followed by what to look for instead, giving the buyer a clear positive action. Tone: reassuring and empowering, not cautionary.\n",
           "length": "3-4 sentences"
         },
         "faq_static": {
           "json_key": "faq",
+          "facts": [
+            "trade_offs"
+          ],
           "output_type": "array",
-          "instruction": "Write as an experienced, trusted diamond advisor. Generate questions that a discerning buyer researching a {carat}-carat {shape} diamond would ask — questions about quality thresholds, certification, proportion standards, and what separates a genuinely good stone from an exceptional one at this size. Reflect an intermediate buyer who wants to buy well, not just buy cheap: \"What cut grade should I insist on for a {carat}-carat {shape}?\", \"Is there a meaningful visual difference between VS1 and VS2 in a {carat}-carat {shape}?\", \"What proportion range gives the best face-up appearance in a {shape} at {carat} carats?\". Answers should be warm but authoritative — clear recommendations with plain reasoning, as an experienced advisor would give a valued client. Vary Ahrefs-style forms: price, cost, worth, how much. No calendar years or today.\n",
+          "instruction": "Write as an experienced, trusted diamond advisor. Generate questions that a discerning buyer researching a {carat}-carat {shape} diamond would ask — questions about quality thresholds, certification, proportion standards, and what separates a genuinely good stone from an exceptional one at this size. Reflect an intermediate buyer who wants to buy well, not just buy cheap: \"What cut grade should I insist on for a {carat}-carat {shape}?\", \"Is there a meaningful visual difference between VS1 and VS2 in a {carat}-carat {shape}?\", \"What proportion range gives the best face-up appearance in a {shape} at {carat} carats?\". Answers should be warm but authoritative — clear recommendations with plain reasoning, as an experienced advisor would give a valued client. Word each question the way a buyer would ask it. No calendar years or today.\n",
           "length": "3 pairs"
         }
       },
       "seo_optimization": {
         "static_content_no_calendar_dates": true,
         "query_phrase_emphasis": [
-          "what should I pay for a {carat}-carat {shape}",
-          "how much is a {carat}-carat diamond worth",
+          "is a {carat}-carat {shape} right for an engagement ring",
+          "{carat}-carat diamond value",
           "{carat}-carat diamond ring cost",
           "engagement ring quality at {carat} carats"
         ]
@@ -7389,6 +7502,24 @@
         "show_recommendations": true,
         "show_cautions": true,
         "emphasis_on_quality": true
+      },
+      "jewellery_treatment": "metal_setting_led",
+      "jewellery_surface": {
+        "lead_table": "metal_setting",
+        "secondary_tables": [
+          "default_color_clarity"
+        ],
+        "tennis_lead_table": "metal",
+        "publish_lab_tree": false,
+        "lab_on_page_note": true,
+        "show_trend": true,
+        "min_trend_weeks": 2,
+        "default_styles": {
+          "earrings": "stud",
+          "bracelet": "tennis",
+          "necklace": "solitaire_pendant"
+        },
+        "default_metal": "white_gold"
       }
     },
     "diamondchart": {
@@ -7432,7 +7563,7 @@
       },
       "target_audience": {
         "primary": "Buyers comparing face-up size across shapes",
-        "secondary": "Jewellers and researchers needing population ranges",
+        "secondary": "Buyers checking whether a listed stone is large or small for its weight",
         "knowledge_level": "Beginner to intermediate"
       },
       "content_tone": "chart_reference",
@@ -7492,6 +7623,16 @@
         ],
         "heading_style": "minimal"
       },
+      "site_brief": {
+        "reader": "A British buyer shopping online for an engagement ring.",
+        "arrives_with": "Will this stone suit me, and how will it wear?",
+        "job": "Say who this shape and weight suits and how it looks and wears on the hand, then the quality points that matter at this size. Point to the UK price chart and carat ladder for the figures.",
+        "never": [
+          "UK prices, retailer names or claims about what UK jewellers stock or UK buyers choose (the copy has no UK facts to draw on).",
+          "Sending the reader to a high-street jeweller."
+        ],
+        "voice": "First person: British and understated, straight-talking and on the buyer's side."
+      },
       "brand_positioning": "Your UK diamond price guide",
       "tagline": "Diamond prices for British buyers",
       "homepage": {
@@ -7515,7 +7656,7 @@
         "formality": "friendly_british",
         "technical_level": "accessible",
         "sentence_structure": "clear_conversational",
-        "editorial_stance": "The reader has chosen a shape or is close to choosing one. The job is to help them find the best stone within that choice — not to nudge them elsewhere. Practical watch outs (where buyers commonly overpay, what to check before buying) should be framed as straight-talking guidance from someone who knows the market, always paired with a concrete positive: what makes a great stone at this shape and carat weight. British understatement is welcome; negativity without a follow-up is not. The tone is a knowledgeable friend who has done the legwork for UK buyers — familiar, direct, and on their side.\n",
+        "editorial_stance": "Watch outs (where buyers commonly overpay, what to check on a listing) are straight-talking guidance from a friend who has done the legwork. British understatement is welcome; negativity without a follow-up is not.\n",
         "voice": {
           "british": true,
           "practical": true,
@@ -7558,27 +7699,41 @@
         ]
       },
       "prompt_rules": [
-        "Write for a British buyer shopping for an engagement ring — reference UK high-street context, British sizing, and GBP value expectations where relevant.",
+        "Write for a British buyer shopping for an engagement ring. Say pounds or use £, never GBP, and use British ring sizes (letters) where ring size comes up.",
         "Be direct and practical in the British register — helpful without being over-eager, knowledgeable without lecturing.",
-        "Acknowledge that most UK buyers compare prices online before visiting a jeweller — guide them on what to look for in both contexts."
+        "Most UK buyers compare and buy online. Guide them on what to check on a listing, such as the grading report and the retailer's video or 360° view."
       ],
       "content_angles": [
-        "Focus on what UK buyers specifically pay for this combination — how British pricing compares to what they might see advertised from overseas retailers.",
-        "Focus on the high-street vs online decision for engagement rings at this carat weight — what each channel offers and where the value sits.",
-        "Focus on how this carat weight and shape works with popular UK ring styles — yellow gold resurgence, platinum durability, and classic British settings.",
-        "Focus on practical daily wear in a UK context — weather, lifestyle, and hand size considerations that affect ring choice.",
-        "Focus on the quality grades where British jewellers typically stock at this carat weight — what is readily available vs what requires a special order."
+        "Focus on what to check on an online listing for this shape and weight before buying from the UK: the grading report, the video or 360° view and the returns policy.",
+        "Focus on who this shape and weight suits: hand size, finger length and how much of the finger the stone covers.",
+        "Focus on how the setting changes the look of this shape and weight: white metal against yellow gold, and claws against a bezel.",
+        "Focus on practical daily wear: how the stone sits in its setting, what knocks it can take and how hand size changes the look.",
+        "Focus on the quality grades that show at this shape and weight, and the ones you can step down on without seeing the difference."
       ],
       "section_prompts": {
         "buying_guidance_static": {
           "json_key": "buying_guidance",
-          "instruction": "Straight-talking buying guidance for UK buyers considering {carat}-carat {shape} diamonds. Cover which quality factors matter most at this size, where UK buyers can be selective without sacrificing appearance, and the most common watch out at this shape and carat weight. Use British English spelling throughout (colour, jewellery, centre).       Every watch out must be immediately paired with a practical positive - what to look for to get a great stone within this choice.\n",
+          "facts": [
+            "finger_coverage",
+            "buyer_type_fit",
+            "size_facts",
+            "quality_priorities",
+            "quality_recommendations",
+            "grade_band"
+          ],
+          "instruction": "Straight-talking buying guidance for UK buyers considering {carat}-carat {shape} diamonds. Cover which quality factors matter most at this size, where UK buyers can be selective without sacrificing appearance, and the most common watch out at this shape and carat weight. Use British English spelling throughout (colour, jewellery, centre).       Every watch out must be immediately paired with a practical positive - what to look for to get a great stone within this choice. Write it as two to four short paragraphs separated by a blank line.\n",
           "length": "4-5 sentences"
         },
         "faq_static": {
           "json_key": "faq",
+          "facts": [
+            "context",
+            "vs_other_carats",
+            "size_vs_carats",
+            "value_notes"
+          ],
           "output_type": "array",
-          "instruction": "Write for UK buyers in a straight-talking, no-nonsense voice. Generate questions that a UK buyer shopping for a {carat}-carat {shape} diamond would genuinely ask — practical questions about quality, value, and what to look out for, with at least one question relevant to the UK buying context (GBP pricing, UK retailer considerations, or UK market patterns). Examples: \"What colour grade works best for a {carat}-carat {shape} in a white gold setting?\", \"Is {carat} carats the right size to buy in a {shape}, or does the price jump significantly?\", \"What's the minimum cut grade worth accepting in a {carat}-carat {shape}?\". Use British English spelling throughout (colour, jewellery, centre). Answers should be direct and actionable. Include UK search forms: cost, price, worth, how much. No calendar years or today.\n",
+          "instruction": "Write for UK buyers in a straight-talking, no-nonsense voice. Generate questions that a UK buyer shopping for a {carat}-carat {shape} diamond would genuinely ask — practical questions about quality, value, and what to look out for, with at least one question about buying online from the UK (delivery, VAT and duty on overseas listings, or returns). Examples: \"What colour grade works best for a {carat}-carat {shape} in a white gold setting?\", \"Is {carat} carats the right size to buy in a {shape}, or does the price jump significantly?\", \"What's the minimum cut grade worth accepting in a {carat}-carat {shape}?\". Use British English spelling throughout (colour, jewellery, centre). Answers should be direct and actionable. Word each question the way a UK buyer would ask it. No calendar years or today.\n",
           "length": "3 pairs"
         }
       },
@@ -7594,12 +7749,12 @@
         "diamond_type": {
           "natural_vs_lab_analysis": {
             "json_key": "natural_vs_lab_analysis",
-            "instruction": "Compare mined and lab-grown diamonds for a UK buyer looking at {diamond_type} prices. Cover grading, what high-street jewellers still push, VAT on the ticket price, and where each type makes sense. No specific pound amounts or dates. British English throughout.\n",
+            "instruction": "Compare mined and lab-grown diamonds for a UK buyer looking at {diamond_type} prices. Cover grading, how each type is described on a listing, VAT on the ticket price and where each type makes sense. No specific pound amounts or dates. British English throughout.\n",
             "length": "4-5 sentences"
           },
           "buying_considerations": {
             "json_key": "buying_considerations",
-            "instruction": "Practical watch-outs for UK buyers shopping {diamond_type} diamonds online before they visit a jeweller. Certification, cut quality, where to be selective and import or VAT surprises on overseas listings. No specific prices.\n",
+            "instruction": "Practical watch-outs for UK buyers shopping {diamond_type} diamonds online. Certification, cut quality, where to be selective and import or VAT surprises on overseas listings. No specific prices.\n",
             "length": "3-4 sentences"
           },
           "faq_static": {
@@ -7626,7 +7781,7 @@
       "seo_optimization": {
         "static_content_no_calendar_dates": true,
         "query_phrase_emphasis": [
-          "how much is a {carat}-carat {shape} worth UK",
+          "{carat}-carat {shape} diamond value UK",
           "cost of {carat}-carat diamond UK",
           "{carat}-carat diamond ring price UK",
           "engagement ring budget {carat} carats"
@@ -7893,7 +8048,7 @@
       "tagline": "Real-time diamond prices in your currency",
       "target_audience": {
         "primary": "Diamond buyers who want to know what they should pay",
-        "secondary": "Researchers, appraisers, and professionals needing current market pricing",
+        "secondary": "Couples checking a quoted price before choosing an engagement ring",
         "knowledge_level": "All levels — the tool does the work"
       },
       "countries": [
@@ -8127,6 +8282,17 @@
         ],
         "heading_style": "minimal"
       },
+      "site_brief": {
+        "reader": "A value-conscious buyer, often buying for the first time, who wants to know they are not overpaying.",
+        "arrives_with": "Is this a good deal, and what would the same money buy instead?",
+        "job": "Show where the extra money stops showing at this shape and weight: the step to the weights either side, which grade upgrades a buyer can see and, where the page allows, what the same spend buys in natural and lab-grown. Lead each point with a number from the facts.",
+        "never": [
+          "Proportion detail or a cut checklist (Diamond Advisors owns that).",
+          "Size comparisons or millimetres (this site has no size module).",
+          "Advisor-magazine lines such as choose well, clear eyes or trusted advisor."
+        ],
+        "voice": "You: short and punchy. Deal energy in the headline, a number or a visible cutoff in the next sentence."
+      },
       "brand_positioning": "Data-driven value hunting",
       "tagline": "Find the most beautiful diamond at the best price",
       "target_audience": {
@@ -8143,7 +8309,7 @@
         "formality": "casual_informative",
         "technical_level": "accessible",
         "sentence_structure": "simple_clear",
-        "editorial_stance": "The reader has chosen a shape or is close to choosing one. The data exists to help them find the best stone within that choice and budget — not to steer them elsewhere. When the data shows a shape commands a premium, the response is to explain what that premium delivers and how to get the most from it, not to suggest switching shapes. Watch outs should always be framed as budget opportunities — specific, actionable ways to spend smarter within the shape they want. Every watch out must be paired with a concrete positive: what they can achieve once they know where to be selective.\n",
+        "editorial_stance": "When the data shows a shape commands a premium, explain what that premium delivers and how to get the most from it. Frame watch outs as budget opportunities: where to be selective within the shape they want.\n",
         "voice": {
           "data_focused": true,
           "value_oriented": true,
@@ -8157,23 +8323,18 @@
           "here is where the price jump is real",
           "the premium at this carat weight is typically",
           "where diminishing returns kick in",
-          "rounds typically carry a 20-30% premium over fancy shapes",
           "VS2 at this size is where clarity becomes eye-clean",
-          "the price boundary at X carats is worth planning around",
+          "the carat boundary at X carats is worth planning around",
           "where you can be more selective without losing anything visible",
           "here's the thing",
           "bottom line",
           "the smart move at this carat weight",
           "what the pattern shows across the market",
           "where the extra spend is not doing much for you visually",
-          "how much is a {carat}-carat {shape} worth",
           "is a {carat}-carat {shape} worth it",
           "value of a {carat}-carat diamond",
-          "what a {carat}-carat {shape} should cost",
-          "the prices are in",
           "nicest look for the spend",
           "typical vs high",
-          "what $X actually buys",
           "where the extra money stops showing up"
         ],
         "avoid_words": [
@@ -8263,38 +8424,51 @@
       },
       "prompt_rules": [
         "Always ground advice in what the data shows — avoid opinions that cannot be supported by price patterns, grade distributions, or sample sizes.",
-        "Frame every quality recommendation as a value decision: what do you gain vs what do you pay for the upgrade?",
+        "Frame every quality recommendation as a value decision: what you gain vs how much more the grade upgrade (colour, clarity or cut) costs, as a percentage from the facts.",
         "When a buyer is choosing an engagement ring, help them find the combination that looks best for the budget — not the 'best' stone in abstract terms.",
-        "Job is 'is this a good deal' and 'where does the extra money stop showing.' Headlines may have recap energy. The next sentence must be a number or a visible cutoff a first-time buyer understands.",
+        "Job is 'is this a good deal' and 'where does the extra money stop showing.' Headlines may have recap energy. The next sentence must be a percentage from the facts or a visible cutoff a first-time buyer understands, never a price figure.",
         "Do not use advisor-magazine lines: choose well, clear eyes, trusted advisor, not a jeweller not a shop, we never talk you out of your shape, don't pay for a grade you can't see."
       ],
+      "compare_diamond_types": true,
       "content_angles": [
         "Focus on the price sweet spot at this carat weight — where quality meets value and diminishing returns begin.",
         "Focus on which quality upgrades are visible on the finger vs which only show up on a grading report.",
         "Focus on sample size and market availability — how many options exist at this combination and what that means for negotiating power.",
-        "Focus on the price gap between adjacent carat weights — is the step up worth it or is this weight already the sweet spot?",
+        "Focus on the step between adjacent carat weights: is the step up worth it or is this weight already the sweet spot?",
         "Focus on the colour and clarity combinations where you stop paying for visible improvement — the exact point of diminishing returns at this carat weight.",
-        "Focus on comparing natural vs lab-grown value at this specific carat weight and shape — where the price gap is widest and what it buys.",
-        "Focus on worth vs price — how much a {carat}-carat {shape} is worth versus typical listing prices.",
+        "Focus on what the same spend buys in natural versus lab-grown at this carat weight and shape, in relative words.",
+        "Focus on how much of the step to the next carat weight a buyer can actually see on the hand.",
         "Focus on whether the step to the next carat weight is worth paying for at this shape."
       ],
       "section_prompts": {
         "buying_guide_static": {
           "json_key": "buying_guide",
-          "instruction": "Value-focused buying guidance for {carat}-carat {shape} diamonds. Focus on where the price premium is justified by measurable quality differences, where spending more is not doing much visually, and the typical price boundaries buyers should plan around at this carat weight. Ground claims in general market patterns — this is static content without access to live data. Every watch out must be paired with a concrete way to get strong value within this shape and carat choice.\n",
+          "facts": [
+            "vs_other_carats",
+            "size_vs_carats",
+            "value_notes",
+            "quality_recommendations",
+            "grade_band"
+          ],
+          "instruction": "Value-focused buying guidance for {carat}-carat {shape} diamonds. Focus on where the price premium is justified by measurable quality differences, where spending more is not doing much visually, and the carat-weight boundaries buyers should plan around. Ground claims in general market patterns — this is static content without access to live data. Every watch out must be paired with a concrete way to get strong value within this shape and carat choice. Write it as two to four short paragraphs separated by a blank line.\n",
           "length": "4-5 sentences"
         },
         "faq_static": {
           "json_key": "faq",
+          "facts": [
+            "context",
+            "buyer_type_fit",
+            "trade_offs"
+          ],
           "output_type": "array",
-          "instruction": "Write as a value-focused, data-grounded guide. Generate questions that a budget-conscious buyer researching a {carat}-carat {shape} diamond would ask — questions about where the price is and is not justified, how to get the best stone for the money, and which quality trade-offs are genuinely worth making. Focus on the pricing reality specific to this shape and carat weight: \"Where does the price premium go on a {carat}-carat {shape}?\", \"What color and clarity combination gives the best value at {carat} carats in a {shape}?\", \"Is it worth paying for GIA certification on a {carat}-carat {shape}?\". Answers should be direct and grounded in general market patterns — no live prices, but confident pattern-based guidance. Vary question forms: worth, value, cost, how much, and price. No calendar years or words like today or currently.\n",
+          "instruction": "Write as a value-focused, data-grounded guide. Generate questions that a budget-conscious buyer researching a {carat}-carat {shape} diamond would ask — questions about where the price is and is not justified, how to get the best stone for the money, and which quality trade-offs are genuinely worth making. Focus on the pricing reality specific to this shape and carat weight: \"Where does the price premium go on a {carat}-carat {shape}?\", \"What color and clarity combination gives the best value at {carat} carats in a {shape}?\", \"Is it worth paying for GIA certification on a {carat}-carat {shape}?\". Answers should be direct and grounded in general market patterns — no live prices, but confident pattern-based guidance. Word each question the way a buyer would ask it. No calendar years or words like today or currently.\n",
           "length": "3 pairs"
         }
       },
       "seo_optimization": {
         "static_content_no_calendar_dates": true,
         "query_phrase_emphasis": [
-          "how much is a {carat}-carat {shape} worth",
+          "is a {carat}-carat {shape} good value",
           "value of {carat}-carat diamond",
           "is it worth paying for at {carat} carats",
           "lab-grown vs natural value at this weight"
@@ -8498,7 +8672,7 @@
         "jewelleryindia.in",
         "jewelleryireland.ie",
         "jewellerynz.co.nz",
-        "jewellerysouthafrica.co.za"
+        "thejeweller.co.za"
       ],
       "brand_tokens": {
         "primary": "#d6ad60",
@@ -8522,6 +8696,16 @@
         "h1_shadow": "15px 15px 0 #000",
         "h1_shadow_mobile": "10px 10px 0 #000"
       },
+      "site_brief": {
+        "reader": "A jewellery buyer in this site's country who has started shopping for an engagement ring.",
+        "arrives_with": "What moves the price of this stone, and how do I buy it well?",
+        "job": "Explain what moves the price of this shape at this weight, as a knowledgeable jewellery guide, then what to prioritise when buying. Explain the market rather than coach the reader's spending.",
+        "never": [
+          "Coaching the reader on where to put their money (Diamond Price Guru owns that).",
+          "Local facts: taxes, duties, retailer names, local prices or what local buyers choose."
+        ],
+        "voice": "Third person: warm and knowledgeable, never condescending."
+      },
       "brand_positioning": "Your local jewellery price guide",
       "tagline": "Diamond prices in your country",
       "target_audience": {
@@ -8535,7 +8719,7 @@
         "formality": "professional_accessible",
         "technical_level": "accessible",
         "sentence_structure": "clear_structured",
-        "editorial_stance": "The reader has chosen a shape or is close to choosing one. Content exists to help them find the best stone within that choice — with practical guidance relevant to their local market. Watch outs (e.g. what to prioritise at a given carat weight, where quality trade-offs are visible) should be paired with a concrete positive: what a well-chosen stone at this shape and size delivers. The tone is that of a knowledgeable local guide — professional and helpful, without the personal voice of an individual expert. Local market context (currency, retailers, regional pricing patterns) can be woven in naturally where it adds value, but the core diamond guidance is universal.\n",
+        "editorial_stance": "The tone is that of a knowledgeable guide: professional and helpful, without the personal voice of an individual expert. The diamond guidance is universal; the country is framing only.\n",
         "voice": {
           "informative": true,
           "local": true,
@@ -8703,14 +8887,14 @@
       "prompt_rules": [
         "Write as though explaining to a friend who has just started ring shopping — knowledgeable and warm, never condescending.",
         "Always contextualise prices and quality grades for engagement ring buyers — the diamond will be set in a ring and worn every day.",
-        "Prefer local framing where possible: reference the buying experience in the reader's country rather than generic global advice."
+        "Write for a buyer in this site's country and name the country where it reads naturally. Do not state local facts: no taxes, import duties, retailer names, local prices or claims about what local buyers choose. The country is framing only."
       ],
       "content_angles": [
-        "Focus on what makes this shape popular for engagement rings in this market — why buyers choose it and what they should expect to pay.",
+        "Focus on why buyers choose this shape for an engagement ring and what it does well at this weight.",
         "Focus on quality trade-offs that matter most when the stone is set — which imperfections disappear once mounted and which remain visible.",
-        "Focus on how this carat weight sits on the hand in a ring setting — visual coverage, proportion, and how it compares to what most local buyers choose.",
+        "Focus on how this carat weight sits on the hand in a ring setting: visual coverage and proportion.",
         "Focus on the buying journey: what to look for first, what to compare, and when to stop upgrading quality grades.",
-        "Focus on how local pricing for this shape compares to the global average — whether local buyers get better or worse value and why."
+        "Focus on what moves the price at this shape and weight, and which of those factors a buyer can actually see."
       ],
       "section_prompts_by_page_type": {
         "all_shapes": {
@@ -8743,7 +8927,7 @@
           "faq_static": {
             "json_key": "faq",
             "output_type": "array",
-            "instruction": "Write for visitors landing on the diamond price hub. Questions should orient first-time buyers: natural versus lab-grown, how to read the charts and carat table, where to go next for a specific carat or shape, and what to decide before visiting a jeweller — practical engagement-ring guidance in a warm local-jeweller voice. No price figures, percentages, or dates.\n",
+            "instruction": "Write for visitors landing on the diamond price hub. Questions should orient first-time buyers: natural versus lab-grown, how to read the charts and carat table, where to go next for a specific carat or shape, and what to decide before buying online - practical engagement-ring guidance in a warm, knowledgeable voice. No price figures, percentages, or dates.\n",
             "length": "4 pairs"
           },
           "type_comparison": {
@@ -8766,18 +8950,28 @@
       "section_prompts": {
         "trend_analysis_static": {
           "json_key": "trend_analysis",
-          "instruction": "Write as a knowledgeable local jewellery guide — professional, helpful, and grounded. Explain the structural pricing factors for {carat}-carat {shape} diamonds: what drives prices at this weight and shape combination, why certain quality grades carry premiums, and where the market typically settles for stones in this range. This is durable context that helps the reader understand the price graph above — not commentary on today's prices. Frame every factor as useful knowledge for a confident purchase. Do not quote specific prices or market movements — the graph handles that. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
+          "facts": [
+            "value_notes"
+          ],
+          "instruction": "Write as a knowledgeable local jewellery guide — professional, helpful, and grounded. Explain the structural pricing factors for {carat}-carat {shape} diamonds: what drives prices at this weight and shape combination, why certain quality grades carry premiums, and where the market typically settles for stones in this range. This is durable context that helps the reader understand the price graph above — not commentary on today's prices. Frame every factor as useful knowledge for a confident purchase. Do not quote specific prices or market movements — the graph handles that. Write for a buyer in {country}, without local prices, taxes or retailer names. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
           "length": "3-4 sentences"
         },
         "buying_guidance_static": {
           "json_key": "buying_guidance",
-          "instruction": "Write as a knowledgeable local jewellery guide — professional, helpful, neutral. Give practical guidance for buying a {carat}-carat {shape} diamond: which quality factors to prioritise at this size (cut, colour, clarity), where a buyer can be selective without sacrificing visible quality, and what to watch for that is specific to this shape at {carat} carats. Every watch-out must be paired with a concrete positive action. Lead with the most impactful recommendation for this particular combination. Do not second-guess the reader's shape choice. Separate paragraphs with a blank line (two newlines between each paragraph).\n",
+          "facts": [
+            "quality_priorities",
+            "grade_band"
+          ],
+          "instruction": "Write as a knowledgeable local jewellery guide — professional, helpful, neutral. Give practical guidance for buying a {carat}-carat {shape} diamond: which quality factors to prioritise at this size (cut, colour, clarity), where a buyer can be selective without sacrificing visible quality, and what to watch for that is specific to this shape at {carat} carats. Every watch-out must be paired with a concrete positive action. Lead with the most impactful recommendation for this particular combination. Do not second-guess the reader's shape choice. Write for a buyer in {country} and name the country once where it reads naturally. Write it as two to four short paragraphs separated by a blank line.\n",
           "length": "4-5 sentences"
         },
         "faq_static": {
           "json_key": "faq",
+          "facts": [
+            "context"
+          ],
           "output_type": "array",
-          "instruction": "Write as a knowledgeable local jewellery guide — professional, clear, and helpful. Generate questions that a buyer researching a {carat}-carat {shape} diamond would realistically search for or ask in a jewellery store — not generic diamond questions but practical doubts, trade-offs, and value questions specific to this shape and carat weight. Examples of the right register: \"What colour grade is good enough for a {carat}-carat {shape}?\", \"Does clarity matter more at {carat} carats for a {shape}?\", \"Where is the best value at {carat} carats for a {shape}?\". Answers must be concise, helpful, and grounded in general diamond pricing patterns — no hedging, no live prices. At least one question must address a common quality trade-off specific to this shape at {carat} carats. Vary price, cost, worth, how much, and ring phrasing. No years or today in static copy.\n",
+          "instruction": "Write as a knowledgeable local jewellery guide — professional, clear, and helpful. Generate questions that a buyer researching a {carat}-carat {shape} diamond would realistically search for or ask in a jewellery store — not generic diamond questions but practical doubts, trade-offs, and value questions specific to this shape and carat weight. Examples of the right register: \"What colour grade is good enough for a {carat}-carat {shape}?\", \"Does clarity matter more at {carat} carats for a {shape}?\", \"Where is the best value at {carat} carats for a {shape}?\". Answers must be concise, helpful, and grounded in general diamond pricing patterns — no hedging, no live prices. At least one question must address a common quality trade-off specific to this shape at {carat} carats. Word each question the way a buyer would ask it. No years or today in static copy.\n",
           "length": "3 pairs"
         }
       },
@@ -8786,7 +8980,7 @@
         "query_phrase_emphasis": [
           "{carat} carat {shape} diamond price in {country}",
           "engagement ring {carat} carats",
-          "how much does a {shape} cost at {carat} carats",
+          "how big is a {shape} at {carat} carats",
           "diamond on hand at {carat} carats"
         ]
       },
@@ -8916,8 +9110,8 @@
         },
         "jewellerysouthafrica": {
           "site_id": "jewellerysouthafrica",
-          "domain": "jewellerysouthafrica.co.za",
-          "brand_name": "Jewellery South Africa",
+          "domain": "thejeweller.co.za",
+          "brand_name": "The Jeweller: South Africa",
           "country": "za",
           "locale": "en-ZA",
           "currency": "ZAR"
@@ -9177,6 +9371,16 @@
         "hero_band": true,
         "intro_style": "cards"
       },
+      "site_brief": {
+        "reader": "An engagement-ring buyer who has picked a shape, or is close to it, and wants the most beautiful stone their budget allows.",
+        "arrives_with": "What's the best-looking stone I can get for my budget at this shape and weight?",
+        "job": "Weigh what decides how beautiful the stone looks for the money: how big it looks on the hand, the cut that makes it lively, which colour and clarity grades show and where the price steps up. Give a clear judgement, not a list.",
+        "never": [
+          "Proportion and symmetry thresholds in depth, or listing-mix trends (Diamond Advisors owns those).",
+          "Natural against lab-grown spend comparisons (Diamond Price Guru owns those)."
+        ],
+        "voice": "A knowledgeable friend in the first person: plain, buyer-side and sceptical of hype. Backs the reader's choice."
+      },
       "brand_positioning": "Independent diamond guidance from someone who knows the market and talks plainly",
       "tagline": "Expert advice without the jewellery-store sales pitch",
       "target_audience": {
@@ -9190,7 +9394,6 @@
         "formality": "conversational_knowledgeable",
         "technical_level": "high_but_accessible",
         "sentence_structure": "varied",
-        "editorial_stance": "The reader has already made or is close to making their choice. The default tone is supportive of that decision — they are not being talked out of anything. Trade-offs and things to be aware of should be framed as practical guidance that helps them buy the best version of what they want, not as reasons to reconsider. Alternatives to the current page's shape or size should only be mentioned in passing as context, never as a recommendation to go elsewhere.\n",
         "voice": {
           "authoritative": true,
           "personal": true,
@@ -9204,16 +9407,11 @@
         },
         "vocabulary_preference": [
           "here is what matters",
-          "where to focus your budget",
           "where the premium is justified",
           "where the extra spend is not doing much for you",
-          "what I would prioritise",
-          "what I would compromise on",
           "the practical difference",
           "face-up size",
-          "if you are spending extra",
           "if this matters to you",
-          "how much is a {carat}-carat {shape} worth",
           "cost of a {carat}-carat diamond",
           "{carat}-carat diamond ring price",
           "{carat}-carat loose diamond prices",
@@ -9239,7 +9437,6 @@
           "mathematical optimization",
           "mathematically optimized",
           "throwing money away",
-          "light leakage",
           "most competitive segment",
           "overpaying",
           "most liquid",
@@ -9252,42 +9449,58 @@
       "voice_examples": {
         "direct_recommendation": "\"My recommendation for color is H - it looks white, but costs significantly less than D or E for a difference you genuinely cannot see face-up.\"\n",
         "buyer_protective_plain": "\"Jewelers push higher clarity than you need because it's easy to demonstrate under a microscope. Don't fall for it - VS2 is the sweet spot.\"\n",
-        "plain_why": "\"Cut matters more than anything else here. A well-cut stone hides color and clarity differences that would otherwise cost you real money to fix.\"\n",
-        "blunt_tradeoff": "\"Yes, rounds cost more than ovals or cushions of the same weight and quality. That's just what the market does. The upside is there are far more of them to compare, so you have more leverage when shopping.\"\n",
-        "note": "The examples above show voice and register - direct, opinionated, buyer-side, plainspoken. Use this register throughout. Do not copy these sentences verbatim into output. Generate your own specific content in this voice.\n"
+        "plain_why": "\"A well-cut stone looks livelier at arm's length and can hide color and clarity differences that would otherwise cost more to upgrade.\"\n",
+        "blunt_tradeoff": "\"Yes, rounds cost more than ovals or cushions of the same weight and quality. That's just what the market does. The upside is there are far more of them to compare, so you can afford to be choosy.\"\n",
+        "note": "The examples above show voice and register - direct, buyer-side, plainspoken. Use this register throughout. Do not copy these sentences verbatim into output. Generate your own specific content in this voice. State trade-offs. Do not tell the reader how to spend when the choice is taste.\n"
       },
       "prompt_rules": [
         "Frame every recommendation through the lens of an engagement ring purchase — the diamond will be set, worn daily, and seen by others.",
-        "When discussing cut quality, always explain the real-world impact on finger sparkle at arm's length, not just grading lab metrics.",
-        "Prefer concrete price-behaviour observations over abstract market commentary — e.g. 'H colour saves you 20-30% vs D with no visible difference' rather than 'colour grades affect price'.",
-        "Mirror Ahrefs-style search phrasing in FAQs (price, worth, cost, how much, ring) without repeating the same head term in every sentence."
+        "When discussing cut quality, describe how the stone looks at a normal viewing distance, not only the lab grade. Do not tell the reader to spend on cut instead of the setting.",
+        "Prefer concrete price-behaviour observations over abstract market commentary: use the percentage steps in the facts (how much more one grade costs than the next) rather than 'colour grades affect price'. Never quote a percentage the facts do not give.",
+        "Word FAQ questions the way a buyer would search or ask them, without repeating the same head term in every sentence."
       ],
       "content_angles": [
         "Focus on how this diamond looks once set in a ring — finger coverage, sparkle at normal viewing distance, and how the setting affects perceived size.",
-        "Focus on where the smart money sits at this carat weight — which quality grades deliver the best visual result per dollar spent.",
-        "Focus on the trade-offs a first-time buyer faces at this carat weight — what to prioritise and what to relax on without regret.",
+        "Focus on which quality grades change what you can see at this carat weight, and which mainly change the price.",
+        "Focus on the trade-offs a first-time buyer faces at this carat weight - which grades change the look and which mainly change the price.",
         "Focus on how cut quality interacts with this shape at this carat weight — what separates a lively stone from a flat one.",
         "Focus on practical ring-building: how setting style, band width, and side stones interact with this centre stone's proportions.",
-        "Focus on comparing this carat weight to adjacent weights — where the sweet spots and price jumps are.",
-        "Focus on how much a {carat}-carat {shape} is worth versus what buyers actually pay — worth, value, and price in plain language.",
-        "Focus on {carat}-carat diamond ring budget — ring price, centre stone price, and what the total purchase looks like.",
-        "Focus on loose diamond vs ring framing — what changes when the same {carat}-carat {shape} is purchased as a loose stone versus set."
+        "Focus on how this weight looks next to the weights either side of it on the hand, using the measured sizes.",
+        "Focus on depth and spread: how two stones of this weight can face up at different sizes, using the measured ranges.",
+        "Focus on how this shape at this weight compares on the hand with the other shapes a buyer might consider."
       ],
       "section_prompts": {
         "pricing_context_static": {
           "json_key": "pricing_context",
+          "facts": [
+            "value_notes"
+          ],
           "instruction": "Write in the Ringspo voice: plain, direct, matter-of-fact. Explain the structural reasons why {carat}-carat {shape} diamonds are priced the way they are — the manufacturing, cutting, or demand factors that are built into the price regardless of market conditions. This is durable context that the price graph cannot show. Keep it positive and practical: frame each pricing factor as useful knowledge that helps the buyer understand what they are paying for and shop confidently. Do not comment on price levels or market movements — the graph handles that. Do not mention resale or investment value.\n",
           "length": "2-3 sentences"
         },
         "buying_advice_static": {
           "json_key": "buying_advice",
-          "instruction": "Write in the Ringspo voice: direct, opinionated, plainspoken, buyer-side. Combine the sharp opening opinion a knowledgeable friend would give with specific cut, colour and clarity guidance for {carat}-carat {shape} diamonds. Lead with the single most useful thing someone needs to hear, then spell out what to prioritise, where to save without losing visible quality, and the most common mistake buyers make at this shape and weight. Every watch-out must be immediately paired with a clear positive action. No market commentary as an opener and no preamble — get straight to what matters for this purchase.\n",
+          "facts": [
+            "context",
+            "size_facts",
+            "size_context",
+            "size_vs_shapes",
+            "quality_priorities",
+            "why_quality_critical",
+            "quality_recommendations",
+            "grade_band"
+          ],
+          "instruction": "Write in the Ringspo voice: direct, plainspoken, buyer-side. Combine the sharp opening a knowledgeable friend would give with specific cut, colour and clarity guidance for {carat}-carat {shape} diamonds. Lead with the single most useful thing someone needs to hear, then spell out which grades change what you can see, where extra spend often does not show, and the most common mistake buyers make at this shape and weight. Do not tell them how to split budget between the stone and the setting. Every watch-out must be immediately paired with a clear positive action. No market commentary as an opener and no preamble — get straight to what matters for this purchase. Write it as two to four short paragraphs separated by a blank line.\n",
           "length": "6-8 sentences"
         },
         "faq_static": {
           "json_key": "faq",
+          "facts": [
+            "finger_coverage",
+            "trade_offs"
+          ],
           "output_type": "array",
-          "instruction": "Write in the Ringspo voice: direct, no-nonsense, buyer-protective. Generate questions that a real person shopping for a {carat}-carat {shape} diamond would actually type into Google or ask a knowledgeable friend — not generic diamond questions, but doubts, trade-offs, and money questions specific to this shape and carat weight. Examples of the right register: \"Do I really need VVS for a {carat}-carat {shape}?\", \"Why does a {shape} cost what it does at {carat} carats?\", \"Is H colour good enough for a {carat}-carat {shape}?\". Answers must be short, direct, and opinionated — no hedging, no preamble. Sound like a knowledgeable friend giving the honest answer, not a retailer trying to upsell. At least one question must address a common money mistake specific to this shape at {carat} carats. Use varied Ahrefs-style question forms across the three FAQs: at least one with \"how much\" or \"worth\", one with \"price\" or \"cost\", and one about the {carat}-carat {shape} in a ring or on the hand. Never ask which website or retailer to buy from — that is retailer-guide copy, not Ringspo. Never ask generic \"compare to other shapes\" questions Loupe-style; stay on this shape and carat. Never include calendar years or words like today or currently.\n",
+          "instruction": "Write in the Ringspo voice: direct, no-nonsense, buyer-protective. Generate questions that a real person shopping for a {carat}-carat {shape} diamond would actually type into Google or ask a knowledgeable friend — not generic diamond questions, but doubts, trade-offs, and money questions specific to this shape and carat weight. Examples of the right register: \"Do I really need VVS for a {carat}-carat {shape}?\", \"Why does a {shape} cost what it does at {carat} carats?\", \"Is H colour good enough for a {carat}-carat {shape}?\". Answers must be short, direct, and opinionated — no hedging, no preamble. Sound like a knowledgeable friend giving the honest answer, not a retailer trying to upsell. Word each question the way a buyer would ask it, and make one of the three about the {carat}-carat {shape} in a ring or on the hand. Never ask which website or retailer to buy from — that is retailer-guide copy, not Ringspo. Never ask generic \"compare to other shapes\" questions Loupe-style; stay on this shape and carat. Never include calendar years or words like today or currently.\n",
           "length": "3 pairs"
         }
       },
@@ -9295,7 +9508,7 @@
         "target": "Google Search and LLMs",
         "static_content_no_calendar_dates": true,
         "query_phrase_emphasis": [
-          "how much is a {carat}-carat {shape} worth",
+          "is a {carat}-carat {shape} a good size",
           "{carat}-carat diamond price and cost",
           "{carat}-carat diamond ring price",
           "loose diamond vs engagement ring budget"
@@ -9480,7 +9693,7 @@
         "all_shapes": {
           "intro_text": "Right now a {carat} carat {type_label} diamond {in_country} runs {currency_symbol}{current_price:,.0f}{intro_change_clause}. That is the typical price across the {num_diamonds:,} stones we track at this weight, with every shape combined.\nExpect anywhere from {currency_symbol}{min_price:,.0f} to {currency_symbol}{max_price:,.0f} depending on shape, {color_word} and clarity. The spread is wide, which means there's real room to shop smart.\n",
           "analysis": "{trend_analysis}\n",
-          "shape_analysis": "The {most_expensive_shape} is the most expensive cut at this weight ({currency_symbol}{most_expensive_price:,.0f}); the {least_expensive_shape} is the cheapest ({currency_symbol}{least_expensive_price:,.0f}) - roughly {price_difference_article} {price_difference_pct:.1f}% premium ({currency_symbol}{price_difference:,.0f}).\nIf you're flexible on shape, that's money better spent on a higher cut grade. We track {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
+          "shape_analysis": "The {most_expensive_shape} is the most expensive cut at this weight ({currency_symbol}{most_expensive_price:,.0f}); the {least_expensive_shape} is the cheapest ({currency_symbol}{least_expensive_price:,.0f}) - roughly {price_difference_article} {price_difference_pct:.1f}% premium ({currency_symbol}{price_difference:,.0f}).\nShape is one of the bigger price gaps at this weight. Cut and the other grades still move the number a long way within each shape. We track {total_sample_size:,} {type} stones across {shape_count} shapes; the weighted median is {currency_symbol}{weighted_median_price:,.0f}.\n"
         }
       },
       "file_naming": {
@@ -9617,6 +9830,23 @@
             "3"
           ]
         }
+      },
+      "jewellery_treatment": "quality_led",
+      "jewellery_surface": {
+        "lead_table": "color_clarity_bands",
+        "secondary_tables": [
+          "metal",
+          "setting"
+        ],
+        "tennis_lead_table": "metal",
+        "publish_lab_tree": true,
+        "show_trend": false,
+        "default_styles": {
+          "earrings": "stud",
+          "bracelet": "tennis",
+          "necklace": "solitaire_pendant"
+        },
+        "default_metal": "white_gold"
       }
     },
     "section_prompts_base": {
@@ -9971,7 +10201,7 @@
   "navigation": {
     "ringspo": {
       "site_id": "ringspo",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "country_label_source": "i18n_common",
       "injection_mode": {
         "us": "replace",
@@ -9979,22 +10209,30 @@
         "ca": "augment",
         "hk": "augment",
         "ie": "augment",
+        "in": "augment",
         "jp": "augment",
         "nz": "augment",
         "sg": "augment",
-        "uk": "augment"
+        "uk": "augment",
+        "za": "augment"
       },
       "site_shell": {
+        "greenfield": [
+          "za",
+          "in"
+        ],
         "renderer": {
           "us": "ldn",
           "au": "theme",
           "ca": "theme",
           "hk": "theme",
           "ie": "theme",
+          "in": "theme",
           "jp": "theme",
           "nz": "theme",
           "sg": "theme",
-          "uk": "theme"
+          "uk": "theme",
+          "za": "theme"
         }
       },
       "menus": {
@@ -10188,78 +10426,78 @@
                   }
                 },
                 {
-                  "heading": "Diamond Shape",
+                  "heading": "Rings by Shape",
                   "entries": {
                     "kind": "list",
                     "items": [
                       {
-                        "label": "Round Engagement Rings",
+                        "label": "Round",
                         "target": {
                           "kind": "editorial",
                           "url": "/round-engagement-rings/"
                         }
                       },
                       {
-                        "label": "Princess cut engagement rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/princess-cut-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Asscher cut engagement rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/asscher-cut-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Cushion Cut Engagement Rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/cushion-cut-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Emerald cut engagement rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/emerald-cut-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Heart Shaped Engagement Rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/heart-shaped-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Marquise Engagement Rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/marquise-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Oval Engagement Rings",
+                        "label": "Oval",
                         "target": {
                           "kind": "editorial",
                           "url": "/oval-engagement-rings/"
                         }
                       },
                       {
-                        "label": "Pear shaped engagement rings",
+                        "label": "Cushion",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/cushion-cut-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Emerald",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/emerald-cut-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Princess",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/princess-cut-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Pear",
                         "target": {
                           "kind": "editorial",
                           "url": "/pear-shaped-engagement-rings/"
                         }
                       },
                       {
-                        "label": "Radiant cut engagement rings",
+                        "label": "Radiant",
                         "target": {
                           "kind": "editorial",
                           "url": "/radiant-cut-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Marquise",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/marquise-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Asscher",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/asscher-cut-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Heart",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/heart-shaped-engagement-rings/"
                         }
                       }
                     ]
@@ -10271,28 +10509,28 @@
                     "kind": "list",
                     "items": [
                       {
-                        "label": "White gold engagement rings",
+                        "label": "White Gold",
                         "target": {
                           "kind": "editorial",
                           "url": "/white-gold-engagement-rings/"
                         }
                       },
                       {
-                        "label": "Platinum engagement rings",
+                        "label": "Platinum",
                         "target": {
                           "kind": "editorial",
                           "url": "/platinum-engagement-rings/"
                         }
                       },
                       {
-                        "label": "Gold engagement rings",
+                        "label": "Yellow Gold",
                         "target": {
                           "kind": "editorial",
                           "url": "/gold-engagement-rings/"
                         }
                       },
                       {
-                        "label": "Rose gold engagement rings",
+                        "label": "Rose Gold",
                         "target": {
                           "kind": "editorial",
                           "url": "/rose-gold-engagement-rings/"
@@ -10302,65 +10540,72 @@
                   }
                 },
                 {
-                  "heading": "Setting Style",
+                  "heading": "Setting Styles",
                   "entries": {
                     "kind": "list",
                     "items": [
                       {
-                        "label": "Bezel engagement rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/bezel-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Channel set diamond rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/channel-set-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Halo engagement rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/halo-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Pavé engagement rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/pave-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Solitaire engagement rings",
+                        "label": "Solitaire",
                         "target": {
                           "kind": "editorial",
                           "url": "/solitaire-engagement-rings/"
                         }
                       },
                       {
-                        "label": "Three stone engagement rings",
+                        "label": "Halo",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/halo-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Pavé",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/pave-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Bezel",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/bezel-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Three-Stone",
                         "target": {
                           "kind": "editorial",
                           "url": "/three-stone-engagement-rings/"
+                        }
+                      },
+                      {
+                        "label": "Channel-Set",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/channel-set-engagement-rings/"
                         }
                       }
                     ]
                   }
                 },
                 {
-                  "heading": "Guides",
+                  "heading": "Buying Guides",
                   "entries": {
                     "kind": "list",
                     "items": [
                       {
-                        "label": "How much to spend",
+                        "label": "How Much to Spend",
                         "target": {
                           "kind": "editorial",
                           "url": "/engagement-ring-budget/"
+                        }
+                      },
+                      {
+                        "label": "Lab-Grown Diamonds",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/lab-grown-diamonds/"
                         }
                       },
                       {
@@ -10371,31 +10616,17 @@
                         }
                       },
                       {
-                        "label": "Lab grown diamonds",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/lab-grown-diamonds/"
-                        }
-                      },
-                      {
-                        "label": "Celeb rings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/celebrity-engagement-rings/"
-                        }
-                      },
-                      {
-                        "label": "Diamond huggie earrings",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/product-category/diamond-huggie-earrings/"
-                        }
-                      },
-                      {
-                        "label": "Diamond stud earrings",
+                        "label": "Diamond Stud Earrings",
                         "target": {
                           "kind": "editorial",
                           "url": "/diamond-stud-earrings/"
+                        }
+                      },
+                      {
+                        "label": "Celebrity Rings",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/celebrity-engagement-rings/"
                         }
                       }
                     ]
@@ -10480,40 +10711,40 @@
               "mega_menu_columns": 2,
               "columns": [
                 {
-                  "heading": "General selling",
+                  "heading": "Selling Guides",
                   "entries": {
                     "kind": "list",
                     "items": [
                       {
-                        "label": "Sell Diamond Engagement Ring",
+                        "label": "Diamond Engagement Ring",
                         "target": {
                           "kind": "editorial",
                           "url": "/sell-diamond-engagement-ring/"
                         }
                       },
                       {
-                        "label": "Sell a loose diamond",
+                        "label": "Loose Diamond",
                         "target": {
                           "kind": "editorial",
                           "url": "/sell-loose-diamond/"
                         }
                       },
                       {
-                        "label": "Jewelry appraisal guide",
+                        "label": "Jewelry Appraisal Guide",
                         "target": {
                           "kind": "editorial",
                           "url": "/jewelry-appraisal/"
                         }
                       },
                       {
-                        "label": "Diamond appraisal guide",
+                        "label": "Diamond Appraisal Guide",
                         "target": {
                           "kind": "editorial",
                           "url": "/diamond-appraisal/"
                         }
                       },
                       {
-                        "label": "Sell gold",
+                        "label": "Sell Gold",
                         "target": {
                           "kind": "editorial",
                           "url": "/sell-gold/"
@@ -10523,57 +10754,57 @@
                   }
                 },
                 {
-                  "heading": "Sell designer jewelry",
+                  "heading": "Designer Brands",
                   "entries": {
                     "kind": "list",
                     "items": [
                       {
-                        "label": "Sell Tiffany jewelry",
+                        "label": "Tiffany & Co.",
                         "target": {
                           "kind": "editorial",
                           "url": "/sell-tiffany-jewelry/"
                         }
                       },
                       {
-                        "label": "Sell Cartier jewelry",
+                        "label": "Cartier",
                         "target": {
                           "kind": "editorial",
                           "url": "/sell-cartier/"
                         }
                       },
                       {
-                        "label": "Sell Graff jewelry",
+                        "label": "Van Cleef & Arpels",
                         "target": {
                           "kind": "editorial",
-                          "url": "/sell-graff/"
+                          "url": "/sell-van-cleef-arpels/"
                         }
                       },
                       {
-                        "label": "Sell Bvlgari jewelry",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/sell-bvlgari/"
-                        }
-                      },
-                      {
-                        "label": "Sell Harry Winston jewelry",
+                        "label": "Harry Winston",
                         "target": {
                           "kind": "editorial",
                           "url": "/sell-harry-winston/"
                         }
                       },
                       {
-                        "label": "Sell David Yurman jewelry",
+                        "label": "David Yurman",
                         "target": {
                           "kind": "editorial",
                           "url": "/sell-david-yurman/"
                         }
                       },
                       {
-                        "label": "Sell Van Cleef jewelry",
+                        "label": "Bvlgari",
                         "target": {
                           "kind": "editorial",
-                          "url": "/sell-van-cleef-arpels/"
+                          "url": "/sell-bvlgari/"
+                        }
+                      },
+                      {
+                        "label": "Graff",
+                        "target": {
+                          "kind": "editorial",
+                          "url": "/sell-graff/"
                         }
                       }
                     ]
@@ -10594,50 +10825,36 @@
               "mega_menu_columns": 2,
               "columns": [
                 {
-                  "heading": "Trusted retailers",
+                  "heading": "Buying Advice",
                   "entries": {
                     "kind": "list",
                     "items": [
                       {
-                        "label": "#1 recommendation",
+                        "label": "Best Places to Buy",
                         "target": {
                           "kind": "editorial",
-                          "url": "/recommended-retailers/#jamesallen"
+                          "url": "/recommended-retailers/"
                         }
                       },
                       {
-                        "label": "Outside USA",
+                        "label": "How Much to Spend",
                         "target": {
                           "kind": "editorial",
-                          "url": "/recommended-retailers/#bluenile"
+                          "url": "/engagement-ring-budget/"
                         }
                       },
                       {
-                        "label": "Highest quality diamonds",
+                        "label": "Lab-Grown Diamonds",
                         "target": {
                           "kind": "editorial",
-                          "url": "/recommended-retailers/#whiteflash"
+                          "url": "/lab-grown-diamonds/"
                         }
                       },
                       {
-                        "label": "Custom rings",
+                        "label": "Buying Pre-Owned Rings",
                         "target": {
                           "kind": "editorial",
-                          "url": "/recommended-retailers/#taylor-hart"
-                        }
-                      },
-                      {
-                        "label": "Colored diamonds",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/recommended-retailers/#leibish"
-                        }
-                      },
-                      {
-                        "label": "Non-diamond",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/recommended-retailers/#gemvara"
+                          "url": "/used-diamond-engagement-rings/"
                         }
                       }
                     ]
@@ -10649,108 +10866,59 @@
                     "kind": "list",
                     "items": [
                       {
-                        "label": "James Allen Review",
+                        "label": "James Allen",
                         "target": {
                           "kind": "editorial",
                           "url": "/reviews/james-allen/"
                         }
                       },
                       {
-                        "label": "Blue Nile Review",
+                        "label": "Blue Nile",
                         "target": {
                           "kind": "editorial",
                           "url": "/reviews/blue-nile/"
                         }
                       },
                       {
-                        "label": "Brilliant Earth Review",
+                        "label": "Brilliant Earth",
                         "target": {
                           "kind": "editorial",
                           "url": "/reviews/brilliant-earth/"
                         }
                       },
                       {
-                        "label": "Brian Gavin Review",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/reviews/brian-gavin/"
-                        }
-                      },
-                      {
-                        "label": "Whiteflash Review",
+                        "label": "Whiteflash",
                         "target": {
                           "kind": "editorial",
                           "url": "/reviews/whiteflash/"
                         }
                       },
                       {
-                        "label": "B2C Jewels Review",
+                        "label": "Brian Gavin",
                         "target": {
                           "kind": "editorial",
-                          "url": "/reviews/b2c-jewels/"
+                          "url": "/reviews/brian-gavin/"
                         }
                       },
                       {
-                        "label": "Shane Co Review",
+                        "label": "Shane Co.",
                         "target": {
                           "kind": "editorial",
                           "url": "/reviews/shane-co/"
                         }
                       },
                       {
-                        "label": "Helzberg Review",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/reviews/helzberg-diamonds/"
-                        }
-                      },
-                      {
-                        "label": "Jared Review",
+                        "label": "Jared",
                         "target": {
                           "kind": "editorial",
                           "url": "/reviews/jared/"
                         }
                       },
                       {
-                        "label": "Kays Review",
+                        "label": "Kay Jewelers",
                         "target": {
                           "kind": "editorial",
                           "url": "/reviews/kay-jewelers/"
-                        }
-                      },
-                      {
-                        "label": "Zales Review",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/reviews/zales/"
-                        }
-                      },
-                      {
-                        "label": "Rogers & Hollands Review",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/reviews/rogers-and-hollands/"
-                        }
-                      },
-                      {
-                        "label": "Robbins Brothers Review",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/reviews/robbins-brothers/"
-                        }
-                      },
-                      {
-                        "label": "Ascot Diamonds Review",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/reviews/ascot-diamonds/"
-                        }
-                      },
-                      {
-                        "label": "Diamonds Direct Review",
-                        "target": {
-                          "kind": "editorial",
-                          "url": "/reviews/diamonds-direct/"
                         }
                       }
                     ]
@@ -12000,11 +12168,11 @@
                   "suppressed": [
                     {
                       "code": "za",
-                      "reason": "No subsite provisioned"
+                      "reason": "Wave 3b greenfield pilot — not launched (root-served)"
                     },
                     {
                       "code": "in",
-                      "reason": "No subsite provisioned"
+                      "reason": "Wave 3b greenfield pilot — not launched (root-served)"
                     },
                     {
                       "code": "fr",
@@ -22004,7 +22172,20 @@
         "size_level_3": "/diamond-size/{shape}/{carat}",
         "size_level_compare": "/diamond-size/compare/{compare}",
         "size_level_methodology": "/diamond-size/methodology",
-        "size_level_sitemap": "/diamond-size/sitemap.xml"
+        "size_level_sitemap": "/diamond-size/sitemap.xml",
+        "jewellery_level_1": "/{country}/diamond-jewelry-prices",
+        "jewellery_level_2": "/{country}/diamond-jewelry-prices/{category}",
+        "jewellery_level_3": "/{country}/diamond-jewelry-prices/{category}/{subpath}",
+        "jewellery_level_mens_cat": "/{country}/diamond-jewelry-prices/mens/{category}",
+        "jewellery_level_mens": "/{country}/diamond-jewelry-prices/mens/{category}/{subpath}",
+        "jewellery_lab_level_1": "/{country}/diamond-jewelry-prices/{jewellery_type}",
+        "jewellery_lab_level_2": "/{country}/diamond-jewelry-prices/{jewellery_type}/{category}",
+        "jewellery_lab_level_3": "/{country}/diamond-jewelry-prices/{jewellery_type}/{category}/{subpath}",
+        "jewellery_lab_level_mens_cat": "/{country}/diamond-jewelry-prices/{jewellery_type}/mens/{category}",
+        "jewellery_lab_level_mens": "/{country}/diamond-jewelry-prices/{jewellery_type}/mens/{category}/{subpath}",
+        "jewellery_level_sitemap": "/{country}/diamond-jewelry-prices/sitemap.xml",
+        "jewellery_type_natural": "",
+        "jewellery_type_lab": "lab-grown"
       },
       "diamondchart": {
         "site_id": "diamondchart",
@@ -22070,7 +22251,15 @@
           "level_4": "/us/1-carat-natural-round-cut-diamond-price",
           "level_5": "/us/1-carat-natural-round-cut-diamond-price/gia/2527938255",
           "level_5_lab": "/au/2-carat-laboratory-grown-oval-cut-diamond-price/igi/LG12345678"
-        }
+        },
+        "jewellery_level_1": "/{country}/jewelry",
+        "jewellery_level_2": "/{country}/{category}",
+        "jewellery_level_3": "/{country}/{category}/{subpath}",
+        "jewellery_level_mens_cat": "/{country}/mens/{category}",
+        "jewellery_level_mens": "/{country}/mens/{category}/{subpath}",
+        "jewellery_level_sitemap": "/{country}/jewelry/sitemap.xml",
+        "jewellery_type_natural": "",
+        "jewellery_type_lab": null
       },
       "betterdiamondinitiative": {
         "site_id": "betterdiamondinitiative",
@@ -22183,7 +22372,7 @@
       },
       "5caratdiamondring": {
         "site_id": "5caratdiamondring",
-        "domain": "5caratdiamondring.com",
+        "domain": "5caratdiamond.com",
         "carat_weight": 5,
         "is_carat_site": true,
         "level_1": "/{country}",
@@ -22723,7 +22912,7 @@
   },
   "entitlements": {
     "version": "1.0.0",
-    "last_updated": "2026-08-13",
+    "last_updated": "2026-11-16",
     "review_notes": "Draft v1 — standalone sites (Ringspo, DPG, DA, BDI, DHUK) may differ for\ncontent-uniqueness (see docs/architecture/content-uniqueness-audit.md).\nTranslation / network families (Loupe, Diamond Price Exact, carat) MUST share\nidentical pipeline_artefacts and wp_widgets keys (and presentation) at each page\nlevel — run scripts/sync_entitlements_families.py after family template changes.\n\nShape hub presentations (shapes_at_carat widget) — standalone sites differ by design:\nshape_cards = Ringspo, Diamond Advisors, BDI; bar_chart_links = Loupe + DPE families;\ntable_ranked = DPG, Diamond Hunt UK; carat network = table_ranked on top-level only\n(no all-shapes page — carat is fixed per domain).\n\nPipeline lists use artefact_id keys from config/artefacts.yaml. WP widgets\nare presentation-only; a widget may be on while its artefact is still planned\n(placeholder) or legacy path.\n\nLAUNCH: All sites ship with market INDEX / pricing content only (Product 1).\nconsumer_advisory profiles below are Phase 8 POLICY — not live at launch.\nWidgets like individual_listings are planned for Phase 8; plugin must not\nrender them until consumer_features_live in country_markets.yaml.\n\nDECISION 2026-06-14 — NO CROSS-SITE PRICING COMPARISON. The cross_site_comparison\nwidget is NOT proceeding (network-graph exposure + price-contradiction risk; see\ndocs/architecture/content-uniqueness-audit.md § 0 and PRD-005 Epic CP56 ON HOLD).\nAll per-site cross_site_comparison values below are now set to `disabled`. The\nplugin MUST NOT render this widget. Internal same-domain links (Ringspo\nsize<->price) are separate and allowed (PRD-015 Decision 5).\nFUTURE (uncommitted): comparison MAY be revisited for a small number of pages using\nTHIRD-PARTY benchmarks (e.g. caratradar.com, stonealgo.com — sites that publish\nprice graphs), NOT reciprocal links between our own owned sites.\n",
     "widget_vocabulary": {
       "cross_site_comparison": {
@@ -22830,6 +23019,136 @@
       "none": {
         "description": "No consumer advisory — index/scoring/calculator/data-source only. Loupe network, SparkleScore, non-core DPE locales until market enabled.\n",
         "countries": {}
+      }
+    },
+    "knowledge_fields": {
+      "ringspo": {
+        "context": "use",
+        "size_facts": "lead",
+        "finger_coverage": "use",
+        "size_context": "lead",
+        "size_vs_shapes": "lead",
+        "vs_other_carats": false,
+        "size_vs_carats": false,
+        "buyer_type_fit": false,
+        "quality_priorities": "use",
+        "why_quality_critical": "use",
+        "quality_recommendations": "use",
+        "value_notes": "use",
+        "trade_offs": "use",
+        "lab_grown_notes": false
+      },
+      "diamondadvisors": {
+        "context": "use",
+        "size_facts": "use",
+        "finger_coverage": false,
+        "size_context": false,
+        "size_vs_shapes": false,
+        "vs_other_carats": "use",
+        "size_vs_carats": "use",
+        "buyer_type_fit": false,
+        "quality_priorities": "lead",
+        "why_quality_critical": "lead",
+        "quality_recommendations": "lead",
+        "value_notes": false,
+        "trade_offs": "use",
+        "lab_grown_notes": false
+      },
+      "diamondpriceguru": {
+        "context": "use",
+        "size_facts": false,
+        "finger_coverage": false,
+        "size_context": false,
+        "size_vs_shapes": false,
+        "vs_other_carats": "lead",
+        "size_vs_carats": "use",
+        "buyer_type_fit": "use",
+        "quality_priorities": false,
+        "why_quality_critical": false,
+        "quality_recommendations": "use",
+        "value_notes": "lead",
+        "trade_offs": "use",
+        "lab_grown_notes": false
+      },
+      "specialized_lab_only": {
+        "context": "use",
+        "size_facts": false,
+        "finger_coverage": "use",
+        "size_context": false,
+        "size_vs_shapes": false,
+        "vs_other_carats": false,
+        "size_vs_carats": false,
+        "buyer_type_fit": "use",
+        "quality_priorities": "use",
+        "why_quality_critical": false,
+        "quality_recommendations": "use",
+        "value_notes": "use",
+        "trade_offs": false,
+        "lab_grown_notes": "lead"
+      },
+      "specialized_uk_only": {
+        "context": "use",
+        "size_facts": "use",
+        "finger_coverage": "lead",
+        "size_context": false,
+        "size_vs_shapes": false,
+        "vs_other_carats": "use",
+        "size_vs_carats": "use",
+        "buyer_type_fit": "lead",
+        "quality_priorities": "use",
+        "why_quality_critical": false,
+        "quality_recommendations": "use",
+        "value_notes": "use",
+        "trade_offs": false,
+        "lab_grown_notes": false
+      },
+      "loupe": {
+        "context": "use",
+        "size_facts": false,
+        "finger_coverage": false,
+        "size_context": false,
+        "size_vs_shapes": false,
+        "vs_other_carats": false,
+        "size_vs_carats": false,
+        "buyer_type_fit": false,
+        "quality_priorities": "use",
+        "why_quality_critical": false,
+        "quality_recommendations": false,
+        "value_notes": "lead",
+        "trade_offs": false,
+        "lab_grown_notes": false
+      },
+      "carat": {
+        "context": "use",
+        "size_facts": "use",
+        "finger_coverage": "lead",
+        "size_context": "use",
+        "size_vs_shapes": "use",
+        "vs_other_carats": false,
+        "size_vs_carats": false,
+        "buyer_type_fit": "use",
+        "quality_priorities": false,
+        "why_quality_critical": false,
+        "quality_recommendations": "use",
+        "value_notes": "use",
+        "trade_offs": "use",
+        "lab_grown_notes": false
+      },
+      "diamond_price_exact": {
+        "context": "use",
+        "size_facts": "lead",
+        "finger_coverage": false,
+        "size_context": "use",
+        "size_vs_shapes": "use",
+        "vs_other_carats": false,
+        "size_vs_carats": false,
+        "buyer_type_fit": false,
+        "quality_priorities": false,
+        "why_quality_critical": false,
+        "quality_recommendations": false,
+        "value_notes": "use",
+        "trade_offs": false,
+        "lab_grown_notes": false
       }
     },
     "sites": {
@@ -22945,6 +23264,7 @@
               "size_chart_html",
               "shape_outline_svg",
               "size_copy_json",
+              "size_og_preview_png",
               "size_sitemap_xml"
             ],
             "wp_widgets": {
@@ -22953,6 +23273,30 @@
               },
               "size_table": true,
               "shape_outline": true
+            }
+          },
+          "jewellery": {
+            "countries": [
+              "us"
+            ],
+            "pipeline_artefacts": [
+              "jewellery_summary_json",
+              "jewellery_quality_grid_json",
+              "jewellery_lab_comparison_json",
+              "jewellery_copy_json"
+            ],
+            "wp_widgets": {
+              "jewellery_design_cards": true,
+              "jewellery_lead_table": {
+                "presentation": "color_clarity_bands"
+              },
+              "jewellery_secondary_tables": {
+                "presentation": "metal_and_setting"
+              },
+              "jewellery_ads": false,
+              "data_methodology": {
+                "presentation": "full"
+              }
             }
           }
         }
@@ -22970,6 +23314,7 @@
               "size_chart_html",
               "shape_outline_svg",
               "size_copy_json",
+              "size_og_preview_png",
               "size_sitemap_xml"
             ],
             "wp_widgets": {
@@ -23117,6 +23462,31 @@
               "market_overview_json",
               "templated_copy_json"
             ]
+          },
+          "jewellery": {
+            "countries": [
+              "us"
+            ],
+            "pipeline_artefacts": [
+              "jewellery_summary_json",
+              "jewellery_quality_grid_json",
+              "jewellery_trend_json",
+              "jewellery_copy_json"
+            ],
+            "wp_widgets": {
+              "jewellery_design_cards": true,
+              "jewellery_lead_table": {
+                "presentation": "metal_setting_grid"
+              },
+              "jewellery_secondary_tables": {
+                "presentation": "default_color_clarity"
+              },
+              "jewellery_trend": true,
+              "jewellery_ads": true,
+              "data_methodology": {
+                "presentation": "full"
+              }
+            }
           }
         }
       },
@@ -25742,6 +26112,20 @@
         "wp_widgets": [],
         "related_artefacts": []
       },
+      "size_og_preview_png": {
+        "schema_version": 1,
+        "page_level": "size",
+        "producing_script": "Z3_generate_artefacts",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "size-og-preview.png",
+        "description": "1200×630 branded PNG social card (site name + page title + size histogram) for Open Graph / sharing on individual size pages.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "size_distribution_json"
+        ],
+        "runtime_note": "Written when a real-cell histogram exists; Kaleido needs Chromium in the runtime image."
+      },
       "size_sitemap_xml": {
         "schema_version": 1,
         "page_level": "size",
@@ -25753,6 +26137,79 @@
         "wp_widgets": [],
         "related_artefacts": [
           "size_chart_html"
+        ]
+      },
+      "jewellery_summary_json": {
+        "schema_version": 1,
+        "page_level": "jewellery",
+        "producing_script": "J4_jewellery_page_artefacts",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "jewellery-summary.json",
+        "description": "Finished jewellery hero benchmark stats (median, p25-p75, design_count, retailer_count), AggregateOffer metadata and deduplicated cross-retailer design cards (evidence[], 1 per design_key).",
+        "wp_widgets": [
+          "jewellery_design_cards"
+        ],
+        "related_artefacts": [
+          "jewellery_quality_grid_json",
+          "jewellery_copy_json"
+        ]
+      },
+      "jewellery_quality_grid_json": {
+        "schema_version": 1,
+        "page_level": "jewellery",
+        "producing_script": "J4_jewellery_page_artefacts",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "jewellery-quality-grid.json",
+        "description": "Server-rendered lead and secondary breakdown tables driven by jewellery_treatment (Ringspo quality_led 3x3 colour x clarity + metal/setting; DA metal_setting_led + default colour x clarity) with Table/Dataset metadata.",
+        "wp_widgets": [
+          "jewellery_lead_table",
+          "jewellery_secondary_tables"
+        ],
+        "related_artefacts": [
+          "jewellery_summary_json"
+        ]
+      },
+      "jewellery_lab_comparison_json": {
+        "schema_version": 1,
+        "page_level": "jewellery",
+        "producing_script": "J4_jewellery_page_artefacts",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "jewellery-lab-comparison.json",
+        "description": "Natural vs lab-grown jewellery benchmark comparison for Ringspo's /lab-grown/ sibling URL tree. Never entitled on Diamond Advisors.",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "jewellery_summary_json"
+        ]
+      },
+      "jewellery_trend_json": {
+        "schema_version": 1,
+        "page_level": "jewellery",
+        "producing_script": "J4_jewellery_page_artefacts",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "jewellery-trend.json",
+        "description": "Diamond Advisors jewellery price and style-mix movement payload (status too_new until two or more jewellery index weeks exist).",
+        "wp_widgets": [
+          "jewellery_trend"
+        ],
+        "related_artefacts": [
+          "jewellery_summary_json"
+        ]
+      },
+      "jewellery_copy_json": {
+        "schema_version": 1,
+        "page_level": "jewellery",
+        "producing_script": "J4_jewellery_page_artefacts",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "jewellery-copy.json",
+        "description": "Editorial and deterministic copy plus FAQ payload for finished jewellery pages (total-weight methodology, natural head framing and site voice).",
+        "wp_widgets": [],
+        "related_artefacts": [
+          "jewellery_summary_json"
         ]
       }
     },
@@ -25796,6 +26253,22 @@
           "all-shapes",
           "diamond-type",
           "top-level"
+        ]
+      },
+      "faq": {
+        "description": "Visible FAQ section and FAQPage JSON-LD, switched together. Off for every site at launch (absent from entitlements = off). Pricing pages merge the C5.8 ranking pair (copy.json) with C1 pairs (static-content.json); size pages read size-copy.json (Z3). The pipelines keep writing FAQ data while this is off. See docs/architecture/faq-production.md.\n",
+        "reads_artefacts": [
+          "static_content_json",
+          "templated_copy_json",
+          "size_copy_json"
+        ],
+        "page_levels": [
+          "shape",
+          "all-shapes",
+          "diamond-type",
+          "top-level",
+          "calculator",
+          "size"
         ]
       },
       "distribution_chart": {
@@ -25984,6 +26457,49 @@
         "page_levels": [
           "shape"
         ]
+      },
+      "jewellery_design_cards": {
+        "description": "Server-rendered deduplicated cross-retailer jewellery design cards (1 per design_key in evidence[]) with metal/carat swatches, J3 price-position pill and affiliate link.",
+        "reads_artefacts": [
+          "jewellery_summary_json"
+        ],
+        "page_levels": [
+          "jewellery"
+        ]
+      },
+      "jewellery_lead_table": {
+        "description": "Primary server-rendered jewellery breakdown table (Ringspo: 3x3 colour x clarity bands; Diamond Advisors: metal x setting).",
+        "reads_artefacts": [
+          "jewellery_quality_grid_json"
+        ],
+        "page_levels": [
+          "jewellery"
+        ]
+      },
+      "jewellery_secondary_tables": {
+        "description": "Secondary server-rendered jewellery breakdown tables (Ringspo: metal and setting; Diamond Advisors: default-cell colour x clarity).",
+        "reads_artefacts": [
+          "jewellery_quality_grid_json"
+        ],
+        "page_levels": [
+          "jewellery"
+        ]
+      },
+      "jewellery_trend": {
+        "description": "Week-on-week jewellery median and style-mix movement block (Diamond Advisors only; stays hidden/too_new until >= 2 weeks exist).",
+        "reads_artefacts": [
+          "jewellery_trend_json"
+        ],
+        "page_levels": [
+          "jewellery"
+        ]
+      },
+      "jewellery_ads": {
+        "description": "On-page finished jewellery display ad placement (Diamond Advisors only; disabled on Ringspo per seed-vs-sell policy).",
+        "reads_artefacts": [],
+        "page_levels": [
+          "jewellery"
+        ]
       }
     }
   },
@@ -26028,6 +26544,26 @@
         "diamond_type": "lab-grown",
         "carat": "1.5",
         "shape": "oval"
+      },
+      {
+        "diamond_type": "natural",
+        "carat": "3",
+        "shape": "cushion"
+      },
+      {
+        "diamond_type": "lab-grown",
+        "carat": "3",
+        "shape": "cushion"
+      },
+      {
+        "diamond_type": "natural",
+        "carat": "7",
+        "shape": "marquise"
+      },
+      {
+        "diamond_type": "lab-grown",
+        "carat": "7",
+        "shape": "marquise"
       },
       {
         "diamond_type": "lab-grown",
@@ -26619,6 +27155,149 @@
         "engineering_position": "The au pack assumes the APPs apply. Over-compliance, not under."
       }
     ]
+  },
+  "indexnow_keys": {
+    "version": "1.0.0",
+    "last_updated": "2026-09-07",
+    "keys": {
+      "ringspo.com": "0c9da8ce668959200ed8bedb594126b3",
+      "diamondpriceguru.com": "750f9125ff03db602010a4e11ef3f7b2",
+      "thediamondadvisors.com": "967b4201368acf95b1e7cc2a661bf043",
+      "sparklescore.net": "6ce15de763b0b45148afb0165005525e",
+      "betterdiamondinitiative.org": "277ab9406832fd5a8fbac3f84c9ac4ed",
+      "diamondhunt.co.uk": "4425bcf0168e2eeee09f0ed4b236ce68",
+      "diamondpricecalc.com": "ad3e4f7c2767d4f0ad8b2373997c35d6",
+      "1caratdiamondrings.com": "9ab1e4f56cd45ba1e90992344ae8524d",
+      "2caratdiamondrings.com": "25ac66bd0a51b32e74ed6b5a0db9ebb6",
+      "3caratdiamondring.com": "9aea28385af88bd0e100082eeb700555",
+      "4caratdiamondrings.com": "1944b70a5924e96d299fd740a887a989",
+      "5caratdiamond.com": "b0a1f64b25f98e402573f0502a72ad50",
+      "6caratdiamondring.com": "24821418d2cb3b3c79838e3c0a88bc72",
+      "7caratdiamondring.com": "1e85b5344d20dad186d3b67198879efd",
+      "8caratdiamondring.com": "f2ad9e46867c1012e753929e56cae3a9",
+      "9caratdiamondring.com": "77cdd0e75aa0c9772b9eae640770ecbe",
+      "10caratdiamondring.com": "8733d6316825e29fa66a119268930a82",
+      "12caratdiamondring.com": "902f9bb1217118392607dcda47d17cc7",
+      "modernjeweler.com": "2d12023a6076ddcb6c96c1ab3d0f1783",
+      "jewellerymonthly.co.uk": "45b3940217b38ba7ffbd734753858b1c",
+      "jewellerysingapore.sg": "b689a05da37c428963af9fa681393d06",
+      "jewellerycanada.ca": "9be88d59ef1049d2e9497c6680be61b3",
+      "jewelleryaustralia.com.au": "1a4c202d3692fe3ca882186665947e21",
+      "jewelleryindia.in": "e4517a6f03288339e1196c7b78296db0",
+      "jewelleryireland.ie": "c71f1361c84df6387612767246402a0b",
+      "jewellerynz.co.nz": "a920bf2e8276dffc62abed8f2099b353",
+      "thejeweller.co.za": "05f1f09f4e0349c693a4da61a15ea4d4"
+    },
+    "sites": {
+      "ringspo.com": {
+        "site_id": "ringspo",
+        "key_file": "config/indexnow_keys/0c9da8ce668959200ed8bedb594126b3.txt"
+      },
+      "diamondpriceguru.com": {
+        "site_id": "diamondpriceguru",
+        "key_file": "config/indexnow_keys/750f9125ff03db602010a4e11ef3f7b2.txt"
+      },
+      "thediamondadvisors.com": {
+        "site_id": "diamondadvisors",
+        "key_file": "config/indexnow_keys/967b4201368acf95b1e7cc2a661bf043.txt"
+      },
+      "sparklescore.net": {
+        "site_id": "sparklescore",
+        "key_file": "config/indexnow_keys/6ce15de763b0b45148afb0165005525e.txt"
+      },
+      "betterdiamondinitiative.org": {
+        "site_id": "betterdiamondinitiative",
+        "key_file": "config/indexnow_keys/277ab9406832fd5a8fbac3f84c9ac4ed.txt"
+      },
+      "diamondhunt.co.uk": {
+        "site_id": "diamondhuntuk",
+        "key_file": "config/indexnow_keys/4425bcf0168e2eeee09f0ed4b236ce68.txt"
+      },
+      "diamondpricecalc.com": {
+        "site_id": "diamondpricecalc",
+        "key_file": "config/indexnow_keys/ad3e4f7c2767d4f0ad8b2373997c35d6.txt"
+      },
+      "1caratdiamondrings.com": {
+        "site_id": "1caratdiamondring",
+        "key_file": "config/indexnow_keys/9ab1e4f56cd45ba1e90992344ae8524d.txt"
+      },
+      "2caratdiamondrings.com": {
+        "site_id": "2caratdiamondring",
+        "key_file": "config/indexnow_keys/25ac66bd0a51b32e74ed6b5a0db9ebb6.txt"
+      },
+      "3caratdiamondring.com": {
+        "site_id": "3caratdiamondring",
+        "key_file": "config/indexnow_keys/9aea28385af88bd0e100082eeb700555.txt"
+      },
+      "4caratdiamondrings.com": {
+        "site_id": "4caratdiamondring",
+        "key_file": "config/indexnow_keys/1944b70a5924e96d299fd740a887a989.txt"
+      },
+      "5caratdiamond.com": {
+        "site_id": "5caratdiamondring",
+        "key_file": "config/indexnow_keys/b0a1f64b25f98e402573f0502a72ad50.txt"
+      },
+      "6caratdiamondring.com": {
+        "site_id": "6caratdiamondring",
+        "key_file": "config/indexnow_keys/24821418d2cb3b3c79838e3c0a88bc72.txt"
+      },
+      "7caratdiamondring.com": {
+        "site_id": "7caratdiamondring",
+        "key_file": "config/indexnow_keys/1e85b5344d20dad186d3b67198879efd.txt"
+      },
+      "8caratdiamondring.com": {
+        "site_id": "8caratdiamondring",
+        "key_file": "config/indexnow_keys/f2ad9e46867c1012e753929e56cae3a9.txt"
+      },
+      "9caratdiamondring.com": {
+        "site_id": "9caratdiamondring",
+        "key_file": "config/indexnow_keys/77cdd0e75aa0c9772b9eae640770ecbe.txt"
+      },
+      "10caratdiamondring.com": {
+        "site_id": "10caratdiamondring",
+        "key_file": "config/indexnow_keys/8733d6316825e29fa66a119268930a82.txt"
+      },
+      "12caratdiamondring.com": {
+        "site_id": "12caratdiamondring",
+        "key_file": "config/indexnow_keys/902f9bb1217118392607dcda47d17cc7.txt"
+      },
+      "modernjeweler.com": {
+        "site_id": "modernjeweler",
+        "key_file": "config/indexnow_keys/2d12023a6076ddcb6c96c1ab3d0f1783.txt"
+      },
+      "jewellerymonthly.co.uk": {
+        "site_id": "jewellerymonthly",
+        "key_file": "config/indexnow_keys/45b3940217b38ba7ffbd734753858b1c.txt"
+      },
+      "jewellerysingapore.sg": {
+        "site_id": "jewellerysingapore",
+        "key_file": "config/indexnow_keys/b689a05da37c428963af9fa681393d06.txt"
+      },
+      "jewellerycanada.ca": {
+        "site_id": "jewellerycanada",
+        "key_file": "config/indexnow_keys/9be88d59ef1049d2e9497c6680be61b3.txt"
+      },
+      "jewelleryaustralia.com.au": {
+        "site_id": "jewelleryaustralia",
+        "key_file": "config/indexnow_keys/1a4c202d3692fe3ca882186665947e21.txt"
+      },
+      "jewelleryindia.in": {
+        "site_id": "jewelleryindia",
+        "key_file": "config/indexnow_keys/e4517a6f03288339e1196c7b78296db0.txt"
+      },
+      "jewelleryireland.ie": {
+        "site_id": "jewelleryireland",
+        "key_file": "config/indexnow_keys/c71f1361c84df6387612767246402a0b.txt"
+      },
+      "jewellerynz.co.nz": {
+        "site_id": "jewellerynz",
+        "key_file": "config/indexnow_keys/a920bf2e8276dffc62abed8f2099b353.txt"
+      },
+      "thejeweller.co.za": {
+        "site_id": "jewellerysouthafrica",
+        "key_file": "config/indexnow_keys/05f1f09f4e0349c693a4da61a15ea4d4.txt"
+      }
+    }
   },
   "launch_sequence": {
     "current_phase": "product_1_market_index",

@@ -1557,6 +1557,30 @@ check(
 );
 
 // -----------------------------------------------------------------------------
+// Long columns (8+ children) are tagged for two-subcolumn layout; short ones are not
+// -----------------------------------------------------------------------------
+
+$split_headings = array();
+$unsplit_headings = array();
+foreach ($us_items as $item) {
+    if (!in_array('ldn-nav-column-heading', $item->classes, true)) {
+        continue;
+    }
+    if (in_array('ldn-nav-column--split', $item->classes, true)) {
+        $split_headings[] = $item->title;
+    } else {
+        $unsplit_headings[] = $item->title;
+    }
+}
+check(
+    in_array('Prices by Carat', $split_headings, true)
+        && in_array('Sizes by Shape', $split_headings, true)
+        && in_array('Natural and Lab', $unsplit_headings, true)
+        && in_array('Tools', $unsplit_headings, true),
+    'columns with 8+ items (Prices by Carat, Sizes by Shape) carry ldn-nav-column--split while 1-2 item columns do not'
+);
+
+// -----------------------------------------------------------------------------
 // No markup, ever: the theme's walker renders
 // -----------------------------------------------------------------------------
 

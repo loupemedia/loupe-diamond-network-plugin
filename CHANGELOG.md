@@ -1,5 +1,109 @@
 # Changelog
 
+## [0.43.4] — 2026-11-16
+
+- **Ringspo US top navigation SEO and UI polish (PRD-018 CP 125).** Desktop mega-menu column headings render as non-anchor `<span class="ldn-nav-column-title">` eyebrow labels instead of duplicate `<a href>` links to the first child URL; the mobile shell drawer builds from the collapsed `'narrow'` item set within `mobile_item_budget` and keeps short group subheads (`Tools`) open for two-tap access; active branches carry `ldn-nav-current` and `aria-current="page"`.
+- **Header and mega-panel layout.** Stretched top-level primary items to full header height over a `1px` bottom rule so mega panels drop flush onto the hero band, added dropdown chevrons and a `2px` active underline, raised clickable row text to `14px` with pill hover highlights, and flowed 8+ item columns (`ldn-nav-column--split`) into two balanced subcolumns inside 2- and 3-column desktop panels.
+- **Ringspo US editorial menu cleanup (`config/navigation/ringspo.yaml` 1.6.0).** Standardised Title Case labels, stripped repeated suffixes (`engagement rings`, `Review`, `Sell ... jewelry`), removed `/product-category/diamond-huggie-earrings/`, replaced the six duplicate `/recommended-retailers/#...` fragment anchors with distinct buying guides, and trimmed `Retailer Reviews` to the eight core retailers.
+
+## [0.43.3] — 2026-11-10
+
+- **Ireland moves to `jewelleryireland.ie` as "Jewellery Ireland".** Config bundle now carries the new domain and brand name for `jewelleryireland` (the NAJ trade magazine is called The Jeweller). The IndexNow key moves to the new domain unchanged, so LDN serves it at `https://jewelleryireland.ie/{key}.txt`. Site id unchanged. Deploy with the Kinsta primary-domain change, not before.
+
+## [0.43.2] — 2026-11-09
+
+- **5 carat domain corrected.** Config bundle now carries `5caratdiamond.com` for `5caratdiamondring` (was `5caratdiamondring.com`, which is not owned). The IndexNow key moves to the new domain unchanged, so LDN serves it at `https://5caratdiamond.com/{key}.txt`. Site id unchanged.
+
+## [0.43.1] — 2026-11-09
+
+- **Ireland and South Africa domains corrected.** Config bundle now carries the live domains `thejeweller.ie` and `thejeweller.co.za` for `jewelleryireland` and `jewellerysouthafrica` (were `jewelleryireland.ie` and `jewellerysouthafrica.co.za`). Site ids unchanged.
+- **Ireland and South Africa brand names corrected** to "The Jeweller: Ireland" and "The Jeweller: South Africa" (were "Jewellery Ireland" and "Jewellery South Africa").
+
+## [0.43.0] — 2026-11-03
+
+- **FAQs off until entitled.** New `faq` WP widget (`config/artefacts.yaml`). The visible FAQ and FAQPage JSON-LD render only where a site's entitlements set `faq: true` for that page level. No site has it yet, so every pricing page (shape, all-shapes, diamond-type, top-level, calculator) and every size page launches without FAQs. C1, C5.8 and Z3 keep writing FAQ data. See `docs/architecture/faq-production.md`.
+
+## [0.42.33] — 2026-09-13
+
+- **Facet Intelligence REST gate.** Discover and recommend POSTs require the page-issued `ldn_facet_intelligence` nonce and an IP rate limit (30/min). The proxy strips `scoring_backend` so the browser cannot request vanilla.
+
+## [0.42.32] — 2026-09-08
+
+- **Facet Intelligence async panel (PRD-009 Epic 5.4).** Calculator `consumer_guidance` ships a loading shell on first paint; `facet-intelligence-panel.js` hydrates recommendations via `POST /wp-json/ldn/v1/facet-intelligence/discover` (or `/recommend`). REST proxy keeps `FACET_INTELLIGENCE_API_KEY` server-side. Gated by consumer advisory + `show_alternatives` or calculator `individual_listings` widget.
+
+## [0.42.31] — 2026-09-07
+
+- **IndexNow verification keys at the web root.** LDN serves `https://{domain}/{key}.txt` from the config bundle (`config/indexnow_keys.yaml`) so IndexNow push notify works without a manual SFTP upload on LDN installs. Rebuild the bundle after key changes; flush permalinks on deploy.
+
+## [0.42.30] — 2026-09-07
+
+- **Shared headline stat specs.** `LDN_Stat_Specs` is the single source for summary-data path resolution and per-level price labels. Removed three duplicate `stat_specs()` copies.
+- **All-shapes (L3) typical price label.** Stats grids, hero cards, Dataset.description and JSON-LD `variableMeasured` now say **Typical price** for the composite figure (sample-weighted mean of per-shape medians). Shape (L4) pages still cite **Median price** in Schema.org.
+
+## [0.42.29] — 2026-09-07
+
+- **Size page social previews.** Individual `/diamond-size/{shape}/{carat}-carat/` pages emit `og:image` (and width/height/type/alt) when Z3 has uploaded `size-og-preview.png`. Hub and comparison pages stay without an image until a preview artefact exists for them.
+
+## [0.42.28] — 2026-08-30
+
+- **Staging QA matrix includes 3ct cushion and 7ct marquise.** Plugin `test_combos` now match C1/C5/K5/Z3 named pairs (natural and lab), not only 1ct/1.5ct round and oval.
+
+## [0.42.27] — 2026-08-28
+
+- **Size methodology is Article.** `/diamond-size/methodology/` is how-we-measure copy. WebPage.mainEntity points at Article. No Dataset and no WebApplication.
+- **Pair compare drops Dataset.** `/diamond-size/compare/{a}-vs-{b}/` keeps WebPage, FAQ and breadcrumbs. It is not a Dataset, not the size-checker tool and not a Product.
+
+## [0.42.26] — 2026-08-28
+
+- **Mega-hub size ItemList.** `/diamond-size/` lists each shape hub as a WebPage. It does not list every matrix cell or emit Product/Offer.
+
+## [0.42.25] — 2026-08-28
+
+- **Shape-hub ladder header sticks to the page.** The house card's `overflow: hidden` and the hub `overflow-x: auto` rule were still trapping `position: sticky` after the mega-hub scroller was removed. Ladder cards are `overflow: visible` at every width; columns shrink on a phone instead of scrolling sideways.
+
+## [0.42.24] — 2026-08-28
+
+- **All-shapes shape cards.** Rank is `1: Marquise` (no hash, compact cut). Order is median, range, change, then sample. Title type is slightly smaller so five columns stay one line.
+- **Ringspo all-shapes title.** H1, document title and Dataset name are `{carat} {type} Diamond in the {Country}`.
+
+## [0.42.23] — 2026-08-28
+
+- **All-shapes ItemList is WebPages.** Hybrid ranking rows link to child shape price pages. They are no longer Product + Offer.
+
+## [0.42.22] — 2026-08-28
+
+- **Mega-hub size matrix is the only sideways-scroll table.** Shape-hub ladders drop `.ldn-size-matrix-scroll` and stay full-height house tables. Each mega-hub cell now stacks outline, then "1 carat", then millimetres so a scrolled-away header does not leave orphan mm values.
+
+## [0.42.21] — 2026-08-28
+
+- **Tool JSON-LD.** Price calculator and size checker are WebApplication pages. WebPage.mainEntity points at `#webapp` (FinanceApplication / UtilitiesApplication, free Offer). Calculator gains breadcrumbs and a slashed `@id`. Size checker drops the Dataset on `/diamond-size/compare/`.
+
+## [0.42.20] — 2026-08-28
+
+- **Size Dataset leftovers.** Drop Dataset `isPartOf` → WebSite (WebPage still owns that). `variableMeasured` uses citation names (Median length, Sample size) plus the on-page P10-P90 or min-max spread. Titles and Dataset `name` replace em/en dashes with a hyphen.
+
+## [0.42.19] — 2026-08-28
+
+- **Size matrix tables are full height.** Dropped the `max-height` scrollport on `.ldn-size-matrix-scroll` (mega hub and shape-hub ladders). The page scrolls through every row, same as editorial comparison tables. Sideways scroll stays for the wide carat columns.
+
+## [0.42.18] — 2026-08-28
+
+- **Price Dataset JSON-LD.** Headline measure is Median price only (drop Current price / trimmed mean). Currency `variableMeasured` uses `unitCode` and whole dollars. Dataset gains `license` (CC BY-NC 4.0) and `measurementTechnique`. A `WebPage` node owns `isPartOf` → `#website` and `mainEntity` → Dataset.
+
+## [0.42.17] — 2026-08-28
+
+- **Ring-guide colour bands span the viewport again.** GenerateBlocks purple and teal sections break out when the container owns a direct white-on-colour section title. Inset white review cards (`h3.gb-headline-text`, e.g. the Alon block) stay in the article column so teal still runs behind them.
+
+## [0.42.16] — 2026-08-28
+
+- **Hero band meets the shell.** Flush GeneratePress top padding on LDN pages and drop `--ldn-padding` top on Ringspo hero-band pricing pages so the green band sits directly under the nav.
+- **Colour/clarity heatmap headers.** The house `.ldn-data-table` header fill painted white labels on a light background after both classes landed on the grid. Heatmap corner labels keep readable ink again.
+- **About this data date.** Methodology copy now resolves `analysis_date` through the same path as freshness (`time_series.analysis_date` on shape summaries), so "as at" is not left blank when only the nested key is present.
+
+## [0.42.15] — 2026-08-28
+
+- **Shape-card ranges round to the nearest thousand.** `$27,960 - $144,419` on the all-shapes grid is `$28k - $144k` so the 5×2 cards stay one line. The exact range stays on `title`. Hero stats are unchanged.
+
 ## [0.42.14] — 2026-08-28
 
 - **PHP 8.1 header load.** `COUNTRY_SWITCHER_TWO_COL_MIN` lives on `LDN_Nav`, not the country-switcher trait. Trait constants are a fatal on Kinsta staging (8.1) and silent on 8.2+.
@@ -729,7 +833,6 @@
 
 - **The top-level carat table now discloses its sample size.** `carat_price_table` rows carry `natural_sample_size` / `lab_grown_sample_size` from C5.3, rendered as a "Diamonds analysed" column. The heaviest weights are traded far less often than 1 ct — 9 ct rested on 28 stones against 8 ct's 113 — which is how a heavier weight can read as cheaper than a lighter one. Thin rows are still published; the count is what makes them interpretable. Rows from artefacts written before C5.3 carried the field degrade to an em dash.
 - **"Median price" corrected to "Typical price" on the diamond-type carat table.** That figure is the sample-weighted mean of each shape's median at that weight, not a median of the stones — the per-shape carat ladder, which *is* a true median from C3's p50, keeps its original label. Ringspo's how-to-read copy and the top-level table intro now describe the actual calculation.
-- Known remaining instance: the L3 all-shapes stats block still labels the same composite figure "Median price", and does so in Schema.org output. It lives in three duplicated `stat_specs()` lists (renderer, schema, content trait) and needs level-aware labelling — logged, not fixed here.
 
 ## [0.14.0] — 2026-07-31
 

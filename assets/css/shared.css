@@ -47,11 +47,16 @@
 	min-height: 0;
 }
 
-/* Theme shells (GeneratePress etc.) pad/margin #content below the LDN shell,
-   which shows as a white strip above a coloured footer. Flush LDN pages. */
+/* Theme shells (GeneratePress etc.) pad/margin #content around the LDN body,
+   which shows as a white strip above a coloured band or below the footer.
+   Flush LDN pages on both edges. */
 body:has(.ldn-page-shell) #page,
 body:has(.ldn-page-shell) #content,
-body:has(.ldn-page-shell) .site-content {
+body:has(.ldn-page-shell) .site-content,
+body:has(.ldn-page-shell) .site-main,
+body:has(.ldn-page-shell) .inside-article {
+	margin-top: 0 !important;
+	padding-top: 0 !important;
 	margin-bottom: 0 !important;
 	padding-bottom: 0 !important;
 }
@@ -1105,7 +1110,8 @@ button.ldn-shape-picker__option:focus-visible {
 
 .ldn-shape-card__shape {
 	font-weight: 600;
-	font-size: 1rem;
+	font-size: 0.875rem;
+	line-height: 1.3;
 	color: var(--ldn-primary, #333);
 }
 
@@ -1678,6 +1684,14 @@ button.ldn-shape-picker__option:focus-visible {
 .ldn-cc-table tbody th {
 	text-align: center;
 	font-weight: 600;
+	color: var(--ldn-text, #333);
+	background: var(--ldn-background, #f8fafc);
+}
+
+/* Heatmap tables carry both classes after the house-table unification. The
+   purple header + white label from `.ldn-data-table` must not apply here. */
+.ldn-data-table.ldn-cc-table tbody tr:nth-of-type(even) th,
+.ldn-data-table.ldn-cc-table tbody tr:nth-of-type(odd) th {
 	background: var(--ldn-background, #f8fafc);
 }
 
@@ -2065,7 +2079,7 @@ button.ldn-shape-picker__option:focus-visible {
 
 .ldn-size-segmentation .ldn-table-card,
 .ldn-size-comparison-table .ldn-table-card,
-.ldn-size-hub-table .ldn-table-card:not(.ldn-size-matrix-scroll) {
+.ldn-size-hub-table:not(.ldn-size-hub-table--ladder) .ldn-table-card:not(.ldn-size-matrix-scroll) {
 	overflow-x: auto;
 	-webkit-overflow-scrolling: touch;
 }
@@ -2758,23 +2772,17 @@ button.ldn-shape-picker__option:focus-visible {
 }
 
 /* ------------------------------------------------------------------
-   Mega-hub matrix table (sticky header + sticky shape column)
+   Mega-hub matrix table (full height + sticky shape column)
    ------------------------------------------------------------------ */
 .ldn-size-matrix-scroll {
-	/* overflow:auto + max-height keeps the purple carat header sticky while the
-	   reader scrolls through shapes. overflow-x alone would still trap sticky
-	   inside this box; a capped height makes vertical scroll happen here.
-	   The house card supplies radius, shadow and white surface. */
-	overflow: auto;
+	/* Mega hub only. Grow with the rows so the page scrolls. overflow-x
+	   only: eleven outline+mm columns are wider than the card. A
+	   max-height here would clip ~10 rows behind an inner scrollbar.
+	   Phone: same full-height table; swipe sideways if columns do not fit. */
+	overflow-x: auto;
+	overflow-y: visible;
 	-webkit-overflow-scrolling: touch;
 	max-width: 100%;
-	max-height: min(70vh, 36rem);
-}
-
-@media screen and (max-width: 640px) {
-	.ldn-size-matrix-scroll {
-		max-height: min(65vh, 28rem);
-	}
 }
 
 .ldn-size-matrix {
@@ -2856,6 +2864,10 @@ button.ldn-shape-picker__option:focus-visible {
 
 .ldn-size-matrix__cell--empty {
 	color: var(--ldn-text-muted, #9ca3af);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.3rem;
 }
 
 .ldn-size-matrix__link {
@@ -2867,9 +2879,17 @@ button.ldn-shape-picker__option:focus-visible {
 	color: var(--ldn-text, #1a1a2e);
 }
 
-.ldn-size-matrix__link:hover .ldn-size-matrix__dims {
+.ldn-size-matrix__link:hover .ldn-size-matrix__dims,
+.ldn-size-matrix__link:hover .ldn-size-matrix__carat {
 	text-decoration: underline;
 	color: var(--ldn-primary, #706cc8);
+}
+
+.ldn-size-matrix__carat {
+	font-size: 0.78rem;
+	font-weight: 600;
+	white-space: nowrap;
+	color: var(--ldn-text, #1a1a2e);
 }
 
 .ldn-size-matrix__outline {
@@ -2895,9 +2915,28 @@ button.ldn-shape-picker__option:focus-visible {
 }
 
 /* Shape-hub carat ladder: same matrix look as the mega hub (purple header,
-   alternating rows, true-to-scale outlines). */
-.ldn-size-hub-table--ladder .ldn-size-matrix-scroll {
+   alternating rows, true-to-scale outlines). overflow: visible so
+   position:sticky on thead sticks to the page (the house card's overflow:
+   hidden and the hub overflow-x rule would trap it). Phone: table is
+   100% wide and columns shrink; do not overflow-x or sticky dies again. */
+.ldn-size-hub-table--ladder .ldn-table-card {
 	margin-top: 0.5rem;
+	overflow: visible;
+}
+
+.ldn-size-hub-table--ladder .ldn-size-matrix {
+	width: 100%;
+	max-width: 100%;
+	table-layout: fixed;
+}
+
+.ldn-size-hub-table--ladder .ldn-size-matrix th,
+.ldn-size-hub-table--ladder .ldn-size-matrix td {
+	min-width: 0;
+}
+
+.ldn-size-hub-table--ladder .ldn-size-matrix thead th {
+	white-space: normal;
 }
 
 .ldn-size-hub-table--ladder .ldn-size-matrix th,
@@ -3059,4 +3098,73 @@ button.ldn-shape-picker__option:focus-visible {
 	font-size: 0.75rem;
 	color: var(--ldn-muted-text, #666);
 	margin-top: 0.25rem;
+}
+
+/* Facet Intelligence alternatives panel (PRD-009 Epic 5.4) */
+.ldn-fi-panel {
+	margin: 2rem 0;
+}
+
+.ldn-fi-panel__title {
+	margin: 0 0 1rem;
+	font-size: 1.25rem;
+	line-height: 1.3;
+}
+
+.ldn-fi-panel__status {
+	margin: 0;
+	color: var(--ldn-muted-text, #666);
+}
+
+.ldn-fi-panel__list {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+	gap: 1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.ldn-fi-panel__item {
+	min-width: 0;
+	padding: 1rem;
+	border-radius: 12px;
+	background: var(--ldn-surface, #fff);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.ldn-fi-panel__item-title {
+	margin: 0 0 0.35rem;
+	font-size: 1rem;
+	line-height: 1.35;
+}
+
+.ldn-fi-panel__item-meta {
+	margin: 0 0 0.5rem;
+	font-size: 0.9375rem;
+	color: var(--ldn-muted-text, #666);
+}
+
+.ldn-fi-panel__reasons {
+	margin: 0 0 0.75rem;
+	padding-left: 1.1rem;
+	font-size: 0.875rem;
+	color: var(--ldn-muted-text, #666);
+}
+
+.ldn-fi-panel__item-link {
+	font-weight: 600;
+	text-decoration: none;
+	color: var(--ldn-primary, #706cc8);
+}
+
+.ldn-fi-panel__item-link:hover,
+.ldn-fi-panel__item-link:focus {
+	text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+	.ldn-fi-panel__list {
+		grid-template-columns: 1fr;
+	}
 }

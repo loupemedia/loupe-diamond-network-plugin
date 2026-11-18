@@ -119,7 +119,9 @@ final class LDN_Size_Renderer {
         } else {
             $out .= $this->price_links_html($ctx);
         }
-        $out .= $this->faq_html($copy);
+        if ($this->faq_enabled($ctx->site_id)) {
+            $out .= $this->faq_html($copy);
+        }
         $out .= '</main></div>';
 
         return $out;
@@ -661,9 +663,31 @@ final class LDN_Size_Renderer {
         if ($brand !== '') {
             $out .= '<meta property="og:site_name" content="' . esc_attr($brand) . '" />' . "\n";
         }
+        $og_image = $this->og_preview_url($ctx);
+        if ($og_image !== '') {
+            $out .= '<meta property="og:image" content="' . esc_url($og_image) . '" />' . "\n";
+            $out .= '<meta property="og:image:width" content="1200" />' . "\n";
+            $out .= '<meta property="og:image:height" content="630" />' . "\n";
+            $out .= '<meta property="og:image:type" content="image/png" />' . "\n";
+            $out .= '<meta property="og:image:alt" content="' . esc_attr($title) . '" />' . "\n";
+        }
         $out .= $this->json_ld_script($ctx, $summary, $copy, $canonical, $title, $description);
 
         return $out;
+    }
+
+    /**
+     * Public HTTPS URL for the page's size OG preview PNG, or '' when absent.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string
+     */
+    public function og_preview_url(LDN_Page_Context $ctx) {
+        if ($ctx->page_level !== 'size-individual') {
+            return '';
+        }
+        $url = $this->fetcher->resolve_artefact_url('size_og_preview_png', $ctx);
+        return is_string($url) ? $url : '';
     }
 
     /**
@@ -674,25 +698,22 @@ final class LDN_Size_Renderer {
      * @return string
      */
     public function page_title(LDN_Page_Context $ctx, array $summary) {
+        $title = '';
         if ($ctx->page_level === 'size-mega-hub' && $this->is_full_range_site($ctx->site_id)) {
-            return __('Diamond Size Chart — Full Measured Range', 'loupe-diamond-network');
-        }
-        if ($ctx->page_level === 'size-carat-hub' && $ctx->carat !== null) {
-            return sprintf(
+            $title = __('Diamond Size Chart — Full Measured Range', 'loupe-diamond-network');
+        } elseif ($ctx->page_level === 'size-carat-hub' && $ctx->carat !== null) {
+            $title = sprintf(
                 /* translators: %s: carat weight */
                 __('%s Carat Diamond Size Chart — All Shapes', 'loupe-diamond-network'),
                 $ctx->carat
             );
-        }
-        if ($ctx->page_level === 'size-comparison-tool') {
-            return __('Diamond Size Checker — Check & Compare Diamond Sizes vs Real Market Data', 'loupe-diamond-network');
-        }
-        if ($ctx->page_level === 'size-methodology') {
-            return $this->is_full_range_site($ctx->site_id)
+        } elseif ($ctx->page_level === 'size-comparison-tool') {
+            $title = __('Diamond Size Checker — Check & Compare Diamond Sizes vs Real Market Data', 'loupe-diamond-network');
+        } elseif ($ctx->page_level === 'size-methodology') {
+            $title = $this->is_full_range_site($ctx->site_id)
                 ? __('How We Measure Diamond Sizes — Full Range Methodology', 'loupe-diamond-network')
                 : __('How We Measure Diamond Sizes — Methodology', 'loupe-diamond-network');
-        }
-        if ($ctx->page_level === 'size-individual' && $ctx->shape !== null && $ctx->carat !== null) {
+        } elseif ($ctx->page_level === 'size-individual' && $ctx->shape !== null && $ctx->carat !== null) {
             $shape = $this->size_shape_label($ctx->shape);
             if ($this->is_full_range_site($ctx->site_id)) {
                 $lmin = $this->dig($summary, array('dimensions_mm', 'length', 'range_min'));
@@ -700,7 +721,7 @@ final class LDN_Size_Renderer {
                 $wmin = $this->dig($summary, array('dimensions_mm', 'width', 'range_min'));
                 $wmax = $this->dig($summary, array('dimensions_mm', 'width', 'range_max'));
                 if ($lmin !== null && $lmax !== null && $wmin !== null && $wmax !== null) {
-                    return sprintf(
+                    $title = sprintf(
                         '%s Carat %s Diamond Size — Full Range %s–%s × %s–%s mm',
                         $ctx->carat,
                         $shape,
@@ -709,26 +730,43 @@ final class LDN_Size_Renderer {
                         $wmin,
                         $wmax
                     );
+                } else {
+                    $title = sprintf(
+                        '%s Carat %s Diamond Size — Full Measured Range',
+                        $ctx->carat,
+                        $shape
+                    );
                 }
-                return sprintf(
-                    '%s Carat %s Diamond Size — Full Measured Range',
-                    $ctx->carat,
-                    $shape
-                );
-            }
-            $length = $this->dig($summary, array('dimensions_mm', 'length', 'median'));
-            $width = $this->dig($summary, array('dimensions_mm', 'width', 'median'));
-            if ($length !== null && $width !== null) {
-                return sprintf(
-                    '%s Carat %s Diamond Size — %s × %s mm',
-                    $ctx->carat,
-                    $shape,
-                    $length,
-                    $width
-                );
+            } else {
+                $length = $this->dig($summary, array('dimensions_mm', 'length', 'median'));
+                $width = $this->dig($summary, array('dimensions_mm', 'width', 'median'));
+                if ($length !== null && $width !== null) {
+                    $title = sprintf(
+                        '%s Carat %s Diamond Size — %s × %s mm',
+                        $ctx->carat,
+                        $shape,
+                        $length,
+                        $width
+                    );
+                }
             }
         }
-        return $this->headline($ctx, $summary);
+        if ($title === '') {
+            $title = $this->headline($ctx, $summary);
+        }
+        return $this->plain_title($title);
+    }
+
+    /**
+     * Replace em and en dashes in titles (anti-AI house style). Table NA cells keep —.
+     *
+     * @param string $text
+     * @return string
+     */
+    public function plain_title($text) {
+        $out = str_replace(array("\u{2014}", "\u{2013}"), ' - ', (string) $text);
+        $out = preg_replace('/ {2,}/', ' ', $out);
+        return is_string($out) ? $out : (string) $text;
     }
 
     /**
@@ -784,7 +822,7 @@ final class LDN_Size_Renderer {
         }
         if ($ctx->page_level === 'size-methodology') {
             return $this->is_full_range_site($ctx->site_id)
-                ? __('How We Measure Diamond Sizes — Full Range', 'loupe-diamond-network')
+                ? $this->plain_title(__('How We Measure Diamond Sizes — Full Range', 'loupe-diamond-network'))
                 : __('How We Measure Diamond Sizes', 'loupe-diamond-network');
         }
         return 'Diamond Size';
@@ -1504,8 +1542,9 @@ final class LDN_Size_Renderer {
 
     /**
      * Mega-hub matrix table: one row per shape, one column per anchor carat,
-     * each cell a true-to-scale outline with L×W mm linking to the individual
-     * page. Sticky header + sticky shape column via CSS. Returns '' when the
+     * each cell a true-to-scale outline, the carat label and L×W mm linking
+     * to the individual page. Sideways scroll lives on this table only
+     * (shape-hub ladders do not use the wrapper). Returns '' when the
      * summary has no matrix payload (pre-migration artefacts) so the caller
      * can fall back to the flat ladder table.
      *
@@ -1553,9 +1592,17 @@ final class LDN_Size_Renderer {
             $cells = isset($row['cells']) && is_array($row['cells']) ? $row['cells'] : array();
             foreach ($carats as $carat) {
                 $carat = (string) $carat;
+                $carat_html = '<span class="ldn-size-matrix__carat">'
+                    . esc_html(sprintf(
+                        /* translators: %s: carat weight, e.g. 1 or 0.3 */
+                        __('%s carat', 'loupe-diamond-network'),
+                        $carat
+                    ))
+                    . '</span>';
                 $cell = isset($cells[$carat]) && is_array($cells[$carat]) ? $cells[$carat] : null;
                 if ($cell === null) {
-                    $body .= '<td class="ldn-size-matrix__cell ldn-size-matrix__cell--empty">—</td>';
+                    $body .= '<td class="ldn-size-matrix__cell ldn-size-matrix__cell--empty">'
+                        . $carat_html . '—</td>';
                     continue;
                 }
                 $url = $this->build_size_individual_url($site_id, $shape, $carat);
@@ -1577,7 +1624,7 @@ final class LDN_Size_Renderer {
                         . esc_html($dims_text)
                         . '</span>';
                 }
-                $inner = $svg . $dims;
+                $inner = $svg . $carat_html . $dims;
                 $body .= '<td class="ldn-size-matrix__cell">'
                     . ($url !== ''
                         ? '<a class="ldn-size-matrix__link" href="' . esc_url($url) . '">' . $inner . '</a>'
@@ -2002,7 +2049,7 @@ final class LDN_Size_Renderer {
         $table_html = $this->house_table_html(
             '<thead><tr>' . $head . '</tr></thead><tbody>' . $body . '</tbody>',
             $is_ladder ? 'ldn-size-matrix' : '',
-            $is_ladder ? 'ldn-size-matrix-scroll' : ''
+            ''
         );
         return '<section class="' . esc_attr($section_class) . '"><h2>' . $title
             . '</h2>' . $lead . $table_html . '</section>';
@@ -2622,7 +2669,8 @@ final class LDN_Size_Renderer {
      *
      * Graph matches the price-page Dataset contract (@id, mainEntity, publisher,
      * isPartOf, keywords, spatialCoverage, temporalCoverage). Shape/carat hubs
-     * add an ItemList of child WebPages - never Product/Offer.
+     * list child size pages; the mega hub lists shape-hub WebPages. Methodology
+     * is Article. Pair compare is WebPage only. Never Product/Offer.
      *
      * @param LDN_Page_Context $ctx
      * @param array            $summary
@@ -2657,19 +2705,37 @@ final class LDN_Size_Renderer {
             ? array('@id' => rtrim($site_url, '/') . '/#organization')
             : array('@type' => 'Organization', 'name' => $brand);
 
+        $is_tool = $ctx->page_level === 'size-comparison-tool';
+        $is_methodology = $ctx->page_level === 'size-methodology';
+        $is_pair = $ctx->page_level === 'size-comparison';
+        $emit_dataset = !$is_tool && !$is_methodology && !$is_pair;
+        $canonical = $schema->tool_canonical_url($canonical);
         $dataset_id = $canonical . '#dataset';
+        $webapp_id = $canonical . '#webapp';
+        $article_id = $canonical . '#article';
         $dataset_description = $this->size_dataset_description($ctx, $summary, $description);
+        $schema_name = $this->plain_title($title);
+        $description = trim((string) $description);
 
         // Do not emit a WebSite node here — SEOPress / the theme already publishes
         // one. Reference it by @id (same pattern as LDN_Schema::website_ref).
+        // Dataset.isPartOf is a parent Dataset, not a WebSite (WebPage owns that).
+        // Size checker: mainEntity is WebApplication. Methodology: Article.
+        // Pair compare: WebPage only (no Dataset, no tool).
         $webpage = array(
             '@type'       => 'WebPage',
             '@id'         => $canonical . '#webpage',
             'url'         => $canonical,
-            'name'        => $title,
+            'name'        => $schema_name,
             'description' => $description,
-            'mainEntity'  => array('@id' => $dataset_id),
         );
+        if ($is_tool) {
+            $webpage['mainEntity'] = array('@id' => $webapp_id);
+        } elseif ($is_methodology) {
+            $webpage['mainEntity'] = array('@id' => $article_id);
+        } elseif ($emit_dataset) {
+            $webpage['mainEntity'] = array('@id' => $dataset_id);
+        }
         $website = $schema->website_ref($site);
         if ($website !== null) {
             $webpage['isPartOf'] = $website;
@@ -2680,42 +2746,60 @@ final class LDN_Size_Renderer {
         $graph[] = $webpage;
 
         $is_hub = in_array($ctx->page_level, array('size-shape-hub', 'size-mega-hub', 'size-carat-hub'), true);
-        $measured = $this->size_variable_measured($summary, $is_hub);
 
-        $dataset = array(
-            '@type'                => 'Dataset',
-            '@id'                  => $dataset_id,
-            'name'                 => $title,
-            'description'          => $dataset_description,
-            'url'                  => $canonical,
-            'creator'              => $org_ref,
-            'publisher'            => $org_ref,
-            'measurementTechnique' => self::MEASUREMENT_TECHNIQUE,
-            'license'              => 'https://creativecommons.org/licenses/by-nc/4.0/',
-            'isAccessibleForFree'  => true,
-        );
-        if ($website !== null) {
-            $dataset['isPartOf'] = $website;
+        if ($emit_dataset) {
+            $measured = $this->size_variable_measured($summary, $is_hub);
+            $dataset = array(
+                '@type'                => 'Dataset',
+                '@id'                  => $dataset_id,
+                'name'                 => $schema_name,
+                'description'          => $dataset_description,
+                'url'                  => $canonical,
+                'creator'              => $org_ref,
+                'publisher'            => $org_ref,
+                'measurementTechnique' => self::MEASUREMENT_TECHNIQUE,
+                'license'              => 'https://creativecommons.org/licenses/by-nc/4.0/',
+                'isAccessibleForFree'  => true,
+            );
+            $keywords = $schema->keywords_for($ctx);
+            if ($keywords !== array()) {
+                $dataset['keywords'] = $keywords;
+            }
+            $place = $schema->country_full_name($ctx, $site);
+            if ($place !== '') {
+                $dataset['spatialCoverage'] = array('@type' => 'Place', 'name' => $place);
+            }
+            if ($generated_date !== '') {
+                $dataset['dateModified'] = $generated_date;
+                $dataset['temporalCoverage'] = $generated_date;
+            }
+            if ($measured !== array()) {
+                $dataset['variableMeasured'] = $measured;
+            }
+            $graph[] = $dataset;
         }
-        $keywords = $schema->keywords_for($ctx);
-        if ($keywords !== array()) {
-            $dataset['keywords'] = $keywords;
+
+        if ($is_methodology) {
+            $article = array(
+                '@type'            => 'Article',
+                '@id'              => $article_id,
+                'headline'         => $schema_name,
+                'description'      => $description !== ''
+                    ? $description
+                    : $this->factual_fallback($summary),
+                'mainEntityOfPage' => $canonical,
+                'author'           => $org_ref,
+                'publisher'        => $org_ref,
+            );
+            if ($generated_date !== '') {
+                $article['datePublished'] = $generated_date;
+                $article['dateModified'] = $generated_date;
+            }
+            $graph[] = $article;
         }
-        $place = $schema->country_full_name($ctx, $site);
-        if ($place !== '') {
-            $dataset['spatialCoverage'] = array('@type' => 'Place', 'name' => $place);
-        }
-        if ($generated_date !== '') {
-            $dataset['dateModified'] = $generated_date;
-            $dataset['temporalCoverage'] = $generated_date;
-        }
-        if ($measured !== array()) {
-            $dataset['variableMeasured'] = $measured;
-        }
-        $graph[] = $dataset;
 
         $list = $schema->page_item_list_node(
-            $title,
+            $schema_name,
             $this->size_hub_list_pages($ctx, $summary),
             $canonical
         );
@@ -2723,22 +2807,20 @@ final class LDN_Size_Renderer {
             $graph[] = $list;
         }
 
-        if ($ctx->page_level === 'size-comparison-tool') {
-            $graph[] = array(
-                '@type'                => 'WebApplication',
-                '@id'                  => $canonical . '#webapp',
-                'name'                 => $title,
-                'url'                  => $canonical,
-                'applicationCategory'  => 'UtilityApplication',
-                'operatingSystem'      => 'Any',
-                'description'          => $description,
-                'isAccessibleForFree'  => true,
-                'offers'               => array('@type' => 'Offer', 'price' => '0'),
-                'provider'             => $org_ref,
+        if ($is_tool) {
+            $webapp = $schema->webapp_node(
+                $canonical,
+                $schema_name,
+                $description,
+                'UtilitiesApplication',
+                $org_ref
             );
+            if ($webapp !== null) {
+                $graph[] = $webapp;
+            }
         }
 
-        if ($this->schema_feature_enabled('faq', $ctx->site_id)) {
+        if ($this->faq_enabled($ctx->site_id) && $this->schema_feature_enabled('faq', $ctx->site_id)) {
             $faq = isset($copy['faq']) && is_array($copy['faq']) ? $copy['faq'] : array();
             $faq_node = $schema->faq_node($faq);
             if ($faq_node !== null) {
@@ -2835,8 +2917,9 @@ final class LDN_Size_Renderer {
     /**
      * PropertyValue list for the size Dataset.
      *
-     * Hubs name length/width/face-up even when there is no single page-level mm
-     * value. Individual pages include the median numbers when present.
+     * Hubs name Length/Width/Face-up area even when there is no single page-level
+     * mm value. Individual pages cite medians plus the on-page spread (P10-P90,
+     * or min-max on full-range sites).
      *
      * @param array $summary
      * @param bool  $is_hub
@@ -2853,34 +2936,168 @@ final class LDN_Size_Renderer {
 
         $measured = array();
         if ($length !== null) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'length_mm', 'value' => $length, 'unitText' => 'mm');
+            $measured[] = $this->size_measure_node(
+                __('Median length', 'loupe-diamond-network'),
+                $length,
+                'mm'
+            );
         } elseif ($is_hub) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'length_mm', 'unitText' => 'mm');
+            $measured[] = $this->size_measure_node(__('Length', 'loupe-diamond-network'), null, 'mm');
         }
         if ($width !== null) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'width_mm', 'value' => $width, 'unitText' => 'mm');
+            $measured[] = $this->size_measure_node(
+                __('Median width', 'loupe-diamond-network'),
+                $width,
+                'mm'
+            );
         } elseif ($is_hub) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'width_mm', 'unitText' => 'mm');
+            $measured[] = $this->size_measure_node(__('Width', 'loupe-diamond-network'), null, 'mm');
         }
         if ($faceup !== null) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'faceup_area_mm2', 'value' => $faceup, 'unitText' => 'mm²');
+            $measured[] = $this->size_measure_node(
+                __('Median face-up area', 'loupe-diamond-network'),
+                $faceup,
+                'mm²'
+            );
         } elseif ($is_hub) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'faceup_area_mm2', 'unitText' => 'mm²');
+            $measured[] = $this->size_measure_node(
+                __('Face-up area', 'loupe-diamond-network'),
+                null,
+                'mm²'
+            );
         }
+
+        if (!$is_hub) {
+            $this->append_size_spread_measures($measured, $summary);
+        }
+
         if ($n > 0) {
-            $measured[] = array('@type' => 'PropertyValue', 'name' => 'sample_size', 'value' => $n);
+            $measured[] = $this->size_measure_node(
+                __('Sample size', 'loupe-diamond-network'),
+                $n,
+                ''
+            );
         }
         return $measured;
     }
 
     /**
-     * Child pages for a shape or carat hub ItemList.
+     * P10-P90 (or min-max) measures that match the key-dimensions table.
+     *
+     * @param array<int, array<string, mixed>> $measured
+     * @param array                            $summary
+     */
+    private function append_size_spread_measures(array &$measured, array $summary) {
+        $full_range = isset($summary['range_presentation'])
+            && $summary['range_presentation'] === 'full_range';
+        $low_key = $full_range ? 'range_min' : 'p10';
+        $high_key = $full_range ? 'range_max' : 'p90';
+
+        if ($this->is_near_round($summary)) {
+            $this->append_size_measure_pair(
+                $measured,
+                $full_range
+                    ? __('Diameter (minimum)', 'loupe-diamond-network')
+                    : __('Diameter (10th percentile)', 'loupe-diamond-network'),
+                $full_range
+                    ? __('Diameter (maximum)', 'loupe-diamond-network')
+                    : __('Diameter (90th percentile)', 'loupe-diamond-network'),
+                $this->average_diameter_mm($summary, $low_key),
+                $this->average_diameter_mm($summary, $high_key),
+                'mm'
+            );
+        } else {
+            $this->append_size_measure_pair(
+                $measured,
+                $full_range
+                    ? __('Length (minimum)', 'loupe-diamond-network')
+                    : __('Length (10th percentile)', 'loupe-diamond-network'),
+                $full_range
+                    ? __('Length (maximum)', 'loupe-diamond-network')
+                    : __('Length (90th percentile)', 'loupe-diamond-network'),
+                $this->dig($summary, array('dimensions_mm', 'length', $low_key)),
+                $this->dig($summary, array('dimensions_mm', 'length', $high_key)),
+                'mm'
+            );
+            $this->append_size_measure_pair(
+                $measured,
+                $full_range
+                    ? __('Width (minimum)', 'loupe-diamond-network')
+                    : __('Width (10th percentile)', 'loupe-diamond-network'),
+                $full_range
+                    ? __('Width (maximum)', 'loupe-diamond-network')
+                    : __('Width (90th percentile)', 'loupe-diamond-network'),
+                $this->dig($summary, array('dimensions_mm', 'width', $low_key)),
+                $this->dig($summary, array('dimensions_mm', 'width', $high_key)),
+                'mm'
+            );
+        }
+
+        $this->append_size_measure_pair(
+            $measured,
+            $full_range
+                ? __('Face-up area (minimum)', 'loupe-diamond-network')
+                : __('Face-up area (10th percentile)', 'loupe-diamond-network'),
+            $full_range
+                ? __('Face-up area (maximum)', 'loupe-diamond-network')
+                : __('Face-up area (90th percentile)', 'loupe-diamond-network'),
+            $this->dig($summary, array('faceup_area_mm2', $low_key)),
+            $this->dig($summary, array('faceup_area_mm2', $high_key)),
+            'mm²'
+        );
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $measured
+     * @param string                           $low_name
+     * @param string                           $high_name
+     * @param mixed                            $low
+     * @param mixed                            $high
+     * @param string                           $unit
+     */
+    private function append_size_measure_pair(array &$measured, $low_name, $high_name, $low, $high, $unit) {
+        if ($low !== null) {
+            $measured[] = $this->size_measure_node($low_name, $low, $unit);
+        }
+        if ($high !== null) {
+            $measured[] = $this->size_measure_node($high_name, $high, $unit);
+        }
+    }
+
+    /**
+     * @param string     $name
+     * @param mixed|null $value
+     * @param string     $unit
+     * @return array<string, mixed>
+     */
+    private function size_measure_node($name, $value = null, $unit = '') {
+        $pv = array(
+            '@type' => 'PropertyValue',
+            'name'  => $name,
+        );
+        if ($value !== null && is_numeric($value)) {
+            $pv['value'] = $value + 0;
+        }
+        if ($unit !== '') {
+            $pv['unitText'] = $unit;
+        }
+        return $pv;
+    }
+
+    /**
+     * Child pages for a size-hub ItemList.
+     *
+     * Shape and carat hubs list individual size pages. The mega hub lists
+     * each shape hub once (not every matrix cell).
      *
      * @param LDN_Page_Context $ctx
      * @param array            $summary
      * @return array<int, array{name:string, url:string}>
      */
     private function size_hub_list_pages(LDN_Page_Context $ctx, array $summary) {
+        if ($ctx->page_level === 'size-mega-hub') {
+            return $this->size_mega_hub_list_pages($ctx, $summary);
+        }
         if (!in_array($ctx->page_level, array('size-shape-hub', 'size-carat-hub'), true)) {
             return array();
         }
@@ -2913,6 +3130,49 @@ final class LDN_Size_Renderer {
                     $this->size_shape_label($shape)
                 ),
                 'url' => $url,
+            );
+        }
+        return $out;
+    }
+
+    /**
+     * One WebPage per unique shape hub on the mega-hub matrix.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $summary
+     * @return array<int, array{name:string, url:string}>
+     */
+    private function size_mega_hub_list_pages(LDN_Page_Context $ctx, array $summary) {
+        $shapes = array();
+        $sources = array();
+        if (isset($summary['rows']) && is_array($summary['rows'])) {
+            $sources[] = $summary['rows'];
+        }
+        if (isset($summary['matrix']['rows']) && is_array($summary['matrix']['rows'])) {
+            $sources[] = $summary['matrix']['rows'];
+        }
+        foreach ($sources as $rows) {
+            foreach ($rows as $row) {
+                if (!is_array($row) || empty($row['shape'])) {
+                    continue;
+                }
+                $shape = (string) $row['shape'];
+                if (isset($shapes[$shape])) {
+                    continue;
+                }
+                $shapes[$shape] = true;
+            }
+        }
+
+        $out = array();
+        foreach (array_keys($shapes) as $shape) {
+            $url = $this->build_size_shape_hub_url($ctx->site_id, $shape);
+            if ($url === '') {
+                continue;
+            }
+            $out[] = array(
+                'name' => $this->size_shape_label($shape) . ' Diamond Size Chart',
+                'url'  => $url,
             );
         }
         return $out;
@@ -3802,6 +4062,18 @@ final class LDN_Size_Renderer {
             return $path;
         }
         return home_url(user_trailingslashit(ltrim($path, '/')));
+    }
+
+    /**
+     * Whether the `faq` widget is entitled on size pages for this site.
+     *
+     * Gates the visible FAQ and FAQPage schema together.
+     *
+     * @param string $site_id
+     * @return bool
+     */
+    private function faq_enabled($site_id) {
+        return (new LDN_Artefacts($this->config))->site_has_wp_widget($site_id, 'faq', 'size');
     }
 
     /**

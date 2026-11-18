@@ -301,11 +301,18 @@ trait LDN_Trait_Sections {
      * Ranking claims belong in C5.8 so they match the chart. C1 must not
      * restate which shape is dearest.
      *
+     * Returns [] unless the `faq` widget is entitled for this site and level.
+     * The visible FAQ and FAQPage schema both read this, so they switch together.
+     *
      * @param LDN_Page_Context $ctx
      * @param array            $bag
      * @return array<int, array{question:mixed, answer:mixed}>
      */
     public function merged_faq_pairs(LDN_Page_Context $ctx, array $bag) {
+        $artefacts = new LDN_Artefacts($this->config);
+        if (!$artefacts->site_has_wp_widget($ctx->site_id, 'faq', (string) $ctx->page_level)) {
+            return array();
+        }
         $static = $this->section_value('faq_static', $ctx, $bag);
         $static = is_array($static) ? $static : array();
         return array_merge($this->templated_faq_pairs($bag), $static);

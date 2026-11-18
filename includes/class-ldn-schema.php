@@ -21,10 +21,11 @@
  *
  * Always layered on top (enrichment beyond the Python builder):
  *   - an Organization node (publisher/creator, referenced by @id)
+ *   - a WebPage (canonical URL, isPartOf the theme WebSite, mainEntity → Dataset)
  *   - a BreadcrumbList (when a trail of >= 2 crumbs is supplied)
  *   - a FAQPage (when 'faq' in schema_features and pairs are present)
  *   - Dataset enrichment: page url, dateModified, temporalCoverage,
- *     spatialCoverage, isPartOf (the site WebSite), keywords, isAccessibleForFree
+ *     spatialCoverage, license, measurementTechnique, keywords, isAccessibleForFree
  *
  * Pure builders take arrays in and return arrays out (unit-testable without
  * WordPress beyond wp_json_encode / esc_*). The renderer wires them to fetched
@@ -39,6 +40,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once dirname(__FILE__) . '/class-ldn-stat-specs.php';
+
 final class LDN_Schema {
 
     /**
@@ -49,7 +52,7 @@ final class LDN_Schema {
     /**
      * ISO currency code → display symbol (mirrors LDN_Renderer::CURRENCY_SYMBOLS).
      * Used only for the human-readable description string; PropertyValue carries
-     * the ISO code in `unitText`, not the symbol.
+     * the ISO code in `unitCode`, not the symbol.
      *
      * @var array<string, string>
      */
@@ -62,25 +65,15 @@ final class LDN_Schema {
     );
 
     /**
-     * Headline-stat specs for `variableMeasured`. Mirrors the resolution paths in
-     * LDN_Renderer::stat_specs() so the on-page stats and the Dataset agree.
-     *
-     * @return array<int, array{label:string, format:string, paths:array}>
+     * How the price index is computed. Distinct from the size-module constant
+     * (millimetres / face-up area). No em dash.
      */
-    private static function measured_specs() {
-        return array(
-            array('label' => 'Current price', 'format' => 'currency',
-                'paths' => array(array('time_series', 'current_price'), array('current_price'))),
-            array('label' => 'Median price', 'format' => 'currency',
-                'paths' => array(array('distribution', 'median_price'), array('median_price'))),
-            array('label' => 'Lowest price', 'format' => 'currency',
-                'paths' => array(array('distribution', 'price_range', 'min'), array('min_price'), array('price_low'))),
-            array('label' => 'Highest price', 'format' => 'currency',
-                'paths' => array(array('distribution', 'price_range', 'max'), array('max_price'), array('price_high'))),
-            array('label' => __('Diamonds analyzed', 'loupe-diamond-network'), 'format' => 'integer',
-                'paths' => array(array('distribution', 'sample_size'), array('num_diamonds'), array('sample_size'))),
-        );
-    }
+    const MEASUREMENT_TECHNIQUE = 'Daily median of asking prices from live online retailer listings, grouped by approximate carat.';
+
+    /**
+     * Reuse licence. Same URL as size Dataset (citation with attribution, non-commercial).
+     */
+    const LICENSE_URL = 'https://creativecommons.org/licenses/by-nc/4.0/';
 
     /**
      * Candidate paths (first hit wins) for the dataset's modified/coverage date.
@@ -102,7 +95,7 @@ final class LDN_Schema {
      * @param array            $summary       summary-data payload (level-appropriate)
      * @param array            $profile       resolved content profile
      * @param array            $site          site config (brand_name, domain, countries)
-     * @param string|null      $currency      ISO code for price unitText
+     * @param string|null      $currency      ISO code for price unitCode
      * @param string           $canonical_url absolute page URL ('' when unknown)
      * @param array            $breadcrumb    [['name'=>, 'url'=>], ...]
      * @param array            $faq_pairs     [['question'=>, 'answer'=>], ...]
@@ -140,13 +133,19 @@ final class LDN_Schema {
     }
 
     /**
-     * WebApplication JSON-LD for the calculator destination page.
+     * WebApplication JSON-LD for a tool page (calculator or size checker).
+     *
+     * Graph: Organization + WebPage (mainEntity → #webapp) + WebApplication
+     * + BreadcrumbList when a trail of >= 2 crumbs is supplied. No Dataset
+     * and no invented aggregateRating.
      *
      * @param LDN_Page_Context $ctx
      * @param array            $site
      * @param string           $name
      * @param string           $description
      * @param string           $canonical_url
+     * @param string           $category     Google Software App category enum.
+     * @param array            $breadcrumb   [['name'=>, 'url'=>], ...]
      * @return string
      */
     public function render_webapp(
@@ -154,31 +153,93 @@ final class LDN_Schema {
         array $site,
         $name,
         $description,
-        $canonical_url
+        $canonical_url,
+        $category = 'FinanceApplication',
+        array $breadcrumb = array()
     ) {
         if (!apply_filters('ldn_emit_json_ld', true, $ctx)) {
             return '';
         }
 
+        $canonical = $this->tool_canonical_url($canonical_url);
         $org = $this->organization_node($site);
-        $node = array(
-            '@type'               => 'WebApplication',
-            '@id'                 => rtrim((string) $canonical_url, '/') . '#webapp',
-            'name'                => (string) $name,
-            'description'         => (string) $description,
-            'url'                 => (string) $canonical_url,
-            'applicationCategory' => 'FinanceApplication',
-            'operatingSystem'     => 'Any (web-based)',
-            'isAccessibleForFree' => true,
-            'provider'            => $org,
-        );
+        $org_ref = isset($org['@id']) ? array('@id' => $org['@id']) : $org;
+        $webapp = $this->webapp_node($canonical, $name, $description, $category, $org_ref);
+        if ($webapp === null) {
+            return '';
+        }
 
-        $doc = array('@context' => 'https://schema.org', '@graph' => array($org, $node));
+        $graph = array($org);
+        $webpage = array(
+            '@type'       => 'WebPage',
+            '@id'         => $canonical . '#webpage',
+            'url'         => $canonical,
+            'name'        => (string) $name,
+            'description' => (string) $description,
+            'mainEntity'  => array('@id' => $webapp['@id']),
+        );
+        $website = $this->website_ref($site);
+        if ($website !== null) {
+            $webpage['isPartOf'] = $website;
+        }
+        $graph[] = $webpage;
+        $graph[] = $webapp;
+
+        $crumbs = $this->breadcrumb_node($breadcrumb);
+        if ($crumbs !== null) {
+            $graph[] = $crumbs;
+        }
+
+        $doc = array('@context' => 'https://schema.org', '@graph' => $graph);
         $json = wp_json_encode($doc, self::JSON_SCRIPT_FLAGS);
         if (!is_string($json) || $json === '') {
             return '';
         }
         return '<script type="application/ld+json">' . $json . '</script>' . "\n";
+    }
+
+    /**
+     * Free WebApplication node. Category must be a Google Software App enum
+     * (FinanceApplication, UtilitiesApplication, …).
+     *
+     * @param string               $canonical_url
+     * @param string               $name
+     * @param string               $description
+     * @param string               $category
+     * @param array<string, mixed> $org_ref
+     * @return array<string, mixed>|null
+     */
+    public function webapp_node($canonical_url, $name, $description, $category, array $org_ref) {
+        $canonical = $this->tool_canonical_url($canonical_url);
+        if ($canonical === '') {
+            return null;
+        }
+        return array(
+            '@type'               => 'WebApplication',
+            '@id'                 => $canonical . '#webapp',
+            'name'                => (string) $name,
+            'description'         => (string) $description,
+            'url'                 => $canonical,
+            'applicationCategory' => (string) $category,
+            'operatingSystem'     => 'Web',
+            'isAccessibleForFree' => true,
+            'offers'              => array('@type' => 'Offer', 'price' => 0),
+            'provider'            => $org_ref,
+        );
+    }
+
+    /**
+     * Tool page canonical with a trailing slash so @id and url stay in sync.
+     *
+     * @param string $url
+     * @return string
+     */
+    public function tool_canonical_url($url) {
+        $url = trim((string) $url);
+        if ($url === '') {
+            return '';
+        }
+        return rtrim($url, '/') . '/';
     }
 
     /**
@@ -210,6 +271,12 @@ final class LDN_Schema {
         $primary = $this->primary_nodes(
             $schema_type, $features, $ctx, $summary, $profile, $site, $currency, $canonical_url, $items, $org_ref
         );
+
+        $webpage = $this->webpage_node($ctx, $summary, $site, $currency, $canonical_url, $primary);
+        if ($webpage !== null) {
+            $graph[] = $webpage;
+        }
+
         foreach ($primary as $node) {
             if (is_array($node) && !empty($node)) {
                 $graph[] = $node;
@@ -308,10 +375,12 @@ final class LDN_Schema {
             : '';
 
         $node = array(
-            '@type'              => 'Dataset',
-            'name'               => $this->headline($ctx, $site) . $suffix,
-            'description'        => $this->dataset_description($ctx, $summary, $currency, null, $site),
-            'isAccessibleForFree' => true,
+            '@type'                => 'Dataset',
+            'name'                 => $this->headline($ctx, $site) . $suffix,
+            'description'          => $this->dataset_description($ctx, $summary, $currency, null, $site),
+            'isAccessibleForFree'  => true,
+            'license'              => self::LICENSE_URL,
+            'measurementTechnique' => self::MEASUREMENT_TECHNIQUE,
         );
         if ($canonical_url !== '') {
             $node['@id'] = $canonical_url . '#dataset';
@@ -339,17 +408,74 @@ final class LDN_Schema {
             $node['publisher'] = $org_ref;
         }
 
-        $website = $this->website_ref($site);
-        if ($website !== null) {
-            $node['isPartOf'] = $website;
-        }
-
-        $measured = $this->variable_measured($summary, $currency);
+        $measured = $this->variable_measured($summary, $currency, $ctx->page_level);
         if (!empty($measured)) {
             $node['variableMeasured'] = $measured;
         }
 
         return $node;
+    }
+
+    /**
+     * WebPage for the canonical URL. Theme / SEOPress owns WebSite; we only
+     * reference it. mainEntity points at Dataset when present, else Article.
+     *
+     * @param array<int, array<string, mixed>|null> $primary
+     * @return array<string, mixed>|null
+     */
+    public function webpage_node(
+        LDN_Page_Context $ctx, array $summary, array $site, $currency, $canonical_url, array $primary
+    ) {
+        if ($canonical_url === '') {
+            return null;
+        }
+
+        $node = array(
+            '@type'       => 'WebPage',
+            '@id'         => $canonical_url . '#webpage',
+            'url'         => $canonical_url,
+            'name'        => $this->headline($ctx, $site),
+            'description' => $this->dataset_description($ctx, $summary, $currency, null, $site),
+        );
+
+        $website = $this->website_ref($site);
+        if ($website !== null) {
+            $node['isPartOf'] = $website;
+        }
+
+        $date = $this->dataset_date($summary);
+        if ($date !== '') {
+            $node['dateModified'] = $date;
+        }
+
+        $main_id = $this->main_entity_id($primary);
+        if ($main_id !== '') {
+            $node['mainEntity'] = array('@id' => $main_id);
+        }
+
+        return $node;
+    }
+
+    /**
+     * @id of the page's primary entity (Dataset preferred, else Article).
+     *
+     * @param array<int, array<string, mixed>|null> $primary
+     * @return string
+     */
+    private function main_entity_id(array $primary) {
+        $article_id = '';
+        foreach ($primary as $node) {
+            if (!is_array($node) || empty($node['@type']) || empty($node['@id'])) {
+                continue;
+            }
+            if ($node['@type'] === 'Dataset') {
+                return (string) $node['@id'];
+            }
+            if ($node['@type'] === 'Article') {
+                $article_id = (string) $node['@id'];
+            }
+        }
+        return $article_id;
     }
 
     /**
@@ -382,57 +508,34 @@ final class LDN_Schema {
     }
 
     /**
-     * Schema.org ItemList of priced products, or null when no items.
+     * ItemList of child WebPages for hybrid/recommendation price hubs.
+     *
+     * Ranking rows link to shape price pages. They are not buyable SKUs, so
+     * this must not emit Product + Offer.
      *
      * @param LDN_Page_Context $ctx
-     * @param array            $items [['name'=>, 'price'=>, 'currency'=>, 'url'=>], ...]
+     * @param array            $items [['name'=>, 'url'=>], ...]
      * @param string           $canonical_url
      * @return array<string, mixed>|null
      */
     public function item_list_node(LDN_Page_Context $ctx, array $items, $canonical_url = '') {
-        $elements = array();
-        $position = 1;
+        $pages = array();
         foreach ($items as $item) {
-            if (!is_array($item) || empty($item['name'])) {
+            if (!is_array($item) || empty($item['name']) || empty($item['url'])) {
                 continue;
             }
-            $product = array('@type' => 'Product', 'name' => (string) $item['name']);
-            if (isset($item['url']) && $item['url'] !== '') {
-                $product['url'] = (string) $item['url'];
-            }
-            if (isset($item['price']) && is_numeric($item['price'])) {
-                $product['offers'] = array(
-                    '@type' => 'Offer',
-                    'price' => (string) $item['price'],
-                    'priceCurrency' => strtoupper((string) ($item['currency'] ?? 'USD')),
-                );
-            }
-            $elements[] = array(
-                '@type'    => 'ListItem',
-                'position' => $position++,
-                'item'     => $product,
+            $pages[] = array(
+                'name' => (string) $item['name'],
+                'url'  => (string) $item['url'],
             );
         }
-        if (empty($elements)) {
-            return null;
-        }
-
-        $node = array(
-            '@type'          => 'ItemList',
-            'name'           => $this->headline($ctx),
-            'numberOfItems'  => count($elements),
-            'itemListElement' => $elements,
-        );
-        if ($canonical_url !== '') {
-            $node['url'] = $canonical_url;
-        }
-        return $node;
+        return $this->page_item_list_node($this->headline($ctx), $pages, $canonical_url);
     }
 
     /**
      * ItemList of child WebPages (size hubs: one entry per carat/shape row).
      *
-     * Distinct from item_list_node(), which emits Product + Offer for price pages.
+     * Same item shape as item_list_node() on price hubs.
      *
      * @param string $name
      * @param array  $pages         [['name'=>, 'url'=>], ...]
@@ -542,20 +645,27 @@ final class LDN_Schema {
      * @param string|null $currency
      * @return array<int, array<string, mixed>>
      */
-    public function variable_measured(array $summary, $currency = null) {
+    public function variable_measured(array $summary, $currency = null, $page_level = 'shape') {
         $out = array();
-        foreach (self::measured_specs() as $spec) {
+        foreach (LDN_Stat_Specs::measured_specs($page_level) as $spec) {
             $value = $this->dig_first($summary, $spec['paths']);
             if ($value === null || !is_scalar($value) || is_bool($value)) {
                 continue;
             }
+            if ($spec['format'] === 'currency') {
+                $numeric = (int) round((float) $value);
+            } elseif ($spec['format'] === 'integer') {
+                $numeric = (int) $value;
+            } else {
+                $numeric = $value + 0;
+            }
             $pv = array(
                 '@type' => 'PropertyValue',
                 'name'  => $spec['label'],
-                'value' => $value + 0,
+                'value' => $numeric,
             );
             if ($spec['format'] === 'currency' && $currency) {
-                $pv['unitText'] = strtoupper((string) $currency);
+                $pv['unitCode'] = strtoupper((string) $currency);
             }
             $out[] = $pv;
         }
@@ -607,11 +717,7 @@ final class LDN_Schema {
         // description skip to time_series.current_price (a trimmed mean) while the
         // visible intro and hero cards quote p50 — so the meta description, the
         // JSON-LD Dataset and the chart's no-JS fallback would contradict the page.
-        $median = $this->dig_first($summary, array(
-            array('distribution', 'median_price'),
-            array('median_price'),
-            array('distribution', 'percentiles', 'p50'),
-        ));
+        $median = $this->dig_first($summary, LDN_Stat_Specs::headline_price_paths());
         if ($median === null) {
             $median = $this->dig_first($summary, array(
                 array('time_series', 'current_price'), array('current_price'),
@@ -626,7 +732,8 @@ final class LDN_Schema {
         }
 
         $symbol = $this->currency_symbol($currency);
-        $detail = sprintf('Median price %s%s', $symbol, number_format((float) $median, 0));
+        $price_phrase = LDN_Stat_Specs::description_headline_price_phrase($ctx->page_level);
+        $detail = sprintf('%s %s%s', $price_phrase, $symbol, number_format((float) $median, 0));
         if (is_numeric($sample) && (int) $sample > 0) {
             $detail .= sprintf(' from %s matching diamonds', number_format((int) $sample));
         }
@@ -739,7 +846,12 @@ final class LDN_Schema {
 
         if (is_numeric($median)) {
             $symbol = $this->currency_symbol($currency);
-            $desc .= sprintf('. Weighted median %s%s', $symbol, number_format((float) $median, 0));
+            $desc .= sprintf(
+                '. %s %s%s',
+                LDN_Stat_Specs::description_headline_price_phrase('all-shapes'),
+                $symbol,
+                number_format((float) $median, 0)
+            );
             if (is_numeric($sample) && (int) $sample > 0) {
                 $desc .= sprintf(' across %s stones', number_format((int) $sample));
             }
@@ -980,7 +1092,7 @@ final class LDN_Schema {
         }
         if ($ctx->site_id === 'ringspo' && $ctx->page_level === 'all-shapes') {
             return sprintf(
-                '%s Diamond Prices by Shape - %s',
+                '%s Diamond in the %s',
                 $subject,
                 $this->country_full_name($ctx, $site)
             );

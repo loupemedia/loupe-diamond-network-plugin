@@ -16,7 +16,7 @@ Legal page rendering is `includes/class-ldn-standard-pages-*.php` (PRD-021).
 | `trait-ldn-nav-markup.php` | Site shell HTML walker (header, utility bar, footer; PRD-018) |
 | `trait-ldn-head.php` | Canonical, Open Graph meta |
 | `trait-ldn-charts.php` | Inline Plotly chart blocks |
-| `trait-ldn-content.php` | Intro, stats, FAQ, static copy |
+| `trait-ldn-content.php` | Intro, stats, FAQ, static copy. FAQs render only when switched on ([`faq-production.md`](../../docs/architecture/faq-production.md)) |
 | `trait-ldn-navigation.php` | Breadcrumbs, freshness line |
 | `trait-ldn-tables.php` | Ranking, carat ladder, colour/clarity grids. **House table:** wrap every generated data table in `.ldn-table-card` > `table.ldn-data-table`. The look is the size-hub chart (brand-colour header, hairline rows). Cell chrome lives in `assets/css/shared.css`. Colour/clarity heatmaps (`.ldn-cc-table`) are the exception. Size pages use the same shell from `LDN_Size_Renderer::house_table_html()` (`ldn-size-table` stays as a layout class). |
 | `trait-ldn-sections.php` | `render_section()` / `render_hero()` dispatch |

@@ -42,6 +42,7 @@ require_once LDN_PLUGIN_DIR . 'components/trait-ldn-homepage.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-shapes-at-carat.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-methodology.php';
 require_once LDN_PLUGIN_DIR . 'components/trait-ldn-price-calculator.php';
+require_once LDN_PLUGIN_DIR . 'includes/class-ldn-stat-specs.php';
 
 final class LDN_Renderer {
     use LDN_Trait_Chrome;
@@ -142,29 +143,6 @@ final class LDN_Renderer {
         'KRW' => '₩', 'AED' => 'AED ', 'SAR' => 'SAR ', 'CHF' => 'CHF ',
         'DKK' => 'kr ', 'SEK' => 'kr ', 'NOK' => 'kr ',
     );
-
-    /**
-     * Headline-stat specs for `summary-data.json`. Each spec lists candidate
-     * `paths` into the (nested C5 contract or legacy-flat) payload — first hit
-     * wins — plus a display label, a value `format`, and whether it feeds the
-     * JSON-LD `variableMeasured`. Order = display order.
-     *
-     * @return array<int, array{label:string, format:string, schema:bool, paths:array}>
-     */
-    private static function stat_specs() {
-        return array(
-            array('label' => 'Current price', 'format' => 'currency', 'schema' => true,
-                'paths' => array(array('time_series', 'current_price'), array('current_price'))),
-            array('label' => 'Median price', 'format' => 'currency', 'schema' => true,
-                'paths' => array(array('distribution', 'median_price'), array('median_price'))),
-            array('label' => 'Lowest price', 'format' => 'currency', 'schema' => false,
-                'paths' => array(array('distribution', 'price_range', 'min'), array('min_price'), array('price_low'))),
-            array('label' => 'Highest price', 'format' => 'currency', 'schema' => false,
-                'paths' => array(array('distribution', 'price_range', 'max'), array('max_price'), array('price_high'))),
-            array('label' => __('Diamonds analyzed', 'loupe-diamond-network'), 'format' => 'integer', 'schema' => true,
-                'paths' => array(array('distribution', 'sample_size'), array('num_diamonds'), array('sample_size'))),
-        );
-    }
 
     /**
      * @var LDN_Data_Fetcher

@@ -29,6 +29,7 @@ final class LDN_Assets {
 		'ldn-chart-init',
 		'ldn-price-calculator',
 		'ldn-price-calculator-destination',
+		'ldn-facet-intelligence-panel',
 		'ldn-size-checker',
 		'ldn-size-carat-explorer',
 		'ldn-type-carat-lookup',
@@ -68,6 +69,7 @@ final class LDN_Assets {
 		$excluded[] = 'chart-init';
 		$excluded[] = 'ldn-price-calculator';
 		$excluded[] = 'price-calculator';
+		$excluded[] = 'ldn-facet-intelligence-panel';
 		$excluded[] = 'ldn-size-checker';
 		$excluded[] = 'ldn-size-carat-explorer';
 		$excluded[] = 'ldn-type-carat-lookup';
@@ -94,6 +96,8 @@ final class LDN_Assets {
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/chart-init.js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/price-calculator(.*).js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/price-calculator(.*).js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/facet-intelligence-panel.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/facet-intelligence-panel.js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/size-(.*).js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/size-(.*).js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/type-carat-lookup.js';
@@ -289,6 +293,30 @@ final class LDN_Assets {
 						'restUrl' => esc_url_raw(rest_url('ldn/v1/')),
 					)
 				);
+				if (class_exists('LDN_Plugin') && class_exists('LDN_Facet_Intelligence_Rest')) {
+					$plugin = LDN_Plugin::instance();
+					if (LDN_Facet_Intelligence_Rest::panel_enabled(
+						$plugin,
+						$ctx->site_id,
+						$ctx->country_code
+					)) {
+						wp_enqueue_script(
+							'ldn-facet-intelligence-panel',
+							$base_url . 'assets/js/facet-intelligence-panel.js',
+							array(),
+							$version,
+							true
+						);
+						wp_localize_script(
+							'ldn-facet-intelligence-panel',
+							'ldnFacetIntelligencePanel',
+							array(
+								'restUrl' => esc_url_raw(rest_url('ldn/v1/')),
+								'nonce'   => wp_create_nonce(LDN_Facet_Intelligence_Rest::NONCE_ACTION),
+							)
+						);
+					}
+				}
 			}
 			if ($ctx->page_level === 'diamond-type') {
 				wp_enqueue_script(

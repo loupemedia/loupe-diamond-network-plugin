@@ -381,6 +381,48 @@ check(strpos($head, 'rel="canonical"') !== false, 'calculator head emits canonic
 check(strpos($head, 'property="og:url"') !== false, 'calculator head emits og:url');
 check(strpos($head, 'WebApplication') !== false, 'calculator head emits WebApplication JSON-LD');
 
+// Test intent: the calculator is a tool. Graph is WebPage → WebApplication
+// (FinanceApplication, free Offer) plus breadcrumbs. No Dataset, no Dataset
+// as mainEntity, description uses American "color".
+// Would fail if: render_webapp still emitted only Organization + WebApplication,
+// @id dropped the trailing slash, or the meta string still said "colour".
+check(strpos($head, 'colour') === false, 'calculator description uses color, not colour');
+$calc_json = null;
+if (preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $head, $calc_m)) {
+    $calc_json = json_decode($calc_m[1], true);
+}
+$calc_graph = (isset($calc_json['@graph']) && is_array($calc_json['@graph'])) ? $calc_json['@graph'] : array();
+$calc_by_type = array();
+foreach ($calc_graph as $node) {
+    if (isset($node['@type'])) {
+        $calc_by_type[$node['@type']] = $node;
+    }
+}
+check(isset($calc_by_type['WebPage']), 'calculator JSON-LD includes WebPage');
+check(isset($calc_by_type['WebApplication']), 'calculator JSON-LD includes WebApplication');
+check(!isset($calc_by_type['Dataset']), 'calculator JSON-LD does not include Dataset');
+check(
+    isset($calc_by_type['WebPage']['mainEntity']['@id'])
+        && strpos($calc_by_type['WebPage']['mainEntity']['@id'], '#webapp') !== false,
+    'calculator WebPage.mainEntity points at WebApplication'
+);
+check(
+    isset($calc_by_type['WebApplication']['@id'])
+        && substr($calc_by_type['WebApplication']['@id'], -strlen('/#webapp')) === '/#webapp',
+    'calculator WebApplication @id uses the slashed canonical'
+);
+check(
+    isset($calc_by_type['WebApplication']['applicationCategory'])
+        && $calc_by_type['WebApplication']['applicationCategory'] === 'FinanceApplication',
+    'calculator uses Google FinanceApplication category'
+);
+check(
+    isset($calc_by_type['WebApplication']['offers']['price'])
+        && (int) $calc_by_type['WebApplication']['offers']['price'] === 0,
+    'calculator WebApplication offers a free price'
+);
+check(isset($calc_by_type['BreadcrumbList']), 'calculator JSON-LD includes BreadcrumbList');
+
 // --- Report -----------------------------------------------------------------
 
 if ($GLOBALS['__fails'] === 0) {

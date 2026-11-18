@@ -224,13 +224,14 @@ trait LDN_Trait_Methodology {
             ? $summary['aggregate']
             : array();
 
+        $schema = new LDN_Schema();
         $date = '';
-        foreach (array(
-            isset($summary['analysis_date']) ? $summary['analysis_date'] : null,
-            isset($type_summary['analysis_date']) ? $type_summary['analysis_date'] : null,
-            isset($overview['analysis_date']) ? $overview['analysis_date'] : null,
-        ) as $candidate) {
-            if (is_string($candidate) && $candidate !== '') {
+        foreach (array($summary, $type_summary, $overview) as $payload) {
+            if (!is_array($payload) || $payload === array()) {
+                continue;
+            }
+            $candidate = $schema->analysis_date($payload);
+            if ($candidate !== '') {
                 $date = $this->methodology_format_date($candidate);
                 break;
             }

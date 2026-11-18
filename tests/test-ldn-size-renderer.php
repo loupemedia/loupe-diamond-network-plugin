@@ -89,6 +89,13 @@ if (!class_exists('LDN_Data_Fetcher')) {
             }
             return array();
         }
+        public function resolve_artefact_url($id, $ctx) {
+            if ($id === 'size_og_preview_png'
+                && isset($ctx->page_level) && $ctx->page_level === 'size-individual') {
+                return 'https://ringspo.s3.amazonaws.com/size/round/1-carat/size-og-preview.png';
+            }
+            return null;
+        }
         public function fetch_artefact_html($id, $ctx) {
             return '';
         }
@@ -96,6 +103,20 @@ if (!class_exists('LDN_Data_Fetcher')) {
 }
 if (!class_exists('LDN_Config')) {
     class LDN_Config {
+        /** @var bool Whether the `faq` widget is entitled on size pages. */
+        public $faq_widget = true;
+
+        public function get_bundle() {
+            if (!$this->faq_widget) {
+                return array();
+            }
+            $size = array('size' => array('wp_widgets' => array('faq' => true)));
+            return array('entitlements' => array('sites' => array(
+                'ringspo'      => array('pages' => $size),
+                'diamondchart' => array('pages' => $size),
+            )));
+        }
+
         public function get_content_profile($site_id) {
             if ((string) $site_id === 'diamondchart') {
                 return array(
@@ -182,6 +203,7 @@ if (!class_exists('LDN_Config')) {
     }
 }
 
+require_once __DIR__ . '/../includes/class-ldn-artefacts.php';
 require_once __DIR__ . '/../includes/class-ldn-schema.php';
 require_once __DIR__ . '/../includes/class-ldn-renderer.php';
 require_once __DIR__ . '/../includes/class-ldn-assets.php';
@@ -269,13 +291,22 @@ $copy = array(
     ),
 );
 // Test intent: size-page JSON-LD is a connected graph — WebPage.mainEntity
-// points at Dataset @id, Dataset carries publisher / isPartOf / keywords /
-// spatialCoverage / temporalCoverage, and no duplicate WebSite node.
-// Would fail if: Dataset was a dangling node, keywords fell through to
-// "diamond prices", or the graph re-emitted @type WebSite alongside SEOPress.
+// points at Dataset @id, Dataset carries publisher / keywords /
+// spatialCoverage / temporalCoverage, WebPage owns isPartOf → #website,
+// and no duplicate WebSite node.
+// Would fail if: Dataset was a dangling node, Dataset reused isPartOf for
+// WebSite, keywords fell through to "diamond prices", or the graph
+// re-emitted @type WebSite alongside SEOPress.
 $summary_dated = $summary;
 $summary_dated['generated_date'] = '2026-07-11';
-$json_ld = $renderer->json_ld_script($ctx, $summary_dated, $copy, $canonical, 'Title', 'Desc');
+$json_ld = $renderer->json_ld_script(
+    $ctx,
+    $summary_dated,
+    $copy,
+    $canonical,
+    '1 Carat Round Diamond Size — 6.37 × 6.41 mm',
+    'Desc'
+);
 check(strpos($json_ld, 'application/ld+json') !== false, 'JSON-LD script emitted');
 check(strpos($json_ld, 'Dataset') !== false, 'JSON-LD includes Dataset');
 check(strpos($json_ld, 'FAQPage') !== false, 'JSON-LD includes FAQPage');
@@ -285,6 +316,27 @@ check(strpos($json_ld, '#website') !== false, 'JSON-LD references theme WebSite 
 check(strpos($json_ld, 'WebPage') !== false, 'JSON-LD includes WebPage node');
 check(strpos($json_ld, '2026-07-11') !== false, 'JSON-LD carries dateModified from generated_date');
 check(strpos($json_ld, 'measurementTechnique') !== false, 'Dataset declares measurementTechnique');
+
+// Test intent: size-page FAQs stay off until the site's size entitlements turn
+// the `faq` widget on; the visible FAQ and FAQPage schema switch together.
+// Would fail if: either rendered for a site with no `faq` widget.
+class LDN_Fetcher_Size_Faq extends LDN_Data_Fetcher {
+    /** @var array */
+    public $copy = array();
+    public function fetch_artefact($id, $ctx) {
+        return $id === 'size_copy_json' ? $this->copy : parent::fetch_artefact($id, $ctx);
+    }
+}
+$faq_fetcher = new LDN_Fetcher_Size_Faq();
+$faq_fetcher->copy = $copy;
+$faq_config = new LDN_Config();
+$faq_renderer = new LDN_Size_Renderer($faq_fetcher, $faq_config);
+check(strpos($faq_renderer->render($ctx, $summary), 'ldn-faq') !== false, 'size FAQ renders when the faq widget is on');
+$faq_config->faq_widget = false;
+check(strpos($faq_renderer->render($ctx, $summary), 'ldn-faq') === false, 'size FAQ is hidden when the faq widget is off');
+$json_ld_off = $faq_renderer->json_ld_script($ctx, $summary_dated, $copy, $canonical, 'Title', 'Desc');
+check(strpos($json_ld_off, 'FAQPage') === false, 'size FAQPage schema is omitted when the faq widget is off');
+check(strpos($json_ld_off, 'Dataset') !== false, 'size Dataset schema still emits when the faq widget is off');
 
 $ind_graph = size_jsonld_graph($json_ld);
 $ind_dataset = size_jsonld_node($ind_graph, 'Dataset');
@@ -298,8 +350,10 @@ check(
 );
 check(isset($ind_dataset['publisher']['@id']) && strpos($ind_dataset['publisher']['@id'], '#organization') !== false,
     'Dataset.publisher references the Organization @id');
-check(isset($ind_dataset['isPartOf']['@id']) && strpos($ind_dataset['isPartOf']['@id'], '#website') !== false,
-    'Dataset.isPartOf references the theme WebSite @id');
+check(!isset($ind_dataset['isPartOf']),
+    'Dataset must not use isPartOf → WebSite (that relation belongs on WebPage)');
+check(isset($ind_page['isPartOf']['@id']) && strpos($ind_page['isPartOf']['@id'], '#website') !== false,
+    'WebPage.isPartOf references the theme WebSite @id');
 check(isset($ind_dataset['temporalCoverage']) && $ind_dataset['temporalCoverage'] === '2026-07-11',
     'Dataset.temporalCoverage matches generated_date');
 check(
@@ -316,20 +370,184 @@ check(strpos($ind_desc, '12,000') !== false, 'Dataset.description includes the s
 check(strpos($ind_desc, 'ideal proportion') !== false, 'Dataset.description states the real-inventory method');
 check(size_jsonld_node($ind_graph, 'ItemList') === null, 'individual size page does not emit a hub ItemList');
 
-// Test intent: the size checker tool page adds a WebApplication node.
-// Would fail if: the tool page emitted only Dataset/WebPage.
+// Test intent: size measures use citation names (Median length, not length_mm)
+// and include the on-page P10-P90 spread. Titles replace em/en dashes.
+// Would fail if: machine keys remained, only medians were emitted, or
+// page_title / Dataset.name kept a Unicode dash.
+$ind_measured = array();
+foreach (isset($ind_dataset['variableMeasured']) && is_array($ind_dataset['variableMeasured'])
+    ? $ind_dataset['variableMeasured'] : array() as $pv) {
+    if (isset($pv['name'])) {
+        $ind_measured[(string) $pv['name']] = $pv['value'] ?? null;
+    }
+}
+check(isset($ind_measured['Median length']) && $ind_measured['Median length'] == 6.37,
+    'individual Dataset cites Median length');
+check(isset($ind_measured['Median width']) && $ind_measured['Median width'] == 6.41,
+    'individual Dataset cites Median width');
+check(isset($ind_measured['Median face-up area']) && $ind_measured['Median face-up area'] == 32.07,
+    'individual Dataset cites Median face-up area');
+check(isset($ind_measured['Diameter (10th percentile)']) && $ind_measured['Diameter (10th percentile)'] == 6.2,
+    'round individual Dataset cites diameter P10 from the key-dimensions table');
+check(isset($ind_measured['Diameter (90th percentile)']) && $ind_measured['Diameter (90th percentile)'] == 6.6,
+    'round individual Dataset cites diameter P90 from the key-dimensions table');
+check(isset($ind_measured['Face-up area (10th percentile)']) && $ind_measured['Face-up area (10th percentile)'] == 31.0,
+    'individual Dataset cites face-up P10');
+check(isset($ind_measured['Sample size']) && $ind_measured['Sample size'] === 12000,
+    'individual Dataset uses Sample size, not sample_size');
+check(!isset($ind_measured['length_mm']), 'individual Dataset does not use machine measure keys');
+$ind_doc_title = $renderer->page_title($ctx, $summary_dated);
+check(strpos($ind_doc_title, "\u{2014}") === false && strpos($ind_doc_title, "\u{2013}") === false,
+    'individual document title has no em or en dash');
+check(strpos($ind_doc_title, ' - ') !== false && strpos($ind_doc_title, '6.37') !== false,
+    'individual document title uses a hyphen before the mm dimensions');
+check(
+    isset($ind_dataset['name'])
+        && $ind_dataset['name'] === '1 Carat Round Diamond Size - 6.37 × 6.41 mm',
+    'Dataset.name replaces the em dash in the SEO title'
+);
+
+$ctx_oval_ld = new LDN_Page_Context('ringspo', 'size-individual', 'us', null, '1', 'oval', 'size');
+$oval_sum_ld = $summary_dated;
+$oval_sum_ld['shape'] = 'oval';
+$oval_sum_ld['lw_ratio'] = array('median' => 1.41, 'p25' => 1.35, 'p75' => 1.48);
+$oval_ld = $renderer->json_ld_script(
+    $ctx_oval_ld,
+    $oval_sum_ld,
+    $copy,
+    $renderer->build_size_individual_url('ringspo', 'oval', '1'),
+    'Title',
+    'Desc'
+);
+$oval_measured_names = array();
+foreach ((size_jsonld_node(size_jsonld_graph($oval_ld), 'Dataset')['variableMeasured'] ?? array()) as $pv) {
+    if (isset($pv['name'])) {
+        $oval_measured_names[] = (string) $pv['name'];
+    }
+}
+check(in_array('Length (10th percentile)', $oval_measured_names, true),
+    'elongated individual Dataset cites length P10, not diameter');
+check(!in_array('Diameter (10th percentile)', $oval_measured_names, true),
+    'elongated individual Dataset does not invent a diameter spread');
+
+// Test intent: the size checker is a tool. WebPage.mainEntity is WebApplication
+// (UtilitiesApplication, free Offer). No Dataset on this URL.
+// Would fail if: mainEntity still pointed at #dataset, or a Dataset was emitted.
 $ctx_tool_schema = new LDN_Page_Context('ringspo', 'size-comparison-tool', 'us', null, null, null, 'size');
+$tool_canonical = $renderer->build_comparison_tool_url('ringspo');
 $json_ld_tool = $renderer->json_ld_script(
     $ctx_tool_schema,
     array('type' => 'size_checker'),
     $copy,
-    $renderer->build_comparison_tool_url('ringspo'),
-    'Diamond Size Checker',
-    'Desc'
+    $tool_canonical,
+    'Diamond Size Checker — Check & Compare',
+    "Desc\n"
 );
-check(strpos($json_ld_tool, 'WebApplication') !== false, 'size checker JSON-LD includes WebApplication');
-check(size_jsonld_node(size_jsonld_graph($json_ld_tool), 'ItemList') === null,
+$tool_graph = size_jsonld_graph($json_ld_tool);
+$tool_page = size_jsonld_node($tool_graph, 'WebPage');
+$tool_app = size_jsonld_node($tool_graph, 'WebApplication');
+check($tool_app !== null, 'size checker JSON-LD includes WebApplication');
+check(size_jsonld_node($tool_graph, 'Dataset') === null,
+    'size checker does not emit a Dataset');
+check(size_jsonld_node($tool_graph, 'ItemList') === null,
     'size checker does not emit a hub ItemList');
+check(
+    isset($tool_page['mainEntity']['@id'])
+        && strpos($tool_page['mainEntity']['@id'], '#webapp') !== false,
+    'size checker WebPage.mainEntity points at WebApplication'
+);
+check(
+    isset($tool_app['applicationCategory'])
+        && $tool_app['applicationCategory'] === 'UtilitiesApplication',
+    'size checker uses Google UtilitiesApplication category'
+);
+check(
+    isset($tool_app['offers']['price']) && (int) $tool_app['offers']['price'] === 0,
+    'size checker WebApplication offers a free price'
+);
+check(
+    isset($tool_app['name']) && strpos((string) $tool_app['name'], "\u{2014}") === false,
+    'size checker WebApplication name has no em dash'
+);
+
+// Test intent: methodology is an Article (how we measure), not a Dataset or tool.
+// Would fail if: json_ld_script still emitted Dataset for every non-tool size page,
+// or marked methodology as WebApplication.
+$ctx_meth_ld = new LDN_Page_Context('ringspo', 'size-methodology', 'us', null, null, null, 'size');
+$meth_canonical = $renderer->build_methodology_url('ringspo');
+$meth_ld = $renderer->json_ld_script(
+    $ctx_meth_ld,
+    array(
+        'type' => 'methodology',
+        'generated_date' => '2026-08-28',
+        'stats' => array('total_n' => 2400000),
+    ),
+    $copy,
+    $meth_canonical,
+    'How We Measure Diamond Sizes',
+    'How we measure real inventory instead of ideal-proportion formulas.'
+);
+$meth_graph = size_jsonld_graph($meth_ld);
+$meth_page = size_jsonld_node($meth_graph, 'WebPage');
+$meth_article = size_jsonld_node($meth_graph, 'Article');
+check($meth_article !== null, 'methodology JSON-LD includes Article');
+check(size_jsonld_node($meth_graph, 'Dataset') === null, 'methodology does not emit a Dataset');
+check(size_jsonld_node($meth_graph, 'WebApplication') === null,
+    'methodology is not a WebApplication');
+check(
+    isset($meth_page['mainEntity']['@id'])
+        && strpos($meth_page['mainEntity']['@id'], '#article') !== false,
+    'methodology WebPage.mainEntity points at Article'
+);
+check(isset($meth_article['headline']) && $meth_article['headline'] === 'How We Measure Diamond Sizes',
+    'methodology Article headline is the page title');
+check(size_jsonld_node($meth_graph, 'FAQPage') !== null, 'methodology keeps FAQPage');
+check(size_jsonld_node($meth_graph, 'BreadcrumbList') !== null, 'methodology keeps BreadcrumbList');
+
+// Test intent: a two-stone compare page is WebPage + FAQ + crumbs only.
+// It is not a Dataset, not the size-checker WebApplication, and not a Product.
+// Would fail if: the shared size builder still attached Dataset, or reused #webapp.
+$ctx_pair_ld = new LDN_Page_Context(
+    'ringspo',
+    'size-comparison',
+    'us',
+    null,
+    null,
+    null,
+    'size',
+    'round-1-carat-vs-oval-0.3-carat'
+);
+$pair_canonical = $renderer->build_comparison_url('ringspo', 'round', '1', 'oval', '0.3');
+$pair_ld = $renderer->json_ld_script(
+    $ctx_pair_ld,
+    array(
+        'type' => 'comparison',
+        'generated_date' => '2026-08-28',
+        'a' => array('shape' => 'round', 'carat_band' => '1'),
+        'b' => array('shape' => 'oval', 'carat_band' => '0.3'),
+    ),
+    $copy,
+    $pair_canonical,
+    '1 Carat Round vs 0.3 Carat Oval Diamond Size',
+    'Compare face-up size for a 1 carat round and a 0.3 carat oval.'
+);
+$pair_graph = size_jsonld_graph($pair_ld);
+$pair_page = size_jsonld_node($pair_graph, 'WebPage');
+check($pair_page !== null, 'pair compare JSON-LD includes WebPage');
+check(size_jsonld_node($pair_graph, 'Dataset') === null, 'pair compare does not emit a Dataset');
+check(size_jsonld_node($pair_graph, 'WebApplication') === null,
+    'pair compare is not a WebApplication');
+check(size_jsonld_node($pair_graph, 'Product') === null, 'pair compare does not emit Product');
+check(
+    !isset($pair_page['mainEntity'])
+        || (
+            strpos((string) ($pair_page['mainEntity']['@id'] ?? ''), '#dataset') === false
+            && strpos((string) ($pair_page['mainEntity']['@id'] ?? ''), '#webapp') === false
+        ),
+    'pair compare WebPage does not point at Dataset or WebApplication'
+);
+check(size_jsonld_node($pair_graph, 'FAQPage') !== null, 'pair compare keeps FAQPage');
+check(size_jsonld_node($pair_graph, 'BreadcrumbList') !== null, 'pair compare keeps BreadcrumbList');
 
 // Test intent: a shape hub Dataset lists the carat ladder as an ItemList of
 // WebPages (not Product/Offer) and names the measured quantities even when
@@ -360,6 +578,7 @@ $hub_graph = size_jsonld_graph($hub_ld);
 $hub_dataset = size_jsonld_node($hub_graph, 'Dataset');
 $hub_list = size_jsonld_node($hub_graph, 'ItemList');
 check($hub_dataset !== null, 'shape hub JSON-LD includes Dataset');
+check(!isset($hub_dataset['isPartOf']), 'hub Dataset must not use isPartOf → WebSite');
 check($hub_list !== null, 'shape hub JSON-LD includes ItemList of carat pages');
 check(isset($hub_list['numberOfItems']) && (int) $hub_list['numberOfItems'] === 2,
     'shape hub ItemList counts the carat rows');
@@ -385,16 +604,73 @@ foreach (isset($hub_dataset['variableMeasured']) && is_array($hub_dataset['varia
         $hub_measured_names[] = (string) $pv['name'];
     }
 }
-check(in_array('length_mm', $hub_measured_names, true), 'hub Dataset names length_mm');
-check(in_array('width_mm', $hub_measured_names, true), 'hub Dataset names width_mm');
-check(in_array('faceup_area_mm2', $hub_measured_names, true), 'hub Dataset names faceup_area_mm2');
-check(in_array('sample_size', $hub_measured_names, true), 'hub Dataset includes sample_size');
+check(in_array('Length', $hub_measured_names, true), 'hub Dataset names Length');
+check(in_array('Width', $hub_measured_names, true), 'hub Dataset names Width');
+check(in_array('Face-up area', $hub_measured_names, true), 'hub Dataset names Face-up area');
+check(in_array('Sample size', $hub_measured_names, true), 'hub Dataset includes Sample size');
+check(!in_array('length_mm', $hub_measured_names, true), 'hub Dataset does not use machine measure keys');
 $hub_desc = isset($hub_dataset['description']) ? (string) $hub_dataset['description'] : '';
 check(strpos($hub_desc, '281,572') !== false, 'hub Dataset.description includes the sample size');
 check(strpos($hub_desc, 'by carat') !== false, 'hub Dataset.description says it is a carat ladder');
 $hub_keywords = isset($hub_dataset['keywords']) && is_array($hub_dataset['keywords'])
     ? $hub_dataset['keywords'] : array();
 check(in_array('oval diamond size chart', $hub_keywords, true), 'hub Dataset keywords own the shape-chart phrase');
+
+// Test intent: mega hub ItemList is one WebPage per shape hub, not every
+// matrix cell and not Product/Offer.
+// Would fail if: size_hub_list_pages still returned [] for size-mega-hub,
+// or listed /diamond-size/round/1-carat/ instead of /diamond-size/round/.
+$ctx_mega_ld = new LDN_Page_Context('ringspo', 'size-mega-hub', 'us', null, null, null, 'size');
+$mega_summary_ld = array(
+    'type' => 'mega_hub',
+    'total_n' => 90000,
+    'generated_date' => '2026-08-28',
+    'rows' => array(
+        array('shape' => 'round', 'carat' => '0.5', 'length_mm' => 5.1),
+        array('shape' => 'round', 'carat' => '1', 'length_mm' => 6.4),
+        array('shape' => 'oval', 'carat' => '1', 'length_mm' => 7.0),
+    ),
+);
+$mega_canonical = $renderer->build_size_mega_hub_url('ringspo');
+$mega_ld = $renderer->json_ld_script(
+    $ctx_mega_ld,
+    $mega_summary_ld,
+    $copy,
+    $mega_canonical,
+    'Diamond Size Chart',
+    'Short intro.'
+);
+$mega_graph = size_jsonld_graph($mega_ld);
+$mega_list = size_jsonld_node($mega_graph, 'ItemList');
+check($mega_list !== null, 'mega hub JSON-LD includes ItemList of shape hubs');
+check(isset($mega_list['numberOfItems']) && (int) $mega_list['numberOfItems'] === 2,
+    'mega hub ItemList counts unique shapes, not every carat cell');
+$mega_items = isset($mega_list['itemListElement']) && is_array($mega_list['itemListElement'])
+    ? $mega_list['itemListElement'] : array();
+$mega_first = isset($mega_items[0]['item']) && is_array($mega_items[0]['item'])
+    ? $mega_items[0]['item'] : array();
+check(isset($mega_first['@type']) && $mega_first['@type'] === 'WebPage',
+    'mega hub ItemList entries are WebPages, not Products');
+check(!isset($mega_first['offers']), 'mega hub ItemList must not carry Offer');
+$mega_urls = array();
+$mega_names = array();
+foreach ($mega_items as $el) {
+    if (isset($el['item']['url'])) {
+        $mega_urls[] = (string) $el['item']['url'];
+    }
+    if (isset($el['item']['name'])) {
+        $mega_names[] = (string) $el['item']['name'];
+    }
+}
+$mega_url_blob = implode(' ', $mega_urls);
+check(strpos($mega_url_blob, '/diamond-size/round/') !== false, 'mega hub ItemList links the round shape hub');
+check(strpos($mega_url_blob, '/diamond-size/oval/') !== false, 'mega hub ItemList links the oval shape hub');
+check(strpos($mega_url_blob, '/0.5-carat/') === false && strpos($mega_url_blob, '/1-carat/') === false,
+    'mega hub ItemList does not list individual size pages');
+check(in_array('Round Diamond Size Chart', $mega_names, true),
+    'mega hub ItemList names the round shape hub');
+check(in_array('Oval Diamond Size Chart', $mega_names, true),
+    'mega hub ItemList names the oval shape hub');
 
 check(strpos($renderer->methodology_html($summary), '12,000') !== false, 'methodology shows sample size');
 
@@ -505,13 +781,11 @@ $bridge_tags = array(
     'seopress_social_og_title'     => 'property="og:title"',
     'seopress_social_og_desc'      => 'property="og:description"',
     'seopress_social_og_site_name' => 'property="og:site_name"',
+    'seopress_social_og_thumb'     => 'property="og:image"',
 );
-// Claimed but deliberately not replaced on size pages:
-//   og:image      — SEOPress's was empty, and og_preview_url() only resolves a
-//                   preview PNG for price shape pages; size pages render SVG.
-//   twitter:image — omitted on purpose so X falls back to og:image rather than
-//                   the unrelated media-library upload SEOPress chose.
-$bridge_unreplaced = array('seopress_social_og_thumb', 'seopress_social_twitter_card_thumb');
+// twitter:image stays omitted on purpose so X falls back to og:image rather than
+// the unrelated media-library upload SEOPress chose.
+$bridge_unreplaced = array('seopress_social_twitter_card_thumb');
 
 foreach (LDN_Seo_Bridge::SEOPRESS_FILTERS as $filter) {
     if (in_array($filter, $bridge_unreplaced, true)) {
@@ -534,11 +808,24 @@ check(
     'og:site_name carries the brand from site config'
 );
 
+check(
+    strpos($size_head, 'size-og-preview.png') !== false
+        && strpos($size_head, 'property="og:image:alt"') !== false,
+    'individual size head emits og:image from size_og_preview_png with alt text'
+);
+
+check(
+    strpos($head_longtail, 'property="og:image"') === false,
+    'long-tail comparison omits og:image when no preview artefact exists'
+);
+
 // Test intent: the mega hub renders the matrix table (one row per shape ×
-// anchor carat columns, sticky-ready classes, every cell linking to its
-// individual page) and falls back to the flat ladder when no matrix payload
-// exists (pre-migration artefacts).
-// Would fail if: cells stopped linking, or the fallback path disappeared.
+// anchor carat columns, every cell linking to its individual page) with the
+// carat written in the cell (outline, then "1 carat", then mm) so a
+// sideways-scrolled header does not leave orphan millimetres. Falls back
+// to the flat ladder when no matrix payload exists.
+// Would fail if: cells dropped the carat line, stopped linking, or the
+// fallback path disappeared.
 $hub_summary = array(
     'type' => 'mega_hub',
     'rows' => array(
@@ -572,6 +859,13 @@ check(strpos($matrix_html, '/diamond-size/round/1-carat/') !== false, 'matrix ce
 check(strpos($matrix_html, '/diamond-size/round/') !== false, 'matrix shape column links to shape hub');
 check(strpos($matrix_html, 'ldn-size-matrix__cell--empty') !== false, 'matrix marks missing cells');
 check(strpos($matrix_html, '6.4 × 6.4 mm') !== false, 'matrix cell shows L × W mm');
+check(strpos($matrix_html, 'ldn-size-matrix-scroll') !== false, 'mega hub matrix wraps in the sideways scroll card');
+check(strpos($matrix_html, 'ldn-size-matrix__carat') !== false, 'mega hub cells include a carat line');
+check(strpos($matrix_html, '>1 carat<') !== false, 'mega hub cell spells the carat in full (not ct)');
+$carat_pos = strpos($matrix_html, 'ldn-size-matrix__carat');
+$dims_pos = strpos($matrix_html, 'ldn-size-matrix__dims');
+check($carat_pos !== false && $dims_pos !== false && $carat_pos < $dims_pos,
+    'mega hub cell stacks carat above millimetres');
 
 $hub_body = $renderer->hub_body_html($ctx_mega, $hub_summary);
 check(strpos($hub_body, 'ldn-size-matrix') !== false, 'mega hub body uses the matrix');
@@ -596,7 +890,7 @@ $ctx_shape_hub = new LDN_Page_Context('ringspo', 'size-shape-hub', 'us', null, n
 $shape_table = $renderer->hub_table_html($ctx_shape_hub, $hub_summary);
 check(strpos($shape_table, 'Round diamond size chart by carat weight') !== false, 'shape hub table heading names the shape');
 check(strpos($shape_table, 'ldn-size-hub-table--ladder') !== false, 'shape hub table uses matrix ladder styling');
-check(strpos($shape_table, 'ldn-size-matrix-scroll') !== false, 'shape hub table wraps in matrix scroll');
+check(strpos($shape_table, 'ldn-size-matrix-scroll') === false, 'shape hub ladder is not the mega-hub sideways scroller');
 check(strpos($shape_table, 'ldn-size-matrix__outline') !== false, 'shape hub table uses matrix outline class');
 check(strpos($shape_table, '>1 ct</a>') !== false || strpos($shape_table, '>1 ct<') !== false, 'shape hub table lists carat weights');
 
@@ -823,6 +1117,23 @@ check(strpos($dims, '10th') !== false, 'key dimensions labels percentile ranges'
 // figure (one column). Would fail if: the stacking media query used `{ {` so
 // browsers ignored it and kept two columns at every width.
 $shared_css = file_get_contents(dirname(__DIR__) . '/assets/css/shared.css');
+// Test intent: the size matrix grows to every row (page scroll), like
+// editorial comparison tables. A max-height on the wrapper clips ~10 rows
+// behind an inner scrollbar. Would fail if: 0.23.4's min(70vh, 36rem) cap
+// returned on .ldn-size-matrix-scroll.
+check(
+    preg_match('/\.ldn-size-matrix-scroll\s*\{[^}]*max-height\s*:/s', $shared_css) !== 1,
+    'size matrix wrapper has no max-height scrollport'
+);
+// Test intent: the shape-hub ladder header sticks to the page. Would fail if:
+// the card kept overflow:hidden / overflow-x:auto (same trap as the mega hub).
+check(
+    preg_match(
+        '/\.ldn-size-hub-table--ladder\s+\.ldn-table-card\s*\{[^}]*overflow:\s*visible/s',
+        $shared_css
+    ) === 1,
+    'shape hub ladder card is overflow:visible so thead sticky can bind to the page'
+);
 check(strpos($shared_css, '@media screen and (max-width: 768px) { {') === false,
     'size-hero stacking media query is not double-braced');
 check(
@@ -867,6 +1178,10 @@ check(strpos($merged, 'About this data') !== false, 'about-this-data strip lives
 check(strpos($merged, 'ldn-size-methodology--inline') !== false,
     'about-this-data is band prose (inherits purple/white), not a card surface');
 $ringspo_css = file_get_contents(dirname(__DIR__) . '/assets/css/families/ringspo.css');
+check(
+    preg_match('/\.ldn-size-matrix-scroll\s*\{[^}]*max-height\s*:/s', $ringspo_css) !== 1,
+    'Ringspo matrix wrapper does not restore a max-height scrollport'
+);
 check(preg_match('/:is\(table,[\s\S]*?\.ldn-size-table--segmentation\)/', $ringspo_css, $surface) === 1,
     'Ringspo white-surface :is() list is present');
 check(strpos($surface[0], '.ldn-size-ideal-real') === false,
@@ -1045,7 +1360,7 @@ check(strpos($full_note, 'full measured spread') !== false, 'full_range note exp
 $ctx_dc = new LDN_Page_Context('diamondchart', 'size-mega-hub', 'us', null, null);
 check($renderer->headline($ctx_dc, $summary) === 'Diamond Size Chart',
     'diamondchart mega hub H1 targets diamond size chart keyword');
-check($renderer->page_title($ctx_dc, $summary) === 'Diamond Size Chart — Full Measured Range',
+check($renderer->page_title($ctx_dc, $summary) === 'Diamond Size Chart - Full Measured Range',
     'diamondchart document title carries full measured range qualifier');
 $meth_cta = $renderer->methodology_cta_html('diamondchart');
 check(strpos($meth_cta, 'methodology') !== false, 'diamondchart mega hub links to methodology page');

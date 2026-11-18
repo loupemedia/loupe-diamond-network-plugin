@@ -90,6 +90,13 @@ final class LDN_Nav {
     const COUNTRY_SWITCHER_TWO_COL_MIN = 8;
 
     /**
+     * Columns with at least this many items carry `ldn-nav-column--split` so
+     * 2- and 3-column desktop mega panels can flow them into two subcolumns.
+     * Lives on LDN_Nav rather than the trait because Kinsta staging runs PHP 8.1.
+     */
+    const COLUMN_SPLIT_MIN = 8;
+
+    /**
      * The hub that lists what a truncated column omits.
      *
      * Keyed by family AND by the dimension the column fans out over, because those

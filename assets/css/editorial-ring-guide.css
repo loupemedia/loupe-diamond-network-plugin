@@ -7,14 +7,31 @@
  * sections, theme headings, white chart surface with 12px radius + shadow.
  *
  * The inject paints no band of its own. Colour sections (Best Place To Buy,
- * the Alon card, purple blocks) are GenerateBlocks in the WordPress post.
- * Do not 50vw-breakout `.gb-container`: that split the teal wrap on staging
- * while production Ringspo, which leaves those blocks to GeneratePress, still
- * paints teal behind the card.
+ * purple blocks) are GenerateBlocks in the WordPress post. Break out only the
+ * `.gb-container` that owns the band background (direct white/base-3 section
+ * title). Do not break out inset white review cards (`h3.gb-headline-text`).
  */
 
 body.ldn-editorial-ring-guide {
 	overflow-x: clip;
+}
+
+/* GenerateBlocks colour bands sit inside an ~800px `.gb-inside-container`.
+ * Break out the container that paints the band, not every ancestor wrapper.
+ * Ancestor inside-containers must not clip the negative margin. */
+body.ldn-editorial-ring-guide .entry-content .gb-inside-container {
+	overflow: visible;
+}
+
+body.ldn-editorial-ring-guide .entry-content .gb-container:has(
+	> .gb-inside-container > :is(h1, h2, h3):is(.has-white-color, .has-base-3-color, .links-color-white)
+):not(:has(> .gb-inside-container > h3.gb-headline-text)) {
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+	padding-left: calc(50vw - 50%);
+	padding-right: calc(50vw - 50%);
+	max-width: none;
+	width: auto;
 }
 
 .ldn-ring-guide,

@@ -42,29 +42,6 @@ trait LDN_Trait_Content {
     );
 
     /**
-     * Headline-stat specs for `summary-data.json`. Each spec lists candidate
-     * `paths` into the (nested C5 contract or legacy-flat) payload — first hit
-     * wins — plus a display label, a value `format`, and whether it feeds the
-     * JSON-LD `variableMeasured`. Order = display order.
-     *
-     * @return array<int, array{label:string, format:string, schema:bool, paths:array}>
-     */
-    private static function stat_specs() {
-        return array(
-            array('label' => 'Current price', 'format' => 'currency', 'schema' => true,
-                'paths' => array(array('time_series', 'current_price'), array('current_price'))),
-            array('label' => 'Median price', 'format' => 'currency', 'schema' => true,
-                'paths' => array(array('distribution', 'median_price'), array('median_price'))),
-            array('label' => 'Lowest price', 'format' => 'currency', 'schema' => false,
-                'paths' => array(array('distribution', 'price_range', 'min'), array('min_price'), array('price_low'))),
-            array('label' => 'Highest price', 'format' => 'currency', 'schema' => false,
-                'paths' => array(array('distribution', 'price_range', 'max'), array('max_price'), array('price_high'))),
-            array('label' => __('Diamonds analyzed', 'loupe-diamond-network'), 'format' => 'integer', 'schema' => true,
-                'paths' => array(array('distribution', 'sample_size'), array('num_diamonds'), array('sample_size'))),
-        );
-    }
-
-    /**
      * @var LDN_Data_Fetcher
      */
     private $fetcher;
@@ -249,11 +226,12 @@ trait LDN_Trait_Content {
         // Headline price tracks the MEDIAN (p50) — the same figure the carat
         // ladder table shows — so the intro, hero stat and table always agree.
         // Falls back to current_price (trimmed avg) only when no median is present.
-        $current_price = $this->dig_first($summary, array(
-            array('distribution', 'median_price'),
-            array('distribution', 'percentiles', 'p50'),
-            array('time_series', 'current_price'),
-            array('current_price'),
+        $current_price = $this->dig_first($summary, array_merge(
+            LDN_Stat_Specs::headline_price_paths(),
+            array(
+                array('time_series', 'current_price'),
+                array('current_price'),
+            )
         ));
         if ($current_price === null || !is_numeric($current_price)) {
             return '';
@@ -602,11 +580,12 @@ trait LDN_Trait_Content {
     public function stats_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
         // Prefer the median (p50) so the headline stat matches the carat
         // ladder table and intro sentence; fall back to current_price (avg).
-        $current = $this->dig_first($summary, array(
-            array('distribution', 'median_price'),
-            array('distribution', 'percentiles', 'p50'),
-            array('time_series', 'current_price'),
-            array('current_price'),
+        $current = $this->dig_first($summary, array_merge(
+            LDN_Stat_Specs::headline_price_paths(),
+            array(
+                array('time_series', 'current_price'),
+                array('current_price'),
+            )
         ));
         $low = $this->dig_first($summary, array(
             array('distribution', 'price_range', 'min'),
@@ -625,9 +604,7 @@ trait LDN_Trait_Content {
         ));
 
         $cells = array();
-        $price_label = $ctx->page_level === 'all-shapes'
-            ? __('Typical price (median)', 'loupe-diamond-network')
-            : __('Median (all qualities)', 'loupe-diamond-network');
+        $price_label = LDN_Stat_Specs::on_page_headline_price_label($ctx->page_level);
         if ($current !== null && is_scalar($current) && !is_bool($current)) {
             $cells[] = array(
                 'label' => $price_label,
@@ -708,11 +685,12 @@ trait LDN_Trait_Content {
             return $this->diamond_type_hero_stats_html($ctx, $summary, $currency);
         }
 
-        $current = $this->dig_first($summary, array(
-            array('distribution', 'median_price'),
-            array('distribution', 'percentiles', 'p50'),
-            array('time_series', 'current_price'),
-            array('current_price'),
+        $current = $this->dig_first($summary, array_merge(
+            LDN_Stat_Specs::headline_price_paths(),
+            array(
+                array('time_series', 'current_price'),
+                array('current_price'),
+            )
         ));
         if ($current === null || !is_numeric($current)) {
             return '';
@@ -736,9 +714,7 @@ trait LDN_Trait_Content {
 
         $symbol = $this->currency_symbol($currency);
 
-        $price_label = $ctx->page_level === 'all-shapes'
-            ? __('Typical price (median)', 'loupe-diamond-network')
-            : __('Median (all qualities)', 'loupe-diamond-network');
+        $price_label = LDN_Stat_Specs::on_page_headline_price_label($ctx->page_level);
 
         $cards = array();
         $cards[] = array(

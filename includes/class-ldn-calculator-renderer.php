@@ -234,7 +234,7 @@ final class LDN_Calculator_Renderer {
         $title = __('Diamond Price Calculator', 'loupe-diamond-network');
         $description = __(
             'Free diamond price calculator with daily-refreshed market data. '
-            . 'Check typical prices for any carat, shape, colour and clarity, or compare a quote.',
+            . 'Check typical prices for any carat, shape, color and clarity, or compare a quote.',
             'loupe-diamond-network'
         );
         $canonical = $this->current_url();
@@ -256,8 +256,69 @@ final class LDN_Calculator_Renderer {
         }
 
         $schema = new LDN_Schema();
-        $out .= $schema->render_webapp($ctx, $site, $title, $description, $canonical);
+        $canonical = $schema->tool_canonical_url($canonical);
+        $out .= $schema->render_webapp(
+            $ctx,
+            $site,
+            $title,
+            $description,
+            $canonical,
+            'FinanceApplication',
+            $this->calculator_breadcrumb_trail($ctx, $site, $canonical)
+        );
         return $out;
+    }
+
+    /**
+     * Brand → Diamond Prices → Calculator.
+     *
+     * @param LDN_Page_Context $ctx
+     * @param array            $site
+     * @param string           $canonical
+     * @return array<int, array{name:string, url:string}>
+     */
+    private function calculator_breadcrumb_trail(LDN_Page_Context $ctx, array $site, $canonical) {
+        $trail = array();
+        $home = function_exists('home_url') ? (string) home_url('/') : '';
+        $brand = !empty($site['brand_name']) ? trim((string) $site['brand_name']) : '';
+        if ($home !== '' && $brand !== '') {
+            $trail[] = array('name' => $brand, 'url' => $home);
+        }
+
+        $structure = method_exists($this->config, 'get_url_structure')
+            ? $this->config->get_url_structure($ctx->site_id)
+            : array();
+        $pattern = is_array($structure) && !empty($structure['level_1'])
+            ? (string) $structure['level_1']
+            : '/{country}/diamond-prices';
+        $country = $ctx->country_code !== null && $ctx->country_code !== ''
+            ? (string) $ctx->country_code
+            : 'us';
+        $path = str_replace('{country}', $country, $pattern);
+        $prices_url = '';
+        if (function_exists('home_url')) {
+            $path = ltrim($path, '/');
+            $prices_url = function_exists('user_trailingslashit')
+                ? home_url(user_trailingslashit($path))
+                : rtrim(home_url($path), '/') . '/';
+        }
+        if ($prices_url !== '') {
+            $trail[] = array(
+                'name' => __('Diamond Prices', 'loupe-diamond-network'),
+                'url'  => $prices_url,
+            );
+        }
+
+        if ($canonical !== '') {
+            $trail[] = array(
+                'name' => __('Calculator', 'loupe-diamond-network'),
+                'url'  => $canonical,
+            );
+        }
+
+        return array_values(array_filter($trail, static function ($crumb) {
+            return !empty($crumb['url']) && !empty($crumb['name']);
+        }));
     }
 
     /**

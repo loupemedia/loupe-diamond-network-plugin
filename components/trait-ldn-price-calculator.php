@@ -1163,17 +1163,46 @@ trait LDN_Trait_Price_Calculator {
      * @return string
      */
     private function calculator_consumer_guidance_html(LDN_Page_Context $ctx) {
-        if (!$this->config->consumer_advisory_enabled($ctx->site_id, $ctx->country_code)) {
+        $plugin = class_exists('LDN_Plugin') ? LDN_Plugin::instance() : null;
+        if ($plugin === null || !LDN_Facet_Intelligence_Rest::panel_enabled(
+            $plugin,
+            $ctx->site_id,
+            $ctx->country_code
+        )) {
             return '';
         }
-        $artefacts = new LDN_Artefacts($this->config);
-        if (!$artefacts->site_has_wp_widget($ctx->site_id, 'individual_listings', 'calculator')) {
-            return '';
-        }
-        return '<section class="ldn-calculator-consumer-guidance"'
-            . ' data-ldn-calculator-consumer-guidance="1"'
-            . ' data-ldn-calculator-country="' . esc_attr($ctx->country_code) . '"'
+
+        $loading = esc_html__('Loading recommendations…', 'loupe-diamond-network');
+        $error = esc_html__(
+            'Recommendations are temporarily unavailable. Try again in a moment.',
+            'loupe-diamond-network'
+        );
+        $empty = esc_html__(
+            'No matching diamonds in inventory right now. Adjust your budget or grades and check again.',
+            'loupe-diamond-network'
+        );
+
+        return '<section class="ldn-fi-panel ldn-calculator-consumer-guidance"'
+            . ' data-ldn-facet-intelligence-panel="1"'
+            . ' data-ldn-fi-mode="discover"'
+            . ' data-ldn-fi-country="' . esc_attr($ctx->country_code) . '"'
+            . ' data-ldn-fi-buyer-intent="good_value"'
+            . ' aria-busy="true"'
+            . ' aria-live="polite"'
             . ' aria-label="' . esc_attr__('Recommended diamonds', 'loupe-diamond-network') . '">'
+            . '<h2 class="ldn-fi-panel__title">'
+            . esc_html__('Stones worth a closer look', 'loupe-diamond-network')
+            . '</h2>'
+            . '<p class="ldn-fi-panel__status ldn-fi-panel__status--loading">'
+            . $loading
+            . '</p>'
+            . '<ul class="ldn-fi-panel__list" hidden></ul>'
+            . '<p class="ldn-fi-panel__status ldn-fi-panel__status--error" hidden>'
+            . $error
+            . '</p>'
+            . '<p class="ldn-fi-panel__status ldn-fi-panel__status--empty" hidden>'
+            . $empty
+            . '</p>'
             . '</section>';
     }
 

@@ -118,16 +118,19 @@ trait LDN_Trait_Nav_Markup {
 
         $this->nav_item_seq = 0;
         $primary = array();
+        $drawer = array();
         if (!empty($navigation['menus']['primary']) && is_array($navigation['menus']['primary'])) {
-            $primary = $this->nav_items($scope, $navigation['menus']['primary']);
+            $primary = $this->nav_items($scope, $navigation['menus']['primary'], 'desktop');
+            $this->nav_item_seq = 0;
+            $drawer = $this->nav_items($scope, $navigation['menus']['primary'], 'narrow');
         }
 
         $utility = array();
         if (!empty($navigation['menus']['secondary']) && is_array($navigation['menus']['secondary'])) {
+            $this->nav_item_seq = $this->highest_menu_order($drawer);
             $utility = $this->nav_items($scope, $navigation['menus']['secondary']);
         }
 
-        $drawer = $primary;
         if ($utility !== array()) {
             $first = true;
             foreach ($utility as $item) {
@@ -138,6 +141,8 @@ trait LDN_Trait_Nav_Markup {
             }
             $drawer = array_merge($drawer, $utility);
         }
+
+        $req_path = $this->shell_normalize_path($this->request_path());
 
         $html = $this->shell_token_block();
         $html .= '<div class="ldn-shell">';
@@ -152,11 +157,11 @@ trait LDN_Trait_Nav_Markup {
             . esc_html($this->shell_label('Menu'))
             . '</button>';
         $html .= '<ul class="ldn-nav-list ldn-shell-primary__list">';
-        $html .= $this->shell_walk($primary, 0, 'desktop');
+        $html .= $this->shell_walk($primary, 0, 'desktop', $req_path);
         $html .= '</ul>';
         $html .= '<div class="ldn-shell-drawer" id="ldn-shell-drawer" hidden>';
         $html .= '<ul class="ldn-nav-list ldn-shell-drawer__list">';
-        $html .= $this->shell_walk($drawer, 0, 'drawer');
+        $html .= $this->shell_walk($drawer, 0, 'drawer', $req_path);
         $html .= '</ul></div>';
         $html .= '</nav></div></header></div>';
 
@@ -247,10 +252,11 @@ trait LDN_Trait_Nav_Markup {
     /**
      * @param array  $items
      * @param int    $parent_id
-     * @param string $surface `desktop` | `drawer`
+     * @param string $surface  `desktop` | `drawer`
+     * @param string $req_path Normalised current request path (empty disables current-state marking).
      * @return string
      */
-    private function shell_walk(array $items, $parent_id, $surface) {
+    private function shell_walk(array $items, $parent_id, $surface, $req_path = '') {
         $html = '';
         foreach ($items as $item) {
             if (!is_object($item)) {
@@ -260,17 +266,42 @@ trait LDN_Trait_Nav_Markup {
             if ($item_parent !== (string) $parent_id) {
                 continue;
             }
-            $children = $this->shell_walk($items, (int) $item->ID, $surface);
+            $children = $this->shell_walk($items, (int) $item->ID, $surface, $req_path);
             $has_children = $children !== '';
-            $html .= '<li class="' . esc_attr($this->shell_item_class_attr($item, $has_children)) . '">';
-            $html .= $this->shell_link($item);
-            if ($has_children) {
+            $is_column_group = $this->shell_is_column_group($item);
+
+            $exact_current = false;
+            $branch_current = false;
+            if ($req_path !== '' && !$is_column_group && !$this->shell_is_country_item($item)) {
+                $item_path = $this->shell_local_item_path($item, $req_path);
+                if ($item_path !== '') {
+                    $exact_current = ($item_path === $req_path);
+                    $prefix_current = ($item_path !== '/' && strpos($req_path, $item_path) === 0);
+                    $branch_current = $exact_current || $prefix_current;
+                }
+                if (!$branch_current && $has_children && strpos($children, 'ldn-nav-current') !== false) {
+                    $branch_current = true;
+                }
+            }
+
+            $needs_disclosure = $has_children && !$is_column_group;
+            $class_attr = $this->shell_item_class_attr($item, $needs_disclosure, $branch_current);
+            $html .= '<li class="' . esc_attr($class_attr) . '">';
+            if ($is_column_group) {
                 $title = isset($item->title) ? (string) $item->title : '';
-                $html .= '<button type="button" class="ldn-shell-disclose" aria-expanded="false">';
-                $html .= '<span class="screen-reader-text">'
-                    . esc_html(sprintf($this->shell_label('Show %s menu'), $title))
-                    . '</span>';
-                $html .= '</button>';
+                $html .= '<span class="ldn-nav-column-title">' . esc_html($title) . '</span>';
+            } else {
+                $html .= $this->shell_link($item, $exact_current);
+            }
+            if ($has_children) {
+                if ($needs_disclosure) {
+                    $title = isset($item->title) ? (string) $item->title : '';
+                    $html .= '<button type="button" class="ldn-shell-disclose" aria-expanded="false">';
+                    $html .= '<span class="screen-reader-text">'
+                        . esc_html(sprintf($this->shell_label('Show %s menu'), $title))
+                        . '</span>';
+                    $html .= '</button>';
+                }
                 $html .= '<ul class="ldn-nav-sub">' . $children . '</ul>';
             }
             $html .= '</li>';
@@ -279,21 +310,109 @@ trait LDN_Trait_Nav_Markup {
     }
 
     /**
+     * Non-collapsed mega-menu column heading: styled as a section label in the
+     * LDN shell rather than a duplicate `<a href>` to the first child URL.
+     * Collapsed narrow hubs (`ldn-nav-narrow-hub`) keep their `<a>` link.
+     *
      * @param object $item
+     * @return bool
+     */
+    private function shell_is_column_group($item) {
+        $classes = isset($item->classes) && is_array($item->classes) ? $item->classes : array();
+        return in_array('ldn-nav-column-heading', $classes, true)
+            && !in_array('ldn-nav-narrow-hub', $classes, true);
+    }
+
+    /**
+     * Country-switcher items carry their own `ldn-nav-country-current` state.
+     *
+     * @param object $item
+     * @return bool
+     */
+    private function shell_is_country_item($item) {
+        $classes = isset($item->classes) && is_array($item->classes) ? $item->classes : array();
+        foreach ($classes as $class) {
+            $class = (string) $class;
+            if (strpos($class, 'ldn-nav-countries') === 0 || strpos($class, 'ldn-nav-country-') === 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Normalise a URL path to lowercase with leading and trailing slashes.
+     *
+     * @param string $path
      * @return string
      */
-    private function shell_link($item) {
+    private function shell_normalize_path($path) {
+        $path = trim((string) $path);
+        if ($path === '' || $path === '/') {
+            return '/';
+        }
+        return '/' . strtolower(trim($path, '/')) . '/';
+    }
+
+    /**
+     * Same-site path for a menu item, or '' for external / fragment-only links.
+     *
+     * @param object $item
+     * @param string $req_path Normalised request path.
+     * @return string
+     */
+    private function shell_local_item_path($item, $req_path = '') {
+        $url = isset($item->url) ? (string) $item->url : '';
+        if ($url === '' || strpos($url, '#') !== false) {
+            return '';
+        }
+        $home = function_exists('home_url') ? (string) home_url('/') : '';
+        $item_host = parse_url($url, PHP_URL_HOST);
+        if (is_string($item_host) && $item_host !== '') {
+            $home_host = $home !== '' ? parse_url($home, PHP_URL_HOST) : '';
+            if (is_string($home_host) && $home_host !== ''
+                && strtolower($item_host) !== strtolower($home_host)
+            ) {
+                return '';
+            }
+        }
+        $path = parse_url($url, PHP_URL_PATH);
+        if (!is_string($path) || $path === '') {
+            return '';
+        }
+        $normalized = $this->shell_normalize_path($path);
+        if ($home !== '' && $req_path !== '') {
+            $home_path = parse_url($home, PHP_URL_PATH);
+            $home_norm = is_string($home_path) ? $this->shell_normalize_path($home_path) : '/';
+            if ($home_norm !== '/' && strpos($normalized, $home_norm) === 0
+                && strpos($req_path, $home_norm) !== 0
+            ) {
+                $stripped = substr($normalized, strlen($home_norm) - 1);
+                $normalized = $this->shell_normalize_path($stripped);
+            }
+        }
+        return $normalized;
+    }
+
+    /**
+     * @param object $item
+     * @param bool   $exact_current
+     * @return string
+     */
+    private function shell_link($item, $exact_current = false) {
         $url = isset($item->url) ? (string) $item->url : '';
         $title = isset($item->title) ? (string) $item->title : '';
-        return '<a href="' . esc_url($url) . '">' . esc_html($title) . '</a>';
+        $current_attr = $exact_current ? ' aria-current="page"' : '';
+        return '<a href="' . esc_url($url) . '"' . $current_attr . '>' . esc_html($title) . '</a>';
     }
 
     /**
      * @param object $item
      * @param bool   $has_children
+     * @param bool   $is_current
      * @return string
      */
-    private function shell_item_class_attr($item, $has_children) {
+    private function shell_item_class_attr($item, $has_children, $is_current = false) {
         $classes = isset($item->classes) && is_array($item->classes) ? $item->classes : array();
         $kept = array();
         foreach ($classes as $class) {
@@ -311,6 +430,9 @@ trait LDN_Trait_Nav_Markup {
         }
         if ($has_children && !in_array('ldn-nav-has-children', $kept, true)) {
             $kept[] = 'ldn-nav-has-children';
+        }
+        if ($is_current && !in_array('ldn-nav-current', $kept, true)) {
+            $kept[] = 'ldn-nav-current';
         }
         return implode(' ', array_unique($kept));
     }

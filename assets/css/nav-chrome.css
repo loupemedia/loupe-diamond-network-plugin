@@ -12,6 +12,7 @@
 .ldn-shell {
 	background: var(--ldn-shell-surface);
 	color: var(--ldn-text);
+	font-family: var(--ldn-font-body, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
 }
 
 .ldn-shell a {
@@ -34,14 +35,36 @@
 .ldn-shell-primary__list > li > a:focus-visible,
 .ldn-shell-primary__list > .ldn-nav-mega:hover > a,
 .ldn-shell-primary__list > .ldn-nav-mega:focus-within > a,
+.ldn-shell-primary__list > .ldn-nav-current > a,
 .ldn-shell-drawer a:hover,
 .ldn-shell-drawer a:focus-visible {
 	color: var(--ldn-primary);
 }
 
+.ldn-shell-primary__list > li > a:hover,
+.ldn-shell-primary__list > li > a:focus-visible,
+.ldn-shell-primary__list > .ldn-nav-mega:hover > a,
+.ldn-shell-primary__list > .ldn-nav-mega:focus-within > a,
+.ldn-shell-primary__list > .ldn-nav-current > a {
+	box-shadow: inset 0 -2px 0 var(--ldn-primary);
+}
+
+.ldn-shell-primary__list > .ldn-nav-current > a {
+	font-weight: 600;
+}
+
 .ldn-shell-utility {
+	position: relative;
+	z-index: 30;
 	border-bottom: 1px solid var(--ldn-shell-rule);
-	min-height: 37px;
+	min-height: 36px;
+}
+
+.ldn-shell-header {
+	position: relative;
+	z-index: 20;
+	background: var(--ldn-shell-surface);
+	border-bottom: 1px solid var(--ldn-shell-rule);
 }
 
 .ldn-shell-utility__nav,
@@ -81,11 +104,13 @@
 	position: absolute;
 	right: 0;
 	top: 100%;
-	z-index: 20;
+	z-index: 35;
 	min-width: 12rem;
-	padding: 0.5rem 0;
+	padding: 0.5rem;
 	background: var(--ldn-shell-surface);
-	box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
+	border-top: 1px solid var(--ldn-shell-rule);
+	border-radius: 0 0 12px 12px;
+	box-shadow: 0 14px 32px -6px rgb(0 0 0 / 12%), 0 4px 10px -2px rgb(0 0 0 / 6%);
 }
 
 .ldn-shell-utility .ldn-nav-has-children:hover > .ldn-nav-sub,
@@ -111,13 +136,15 @@
 .ldn-shell-utility .ldn-nav-sub a {
 	display: flex;
 	align-items: center;
-	min-height: 44px;
+	min-height: 40px;
 	min-width: 0;
-	padding: 0 10px;
+	padding: 0 0.625rem;
+	border-radius: 6px;
 }
 
 .ldn-shell-utility .ldn-nav-country-current > a {
-	color: var(--ldn-text);
+	color: var(--ldn-primary);
+	font-weight: 600;
 }
 
 .ldn-shell-utility .ldn-nav-sub a:hover,
@@ -128,11 +155,12 @@
 }
 
 .ldn-shell-header__inner {
+	position: relative;
 	display: grid;
 	grid-template-columns: auto minmax(0, 1fr);
 	align-items: center;
-	min-height: 90px;
-	gap: 1rem;
+	min-height: 84px;
+	gap: 1.5rem;
 }
 
 .ldn-shell-brand,
@@ -148,29 +176,57 @@
 }
 
 .ldn-shell-primary {
-	position: relative;
+	position: static;
+	align-self: stretch;
+	display: flex;
+	align-items: stretch;
+	justify-content: flex-end;
 	min-width: 0;
 }
 
 .ldn-shell-primary__list {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: center;
+	align-items: stretch;
 	justify-content: flex-end;
+	gap: 0.125rem;
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
-.ldn-shell-primary__list > li > a {
+.ldn-shell-primary__list > li {
 	display: flex;
+	align-items: stretch;
+}
+
+.ldn-shell-primary__list > li > a {
+	display: inline-flex;
 	align-items: center;
+	gap: 0.375rem;
 	min-height: 44px;
-	padding-left: 20px;
-	font-size: 15px;
-	letter-spacing: 1px;
-	line-height: 60px;
+	padding: 0 0.875rem;
+	font-size: 0.9375rem;
+	font-weight: 500;
+	letter-spacing: 0;
+	line-height: 1.25;
 	color: var(--ldn-text);
+}
+
+.ldn-shell-primary__list > .ldn-nav-has-children > a::after {
+	content: "";
+	width: 0.36em;
+	height: 0.36em;
+	border-right: 1.5px solid currentColor;
+	border-bottom: 1.5px solid currentColor;
+	transform: translateY(-0.1em) rotate(45deg);
+	opacity: 0.55;
+}
+
+.ldn-shell-primary__list > .ldn-nav-has-children:hover > a::after,
+.ldn-shell-primary__list > .ldn-nav-has-children:focus-within > a::after {
+	transform: translateY(0.12em) rotate(-135deg);
+	opacity: 1;
 }
 
 .ldn-shell-drawer-toggle {
@@ -178,11 +234,14 @@
 	min-width: 44px;
 	min-height: 44px;
 	margin-left: auto;
-	padding: 0 0.75rem;
+	padding: 0 0.875rem;
 	border: 1px solid var(--ldn-shell-rule);
+	border-radius: 8px;
 	background: var(--ldn-shell-surface);
 	color: var(--ldn-text);
 	font: inherit;
+	font-size: 0.875rem;
+	font-weight: 600;
 	cursor: pointer;
 }
 
@@ -289,15 +348,38 @@ body.ldn-shell-owned .main-navigation {
 }
 
 @media (max-width: 992px) {
+	.ldn-shell-header__inner {
+		gap: 0.75rem;
+	}
+
+	.ldn-shell-brand img {
+		width: 132px;
+		height: 45px;
+	}
+
+	.ldn-shell-primary__list {
+		gap: 0;
+	}
+
 	.ldn-shell-primary__list > li > a {
-		padding-left: 12px;
-		letter-spacing: 0;
+		padding: 0 0.5rem;
+		gap: 0.25rem;
+		font-size: 0.875rem;
 	}
 }
 
 @media (max-width: 768px) {
 	.ldn-shell-utility {
 		display: none;
+	}
+
+	.ldn-shell-header__inner {
+		position: static;
+		min-height: 72px;
+	}
+
+	.ldn-shell-primary {
+		align-self: center;
 	}
 
 	.ldn-shell-drawer-toggle {
@@ -318,17 +400,42 @@ body.ldn-shell-owned .main-navigation {
 		left: 0;
 		z-index: 30;
 		background: var(--ldn-shell-surface);
-		box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
-		padding: 0.5rem 0 1rem;
+		border-top: 1px solid var(--ldn-shell-rule);
+		box-shadow: 0 14px 32px -6px rgb(0 0 0 / 14%), 0 4px 10px -2px rgb(0 0 0 / 6%);
+		padding: 0.5rem 1rem 1.25rem;
+		max-height: calc(100dvh - 72px);
+		overflow-y: auto;
 	}
 
 	.ldn-shell--drawer-open .ldn-shell-drawer {
 		display: block;
 	}
 
-	.ldn-shell-drawer__list > li > a,
+	.ldn-shell-drawer__list > li {
+		border-bottom: 1px solid var(--ldn-shell-rule);
+	}
+
+	.ldn-shell-drawer__list > li:last-child {
+		border-bottom: 0;
+	}
+
+	.ldn-shell-drawer__list > li > a {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		font-size: 0.9375rem;
+		font-weight: 500;
+	}
+
+	.ldn-shell-drawer__list > .ldn-nav-current > a {
+		color: var(--ldn-primary);
+		font-weight: 600;
+	}
+
 	.ldn-shell-drawer .ldn-shell-disclose {
 		min-height: 44px;
+		font-size: 1.125rem;
+		color: var(--ldn-secondary-text);
 	}
 
 	.ldn-shell-drawer .ldn-nav-has-children {
@@ -350,12 +457,41 @@ body.ldn-shell-owned .main-navigation {
 	.ldn-shell-drawer .ldn-nav-sub {
 		display: none;
 		grid-column: 1 / -1;
-		padding-left: 1rem;
+		padding: 0 0 0.5rem 0.875rem;
 	}
 
 	/* Country list stays one column in the drawer. Two columns are desktop-only. */
 	.ldn-shell-drawer .ldn-nav-open > .ldn-nav-sub {
 		display: block;
+	}
+
+	/* Short non-collapsed group headings (Tools) stay expanded inside their open parent. */
+	.ldn-shell-drawer .ldn-nav-column-heading > .ldn-nav-column-title {
+		display: block;
+		padding: 0.5rem 0 0.2rem;
+		font-size: 0.72rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--ldn-secondary-text);
+	}
+
+	.ldn-shell-drawer .ldn-nav-column-heading > .ldn-nav-sub {
+		display: block;
+		padding: 0;
+	}
+
+	.ldn-shell-drawer .ldn-nav-sub a {
+		display: flex;
+		align-items: center;
+		min-height: 44px;
+		font-size: 0.875rem;
+	}
+
+	.ldn-shell-drawer .ldn-nav-utility-start {
+		margin-top: 0.5rem;
+		padding-top: 0.5rem;
+		border-top: 2px solid var(--ldn-shell-rule);
 	}
 
 	.ldn-shell-footer__inner {
@@ -373,12 +509,18 @@ body.ldn-shell-owned .main-navigation {
 	}
 
 	.ldn-shell-header__inner {
-		min-height: 72px;
+		min-height: 68px;
+	}
+
+	.ldn-shell-brand img {
+		width: 132px;
+		height: 45px;
 	}
 }
 
 @media (prefers-reduced-motion: no-preference) {
-	.ldn-shell a {
-		transition: color 160ms ease, text-decoration-color 160ms ease;
+	.ldn-shell a,
+	.ldn-shell-primary__list > .ldn-nav-has-children > a::after {
+		transition: color 160ms ease, box-shadow 160ms ease, transform 160ms ease, opacity 160ms ease, text-decoration-color 160ms ease;
 	}
 }
