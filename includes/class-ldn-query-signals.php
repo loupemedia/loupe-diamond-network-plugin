@@ -46,7 +46,7 @@ final class LDN_Query_Signals {
      * streams XML and exits before the theme loads, so it has no title or
      * pagination state to correct.
      */
-    const ROUTES = array('price', 'size', 'calculator');
+    const ROUTES = array('price', 'size', 'calculator', 'jewellery');
 
     /**
      * Hook the corrections.
@@ -133,6 +133,18 @@ final class LDN_Query_Signals {
                         __('Diamond Price Calculator', 'loupe-diamond-network')
                     );
                 }
+            }
+        }
+
+        $jewellery = method_exists($plugin, 'jewellery_dispatcher') ? $plugin->jewellery_dispatcher() : null;
+        if ($jewellery instanceof LDN_Jewellery_Dispatcher) {
+            $ctx = $jewellery->current_context();
+            if ($ctx instanceof LDN_Page_Context) {
+                $summary = $jewellery->primary_data();
+                $renderer = new LDN_Jewellery_Renderer($plugin->data_fetcher(), $plugin->config());
+                return self::with_site_name(
+                    $renderer->page_title($ctx, is_array($summary) ? $summary : array())
+                );
             }
         }
 

@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Loupe Diamond Network 0.42.6\n"
+"Project-Id-Version: Loupe Diamond Network 0.43.5\n"
 "Report-Msgid-Bugs-To: https://ringspo.com/\n"
-"POT-Creation-Date: 2026-08-28 00:12+1000\n"
+"POT-Creation-Date: 2026-11-18 20:32+1000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,20 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: components/trait-ldn-content.php:62
-#: components/trait-ldn-content.php:639
-#: components/trait-ldn-content.php:750
-#: components/trait-ldn-tables.php:493
-#: components/trait-ldn-tables.php:515
-#: components/trait-ldn-tables.php:730
-#: components/trait-ldn-tables.php:742
-#: components/trait-ldn-tables.php:996
-#: includes/class-ldn-renderer.php:164
-#: includes/class-ldn-schema.php:80
-msgid "Diamonds analyzed"
-msgstr ""
-
-#: components/trait-ldn-content.php:472
+#: components/trait-ldn-content.php:450
 #, php-format
 msgid ""
 "Our index tracks %1$s diamonds across %2$d natural and %3$d lab-grown shape "
@@ -39,76 +26,82 @@ msgid ""
 "the world. Prices are updated every day."
 msgstr ""
 
-#: components/trait-ldn-content.php:629
-#: components/trait-ldn-content.php:740
-#: components/trait-ldn-tables.php:166
-msgid "Typical price (median)"
+#: components/trait-ldn-content.php:616
+#: components/trait-ldn-content.php:726
+#: components/trait-ldn-tables.php:543
+#: components/trait-ldn-tables.php:565
+#: components/trait-ldn-tables.php:780
+#: components/trait-ldn-tables.php:792
+#: components/trait-ldn-tables.php:1039
+#: includes/class-ldn-stat-specs.php:117
+msgid "Diamonds analyzed"
 msgstr ""
 
-#: components/trait-ldn-content.php:630
-#: components/trait-ldn-content.php:741
-msgid "Median (all qualities)"
-msgstr ""
-
-#: components/trait-ldn-content.php:650
-#: components/trait-ldn-content.php:761
+#: components/trait-ldn-content.php:627
+#: components/trait-ldn-content.php:737
 msgid "Shapes compared"
 msgstr ""
 
-#: components/trait-ldn-content.php:657
+#: components/trait-ldn-content.php:634
+#: includes/class-ldn-stat-specs.php:99
 msgid "Lowest price"
 msgstr ""
 
-#: components/trait-ldn-content.php:663
+#: components/trait-ldn-content.php:640
+#: includes/class-ldn-stat-specs.php:108
 msgid "Highest price"
 msgstr ""
 
-#: components/trait-ldn-content.php:768
+#: components/trait-ldn-content.php:748
+msgid "Price range (outliers excluded)"
+msgstr ""
+
+#: components/trait-ldn-content.php:749
 #: components/trait-ldn-tables.php:176
 msgid "Price range"
 msgstr ""
 
-#: components/trait-ldn-content.php:797
+#: components/trait-ldn-content.php:778
 #, php-format
 msgid "%s change"
 msgstr ""
 
-#: components/trait-ldn-content.php:858
-#: includes/class-ldn-size-renderer.php:3457
+#: components/trait-ldn-content.php:839
+#: includes/class-ldn-size-renderer.php:3920
 msgid "Carat weights"
 msgstr ""
 
-#: components/trait-ldn-content.php:864
-#: components/trait-ldn-content.php:908
+#: components/trait-ldn-content.php:845
+#: components/trait-ldn-content.php:889
 msgid "Diamonds tracked"
 msgstr ""
 
-#: components/trait-ldn-content.php:917
+#: components/trait-ldn-content.php:898
 #, php-format
 msgid "%d natural"
 msgstr ""
 
-#: components/trait-ldn-content.php:924
+#: components/trait-ldn-content.php:905
 #, php-format
 msgid "%d lab-grown"
 msgstr ""
 
-#: components/trait-ldn-content.php:929
+#: components/trait-ldn-content.php:910
 msgid "Shape & carat combinations"
 msgstr ""
 
-#: components/trait-ldn-content.php:941
+#: components/trait-ldn-content.php:922
 #, php-format
 msgid "%s ct natural (typical)"
 msgstr ""
 
-#: components/trait-ldn-content.php:953
+#: components/trait-ldn-content.php:934
 #, php-format
 msgid "%s ct lab-grown discount"
 msgstr ""
 
-#: components/trait-ldn-content.php:1202
-#: includes/class-ldn-size-renderer.php:2161
+#: components/trait-ldn-content.php:1171
+#: includes/class-ldn-size-renderer.php:2237
 msgid "FAQ"
 msgstr ""
 
@@ -164,7 +157,7 @@ msgid "Browse natural or lab-grown prices"
 msgstr ""
 
 #: components/trait-ldn-homepage.php:187
-#: components/trait-ldn-tables.php:1163
+#: components/trait-ldn-tables.php:1206
 msgid "Natural vs lab-grown price change (%)"
 msgstr ""
 
@@ -177,165 +170,165 @@ msgid "Popular shapes"
 msgstr ""
 
 #: components/trait-ldn-methodology.php:138
-#: includes/class-ldn-size-renderer.php:2308
-#: includes/class-ldn-size-renderer.php:2366
+#: includes/class-ldn-size-renderer.php:2384
+#: includes/class-ldn-size-renderer.php:2442
 msgid "About this data"
-msgstr ""
-
-#: components/trait-ldn-nav-items.php:793
-msgctxt "navigation"
-msgid "Diamond Prices"
-msgstr ""
-
-#: components/trait-ldn-nav-items.php:794
-msgctxt "navigation"
-msgid "Diamond Sizes"
-msgstr ""
-
-#: components/trait-ldn-nav-items.php:795
-msgctxt "navigation"
-msgid "Prices by Carat"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:796
 msgctxt "navigation"
-msgid "Prices by Shape"
+msgid "Diamond Prices"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:797
 msgctxt "navigation"
-msgid "Natural and Lab"
+msgid "Diamond Sizes"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:798
-#: components/trait-ldn-nav-items.php:803
 msgctxt "navigation"
-msgid "Tools"
+msgid "Prices by Carat"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:799
 msgctxt "navigation"
-msgid "Price Calculator"
+msgid "Prices by Shape"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:800
 msgctxt "navigation"
-msgid "Lab-Grown Prices"
+msgid "Natural and Lab"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:801
+#: components/trait-ldn-nav-items.php:806
 msgctxt "navigation"
-msgid "Sizes by Shape"
+msgid "Tools"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:802
 msgctxt "navigation"
-msgid "Sizes by Carat"
+msgid "Price Calculator"
+msgstr ""
+
+#: components/trait-ldn-nav-items.php:803
+msgctxt "navigation"
+msgid "Lab-Grown Prices"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:804
 msgctxt "navigation"
-msgid "Size Comparison"
+msgid "Sizes by Shape"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:805
 msgctxt "navigation"
-msgid "How We Measure"
-msgstr ""
-
-#: components/trait-ldn-nav-items.php:806
-msgctxt "navigation"
-msgid "Select Country"
+msgid "Sizes by Carat"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:807
 msgctxt "navigation"
-msgid "Learn"
+msgid "Size Comparison"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:808
 msgctxt "navigation"
-msgid "Rings by Carat"
+msgid "How We Measure"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:809
 msgctxt "navigation"
-msgid "Sell Jewelry"
+msgid "Select Country"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:810
 msgctxt "navigation"
-msgid "Where to Buy"
+msgid "Learn"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:811
 msgctxt "navigation"
-msgid "Importing a Ring"
+msgid "Rings by Carat"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:812
 msgctxt "navigation"
-msgid "Retailer Guides"
+msgid "Sell Jewelry"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:813
 msgctxt "navigation"
-msgid "About"
+msgid "Where to Buy"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:814
 msgctxt "navigation"
-msgid "Contact"
+msgid "Importing a Ring"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:815
 msgctxt "navigation"
-msgid "Reviews of Ringspo"
+msgid "Retailer Guides"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:816
 msgctxt "navigation"
-msgid "Why Do We Do This?"
+msgid "About"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:817
 msgctxt "navigation"
-msgid "Privacy"
+msgid "Contact"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:818
 msgctxt "navigation"
-msgid "Terms"
+msgid "Reviews of Ringspo"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:819
 msgctxt "navigation"
-msgid "Cookies"
+msgid "Why Do We Do This?"
 msgstr ""
 
 #: components/trait-ldn-nav-items.php:820
 msgctxt "navigation"
+msgid "Privacy"
+msgstr ""
+
+#: components/trait-ldn-nav-items.php:821
+msgctxt "navigation"
+msgid "Terms"
+msgstr ""
+
+#: components/trait-ldn-nav-items.php:822
+msgctxt "navigation"
+msgid "Cookies"
+msgstr ""
+
+#: components/trait-ldn-nav-items.php:823
+msgctxt "navigation"
 msgid "Affiliate Disclosure"
 msgstr ""
 
-#: components/trait-ldn-nav-items.php:870
+#: components/trait-ldn-nav-items.php:873
 #, php-format
 msgctxt "navigation carat label"
 msgid "%s Carat"
 msgstr ""
 
-#: components/trait-ldn-nav-items.php:885
+#: components/trait-ldn-nav-items.php:888
 msgctxt "navigation"
 msgid "Lab-Grown"
 msgstr ""
 
-#: components/trait-ldn-nav-items.php:888
+#: components/trait-ldn-nav-items.php:891
 msgctxt "navigation"
 msgid "Natural"
 msgstr ""
 
 #: components/trait-ldn-navigation.php:71
-#: includes/class-ldn-size-renderer.php:2481
+#: includes/class-ldn-size-renderer.php:2557
 msgid "Breadcrumb"
 msgstr ""
 
@@ -350,11 +343,12 @@ msgid "Based on %s diamonds in our database"
 msgstr ""
 
 #: components/trait-ldn-navigation.php:136
+#: includes/class-ldn-calculator-renderer.php:307
 msgid "Diamond Prices"
 msgstr ""
 
 #: components/trait-ldn-navigation.php:222
-#: includes/class-ldn-size-renderer.php:2393
+#: includes/class-ldn-size-renderer.php:2469
 #, php-format
 msgid "%s carat — all shapes"
 msgstr ""
@@ -411,25 +405,25 @@ msgid "Where to go next"
 msgstr ""
 
 #: components/trait-ldn-navigation.php:396
-#: components/trait-ldn-price-calculator.php:1451
-#: components/trait-ldn-tables.php:696
-#: components/trait-ldn-tables.php:993
-#: includes/class-ldn-size-renderer.php:2018
-#: includes/class-ldn-size-renderer.php:4099
+#: components/trait-ldn-price-calculator.php:1481
+#: components/trait-ldn-tables.php:746
+#: components/trait-ldn-tables.php:1036
+#: includes/class-ldn-size-renderer.php:2094
+#: includes/class-ldn-size-renderer.php:4578
 msgid "Natural"
 msgstr ""
 
 #: components/trait-ldn-navigation.php:400
-#: components/trait-ldn-price-calculator.php:1452
-#: components/trait-ldn-tables.php:697
-#: components/trait-ldn-tables.php:994
-#: includes/class-ldn-size-renderer.php:2018
-#: includes/class-ldn-size-renderer.php:4098
+#: components/trait-ldn-price-calculator.php:1482
+#: components/trait-ldn-tables.php:747
+#: components/trait-ldn-tables.php:1037
+#: includes/class-ldn-size-renderer.php:2094
+#: includes/class-ldn-size-renderer.php:4577
 msgid "Lab-grown"
 msgstr ""
 
 #: components/trait-ldn-navigation.php:448
-#: components/trait-ldn-price-calculator.php:1467
+#: components/trait-ldn-price-calculator.php:1497
 msgid "Diamond type"
 msgstr ""
 
@@ -506,32 +500,32 @@ msgstr ""
 msgid "%1$s carat %2$s diamond price calculator"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:161
+#: components/trait-ldn-price-calculator.php:162
 msgid ""
 "Pick a shape, then choose colour and clarity to see typical prices or check "
 "a quote."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:167
+#: components/trait-ldn-price-calculator.php:168
 msgid "Calculator shape"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:212
+#: components/trait-ldn-price-calculator.php:213
 #, php-format
 msgid "%1$s ct %2$s diamond price calculator"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:216
+#: components/trait-ldn-price-calculator.php:217
 msgid "Diamond price calculator"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:265
+#: components/trait-ldn-price-calculator.php:266
 msgid ""
 "The figures above are for the most common specification at this weight. "
 "Choosing a different one needs JavaScript."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:334
+#: components/trait-ldn-price-calculator.php:335
 msgid ""
 "Choose the colour, clarity and cut you are considering and this shows what "
 "diamonds matching that exact specification are selling for. Add a price you "
@@ -539,7 +533,7 @@ msgid ""
 "set of stones."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:341
+#: components/trait-ldn-price-calculator.php:342
 msgid ""
 "Choose the colour and clarity you are considering and this shows what "
 "diamonds matching that exact specification are selling for. Add a price you "
@@ -547,451 +541,469 @@ msgid ""
 "set of stones."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:353
+#: components/trait-ldn-price-calculator.php:354
 #, php-format
 msgid ""
 "It compares like with like across %s diamonds, so a high price for a modest "
 "specification cannot hide behind an average."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:362
+#: components/trait-ldn-price-calculator.php:363
 msgid ""
 "The median at the top of this page covers every colour and clarity grade. "
 "Use the selectors below to narrow that to the specification you are actually "
 "shopping for."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:400
+#: components/trait-ldn-price-calculator.php:401
 msgid "Clarity"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:411
-#: components/trait-ldn-price-calculator.php:522
+#: components/trait-ldn-price-calculator.php:412
+#: components/trait-ldn-price-calculator.php:523
 msgid "Cut"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:423
-#: components/trait-ldn-price-calculator.php:429
+#: components/trait-ldn-price-calculator.php:424
+#: components/trait-ldn-price-calculator.php:430
 msgid "Quoted price"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:424
+#: components/trait-ldn-price-calculator.php:425
 msgid "optional"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:432
+#: components/trait-ldn-price-calculator.php:433
 msgid "See where your quote sits in this range."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:452
+#: components/trait-ldn-price-calculator.php:453
 msgid ""
 "How colorless the diamond looks. D is colorless; grades toward J show more "
 "tint."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:456
+#: components/trait-ldn-price-calculator.php:457
 msgid ""
 "How colourless the diamond looks. D is colourless; grades toward J show more "
 "tint."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:460
+#: components/trait-ldn-price-calculator.php:461
 msgid ""
 "How few inclusions the diamond has. IF is cleanest; SI often still looks "
 "clean to the eye."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:464
+#: components/trait-ldn-price-calculator.php:465
 msgid ""
 "How well the diamond is proportioned. Better cut returns more brilliance. "
 "Graded for rounds."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:468
+#: components/trait-ldn-price-calculator.php:469
 msgid ""
 "Optional. Enter a price you have been quoted to see where it sits against "
 "live listings."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:482
-#: includes/class-ldn-editorial-bridge.php:2001
+#: components/trait-ldn-price-calculator.php:483
+#: includes/class-ldn-editorial-bridge.php:2002
 msgid "Color"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:483
-#: includes/class-ldn-editorial-bridge.php:1999
+#: components/trait-ldn-price-calculator.php:484
+#: includes/class-ldn-editorial-bridge.php:2000
 msgid "Colour"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:501
+#: components/trait-ldn-price-calculator.php:502
 msgid "About this field"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:515
+#: components/trait-ldn-price-calculator.php:516
 msgid ""
 "Cut grading is not comparable across fancy shapes the way it is for round "
 "diamonds."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:649
-#: components/trait-ldn-price-calculator.php:1307
+#: components/trait-ldn-price-calculator.php:650
+#: components/trait-ldn-price-calculator.php:1337
 msgid "Any"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:674
+#: components/trait-ldn-price-calculator.php:675
 msgid "VG"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:675
+#: components/trait-ldn-price-calculator.php:676
 msgid "Ex"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:676
+#: components/trait-ldn-price-calculator.php:677
 msgid "Super Ideal"
-msgstr ""
-
-#: components/trait-ldn-price-calculator.php:751
-#: components/trait-ldn-price-calculator.php:934
-msgid "Lower end"
 msgstr ""
 
 #: components/trait-ldn-price-calculator.php:752
 #: components/trait-ldn-price-calculator.php:935
-msgid "Typical"
+msgid "Lower end"
 msgstr ""
 
 #: components/trait-ldn-price-calculator.php:753
 #: components/trait-ldn-price-calculator.php:936
+msgid "Typical"
+msgstr ""
+
+#: components/trait-ldn-price-calculator.php:754
+#: components/trait-ldn-price-calculator.php:937
 msgid "Higher end"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:799
+#: components/trait-ldn-price-calculator.php:800
 #, php-format
 msgid "Based on %s diamond."
 msgid_plural "Based on %s diamonds."
 msgstr[0] ""
 msgstr[1] ""
 
-#: components/trait-ldn-price-calculator.php:810
+#: components/trait-ldn-price-calculator.php:811
 #, php-format
 msgid "Based on %1$s diamond at %2$s."
 msgid_plural "Based on %1$s diamonds at %2$s."
 msgstr[0] ""
 msgstr[1] ""
 
-#: components/trait-ldn-price-calculator.php:832
-#: components/trait-ldn-price-calculator.php:914
+#: components/trait-ldn-price-calculator.php:833
+#: components/trait-ldn-price-calculator.php:915
 #, php-format
 msgid "%s color"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:833
-#: components/trait-ldn-price-calculator.php:915
+#: components/trait-ldn-price-calculator.php:834
+#: components/trait-ldn-price-calculator.php:916
 #, php-format
 msgid "%s colour"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:840
-#: components/trait-ldn-price-calculator.php:933
+#: components/trait-ldn-price-calculator.php:841
+#: components/trait-ldn-price-calculator.php:934
 #, php-format
 msgid "%s clarity"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:846
-#: components/trait-ldn-price-calculator.php:960
+#: components/trait-ldn-price-calculator.php:847
+#: components/trait-ldn-price-calculator.php:961
 msgid "any cut"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:849
-#: components/trait-ldn-price-calculator.php:959
+#: components/trait-ldn-price-calculator.php:850
+#: components/trait-ldn-price-calculator.php:960
 #, php-format
 msgid "%s cut"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:918
+#: components/trait-ldn-price-calculator.php:919
 msgid ""
 "We do not have enough diamonds at that exact specification to give a "
 "reliable figure. Try a different color or clarity."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:923
+#: components/trait-ldn-price-calculator.php:924
 msgid ""
 "We do not have enough diamonds at that exact specification to give a "
 "reliable figure. Try a different colour or clarity."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:938
+#: components/trait-ldn-price-calculator.php:939
 msgid "Based on %count% diamond at %spec%."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:939
-msgid "Based on %count% diamonds at %spec%."
-msgstr ""
-
 #: components/trait-ldn-price-calculator.php:940
-#, php-format
-msgid "Based on %count% diamond."
+msgid "Based on %count% diamonds at %spec%."
 msgstr ""
 
 #: components/trait-ldn-price-calculator.php:941
 #, php-format
+msgid "Based on %count% diamond."
+msgstr ""
+
+#: components/trait-ldn-price-calculator.php:942
+#, php-format
 msgid "Based on %count% diamonds."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:945
+#: components/trait-ldn-price-calculator.php:946
 msgid ""
 "Choosing %alt% over %current% %dimension% typically adds about %pct%% to the "
 "median price."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:949
+#: components/trait-ldn-price-calculator.php:950
 msgid ""
 "Choosing %alt% over %current% %dimension% typically lowers the median by "
 "about %pct%%."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:977
+#: components/trait-ldn-price-calculator.php:978
 msgid ""
 "This quote is well below what similar diamonds usually sell for. That can be "
 "a great deal — but verify the certificate, cut quality, and return policy "
 "before price is the only thing you weigh."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:983
+#: components/trait-ldn-price-calculator.php:984
 msgid ""
 "This quote sits just above the lowest prices we see for this specification. "
 "It looks competitive — compare the grading report and how the stone faces up."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:988
+#: components/trait-ldn-price-calculator.php:989
 msgid ""
 "This quote is in the lower quarter of the market for this specification. "
 "Savings are plausible; still weigh cut, eye-cleanliness, and seller terms."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:993
+#: components/trait-ldn-price-calculator.php:994
 msgid ""
 "This quote is below what most comparable diamonds cost, but not an outlier. "
 "A fair price is only part of the decision — check certification and service."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:998
+#: components/trait-ldn-price-calculator.php:999
 msgid ""
 "This quote is approaching the middle of the range for this specification. "
 "You are not overpaying on price alone; prioritise cut and seller reputation."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1003
+#: components/trait-ldn-price-calculator.php:1004
 msgid ""
 "This quote is a little under the typical price for this specification. That "
 "is a reasonable place to be — use any savings on cut or a seller you trust."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1008
+#: components/trait-ldn-price-calculator.php:1009
 msgid ""
 "This quote is slightly below the middle of the market for this spec. Price "
 "looks fair; the rest is whether this stone's proportions suit you."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1013
+#: components/trait-ldn-price-calculator.php:1014
 msgid ""
 "This quote is close to the typical price for this specification. You are "
 "paying roughly what comparable stones sell for — focus on cut and cert."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1018
+#: components/trait-ldn-price-calculator.php:1019
 msgid ""
 "This quote is just under the median for this specification. Not a bargain, "
 "not a premium — make sure the stone earns the spend on merit."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1023
+#: components/trait-ldn-price-calculator.php:1024
 msgid ""
 "This quote is near the middle of what comparable diamonds sell for. Price "
 "looks in line with the market; cut and seller terms should decide it."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1028
+#: components/trait-ldn-price-calculator.php:1029
 msgid ""
 "This quote is a little above the typical range for this specification. You "
 "may be paying a modest premium — confirm cut quality justifies it."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1033
+#: components/trait-ldn-price-calculator.php:1034
 msgid ""
 "This quote is above what most comparable diamonds cost. Higher price is not "
 "automatically better; check the certificate and policies."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1038
+#: components/trait-ldn-price-calculator.php:1039
 msgid ""
 "This quote sits toward the upper half of the market for this specification. "
 "Unless something specific justifies it, it is worth shopping alternatives."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1043
+#: components/trait-ldn-price-calculator.php:1044
 msgid ""
 "This quote is above the typical range for this specification. Make sure cut, "
 "certification, or seller reputation earns the extra spend."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1048
+#: components/trait-ldn-price-calculator.php:1049
 msgid ""
 "This quote sits toward the high end of the market for this specification. "
 "Compare other options unless a brand or terms you need explains the premium."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1053
+#: components/trait-ldn-price-calculator.php:1054
 msgid ""
 "This quote is near the top of what similar diamonds sell for. Price alone "
 "suggests you could do better — weigh cut and seller trust carefully."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1058
+#: components/trait-ldn-price-calculator.php:1059
 msgid ""
 "This quote is at the high end of the range for this specification. Unless "
 "there is a clear reason to pay more, compare other stones first."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1063
+#: components/trait-ldn-price-calculator.php:1064
 msgid ""
 "This quote is higher than almost every comparable diamond we track. Unless "
 "there is a clear reason — a specific cut grade, a trusted seller, or terms "
 "you need — compare other options before you commit."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1083
+#: components/trait-ldn-price-calculator.php:1084
 #, php-format
 msgid ""
 "Choose the shape, carat, type, and the %s, clarity, and cut grades you are "
 "shopping for."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1090
+#: components/trait-ldn-price-calculator.php:1091
 msgid ""
 "We show the lower end, typical, and higher end prices from live listings "
 "that match that exact specification."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1095
+#: components/trait-ldn-price-calculator.php:1096
 msgid ""
 "Add a quoted price to see where it sits on the market range for the same "
 "spec."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1106
-#: includes/class-ldn-size-renderer.php:3136
+#: components/trait-ldn-price-calculator.php:1107
+#: includes/class-ldn-size-renderer.php:3599
 msgid "How it works"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1139
+#: components/trait-ldn-price-calculator.php:1140
 msgid ""
 "Small changes to color, clarity, or cut can move the median price more than "
 "many shoppers expect. At your current selection:"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1144
+#: components/trait-ldn-price-calculator.php:1145
 msgid "These percentages update when you change the selectors above."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1149
+#: components/trait-ldn-price-calculator.php:1150
 msgid "What drives the price?"
 msgstr ""
 
 #: components/trait-ldn-price-calculator.php:1176
+msgid "Loading recommendations…"
+msgstr ""
+
+#: components/trait-ldn-price-calculator.php:1178
+msgid "Recommendations are temporarily unavailable. Try again in a moment."
+msgstr ""
+
+#: components/trait-ldn-price-calculator.php:1182
+msgid ""
+"No matching diamonds in inventory right now. Adjust your budget or grades "
+"and check again."
+msgstr ""
+
+#: components/trait-ldn-price-calculator.php:1193
 msgid "Recommended diamonds"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1263
+#: components/trait-ldn-price-calculator.php:1195
+msgid "Stones worth a closer look"
+msgstr ""
+
+#: components/trait-ldn-price-calculator.php:1293
 msgid "clarity"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1290
-#: components/trait-ldn-price-calculator.php:1309
+#: components/trait-ldn-price-calculator.php:1320
+#: components/trait-ldn-price-calculator.php:1339
 msgid "cut"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1347
+#: components/trait-ldn-price-calculator.php:1377
 #, php-format
 msgid ""
 "Choosing %1$s over %2$s %3$s typically adds about %4$d%% to the median price."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1359
+#: components/trait-ldn-price-calculator.php:1389
 #, php-format
 msgid ""
 "Choosing %1$s over %2$s %3$s typically lowers the median by about %4$d%%."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1406
+#: components/trait-ldn-price-calculator.php:1436
 msgid ""
 "Calculator data is not available for this specification yet. Try a different "
 "carat or shape."
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1493
-#: components/trait-ldn-price-calculator.php:1499
-#: components/trait-ldn-price-calculator.php:1503
-#: components/trait-ldn-tables.php:604
-#: components/trait-ldn-tables.php:623
-#: components/trait-ldn-tables.php:992
-#: includes/class-ldn-size-renderer.php:1120
-#: includes/class-ldn-size-renderer.php:1752
-#: includes/class-ldn-size-renderer.php:3071
-#: includes/class-ldn-size-renderer.php:3085
+#: components/trait-ldn-price-calculator.php:1523
+#: components/trait-ldn-price-calculator.php:1529
+#: components/trait-ldn-price-calculator.php:1533
+#: components/trait-ldn-tables.php:654
+#: components/trait-ldn-tables.php:673
+#: components/trait-ldn-tables.php:1035
+#: includes/class-ldn-size-renderer.php:1183
+#: includes/class-ldn-size-renderer.php:1829
+#: includes/class-ldn-size-renderer.php:3534
+#: includes/class-ldn-size-renderer.php:3548
 msgid "Carat weight"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1594
+#: components/trait-ldn-price-calculator.php:1624
 #: components/trait-ldn-tables.php:186
-#: includes/class-ldn-editorial-bridge.php:1144
-#: includes/class-ldn-size-renderer.php:1116
-#: includes/class-ldn-size-renderer.php:1501
-#: includes/class-ldn-size-renderer.php:1677
-#: includes/class-ldn-size-renderer.php:1749
-#: includes/class-ldn-size-renderer.php:1924
-#: includes/class-ldn-size-renderer.php:3068
-#: includes/class-ldn-size-renderer.php:3845
+#: includes/class-ldn-editorial-bridge.php:1145
+#: includes/class-ldn-size-renderer.php:1179
+#: includes/class-ldn-size-renderer.php:1565
+#: includes/class-ldn-size-renderer.php:1754
+#: includes/class-ldn-size-renderer.php:1826
+#: includes/class-ldn-size-renderer.php:2001
+#: includes/class-ldn-size-renderer.php:3531
+#: includes/class-ldn-size-renderer.php:4321
 msgid "Shape"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1622
+#: components/trait-ldn-price-calculator.php:1653
 msgid "Round"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1623
+#: components/trait-ldn-price-calculator.php:1654
 msgid "Princess"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1624
+#: components/trait-ldn-price-calculator.php:1655
 msgid "Oval"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1625
+#: components/trait-ldn-price-calculator.php:1656
 msgid "Cushion"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1626
+#: components/trait-ldn-price-calculator.php:1657
 msgid "Emerald"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1627
+#: components/trait-ldn-price-calculator.php:1658
 msgid "Asscher"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1628
+#: components/trait-ldn-price-calculator.php:1659
 msgid "Radiant"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1629
+#: components/trait-ldn-price-calculator.php:1660
 msgid "Pear"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1630
+#: components/trait-ldn-price-calculator.php:1661
 msgid "Marquise"
 msgstr ""
 
-#: components/trait-ldn-price-calculator.php:1631
+#: components/trait-ldn-price-calculator.php:1662
 msgid "Heart"
 msgstr ""
 
@@ -1000,50 +1012,50 @@ msgid "Price distribution"
 msgstr ""
 
 #: components/trait-ldn-sections.php:52
-#: components/trait-ldn-sections.php:182
+#: components/trait-ldn-sections.php:185
 #, php-format
 msgid "%s diamond prices by carat weight"
 msgstr ""
 
-#: components/trait-ldn-sections.php:376
+#: components/trait-ldn-sections.php:410
 #, php-format
 msgid "Diamond prices in %s"
 msgstr ""
 
-#: components/trait-ldn-sections.php:382
+#: components/trait-ldn-sections.php:416
 #, php-format
 msgid "%1$s diamond prices in %2$s"
 msgstr ""
 
-#: components/trait-ldn-shapes-at-carat.php:116
+#: components/trait-ldn-shapes-at-carat.php:117
 #, php-format
-msgid "#%1$d: %2$s"
+msgid "%1$d: %2$s"
 msgstr ""
 
-#: components/trait-ldn-shapes-at-carat.php:127
+#: components/trait-ldn-shapes-at-carat.php:128
 #, php-format
 msgid "%s diamonds"
 msgstr ""
 
-#: components/trait-ldn-shapes-at-carat.php:156
+#: components/trait-ldn-shapes-at-carat.php:160
 msgid "Size chart"
 msgstr ""
 
-#: components/trait-ldn-shapes-at-carat.php:178
+#: components/trait-ldn-shapes-at-carat.php:182
 #, php-format
 msgid "%s carat diamonds by shape"
 msgstr ""
 
-#: components/trait-ldn-shapes-at-carat.php:187
+#: components/trait-ldn-shapes-at-carat.php:191
 #, php-format
 msgid "%s price change shown on each card."
 msgstr ""
 
-#: components/trait-ldn-shapes-at-carat.php:199
+#: components/trait-ldn-shapes-at-carat.php:203
 msgid "Select a shape to see detailed pricing for that cut."
 msgstr ""
 
-#: components/trait-ldn-shapes-at-carat.php:210
+#: components/trait-ldn-shapes-at-carat.php:214
 #, php-format
 msgid "%1$s Carat %2$s Diamond Prices by Shape - %3$s"
 msgstr ""
@@ -1056,6 +1068,10 @@ msgstr ""
 #: components/trait-ldn-tables.php:159
 #, php-format
 msgid "%s %% change"
+msgstr ""
+
+#: components/trait-ldn-tables.php:166
+msgid "Typical price (median)"
 msgstr ""
 
 #: components/trait-ldn-tables.php:167
@@ -1092,60 +1108,84 @@ msgid "%s prices by carat weight"
 msgstr ""
 
 #: components/trait-ldn-tables.php:283
-#: components/trait-ldn-tables.php:490
-#: components/trait-ldn-tables.php:512
-#: includes/class-ldn-editorial-bridge.php:1055
-#: includes/class-ldn-size-renderer.php:1926
-#: includes/class-ldn-size-renderer.php:3846
+#: components/trait-ldn-tables.php:540
+#: components/trait-ldn-tables.php:562
+#: includes/class-ldn-editorial-bridge.php:1056
+#: includes/class-ldn-size-renderer.php:2003
+#: includes/class-ldn-size-renderer.php:4322
 msgid "Carat"
 msgstr ""
 
 #: components/trait-ldn-tables.php:284
-#: components/trait-ldn-tables.php:729
-#: components/trait-ldn-tables.php:741
-#: includes/class-ldn-editorial-bridge.php:1056
-#: includes/class-ldn-editorial-bridge.php:1145
+#: components/trait-ldn-tables.php:779
+#: components/trait-ldn-tables.php:791
+#: includes/class-ldn-editorial-bridge.php:1057
+#: includes/class-ldn-editorial-bridge.php:1146
+#: includes/class-ldn-stat-specs.php:69
 msgid "Median price"
 msgstr ""
 
-#: components/trait-ldn-tables.php:393
+#: components/trait-ldn-tables.php:397
 #, php-format
-msgid "Price by %s and clarity"
+msgid "Based on %d diamond"
+msgid_plural "Based on %d diamonds"
+msgstr[0] ""
+msgstr[1] ""
+
+#: components/trait-ldn-tables.php:411
+#, php-format
+msgid ""
+"Median price for this shape and carat weight across the %s (D is the highest "
+"grade) and clarity grades we track. Darker cells cost more."
 msgstr ""
 
-#: components/trait-ldn-tables.php:396
+#: components/trait-ldn-tables.php:415
 #, php-format
 msgid ""
 "Average price for this shape and carat weight across the %s (D is the "
 "highest grade) and clarity grades we track. Darker cells cost more."
 msgstr ""
 
-#: components/trait-ldn-tables.php:491
-#: components/trait-ldn-tables.php:513
-#: components/trait-ldn-tables.php:605
-#: components/trait-ldn-tables.php:631
+#: components/trait-ldn-tables.php:421
+#, php-format
+msgid ""
+"Faded prices are based on fewer than %d diamonds, so treat them as a rough "
+"guide."
+msgstr ""
+
+#: components/trait-ldn-tables.php:427
+#, php-format
+msgid "Price by %s and clarity"
+msgstr ""
+
+#: components/trait-ldn-tables.php:541
+#: components/trait-ldn-tables.php:563
+#: components/trait-ldn-tables.php:655
+#: components/trait-ldn-tables.php:681
+#: includes/class-ldn-stat-specs.php:54
+#: includes/class-ldn-stat-specs.php:67
 msgid "Typical price"
 msgstr ""
 
-#: components/trait-ldn-tables.php:492
-#: components/trait-ldn-tables.php:514
-#: components/trait-ldn-tables.php:606
-#: components/trait-ldn-tables.php:635
+#: components/trait-ldn-tables.php:542
+#: components/trait-ldn-tables.php:564
+#: components/trait-ldn-tables.php:656
+#: components/trait-ldn-tables.php:685
 msgid "Price per carat"
 msgstr ""
 
-#: components/trait-ldn-tables.php:607
-#: components/trait-ldn-tables.php:643
+#: components/trait-ldn-tables.php:657
+#: components/trait-ldn-tables.php:693
 msgid "Compare shapes at this weight"
 msgstr ""
 
-#: components/trait-ldn-tables.php:609
+#: components/trait-ldn-tables.php:659
 msgid ""
 "Typical price across all shapes at this weight. Open a shape page for "
 "colour, clarity and cut."
 msgstr ""
 
-#: components/trait-ldn-tables.php:656
+#: components/trait-ldn-tables.php:706
 msgid ""
 "Each figure combines the median price of every shape we track at that "
 "weight. Shapes with more diamonds on the market count for more, so the "
@@ -1154,13 +1194,13 @@ msgid ""
 "cut affect what you pay."
 msgstr ""
 
-#: components/trait-ldn-tables.php:728
-#: components/trait-ldn-tables.php:740
-#: includes/class-ldn-size-renderer.php:799
+#: components/trait-ldn-tables.php:778
+#: components/trait-ldn-tables.php:790
+#: includes/class-ldn-size-renderer.php:862
 msgid "Diamond"
 msgstr ""
 
-#: components/trait-ldn-tables.php:751
+#: components/trait-ldn-tables.php:801
 msgid ""
 "These are the shape and weight combinations with the most diamonds on the "
 "market, which makes them the sizes buyers are actually choosing. Each price "
@@ -1168,35 +1208,35 @@ msgid ""
 "number than the all-shapes figures higher up this page."
 msgstr ""
 
-#: components/trait-ldn-tables.php:759
+#: components/trait-ldn-tables.php:809
 msgid "The most traded diamonds right now"
 msgstr ""
 
-#: components/trait-ldn-tables.php:786
+#: components/trait-ldn-tables.php:836
 #, php-format
 msgid "%s diamond price per carat by weight"
 msgstr ""
 
-#: components/trait-ldn-tables.php:809
+#: components/trait-ldn-tables.php:859
 #, php-format
 msgid "%s diamond price per carat by carat weight"
 msgstr ""
 
-#: components/trait-ldn-tables.php:827
+#: components/trait-ldn-tables.php:877
 msgid ""
 "A bigger lab-grown diamond usually costs more for every carat it weighs, not "
 "just more in total. The climb is gentler than it is for natural diamonds, "
 "because growing a larger stone is a question of time rather than luck."
 msgstr ""
 
-#: components/trait-ldn-tables.php:835
+#: components/trait-ldn-tables.php:885
 msgid ""
 "A bigger natural diamond costs more for every carat it weighs, not just more "
 "in total. Large rough is genuinely scarce, so the price of a single carat "
 "climbs steadily with the size of the finished stone."
 msgstr ""
 
-#: components/trait-ldn-tables.php:842
+#: components/trait-ldn-tables.php:892
 msgid ""
 "Look for the steps around 1, 1.5 and 2 carats. Buyers cluster at those "
 "weights, so a diamond that just reaches one of them costs more per carat "
@@ -1204,11 +1244,11 @@ msgid ""
 "usually the cheapest way to get a given look."
 msgstr ""
 
-#: components/trait-ldn-tables.php:852
+#: components/trait-ldn-tables.php:902
 msgid "How price per carat changes with weight"
 msgstr ""
 
-#: components/trait-ldn-tables.php:887
+#: components/trait-ldn-tables.php:937
 msgid ""
 "Each row combines every shape we track at that weight, weighted toward "
 "shapes with more diamonds on the market. Shape and quality move the price a "
@@ -1216,62 +1256,62 @@ msgid ""
 "volatile."
 msgstr ""
 
-#: components/trait-ldn-tables.php:979
+#: components/trait-ldn-tables.php:1022
 msgid "Natural vs lab-grown prices by carat"
 msgstr ""
 
-#: components/trait-ldn-tables.php:982
+#: components/trait-ldn-tables.php:1025
 #, php-format
 msgid "Natural vs lab-grown diamond prices in %s by carat weight"
 msgstr ""
 
-#: components/trait-ldn-tables.php:989
+#: components/trait-ldn-tables.php:1032
 msgid "Select any price to explore that carat weight in more detail."
 msgstr ""
 
-#: components/trait-ldn-tables.php:995
+#: components/trait-ldn-tables.php:1038
 msgid "Lab-grown discount"
 msgstr ""
 
-#: components/trait-ldn-tables.php:1056
+#: components/trait-ldn-tables.php:1099
 #, php-format
 msgid "Price per carat - %s."
 msgstr ""
 
-#: components/trait-ldn-tables.php:1087
+#: components/trait-ldn-tables.php:1130
 #, php-format
 msgid "Lab-grown discount vs natural - %s."
 msgstr ""
 
-#: components/trait-ldn-tables.php:1110
+#: components/trait-ldn-tables.php:1153
 msgid "Lab-grown discount vs natural by carat weight"
 msgstr ""
 
-#: components/trait-ldn-tables.php:1123
+#: components/trait-ldn-tables.php:1166
 #, php-format
 msgid "At %1$s ct, lab-grown is typically about %2$s%% cheaper than natural."
 msgstr ""
 
-#: components/trait-ldn-tables.php:1132
+#: components/trait-ldn-tables.php:1175
 #, php-format
 msgid ""
 "Lab-grown diamonds cost less than natural at every weight we track in %s. "
 "The chart shows how wide that gap is at each carat size."
 msgstr ""
 
-#: components/trait-ldn-tables.php:1143
+#: components/trait-ldn-tables.php:1186
 msgid "Natural vs lab-grown price gap"
 msgstr ""
 
-#: components/trait-ldn-tables.php:1175
+#: components/trait-ldn-tables.php:1218
 msgid "Natural vs lab-grown price change"
 msgstr ""
 
-#: components/trait-ldn-tables.php:1194
+#: components/trait-ldn-tables.php:1237
 msgid "1, 2 and 3 carat price change (%)"
 msgstr ""
 
-#: components/trait-ldn-tables.php:1206
+#: components/trait-ldn-tables.php:1249
 msgid "How prices have moved at 1, 2 and 3 carats"
 msgstr ""
 
@@ -1342,202 +1382,207 @@ msgstr ""
 #: includes/class-ldn-calculator-renderer.php:236
 msgid ""
 "Free diamond price calculator with daily-refreshed market data. Check "
-"typical prices for any carat, shape, colour and clarity, or compare a quote."
+"typical prices for any carat, shape, color and clarity, or compare a quote."
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:573
+#: includes/class-ldn-calculator-renderer.php:314
+msgid "Calculator"
+msgstr ""
+
+#: includes/class-ldn-editorial-bridge.php:574
 #, php-format
 msgid "Current %s prices"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:579
+#: includes/class-ldn-editorial-bridge.php:580
 #, php-format
 msgid ""
 "%s, clarity and cut quality move the price a long way - two stones with the "
 "same carat can be very different values."
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:620
+#: includes/class-ldn-editorial-bridge.php:621
 #, php-format
 msgid "price chart of all %s carat diamonds"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:627
+#: includes/class-ldn-editorial-bridge.php:628
 #, php-format
 msgid "See a live %s and learn more about each shape"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:633
+#: includes/class-ldn-editorial-bridge.php:634
 #, php-format
 msgid "live price chart of %1$s carat %2$s diamonds"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:641
+#: includes/class-ldn-editorial-bridge.php:642
 #, php-format
 msgid "See a %1$s and learn how %2$s and clarity affect the price you'll pay"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:655
+#: includes/class-ldn-editorial-bridge.php:656
 msgid "How big it looks"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:657
+#: includes/class-ldn-editorial-bridge.php:658
 msgid ""
 "Carat is weight, not diameter. How large the stone looks depends on shape, "
 "depth and whether it is square or elongated."
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:683
-#: includes/class-ldn-editorial-bridge.php:707
+#: includes/class-ldn-editorial-bridge.php:684
+#: includes/class-ldn-editorial-bridge.php:708
 #, php-format
 msgid "%s carat at actual size"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:688
+#: includes/class-ldn-editorial-bridge.php:689
 #, php-format
 msgid "%s carat diamond sizes drawn at true scale next to a US quarter"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:695
+#: includes/class-ldn-editorial-bridge.php:696
 #, php-format
 msgid "%s at actual size"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:700
+#: includes/class-ldn-editorial-bridge.php:701
 #, php-format
 msgid ""
 "%s diamond sizes by carat weight, drawn at true scale next to a US quarter"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:712
+#: includes/class-ldn-editorial-bridge.php:713
 #, php-format
 msgid "%1$s carat %2$s diamond size drawn at true scale next to a US quarter"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:739
+#: includes/class-ldn-editorial-bridge.php:740
 #, php-format
 msgid "US quarter, %s mm across"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:746
+#: includes/class-ldn-editorial-bridge.php:747
 msgid "US quarter"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:792
+#: includes/class-ldn-editorial-bridge.php:793
 #, php-format
 msgid "%s diamond sizing"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:804
+#: includes/class-ldn-editorial-bridge.php:805
 #, php-format
 msgid ""
 "Typical face-up %s from real diamonds, drawn at true scale next to a US "
 "quarter for reference."
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:812
+#: includes/class-ldn-editorial-bridge.php:813
 msgid ""
 "Typical face-up size from real diamonds, drawn at true scale next to a US "
 "quarter for reference."
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:822
+#: includes/class-ldn-editorial-bridge.php:823
 #, php-format
 msgid "Learn more on our %s here"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:837
+#: includes/class-ldn-editorial-bridge.php:838
 #, php-format
 msgid "%s carat diamond size chart"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:843
+#: includes/class-ldn-editorial-bridge.php:844
 #, php-format
 msgid "%1$s carat %2$s diamond size chart"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:973
+#: includes/class-ldn-editorial-bridge.php:974
 #, php-format
 msgid "%s ct"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1046
+#: includes/class-ldn-editorial-bridge.php:1047
 #, php-format
 msgid "%1$s diamonds: median %2$s asking price by carat weight"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1057
-#: includes/class-ldn-editorial-bridge.php:1146
+#: includes/class-ldn-editorial-bridge.php:1058
+#: includes/class-ldn-editorial-bridge.php:1147
 msgid "Stones priced"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1062
-#: includes/class-ldn-size-renderer.php:2420
+#: includes/class-ldn-editorial-bridge.php:1063
+#: includes/class-ldn-size-renderer.php:1598
+#: includes/class-ldn-size-renderer.php:2496
 #, php-format
 msgid "%s carat"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1137
+#: includes/class-ldn-editorial-bridge.php:1138
 #, php-format
 msgid "%1$s carat prices today: %2$s against the market"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1162
+#: includes/class-ldn-editorial-bridge.php:1163
 #, php-format
 msgid "At %4$s carat a %1$s costs about %2$s%% less than %3$s."
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1170
+#: includes/class-ldn-editorial-bridge.php:1171
 #, php-format
 msgid "At %4$s carat a %1$s costs about %2$s%% more than %3$s."
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1181
+#: includes/class-ldn-editorial-bridge.php:1182
 #, php-format
 msgid "That puts %1$s %2$d of %3$d shapes by price at this weight."
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1273
+#: includes/class-ldn-editorial-bridge.php:1274
 #, php-format
 msgid "Prices updated %s"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1279
+#: includes/class-ldn-editorial-bridge.php:1280
 #, php-format
 msgid "Prices updated between %1$s and %2$s"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1642
+#: includes/class-ldn-editorial-bridge.php:1643
 #, php-format
 msgid "Median %2$s asking prices by shape for %1$s carat diamonds"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1650
+#: includes/class-ldn-editorial-bridge.php:1651
 #, php-format
 msgid "Last updated %s"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1753
+#: includes/class-ldn-editorial-bridge.php:1754
 #, php-format
 msgid "%1$s carat %2$s diamond prices"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1793
+#: includes/class-ldn-editorial-bridge.php:1794
 #, php-format
 msgid "Median: %1$s%2$s"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1817
+#: includes/class-ldn-editorial-bridge.php:1818
 msgid "Number of diamonds"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1877
-#: includes/class-ldn-editorial-bridge.php:1899
+#: includes/class-ldn-editorial-bridge.php:1878
+#: includes/class-ldn-editorial-bridge.php:1900
 #, php-format
 msgid "Open the live chart and %s/clarity grid"
 msgstr ""
 
-#: includes/class-ldn-editorial-bridge.php:1890
+#: includes/class-ldn-editorial-bridge.php:1891
 #, php-format
 msgid "Live %1$s asking prices as of %2$s."
 msgstr ""
@@ -1549,211 +1594,211 @@ msgid ""
 "plugin on deploy."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:226
+#: includes/class-ldn-size-renderer.php:245
 msgid ""
 "These outlines show the smallest and largest measured face-up sizes among "
 "valid inventory at this carat weight."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:230
+#: includes/class-ldn-size-renderer.php:249
 msgid ""
 "These outlines show the bottom 10%, average, and top 10% of face-up size "
 "from real inventory at this carat weight."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:245
+#: includes/class-ldn-size-renderer.php:264
 msgid ""
 "Stones aligned on a shared baseline — full measured range in this carat band."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:358
+#: includes/class-ldn-size-renderer.php:377
 msgid "How does cut grade affect size?"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:361
+#: includes/class-ldn-size-renderer.php:380
 msgid ""
 "Median dimensions from real inventory at this carat weight, split by GIA cut "
 "grade. The headline size above pools all grades."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:365
+#: includes/class-ldn-size-renderer.php:385
 msgid "Cut grade"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:366
-#: includes/class-ldn-size-renderer.php:440
+#: includes/class-ldn-size-renderer.php:386
+#: includes/class-ldn-size-renderer.php:464
 msgid "Stones"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:367
-#: includes/class-ldn-size-renderer.php:441
+#: includes/class-ldn-size-renderer.php:387
+#: includes/class-ldn-size-renderer.php:465
 msgid "Share"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:368
-#: includes/class-ldn-size-renderer.php:428
+#: includes/class-ldn-size-renderer.php:388
+#: includes/class-ldn-size-renderer.php:451
 msgid "Median diameter"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:369
-#: includes/class-ldn-size-renderer.php:443
+#: includes/class-ldn-size-renderer.php:389
+#: includes/class-ldn-size-renderer.php:467
 msgid "Median face-up"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:370
-#: includes/class-ldn-size-renderer.php:444
+#: includes/class-ldn-size-renderer.php:390
+#: includes/class-ldn-size-renderer.php:468
 msgid "Median depth %"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:429
+#: includes/class-ldn-size-renderer.php:452
 msgid "Median size (W × L)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:432
+#: includes/class-ldn-size-renderer.php:455
 msgid "How does length-to-width ratio affect size?"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:435
+#: includes/class-ldn-size-renderer.php:458
 msgid ""
 "Median dimensions from real inventory at this carat weight, grouped by "
 "length-to-width ratio. The headline size above pools all proportions."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:439
+#: includes/class-ldn-size-renderer.php:463
 msgid "L/W band"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:465
+#: includes/class-ldn-size-renderer.php:492
 #, php-format
 msgid ""
 "Relative actual size (mm): US quarter (24.26 mm) beside the median %1$s "
 "carat %2$s."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:469
+#: includes/class-ldn-size-renderer.php:496
 msgid ""
 "Relative actual size (mm): US quarter (24.26 mm) beside the median stone."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:506
-#: includes/class-ldn-size-renderer.php:3523
+#: includes/class-ldn-size-renderer.php:533
+#: includes/class-ldn-size-renderer.php:3986
 #, php-format
 msgid "Bottom 10% of size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:507
-#: includes/class-ldn-size-renderer.php:3525
+#: includes/class-ldn-size-renderer.php:534
+#: includes/class-ldn-size-renderer.php:3988
 msgid "Average size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:508
-#: includes/class-ldn-size-renderer.php:3527
+#: includes/class-ldn-size-renderer.php:535
+#: includes/class-ldn-size-renderer.php:3990
 #, php-format
 msgid "Top 10% of size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:545
+#: includes/class-ldn-size-renderer.php:572
 msgid "Smallest measured"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:546
+#: includes/class-ldn-size-renderer.php:573
 msgid "Largest measured"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:653
+#: includes/class-ldn-size-renderer.php:703
 msgid "Diamond Size Chart — Full Measured Range"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:658
+#: includes/class-ldn-size-renderer.php:707
 #, php-format
 msgid "%s Carat Diamond Size Chart — All Shapes"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:663
+#: includes/class-ldn-size-renderer.php:711
 msgid ""
 "Diamond Size Checker — Check & Compare Diamond Sizes vs Real Market Data"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:667
+#: includes/class-ldn-size-renderer.php:714
 msgid "How We Measure Diamond Sizes — Full Range Methodology"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:668
+#: includes/class-ldn-size-renderer.php:715
 msgid "How We Measure Diamond Sizes — Methodology"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:744
+#: includes/class-ldn-size-renderer.php:807
 #, php-format
 msgid "%s Carat Diamond Sizes"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:758
-#: includes/class-ldn-size-renderer.php:3239
-#: includes/class-ldn-size-renderer.php:3420
+#: includes/class-ldn-size-renderer.php:821
+#: includes/class-ldn-size-renderer.php:3702
+#: includes/class-ldn-size-renderer.php:3883
 msgid "Diamond Size Checker"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:762
+#: includes/class-ldn-size-renderer.php:825
 msgid "How We Measure Diamond Sizes — Full Range"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:763
+#: includes/class-ldn-size-renderer.php:826
 msgid "How We Measure Diamond Sizes"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:778
+#: includes/class-ldn-size-renderer.php:841
 msgid ""
 "Check one diamond against real market sizes or compare two diamonds side by "
 "side."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:785
+#: includes/class-ldn-size-renderer.php:848
 #, php-format
 msgid ""
 "How our diamond size data is generated from %s real diamond measurements."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:789
+#: includes/class-ldn-size-renderer.php:852
 msgid "How our diamond size data is generated from real diamond measurements."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:805
+#: includes/class-ldn-size-renderer.php:868
 #, php-format
 msgid ""
 "Median %1$s sizes below are based on %2$s real %3$s diamonds measured in "
 "retailer inventory."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:816
+#: includes/class-ldn-size-renderer.php:879
 #, php-format
 msgid ""
 "Median %s sizes below are based on real diamonds measured in retailer "
 "inventory."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:948
+#: includes/class-ldn-size-renderer.php:1011
 #, php-format
 msgid "Do all %1$s carat %2$s diamonds look the same size?"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:953
+#: includes/class-ldn-size-renderer.php:1016
 msgid "Size distribution"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:957
+#: includes/class-ldn-size-renderer.php:1020
 msgid ""
 "Real stones of the same carat weight spread across a range of average "
 "diameters. The chart shows how many listed diamonds fall in each diameter "
 "band."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:962
+#: includes/class-ldn-size-renderer.php:1025
 msgid ""
 "Real stones of the same carat weight vary in how long they face up and how "
 "elongated they are. These charts show the spread in our retailer inventory."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1100
+#: includes/class-ldn-size-renderer.php:1163
 msgid ""
 "Length-to-width ratio compares how long an oval faces up relative to its "
 "width. Ratios around the typical range look balanced on the finger; more "
@@ -1762,105 +1807,106 @@ msgid ""
 "the certificate dimensions."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1128
+#: includes/class-ldn-size-renderer.php:1191
 msgid "Full diameter range (min–max)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1135
+#: includes/class-ldn-size-renderer.php:1198
 msgid "Typical diameter range (10th–90th %)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1141
+#: includes/class-ldn-size-renderer.php:1204
 msgid "Average diameter (mm)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1151
+#: includes/class-ldn-size-renderer.php:1214
 msgid "Full length range (min–max)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1155
+#: includes/class-ldn-size-renderer.php:1218
 msgid "Full width range (min–max)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1162
-#: includes/class-ldn-size-renderer.php:1930
-#: includes/class-ldn-size-renderer.php:3090
-#: includes/class-ldn-size-renderer.php:3847
+#: includes/class-ldn-size-renderer.php:1225
+#: includes/class-ldn-size-renderer.php:2007
+#: includes/class-ldn-size-renderer.php:3553
+#: includes/class-ldn-size-renderer.php:4323
 msgid "Length (mm)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1166
-#: includes/class-ldn-size-renderer.php:1931
-#: includes/class-ldn-size-renderer.php:3093
-#: includes/class-ldn-size-renderer.php:3848
+#: includes/class-ldn-size-renderer.php:1229
+#: includes/class-ldn-size-renderer.php:2008
+#: includes/class-ldn-size-renderer.php:3556
+#: includes/class-ldn-size-renderer.php:4324
 msgid "Width (mm)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1174
-#: includes/class-ldn-size-renderer.php:1937
+#: includes/class-ldn-size-renderer.php:1237
+#: includes/class-ldn-size-renderer.php:2014
 msgid "Face-up range (min–max)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1182
+#: includes/class-ldn-size-renderer.php:1245
 msgid "Face-up area (mm²)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1186
+#: includes/class-ldn-size-renderer.php:1249
 msgid "Face-up range (10th–90th %)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1191
-#: includes/class-ldn-size-renderer.php:1940
-#: includes/class-ldn-size-renderer.php:3811
+#: includes/class-ldn-size-renderer.php:1254
+#: includes/class-ldn-size-renderer.php:2017
+#: includes/class-ldn-size-renderer.php:4286
 msgid "L/W ratio"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1196
-#: includes/class-ldn-size-renderer.php:1943
-#: includes/class-ldn-size-renderer.php:3803
+#: includes/class-ldn-size-renderer.php:1259
+#: includes/class-ldn-size-renderer.php:2020
+#: includes/class-ldn-size-renderer.php:4278
 msgid "Depth %"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1201
-#: includes/class-ldn-size-renderer.php:3830
+#: includes/class-ldn-size-renderer.php:1264
+#: includes/class-ldn-size-renderer.php:2976
+#: includes/class-ldn-size-renderer.php:4305
 msgid "Sample size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1230
+#: includes/class-ldn-size-renderer.php:1293
 msgid ""
 "Ranges show the full measured spread among valid stones in this carat band "
 "(minimum to maximum), not a trimmed percentile band."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1238
+#: includes/class-ldn-size-renderer.php:1301
 msgid "How we measure ranges"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1249
+#: includes/class-ldn-size-renderer.php:1312
 msgid ""
 "Ranges use 10th-90th percentiles, not min and max. Raw feeds often include "
 "bad measurements."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1257
+#: includes/class-ldn-size-renderer.php:1320
 msgid "Why we use percentiles"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1273
+#: includes/class-ldn-size-renderer.php:1336
 msgid "Key Dimensions"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1278
+#: includes/class-ldn-size-renderer.php:1341
 #, php-format
 msgid "%1$s Carat %2$s Diamond Key Dimensions"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1308
+#: includes/class-ldn-size-renderer.php:1371
 #, php-format
 msgid "Based on %s assessed stones."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1317
+#: includes/class-ldn-size-renderer.php:1380
 #, php-format
 msgid ""
 "Other websites that publish diamond size charts often quote a %1$s carat "
@@ -1868,550 +1914,644 @@ msgid ""
 "%3$s x %4$s mm"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1332
+#: includes/class-ldn-size-renderer.php:1395
 #, php-format
 msgid " (~%s mm diameter)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1341
+#: includes/class-ldn-size-renderer.php:1404
 #, php-format
 msgid ""
 "Other websites that publish diamond size charts often quote a %1$s carat "
 "%2$s at %5$s x %6$s mm. Our inventory median is %3$s x %4$s mm."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1359
+#: includes/class-ldn-size-renderer.php:1422
 #, php-format
 msgid ""
 "Face-up area medians %1$s mm² — about %2$s%% %3$s than the chart ideal of "
 "%4$s mm²."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1390
+#: includes/class-ldn-size-renderer.php:1453
 msgid "Chart numbers vs real stones"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1392
+#: includes/class-ldn-size-renderer.php:1455
 msgid "What published charts assume"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1395
+#: includes/class-ldn-size-renderer.php:1458
 msgid "How depth changes face-up size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1570
+#: includes/class-ldn-size-renderer.php:1642
 msgid "Diamond size chart — full measured range by shape and carat"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1571
+#: includes/class-ldn-size-renderer.php:1643
 msgid "Diamond size chart by shape and carat weight"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1575
+#: includes/class-ldn-size-renderer.php:1647
 msgid ""
 "Outlines share one scale — larger carats read visibly bigger. Each cell "
 "shows median dimensions; hover the link for the full min–max range on the "
 "detail page."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1668
+#: includes/class-ldn-size-renderer.php:1745
 #, php-format
 msgid "%s carat diamonds at actual size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1672
+#: includes/class-ldn-size-renderer.php:1749
 msgid ""
 "Every outline shares one millimeter scale — compare how round, oval, and "
 "elongated shapes differ at this carat weight. Pick a shape to highlight it "
 "on the ruler below."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1740
+#: includes/class-ldn-size-renderer.php:1817
 #, php-format
 msgid "%s diamonds at actual size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1744
+#: includes/class-ldn-size-renderer.php:1821
 msgid ""
 "Drag the slider to change the carat weight and watch the stone grow beside a "
 "US quarter (24.26 mm). Switch shape to compare outlines at true relative "
 "scale."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1928
-#: includes/class-ldn-size-renderer.php:2539
+#: includes/class-ldn-size-renderer.php:2005
+#: includes/class-ldn-size-renderer.php:2615
 msgid "Size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1933
+#: includes/class-ldn-size-renderer.php:2010
 msgid "Length range (min–max)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1935
-#: includes/class-ldn-size-renderer.php:3849
+#: includes/class-ldn-size-renderer.php:2012
+#: includes/class-ldn-size-renderer.php:4325
 msgid "Face-up (mm²)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1948
+#: includes/class-ldn-size-renderer.php:2025
 #, php-format
 msgid "%s diamond size chart by carat weight"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1954
+#: includes/class-ldn-size-renderer.php:2031
 #, php-format
 msgid "All diamond shapes at %s carat — full measured range"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1959
+#: includes/class-ldn-size-renderer.php:2036
 msgid "Full measured range — all shapes and carat weights"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1960
+#: includes/class-ldn-size-renderer.php:2037
 msgid "All shapes and carat weights"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:1965
+#: includes/class-ldn-size-renderer.php:2042
 msgid ""
 "Median length, width, and face-up area at each carat weight. Click a row to "
 "see how much stones vary at that weight."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2026
+#: includes/class-ldn-size-renderer.php:2102
 #, php-format
 msgid "%s prices"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2037
+#: includes/class-ldn-size-renderer.php:2113
 #, php-format
 msgid "What does a %1$s carat %2$s cost?"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2045
+#: includes/class-ldn-size-renderer.php:2121
 msgid "View diamond prices for this size:"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2099
-#: includes/class-ldn-size-renderer.php:4166
+#: includes/class-ldn-size-renderer.php:2175
+#: includes/class-ldn-size-renderer.php:4645
 #, php-format
 msgid "Range %1$s – %2$s"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2108
-#: includes/class-ldn-size-renderer.php:4180
+#: includes/class-ldn-size-renderer.php:2184
+#: includes/class-ldn-size-renderer.php:4659
 #, php-format
 msgid "Based on %s diamonds"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2113
-#: includes/class-ldn-size-renderer.php:4185
+#: includes/class-ldn-size-renderer.php:2189
+#: includes/class-ldn-size-renderer.php:4664
 msgid "See full price analysis"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2216
+#: includes/class-ldn-size-renderer.php:2292
 msgid "How much do diamond sizes vary?"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2220
+#: includes/class-ldn-size-renderer.php:2296
 #, php-format
 msgid "How much do %1$s carat %2$s diamond sizes vary?"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2246
+#: includes/class-ldn-size-renderer.php:2322
 #, php-format
 msgid ""
 "In our sample of %1$s stones, deeper-cut diamonds tend to face up %2$s for "
 "their carat weight — total depth %% correlates with face-up area."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2274
-#: includes/class-ldn-size-renderer.php:2330
+#: includes/class-ldn-size-renderer.php:2350
+#: includes/class-ldn-size-renderer.php:2406
 #, php-format
 msgid ""
 "Measurements are aggregated from %1$s real diamonds from %2$d retailers."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2281
-#: includes/class-ldn-size-renderer.php:2336
+#: includes/class-ldn-size-renderer.php:2357
+#: includes/class-ldn-size-renderer.php:2412
 #, php-format
 msgid "Measurements are aggregated from %s real diamonds."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2289
-#: includes/class-ldn-size-renderer.php:2343
+#: includes/class-ldn-size-renderer.php:2365
+#: includes/class-ldn-size-renderer.php:2419
 #, php-format
 msgid "Stones with implausible geometry were excluded (%s%% of raw rows)."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2294
-#: includes/class-ldn-size-renderer.php:2352
+#: includes/class-ldn-size-renderer.php:2370
+#: includes/class-ldn-size-renderer.php:2428
 msgid ""
 "Sparse inventory — figures use industry ideal proportions until more real "
 "measurements are available."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2304
-#: includes/class-ldn-size-renderer.php:2362
+#: includes/class-ldn-size-renderer.php:2380
+#: includes/class-ldn-size-renderer.php:2438
 msgid "Read our full methodology"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2348
+#: includes/class-ldn-size-renderer.php:2424
 msgid ""
 "Published ranges use 10th–90th percentiles (typical spread), not min and max."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2403
+#: includes/class-ldn-size-renderer.php:2479
 #, php-format
 msgid "%s diamond size chart"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2412
+#: includes/class-ldn-size-renderer.php:2488
 msgid "All shapes size chart"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2442
+#: includes/class-ldn-size-renderer.php:2518
 msgid "More size guides"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2509
+#: includes/class-ldn-size-renderer.php:2585
 msgid "Size charts"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2510
+#: includes/class-ldn-size-renderer.php:2586
 msgid "Diamond Size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2523
-#: includes/class-ldn-size-renderer.php:2555
+#: includes/class-ldn-size-renderer.php:2599
+#: includes/class-ldn-size-renderer.php:2631
 #, php-format
 msgid "%s Carat"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2574
+#: includes/class-ldn-size-renderer.php:2650
 msgid "Size Checker"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2581
+#: includes/class-ldn-size-renderer.php:2657
 msgid "Methodology"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2756
-#: includes/class-ldn-size-renderer.php:2771
+#: includes/class-ldn-size-renderer.php:2940
+msgid "Median length"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:2945
+msgid "Length"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:2949
+msgid "Median width"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:2954
+msgid "Width"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:2958
+msgid "Median face-up area"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:2964
+#: includes/class-ldn-size-renderer.php:4274
+msgid "Face-up area"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3000
+msgid "Diameter (minimum)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3001
+msgid "Diameter (10th percentile)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3003
+msgid "Diameter (maximum)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3004
+msgid "Diameter (90th percentile)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3013
+msgid "Length (minimum)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3014
+msgid "Length (10th percentile)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3016
+msgid "Length (maximum)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3017
+msgid "Length (90th percentile)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3025
+msgid "Width (minimum)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3026
+msgid "Width (10th percentile)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3028
+msgid "Width (maximum)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3029
+msgid "Width (90th percentile)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3039
+msgid "Face-up area (minimum)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3040
+msgid "Face-up area (10th percentile)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3042
+msgid "Face-up area (maximum)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3043
+msgid "Face-up area (90th percentile)"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3128
+#, php-format
+msgid "%1$s carat %2$s diamond size"
+msgstr ""
+
+#: includes/class-ldn-size-renderer.php:3219
+#: includes/class-ldn-size-renderer.php:3234
 #, php-format
 msgid "%1$s ct round vs %1$s ct %2$s"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2795
+#: includes/class-ldn-size-renderer.php:3258
 msgid "Diamond Chart"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2816
+#: includes/class-ldn-size-renderer.php:3279
 msgid "Diamond Size Chart"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2822
+#: includes/class-ldn-size-renderer.php:3285
 msgid "How we measure sizes"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2830
+#: includes/class-ldn-size-renderer.php:3293
 #, php-format
 msgid "%s — Diamond Size & Quality Reference Charts"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2835
+#: includes/class-ldn-size-renderer.php:3298
 msgid ""
 "Authoritative diamond size charts with full measured ranges for every shape "
 "and carat."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2855
+#: includes/class-ldn-size-renderer.php:3318
 msgid "Reference charts"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2859
+#: includes/class-ldn-size-renderer.php:3322
 msgid "Diamond size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2861
+#: includes/class-ldn-size-renderer.php:3324
 msgid ""
 "Full measured min–max ranges and median dimensions for every shape and carat "
 "— not trimmed percentile bands."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2864
+#: includes/class-ldn-size-renderer.php:3327
 msgid "Open size chart"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2867
+#: includes/class-ldn-size-renderer.php:3330
 msgid "Diamond quality"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2869
+#: includes/class-ldn-size-renderer.php:3332
 msgid ""
 "Phase 2: 4Cs and price-by-grade reference charts under /quality/ — coming "
 "after size launch."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:2999
+#: includes/class-ldn-size-renderer.php:3462
 msgid "Check a diamond's size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3001
+#: includes/class-ldn-size-renderer.php:3464
 msgid ""
 "Compare any of the sizes above, or enter a real diamond's carat weight, "
 "shape and millimeter measurements to see how it ranks against the market — "
 "and how it compares to another stone."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3004
+#: includes/class-ldn-size-renderer.php:3467
 msgid "Open the Diamond Size Checker"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3020
+#: includes/class-ldn-size-renderer.php:3483
 msgid "How we measure the full range"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3022
+#: includes/class-ldn-size-renderer.php:3485
 msgid ""
 "Every min–max figure comes from real retailer measurements after validity "
 "filtering — not ideal-proportion formulas or trimmed percentile bands."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3025
+#: includes/class-ldn-size-renderer.php:3488
 msgid "Read the methodology"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3076
+#: includes/class-ldn-size-renderer.php:3539
 msgid "Measurement source"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3078
+#: includes/class-ldn-size-renderer.php:3541
 msgid "Typical market size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3080
+#: includes/class-ldn-size-renderer.php:3543
 msgid "Enter measurements"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3096
+#: includes/class-ldn-size-renderer.php:3559
 msgid "Depth (mm)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3101
+#: includes/class-ldn-size-renderer.php:3564
 msgid ""
 "Copy these from the listing or grading certificate (shown as length × width "
 "× depth)."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3118
+#: includes/class-ldn-size-renderer.php:3581
 msgid ""
 "Pick a shape and carat, or enter the millimeter measurements from a listing "
 "or certificate."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3122
+#: includes/class-ldn-size-renderer.php:3585
 msgid ""
 "We rank the stone's face-up area — what you actually see when set — against "
 "real market inventory at that weight."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3126
+#: includes/class-ldn-size-renderer.php:3589
 msgid ""
 "Optionally add a second diamond to see a true-scale overlay and per-carat "
 "spread comparison."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3157
+#: includes/class-ldn-size-renderer.php:3620
 #, php-format
 msgid ""
 "Example: a %1$s ct %2$s beside a %3$s ct %4$s at true scale. Press Check "
 "size above to analyze your own stone."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3183
+#: includes/class-ldn-size-renderer.php:3646
 msgid "Browse the full diamond size chart"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3185
+#: includes/class-ldn-size-renderer.php:3648
 msgid ""
 "Face-up sizes across shapes and carat weights, drawn from real listings."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3194
+#: includes/class-ldn-size-renderer.php:3657
 msgid "How we measure real diamonds"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3196
+#: includes/class-ldn-size-renderer.php:3659
 msgid "Why we use measured length × width instead of ideal-proportion charts."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3206
-#: includes/class-ldn-size-renderer.php:3430
+#: includes/class-ldn-size-renderer.php:3669
+#: includes/class-ldn-size-renderer.php:3893
 msgid "Explore the data"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3241
+#: includes/class-ldn-size-renderer.php:3704
 msgid ""
 "Check a diamond against real market sizes, or compare two stones side by "
 "side."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3254
+#: includes/class-ldn-size-renderer.php:3717
 msgid "Compare with a second diamond"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3266
+#: includes/class-ldn-size-renderer.php:3729
 msgid "Second diamond"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3275
+#: includes/class-ldn-size-renderer.php:3738
 msgid "Check size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3280
+#: includes/class-ldn-size-renderer.php:3743
 msgid "Results"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3308
+#: includes/class-ldn-size-renderer.php:3771
 msgid "Compare by shape"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3317
+#: includes/class-ldn-size-renderer.php:3780
 msgid "Open the full Diamond Size Checker"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3410
+#: includes/class-ldn-size-renderer.php:3873
 msgid "Diamond size chart"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3412
+#: includes/class-ldn-size-renderer.php:3875
 msgid "Browse every shape and carat weight with true-to-scale outlines."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3422
+#: includes/class-ldn-size-renderer.php:3885
 msgid ""
 "Rank a stone against real inventory, or compare two diamonds side by side."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3449
+#: includes/class-ldn-size-renderer.php:3912
 msgid "Real diamonds measured"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3454
+#: includes/class-ldn-size-renderer.php:3917
 msgid "Shapes covered"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3462
+#: includes/class-ldn-size-renderer.php:3925
 msgid "Retailers sampled"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3509
+#: includes/class-ldn-size-renderer.php:3972
 msgid ""
 "Example: 1 carat oval. Bottom 10%, average and top 10% of face-up size from "
 "real inventory."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3536
+#: includes/class-ldn-size-renderer.php:3999
 msgid "Example: 1 carat oval size spread from measured inventory."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3555
+#: includes/class-ldn-size-renderer.php:4018
 msgid ""
 "Face-up area uses length × width × a shape-specific fill factor (π/4 ≈ "
 "0.7854 for an oval ellipse)."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3745
+#: includes/class-ldn-size-renderer.php:4220
 msgid "Diamond A"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3746
+#: includes/class-ldn-size-renderer.php:4221
 msgid "Diamond B"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3751
+#: includes/class-ldn-size-renderer.php:4226
 msgid "Face-up overlay"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3759
+#: includes/class-ldn-size-renderer.php:4234
 msgid "Face-up size comparison"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3795
+#: includes/class-ldn-size-renderer.php:4270
 msgid "Measurements"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3799
-msgid "Face-up area"
-msgstr ""
-
-#: includes/class-ldn-size-renderer.php:3807
+#: includes/class-ldn-size-renderer.php:4282
 msgid "Table %"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3816
+#: includes/class-ldn-size-renderer.php:4291
 msgid "Chart ideal size"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3820
+#: includes/class-ldn-size-renderer.php:4295
 msgid "Chart ideal depth"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3825
-#: includes/class-ldn-size-renderer.php:3895
+#: includes/class-ldn-size-renderer.php:4300
+#: includes/class-ldn-size-renderer.php:4374
 msgid "larger"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3825
+#: includes/class-ldn-size-renderer.php:4300
 msgid "smaller"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3826
+#: includes/class-ldn-size-renderer.php:4301
 msgid "Vs chart ideal"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3859
+#: includes/class-ldn-size-renderer.php:4335
 msgid "Side-by-side measurements"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3883
+#: includes/class-ldn-size-renderer.php:4362
 #, php-format
 msgid "Both stones have the same face-up area (%s mm²)."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3892
+#: includes/class-ldn-size-renderer.php:4371
 msgid "faces up about"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:3961
+#: includes/class-ldn-size-renderer.php:4440
 #, php-format
 msgid "Difference: %1$s mm² (%2$s%%)"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:4003
+#: includes/class-ldn-size-renderer.php:4482
 #, php-format
 msgid ""
 "The %1$s faces up about %2$s%% larger than the other stone when viewed from "
 "above (%3$s mm² vs %4$s mm²)."
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:4050
+#: includes/class-ldn-size-renderer.php:4529
 #, php-format
 msgid "%1$s carat %2$s"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:4063
+#: includes/class-ldn-size-renderer.php:4542
 msgid "What do these diamonds cost?"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:4150
+#: includes/class-ldn-size-renderer.php:4629
 #, php-format
 msgid "%s per carat"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:4238
+#: includes/class-ldn-size-renderer.php:4717
 msgid "Size chart & measurements"
 msgstr ""
 
-#: includes/class-ldn-size-renderer.php:4246
+#: includes/class-ldn-size-renderer.php:4725
 msgid "Individual size pages"
+msgstr ""
+
+#: includes/class-ldn-stat-specs.php:56
+msgid "Median (all qualities)"
 msgstr ""

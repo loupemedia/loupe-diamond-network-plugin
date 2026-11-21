@@ -182,6 +182,12 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 	font-size: 0.95rem;
 }
 
+/* `.ldn-price-page table` (back-compat, below) adds a 1rem margin that showed as
+   a white strip above the header inside the card. */
+.ldn-table-card > .ldn-data-table {
+	margin: 0;
+}
+
 .ldn-data-table th,
 .ldn-data-table td {
 	border: 0;
@@ -896,10 +902,20 @@ details.ldn-field-help[open] > .ldn-field-help__tip {
 	color: var(--ldn-secondary-text, #666);
 }
 
+/* One row of shapes however many there are; two rows of five on phones, where
+   ten across would leave ~30px per option. */
 .ldn-shape-picker__options {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
+	grid-auto-flow: column;
+	grid-auto-columns: minmax(0, 1fr);
 	gap: var(--ldn-space-2, 0.5rem);
+}
+
+@media (max-width: 640px) {
+	.ldn-shape-picker__options {
+		grid-auto-flow: row;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+	}
 }
 
 .ldn-shape-picker__option {
@@ -1704,6 +1720,22 @@ button.ldn-shape-picker__option:focus-visible {
 .ldn-cc-table .ldn-cc-empty {
 	color: var(--ldn-secondary-text, #94a3b8);
 	text-align: center;
+}
+
+/* Fewer than 5 diamonds: muted and dotted so it reads as a rough guide. The
+   footnote below the table says why, since a title tooltip never shows on touch. */
+.ldn-cc-table .ldn-cc-thin {
+	color: var(--ldn-secondary-text, #94a3b8);
+	font-style: italic;
+	text-decoration: underline dotted;
+	text-underline-offset: 0.2em;
+	cursor: help;
+}
+
+.ldn-cc-footnote {
+	margin: var(--ldn-space-2, 0.5rem) 0 0;
+	font-size: 0.8rem;
+	color: var(--ldn-secondary-text, #666);
 }
 
 /* ----- Responsive ----- */

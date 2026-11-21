@@ -49,6 +49,9 @@ final class LDN_Page_Context {
     /** @var string|null Full compare slug, e.g. round-1-carat-vs-princess-1-carat. */
     public $compare_slug;
 
+    /** @var string|null Jewellery S3 subpath, e.g. 'hub' or 'earrings/studs/1-carat'. */
+    public $jewelry_path;
+
     /** @var string */
     public $module;
 
@@ -59,8 +62,9 @@ final class LDN_Page_Context {
      * @param string|null $diamond_type
      * @param string|null $carat
      * @param string|null $shape
-     * @param string      $module       'price' | 'size'
+     * @param string      $module       'price' | 'size' | 'jewellery'
      * @param string|null $compare_slug
+     * @param string|null $jewelry_path
      */
     public function __construct(
         $site_id,
@@ -70,7 +74,8 @@ final class LDN_Page_Context {
         $carat = null,
         $shape = null,
         $module = 'price',
-        $compare_slug = null
+        $compare_slug = null,
+        $jewelry_path = null
     ) {
         $this->site_id = (string) $site_id;
         $this->page_level = (string) $page_level;
@@ -80,5 +85,6 @@ final class LDN_Page_Context {
         $this->shape = $shape !== null ? (string) $shape : null;
         $this->module = (string) $module;
         $this->compare_slug = $compare_slug !== null ? (string) $compare_slug : null;
+        $this->jewelry_path = $jewelry_path !== null ? (string) $jewelry_path : null;
     }
 }

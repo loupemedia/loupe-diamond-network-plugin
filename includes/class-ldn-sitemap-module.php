@@ -50,7 +50,7 @@ final class LDN_Sitemap_Module {
         LDN_Config $config,
         $rollout,
         LDN_Data_Fetcher $fetcher,
-        LDN_Page_Registry $registry = null
+        ?LDN_Page_Registry $registry = null
     ) {
         $this->site_id = (string) $site_id;
         $this->config = $config;
@@ -129,6 +129,13 @@ final class LDN_Sitemap_Module {
                 'index.php?ldn_route=' . self::ROUTE . '&ldn_sitemap_kind=size';
         }
 
+        $jewellery_path = method_exists($this->config, 'jewellery_sitemap_path')
+            ? $this->config->jewellery_sitemap_path($this->site_id)
+            : null;
+        if (is_string($jewellery_path) && $jewellery_path !== '' && $this->jewellery_entitled()) {
+            $rules = array_merge($rules, $this->rules_for_path($jewellery_path, 'jewellery'));
+        }
+
         return $rules;
     }
 
@@ -174,6 +181,26 @@ final class LDN_Sitemap_Module {
         if (!$this->rollout instanceof LDN_Rollout_Reader) {
             return array();
         }
+        if ($kind === 'jewellery') {
+            if (!$this->jewellery_entitled()) {
+                return array();
+            }
+            $allowed = method_exists($this->config, 'jewellery_rollout_countries')
+                ? $this->config->jewellery_rollout_countries($this->site_id)
+                : array();
+            $out = array();
+            foreach ($this->rollout->enabled_countries() as $country) {
+                if (!in_array($country, $allowed, true)) {
+                    continue;
+                }
+                if ($this->rollout->is_enabled($country, 'jewellery')
+                    || $this->rollout->is_enabled($country, 'price')
+                ) {
+                    $out[] = $country;
+                }
+            }
+            return $out;
+        }
         $module = $kind === 'size' ? 'size' : 'price';
         $out = array();
         foreach ($this->rollout->enabled_countries() as $country) {
@@ -207,6 +234,9 @@ final class LDN_Sitemap_Module {
                 break;
             case 'size':
                 $xml = $this->render_size_sitemap();
+                break;
+            case 'jewellery':
+                $xml = $this->render_jewellery_sitemap($country);
                 break;
             default:
                 $this->emit_404();
@@ -248,6 +278,26 @@ final class LDN_Sitemap_Module {
         $size_path = $this->config->size_sitemap_path($this->site_id);
         if (is_string($size_path) && $size_path !== '' && $this->has_enabled_module('size')) {
             $child_urls[] = $base . $size_path;
+        }
+
+        $jewellery_path = method_exists($this->config, 'jewellery_sitemap_path')
+            ? $this->config->jewellery_sitemap_path($this->site_id)
+            : null;
+        if (is_string($jewellery_path) && $jewellery_path !== '' && $this->jewellery_entitled()) {
+            $jwl_countries = $this->enabled_countries_for_kind('jewellery');
+            if ($jwl_countries !== array()) {
+                if (strpos($jewellery_path, '{country}') !== false) {
+                    foreach ($jwl_countries as $country) {
+                        $path = str_replace('{country}', $country, $jewellery_path);
+                        if (method_exists($this->config, 'path_relative_to_mount')) {
+                            $path = $this->config->path_relative_to_mount($path);
+                        }
+                        $child_urls[] = $base . $path;
+                    }
+                } else {
+                    $child_urls[] = $base . $jewellery_path;
+                }
+            }
         }
 
         $child_urls = array_values(array_unique(array_filter($child_urls)));
@@ -320,6 +370,48 @@ final class LDN_Sitemap_Module {
         }
 
         return LDN_Sitemap::urlset_from_rows($rows);
+    }
+
+    /**
+     * @param string|null $country
+     * @return string
+     */
+    private function render_jewellery_sitemap($country) {
+        $enabled = $this->enabled_countries_for_kind('jewellery');
+        if ($enabled === array()) {
+            return '';
+        }
+        if ($country !== null) {
+            if (!in_array($country, $enabled, true)) {
+                return '';
+            }
+            $countries = array($country);
+        } else {
+            $countries = $enabled;
+        }
+
+        $rows = $this->registry->fetch_sitemap_rows(
+            $this->site_id,
+            $countries,
+            99,
+            LDN_Page_Registry::JEWELLERY_SITEMAP_MODULES
+        );
+        if (empty($rows)) {
+            return '';
+        }
+
+        return LDN_Sitemap::urlset_from_rows($rows);
+    }
+
+    /**
+     * @return bool
+     */
+    private function jewellery_entitled() {
+        if (!class_exists('LDN_Artefacts')) {
+            return false;
+        }
+        $artefacts = new LDN_Artefacts($this->config);
+        return $artefacts->site_entitled_to_artefact($this->site_id, 'jewellery_summary_json');
     }
 
     /**

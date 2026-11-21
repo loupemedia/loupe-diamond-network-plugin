@@ -1305,6 +1305,20 @@ check(
         && strpos($hero_cards, 'Price range') !== false,
     'hero_stats_html renders min–max as a single price-range card'
 );
+// Test intent: the range card says outliers are excluded only when C5 flags
+// the published range as Tukey-fenced; raw inventory ranges keep the plain label.
+// Would fail if: the plugin always (or never) claimed outliers were excluded.
+check(
+    strpos($hero_cards, 'outliers excluded') === false,
+    'hero_stats_html keeps the plain "Price range" label when the range is not flagged as fenced'
+);
+$fenced_summary = $hero_summary;
+$fenced_summary['distribution']['price_range']['outliers_excluded'] = true;
+$fenced_cards = $loupe_renderer->hero_stats_html($shape_ctx, $fenced_summary, 'USD');
+check(
+    strpos($fenced_cards, 'Price range (outliers excluded)') !== false,
+    'hero_stats_html labels a fenced range "Price range (outliers excluded)"'
+);
 check(
     strpos($hero_cards, 'ldn-stat--down') !== false && strpos($hero_cards, '5.39%') !== false,
     'hero_stats_html adds a down-trend change card for a price fall'
@@ -2242,6 +2256,45 @@ check(
     strpos($cc_html, 'ldn-color-clarity') !== false && strpos($cc_html, '$9,800') !== false,
     'color_clarity grid renders the section with formatted cell prices'
 );
+// Test intent: a grid cell resting on fewer than 5 diamonds is marked thin (faded,
+// count in its title, a footnote that works without hover) and never sets the
+// shading scale; the caption says "Median" only when the payload declares it.
+// Would fail if: a single 6 ct D/IF stone at $43,842 drew as solid as a 300-stone
+// cell and stretched the heat scale, or a v1 mean grid was captioned "Median".
+$cc_thin_payload = array(
+    'currency'    => 'USD',
+    'statistic'   => 'median',
+    'price_table' => array(
+        'D' => array('IF' => array('price' => 43842, 'count' => 2)),
+        'G' => array(
+            'VS1' => array('price' => 9000, 'count' => 40),
+            'VS2' => array('price' => 8000, 'count' => 55),
+        ),
+    ),
+);
+$cc_thin_html = $renderer->color_clarity_table_html($shape_ctx, $cc_thin_payload, 'USD');
+check(
+    preg_match('/<td class="ldn-cc-thin" title="Based on 2 diamonds">\$43,842<\/td>/', $cc_thin_html) === 1,
+    'thin grid cell is faded, unshaded and carries its count'
+);
+check(
+    strpos($cc_thin_html, 'ldn-cc-footnote') !== false,
+    'grid with a thin cell explains faded cells in a footnote'
+);
+check(
+    preg_match('/<td style="[^"]*8%[^"]*">\$8,000/', $cc_thin_html) === 1
+        && preg_match('/<td style="[^"]*63%[^"]*">\$9,000/', $cc_thin_html) === 1,
+    'thin cells are left out of the shading scale'
+);
+check(
+    strpos($cc_thin_html, 'Median price for this shape') !== false,
+    'median grid is captioned as a median'
+);
+check(
+    strpos($cc_html, 'Average price for this shape') !== false
+        && strpos($cc_html, 'ldn-cc-footnote') === false,
+    'v1 grid without a statistic keeps the average caption and no footnote'
+);
 $cc_with_size = $size_card_renderer->render_section(
     'color_clarity',
     $ringspo_shape_ctx,
@@ -2284,7 +2337,18 @@ if (!class_exists('LDN_Fetcher_Buying_Advice')) {
         }
     }
 }
-$advice_renderer = new LDN_Renderer(new LDN_Fetcher_Buying_Advice(), new LDN_Config_Size_Link());
+if (!class_exists('LDN_Config_Advice_Copy_On')) {
+    class LDN_Config_Advice_Copy_On extends LDN_Config_Size_Link {
+        public function get_bundle() {
+            return array('entitlements' => array('sites' => array(
+                'ringspo' => array('pages' => array(
+                    'shape' => array('wp_widgets' => array('shape_editorial_copy' => true)),
+                )),
+            )));
+        }
+    }
+}
+$advice_renderer = new LDN_Renderer(new LDN_Fetcher_Buying_Advice(), new LDN_Config_Advice_Copy_On());
 $legacy_advice = $advice_renderer->render_section(
     'buying_advice_static',
     $ringspo_shape_ctx,
@@ -2771,9 +2835,14 @@ $chart_with_loader = $loader_renderer->chart_html(
     'Price over time'
 );
 check(
-    strpos($chart_with_loader, 'cdn.plot.ly') !== false
+    strpos($chart_with_loader, 'cdn.plot.ly/plotly-cartesian-2.35.2.min.js') !== false
         && substr_count($chart_with_loader, 'data-ldn-chart') === 1,
-    'the Plotly CDN loader is not tagged for re-execution on swap'
+    'the Plotly CDN loader uses the plotly-cartesian partial bundle and is not tagged for re-execution on swap'
+);
+check(
+    LDN_Renderer::PLOTLY_CDN === LDN_Size_Renderer::PLOTLY_CDN
+        && strpos(LDN_Renderer::PLOTLY_CDN, 'plotly-cartesian-') !== false,
+    'pricing and size renderers share the identical plotly-cartesian CDN URL for browser cache reuse'
 );
 
 // --- 14b. the fallback must quote the same figure as the visible page --------
@@ -3372,6 +3441,26 @@ check(
     'all-shapes calculator uses shape-picker icons inside a white surface'
 );
 
+// Test intent: a ranking display name with a "cut" suffix still gets its shape's
+// icon file, because icons are keyed by the bare shape slug.
+// Would fail if: "Emerald cut" built emerald-cut.svg (no such file; blank icon).
+$hub_cut_html = $hub_renderer->all_shapes_calculator_html($hub_ctx, array(
+    'ranking' => array(
+        'shapes' => array(
+            array('shape' => 'Emerald cut', 'median_price' => 4200),
+        ),
+    ),
+));
+check(
+    strpos($hub_cut_html, 'assets/img/shapes/emerald.svg') !== false
+        && strpos($hub_cut_html, 'emerald-cut.svg') === false,
+    'hub calculator maps a "cut"-suffixed shape name to its bare icon file'
+);
+check(
+    strpos($hub_cut_html, 'ldn-shape-picker__label">Emerald<') !== false,
+    'hub calculator labels drop the "cut" suffix so ten shapes fit one row'
+);
+
 // The heading and specification come from the manifest, not the page context:
 // this is what lets a calculator page with no shape or carat of its own host the
 // same module.
@@ -3486,6 +3575,57 @@ $faq_html = $renderer->faq_html(array(
 ));
 check(strpos($faq_html, "\u{2014}") === false, 'faq_html strips em dashes from question and answer');
 check(strpos($faq_html, 'Why - this?') !== false, 'faq_html keeps the question readable after the swap');
+
+// Test intent: C1 copy on shape pages renders only when the site's shape page
+// entitles `shape_editorial_copy`; absent means off. Hub copy is not gated.
+// Would fail if: "Why this shape is priced this way" showed on a Ringspo shape
+// page just because static-content.json still carried pricing_context.
+if (!class_exists('LDN_Config_Shape_Copy_On')) {
+    class LDN_Config_Shape_Copy_On extends LDN_Config {
+        public function get_bundle() {
+            return array('entitlements' => array('sites' => array(
+                'ringspo' => array('pages' => array(
+                    'shape' => array('wp_widgets' => array('shape_editorial_copy' => true)),
+                )),
+            )));
+        }
+    }
+}
+if (!class_exists('LDN_Config_Shape_Copy_Off')) {
+    class LDN_Config_Shape_Copy_Off extends LDN_Config {
+        public function get_bundle() {
+            return array('entitlements' => array('sites' => array(
+                'ringspo' => array('pages' => array(
+                    'shape'      => array('wp_widgets' => array('price_calculator' => true)),
+                    'all-shapes' => array('wp_widgets' => array('price_calculator' => true)),
+                )),
+            )));
+        }
+    }
+}
+$shape_copy_bag = array('static' => array('sections' => array(
+    'pricing_context' => 'Ovals cost less per carat than rounds.',
+    'buying_advice'   => 'Check the bow-tie in person.',
+    'how_to_use'      => 'Read the median first.',
+)));
+$copy_shape_ctx = new LDN_Page_Context('ringspo', 'shape', 'us', 'natural', '1', 'oval');
+$copy_hub_ctx   = new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'natural', '1');
+$copy_off = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Shape_Copy_Off());
+$copy_on  = new LDN_Renderer(new LDN_Data_Fetcher(), new LDN_Config_Shape_Copy_On());
+check(
+    $copy_off->render_section('pricing_context_static', $copy_shape_ctx, $shape_copy_bag) === ''
+    && $copy_off->render_section('buying_advice_static', $copy_shape_ctx, $shape_copy_bag) === '',
+    'shape-page C1 copy is hidden when shape_editorial_copy is absent'
+);
+check(
+    strpos($copy_on->render_section('pricing_context_static', $copy_shape_ctx, $shape_copy_bag), 'Ovals cost less') !== false
+    && strpos($copy_on->render_section('buying_advice_static', $copy_shape_ctx, $shape_copy_bag), 'bow-tie') !== false,
+    'shape-page C1 copy renders when shape_editorial_copy is entitled'
+);
+check(
+    strpos($copy_off->render_section('how_to_use_static', $copy_hub_ctx, $shape_copy_bag), 'median first') !== false,
+    'hub C1 copy is not gated by the shape-page switch'
+);
 
 // --- Report -----------------------------------------------------------------
 $tests = $GLOBALS['__tests'];

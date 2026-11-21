@@ -315,6 +315,14 @@
 	color: inherit;
 }
 
+/* The header sits on a brand fill inside a white table card, so it keeps the
+   header foreground rather than inheriting the card's ink. */
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+	.ldn-data-table thead th {
+	color: var(--ldn-table-header-fg, #fff);
+}
 /* Components that own a white surface inside a coloured band. A new module that
    carries its own background is added here — there is no second list.
    Do not add .ldn-size-methodology / .ldn-data-methodology / .ldn-size-ideal-real
@@ -332,6 +340,15 @@
 	color: var(--ringspo-ink);
 	border-color: transparent;
 	text-decoration: none;
+}
+
+/* Data-table cells paint their own fills; a white card behind them leaks at the
+   rounded header corners. Must follow the surface rule (equal specificity). */
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic .ldn-section--accent,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+	:is(.ldn-table-card:has(> .ldn-data-table), .ldn-table-card > .ldn-data-table) {
+	background-color: transparent;
 }
 
 /* Links on a white surface need the brand colour back — inheriting the band's

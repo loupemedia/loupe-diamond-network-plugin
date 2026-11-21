@@ -347,12 +347,19 @@ trait LDN_Trait_Tables {
             return '';
         }
 
+        // Thin cells are drawn but never set the heat scale: one odd stone would
+        // otherwise wash out every well-supported cell.
         $min = null;
         $max = null;
+        $has_thin = false;
         foreach ($colors as $color) {
             foreach ($clarities as $clarity) {
                 $price = $this->color_clarity_cell_price($table, $color, $clarity);
                 if ($price === null) {
+                    continue;
+                }
+                if ($this->color_clarity_cell_is_thin($table, $color, $clarity)) {
+                    $has_thin = true;
                     continue;
                 }
                 if ($min === null || $price < $min) {
@@ -383,24 +390,73 @@ trait LDN_Trait_Tables {
                     $body .= '<td class="ldn-cc-empty">—</td>';
                     continue;
                 }
+                if ($this->color_clarity_cell_is_thin($table, $color, $clarity)) {
+                    $count = (int) $table[$color][$clarity]['count'];
+                    $body .= '<td class="ldn-cc-thin" title="' . esc_attr(sprintf(
+                        /* translators: %d: number of diamonds behind a grid cell */
+                        _n('Based on %d diamond', 'Based on %d diamonds', $count, 'loupe-diamond-network'),
+                        $count
+                    )) . '">' . esc_html($symbol . number_format($price, 0)) . '</td>';
+                    continue;
+                }
                 $style = $this->color_clarity_cell_style($price, $min, $max);
                 $body .= '<td' . $style . '>' . esc_html($symbol . number_format($price, 0)) . '</td>';
             }
             $body .= '</tr>';
         }
 
+        $is_median = isset($payload['statistic']) && $payload['statistic'] === 'median';
+        $caption = $is_median
+            ? __(
+                'Median price for this shape and carat weight across the %s (D is the highest grade) and clarity grades we track. Darker cells cost more.',
+                'loupe-diamond-network'
+            )
+            : __(
+                'Average price for this shape and carat weight across the %s (D is the highest grade) and clarity grades we track. Darker cells cost more.',
+                'loupe-diamond-network'
+            );
+        $footnote = $has_thin
+            ? '<p class="ldn-cc-footnote">' . esc_html(sprintf(
+                /* translators: %d: minimum number of diamonds for a full-strength grid cell */
+                __('Faded prices are based on fewer than %d diamonds, so treat them as a rough guide.', 'loupe-diamond-network'),
+                self::color_clarity_thin_count()
+            )) . '</p>'
+            : '';
+
         return '<section class="ldn-section ldn-color-clarity">'
             . '<h2>' . esc_html(sprintf(__('Price by %s and clarity', 'loupe-diamond-network'), $color_word)) . '</h2>'
-            . '<p>' . esc_html(sprintf(
-                __(
-                    'Average price for this shape and carat weight across the %s (D is the highest grade) and clarity grades we track. Darker cells cost more.',
-                    'loupe-diamond-network'
-                ),
-                $color_word
-            )) . '</p>'
+            . '<p>' . esc_html(sprintf($caption, $color_word)) . '</p>'
             . '<div class="ldn-cc-scroll"><table class="ldn-data-table ldn-cc-table">'
             . '<thead><tr>' . $head . '</tr></thead>'
-            . '<tbody>' . $body . '</tbody></table></div></section>';
+            . '<tbody>' . $body . '</tbody></table></div>'
+            . $footnote . '</section>';
+    }
+
+    /**
+     * Fewest diamonds a grid cell needs to be shown at full strength.
+     *
+     * @return int
+     */
+    private static function color_clarity_thin_count() {
+        return 5;
+    }
+
+    /**
+     * True when a cell states a stone count below the thin threshold. Cells with
+     * no count (the bare-numeric fallback) are not treated as thin.
+     *
+     * @param array  $table
+     * @param string $color
+     * @param string $clarity
+     * @return bool
+     */
+    private function color_clarity_cell_is_thin(array $table, $color, $clarity) {
+        $cell = isset($table[$color][$clarity]) ? $table[$color][$clarity] : null;
+        if (!is_array($cell) || !isset($cell['count']) || !is_numeric($cell['count'])) {
+            return false;
+        }
+        $count = (int) $cell['count'];
+        return $count > 0 && $count < self::color_clarity_thin_count();
     }
 
     /**

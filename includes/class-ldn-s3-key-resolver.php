@@ -67,6 +67,12 @@ final class LDN_S3_Key_Resolver {
         'size_copy_json'         => 'size-copy.json',
         'shape_outline_svg'      => 'shape-outline.svg',
         'size_sitemap_xml'       => 'sitemap.xml',
+        'jewellery_summary_json'        => 'jewellery-summary.json',
+        'jewellery_quality_grid_json'   => 'jewellery-quality-grid.json',
+        'jewellery_lab_comparison_json' => 'jewellery-lab-comparison.json',
+        'jewellery_trend_json'          => 'jewellery-trend.json',
+        'jewellery_copy_json'           => 'jewellery-copy.json',
+        'jewellery_explorer_json'       => 'jewellery-explorer.json',
     );
 
     /**
@@ -144,6 +150,9 @@ final class LDN_S3_Key_Resolver {
     private function folder_prefix(LDN_Page_Context $ctx) {
         if ($ctx->module === 'size') {
             return $this->size_folder_prefix($ctx);
+        }
+        if ($ctx->module === 'jewellery') {
+            return $this->jewellery_folder_prefix($ctx);
         }
 
         $country = $ctx->country_code;
@@ -258,6 +267,28 @@ final class LDN_S3_Key_Resolver {
             default:
                 return null;
         }
+    }
+
+    /**
+     * Jewellery-module folder prefix via `s3.jewellery_prefix`.
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string|null
+     */
+    private function jewellery_folder_prefix(LDN_Page_Context $ctx) {
+        $site = $this->config->get_site($ctx->site_id);
+        if ($site === null || empty($site['s3']['jewellery_prefix'])) {
+            return null;
+        }
+        if ($ctx->country_code === '' || $ctx->diamond_type === null || $ctx->jewelry_path === null || $ctx->jewelry_path === '') {
+            return null;
+        }
+        $replacements = array(
+            '{country}'      => $ctx->country_code,
+            '{diamond_type}' => $ctx->diamond_type,
+            '{jewelry_path}' => trim($ctx->jewelry_path, '/'),
+        );
+        return rtrim(strtr((string) $site['s3']['jewellery_prefix'], $replacements), '/') . '/';
     }
 
     // =========================================================================

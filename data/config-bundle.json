@@ -1,6 +1,6 @@
 {
-  "version": "f477f70f",
-  "generated_at": "2026-11-17T06:08:28.757762+00:00",
+  "version": "3bd72634",
+  "generated_at": "2026-11-20T13:31:54.043778+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -195,7 +195,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -454,7 +453,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -713,7 +711,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -972,7 +969,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -1231,7 +1227,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -1490,7 +1485,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -1749,7 +1743,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -2008,7 +2001,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -2267,7 +2259,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -2526,7 +2517,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -2785,7 +2775,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -3182,7 +3171,6 @@
       "url_levels": 4,
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brian_gavin",
@@ -3958,12 +3946,14 @@
       "jewellery_module": {
         "rollout_countries": [
           "us"
-        ]
+        ],
+        "pool_id": "us_diamondadvisors_v1"
       },
       "s3": {
         "bucket": "diamondadvisors",
         "graph_prefix": "{country}/{diamond_type}/{carat}-carat/{shape}/",
-        "jewellery_prefix": "jewellery/{country}/{diamond_type}/{jewelry_path}/"
+        "jewellery_prefix": "jewellery/{country}/{diamond_type}/{jewelry_path}/",
+        "image_base_url": "https://dcr52scuycepg.cloudfront.net"
       }
     },
     "diamondchart": {
@@ -4007,7 +3997,6 @@
       "url_levels": 5,
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "whiteflash",
           "brilliant_earth",
@@ -5618,7 +5607,6 @@
       "canonical_source_country": "us",
       "retailers": {
         "enabled": [
-          "james_allen",
           "blue_nile",
           "brilliant_earth",
           "whiteflash",
@@ -5684,13 +5672,15 @@
       "jewellery_module": {
         "rollout_countries": [
           "us"
-        ]
+        ],
+        "pool_id": "us_ringspo_v1"
       },
       "s3": {
         "bucket": "ringspo",
         "graph_prefix": "{country}/{diamond_type}/{carat}-carat/{shape}/",
         "size_prefix": "size",
-        "jewellery_prefix": "jewellery/{country}/{diamond_type}/{jewelry_path}/"
+        "jewellery_prefix": "jewellery/{country}/{diamond_type}/{jewelry_path}/",
+        "image_base_url": "https://d1egdb7lgpukq6.cloudfront.net"
       }
     },
     "sparklescore": {
@@ -7505,12 +7495,14 @@
       },
       "jewellery_treatment": "metal_setting_led",
       "jewellery_surface": {
+        "price_framing": "mean_min_max",
+        "grid_columns": 2,
         "lead_table": "metal_setting",
         "secondary_tables": [
-          "default_color_clarity"
+          "color_clarity_bands"
         ],
         "tennis_lead_table": "metal",
-        "publish_lab_tree": false,
+        "publish_lab_tree": true,
         "lab_on_page_note": true,
         "show_trend": true,
         "min_trend_weeks": 2,
@@ -7519,7 +7511,13 @@
           "bracelet": "tennis",
           "necklace": "solitaire_pendant"
         },
-        "default_metal": "white_gold"
+        "default_metal": "white_gold",
+        "metal_tokens": {
+          "white_gold": "#DDDCE0",
+          "yellow_gold": "#C8A96B",
+          "rose_gold": "#C89888",
+          "platinum": "#B9BDC4"
+        }
       }
     },
     "diamondchart": {
@@ -9833,6 +9831,7 @@
       },
       "jewellery_treatment": "quality_led",
       "jewellery_surface": {
+        "price_framing": "median_p25_p75",
         "lead_table": "color_clarity_bands",
         "secondary_tables": [
           "metal",
@@ -9846,7 +9845,13 @@
           "bracelet": "tennis",
           "necklace": "solitaire_pendant"
         },
-        "default_metal": "white_gold"
+        "default_metal": "white_gold",
+        "metal_tokens": {
+          "white_gold": "#e4e4e8",
+          "yellow_gold": "#d9b45a",
+          "rose_gold": "#dba596",
+          "platinum": "#c9ccd3"
+        }
       }
     },
     "section_prompts_base": {
@@ -10201,7 +10206,7 @@
   "navigation": {
     "ringspo": {
       "site_id": "ringspo",
-      "version": "1.6.0",
+      "version": "1.7.0",
       "country_label_source": "i18n_common",
       "injection_mode": {
         "us": "replace",
@@ -10301,6 +10306,16 @@
                         "target": {
                           "kind": "generated",
                           "page_family": "price_calculator"
+                        }
+                      },
+                      {
+                        "label_key": "nav.diamond_jewelry_prices",
+                        "countries": [
+                          "us"
+                        ],
+                        "target": {
+                          "kind": "generated",
+                          "page_family": "jewellery_hub"
                         }
                       }
                     ]
@@ -12430,6 +12445,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -12497,6 +12513,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -12564,6 +12581,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -12631,6 +12649,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -12698,6 +12717,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -12765,6 +12785,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -12832,6 +12853,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -12899,6 +12921,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -12966,6 +12989,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13033,6 +13057,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewellery Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13100,6 +13125,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13167,6 +13193,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13234,6 +13261,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13301,6 +13329,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13368,6 +13397,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13435,6 +13465,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13502,6 +13533,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13569,6 +13601,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13636,6 +13669,7 @@
           "nav.about": "企業情報",
           "nav.contact": "お問い合わせ",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "ダイヤモンドジュエリー価格",
           "nav.diamond_prices": "ダイヤモンド価格",
           "nav.diamond_sizes": "ダイヤモンドのサイズ",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13703,6 +13737,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13770,6 +13805,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13837,6 +13873,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13904,6 +13941,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -13971,6 +14009,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -14038,6 +14077,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -14105,6 +14145,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -14172,6 +14213,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -14239,6 +14281,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -14306,6 +14349,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -14373,6 +14417,7 @@
           "nav.about": "About",
           "nav.contact": "Contact",
           "nav.cookies": "Cookies",
+          "nav.diamond_jewelry_prices": "Diamond Jewelry Prices",
           "nav.diamond_prices": "Diamond Prices",
           "nav.diamond_sizes": "Diamond Sizes",
           "nav.disclosure": "Affiliate Disclosure",
@@ -22257,9 +22302,14 @@
         "jewellery_level_3": "/{country}/{category}/{subpath}",
         "jewellery_level_mens_cat": "/{country}/mens/{category}",
         "jewellery_level_mens": "/{country}/mens/{category}/{subpath}",
+        "jewellery_lab_level_1": "/{country}/{jewellery_type}/jewelry",
+        "jewellery_lab_level_2": "/{country}/{jewellery_type}/{category}",
+        "jewellery_lab_level_3": "/{country}/{jewellery_type}/{category}/{subpath}",
+        "jewellery_lab_level_mens_cat": "/{country}/{jewellery_type}/mens/{category}",
+        "jewellery_lab_level_mens": "/{country}/{jewellery_type}/mens/{category}/{subpath}",
         "jewellery_level_sitemap": "/{country}/jewelry/sitemap.xml",
         "jewellery_type_natural": "",
-        "jewellery_type_lab": null
+        "jewellery_type_lab": "lab-grown"
       },
       "betterdiamondinitiative": {
         "site_id": "betterdiamondinitiative",
@@ -23283,7 +23333,9 @@
               "jewellery_summary_json",
               "jewellery_quality_grid_json",
               "jewellery_lab_comparison_json",
-              "jewellery_copy_json"
+              "jewellery_copy_json",
+              "jewellery_explorer_json",
+              "jewellery_image_webp"
             ],
             "wp_widgets": {
               "jewellery_design_cards": true,
@@ -23470,8 +23522,10 @@
             "pipeline_artefacts": [
               "jewellery_summary_json",
               "jewellery_quality_grid_json",
+              "jewellery_lab_comparison_json",
               "jewellery_trend_json",
-              "jewellery_copy_json"
+              "jewellery_copy_json",
+              "jewellery_image_webp"
             ],
             "wp_widgets": {
               "jewellery_design_cards": true,
@@ -23479,10 +23533,10 @@
                 "presentation": "metal_setting_grid"
               },
               "jewellery_secondary_tables": {
-                "presentation": "default_color_clarity"
+                "presentation": "color_clarity_bands"
               },
               "jewellery_trend": true,
-              "jewellery_ads": true,
+              "jewellery_ads": false,
               "data_methodology": {
                 "presentation": "full"
               }
@@ -25717,13 +25771,13 @@
         "related_artefacts": []
       },
       "color_clarity_json": {
-        "schema_version": 1,
+        "schema_version": 2,
         "page_level": "shape",
         "producing_script": "C5.7_color_clarity_grid (data: C3.2_color_clarity_aggregate)",
         "gate": "color_clarity",
         "status": "live",
         "filename": "color-clarity.json",
-        "description": "Colour × clarity price grid — average price per colour/clarity combination, computed from the site's own retailer pool.",
+        "description": "Colour × clarity price grid — median price and stone count per colour/clarity combination, from the pooled-cut benchmark cells the price calculator reads (v2, 2026-11-18; v1 was the calc_data mean), computed from the site's own retailer pool.",
         "wp_widgets": [
           "color_clarity_grid"
         ],
@@ -26178,7 +26232,7 @@
         "gate": "site_entitlement",
         "status": "planned",
         "filename": "jewellery-lab-comparison.json",
-        "description": "Natural vs lab-grown jewellery benchmark comparison for Ringspo's /lab-grown/ sibling URL tree. Never entitled on Diamond Advisors.",
+        "description": "Natural vs lab-grown jewellery benchmark comparison for sites that publish both natural and /lab-grown/ jewellery URL trees (Ringspo and Diamond Advisors).",
         "wp_widgets": [],
         "related_artefacts": [
           "jewellery_summary_json"
@@ -26209,6 +26263,37 @@
         "description": "Editorial and deterministic copy plus FAQ payload for finished jewellery pages (total-weight methodology, natural head framing and site voice).",
         "wp_widgets": [],
         "related_artefacts": [
+          "jewellery_summary_json"
+        ]
+      },
+      "jewellery_explorer_json": {
+        "schema_version": 1,
+        "page_level": "jewellery",
+        "producing_script": "J4_jewellery_page_artefacts",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "jewellery-explorer.json",
+        "description": "Carat / price / metal filter data for one style slice and diamond type, fetched on first filter touch (CP 135). Per carat band: index stats, featured order and price positions. Per design: band price, photo / title / link per band and metal, and the default metal per band. Carat, budget and guide pages of a style share one body and differ only in initial_band.",
+        "wp_widgets": [
+          "jewellery_design_cards"
+        ],
+        "related_artefacts": [
+          "jewellery_summary_json"
+        ]
+      },
+      "jewellery_image_webp": {
+        "schema_version": 1,
+        "page_level": "jewellery",
+        "producing_script": "J3.5_jewellery_images",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "jewellery/images/{hash}.webp",
+        "description": "400px-wide WebP copy of a retailer's product photo, served from the site's image CDN (CP 135). Only for retailers whose jewellery.images.copy is allowed in retailers.yaml. J4 swaps the copy into design cards and the explorer; designs without a copy keep the retailer's own photo URL.",
+        "wp_widgets": [
+          "jewellery_design_cards"
+        ],
+        "related_artefacts": [
+          "jewellery_explorer_json",
           "jewellery_summary_json"
         ]
       }
@@ -26269,6 +26354,15 @@
           "top-level",
           "calculator",
           "size"
+        ]
+      },
+      "shape_editorial_copy": {
+        "description": "C1 page-specific copy on shape pages (\"Why this shape is priced this way\", \"Buying advice\" and every other `_static` section the shape page_structure lists). Off for every site (absent from entitlements = off) until C1 copy is approved. Turn on per site with `shape_editorial_copy: true` under `pages.shape.wp_widgets`, then rebuild the config bundle. The FAQ has its own `faq` widget. Hub and type-page copy is not gated. C1 keeps writing the copy while this is off.\n",
+        "reads_artefacts": [
+          "static_content_json"
+        ],
+        "page_levels": [
+          "shape"
         ]
       },
       "distribution_chart": {
@@ -27304,5 +27398,19 @@
     "next_phase": "phase_8_consumer_advisory",
     "consumer_features_live": false,
     "notes": "All network sites launch with diamond pricing / market index content only. Set consumer_features_live true when CP 46–49 ship and ops approves go-live. Until then, WP plugin and pipelines must not render consumer widgets or routes.\n"
+  },
+  "retailer_names": {
+    "JA": "James Allen",
+    "BN": "Blue Nile",
+    "WF": "Whiteflash",
+    "BG": "Brian Gavin",
+    "BE": "Brilliant Earth",
+    "DN": "Diamond Nexus",
+    "GN": "GemsNY",
+    "RC": "Ring Concierge",
+    "RT": "Ritani",
+    "VR": "Vrai",
+    "WC": "With Clarity",
+    "RA": "Rare Carat"
   }
 }

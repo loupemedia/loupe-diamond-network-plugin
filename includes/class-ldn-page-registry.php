@@ -32,11 +32,16 @@ final class LDN_Page_Registry {
 
     const MODULE_SIZE = 'size';
 
+    const MODULE_JEWELLERY = 'jewellery';
+
     /** @var string[] Modules included in the price sitemap child. */
     const PRICE_SITEMAP_MODULES = array(self::MODULE_PRICING, self::MODULE_CALCULATOR);
 
     /** @var string[] Modules included in the size sitemap child. */
     const SIZE_SITEMAP_MODULES = array(self::MODULE_SIZE);
+
+    /** @var string[] Modules included in the jewellery sitemap child. */
+    const JEWELLERY_SITEMAP_MODULES = array(self::MODULE_JEWELLERY);
 
     /**
      * Whether a registry hierarchy_level belongs in the price sitemap.

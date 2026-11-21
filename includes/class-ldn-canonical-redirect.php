@@ -32,7 +32,7 @@ final class LDN_Canonical_Redirect {
      *
      * @var string[]
      */
-    const ROUTES = array('price', 'size');
+    const ROUTES = array('price', 'size', 'calculator', 'legal', 'jewellery');
 
     /**
      * Hook into WordPress.

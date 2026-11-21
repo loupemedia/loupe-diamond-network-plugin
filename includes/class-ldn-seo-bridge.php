@@ -166,6 +166,11 @@ final class LDN_Seo_Bridge {
             return true;
         }
 
+        $jewellery = method_exists($plugin, 'jewellery_dispatcher') ? $plugin->jewellery_dispatcher() : null;
+        if ($jewellery instanceof LDN_Jewellery_Dispatcher && $jewellery->current_context() instanceof LDN_Page_Context) {
+            return true;
+        }
+
         return false;
     }
 }

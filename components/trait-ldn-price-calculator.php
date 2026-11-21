@@ -140,7 +140,8 @@ trait LDN_Trait_Price_Calculator {
                 . ($active ? ' ldn-shape-picker__option--active' : '')
                 . '" data-ldn-shape-calc-pill="' . esc_attr($shape_slug) . '">'
                 . $this->price_calculator_shape_icon_html($shape_slug)
-                . '<span class="ldn-shape-picker__label">' . esc_html($shape) . '</span>'
+                . '<span class="ldn-shape-picker__label">'
+                . esc_html(preg_replace('/\s+cut$/i', '', $shape)) . '</span>'
                 . '</button>';
 
             $panels .= '<div class="ldn-shape-calc-panel'
@@ -1633,7 +1634,8 @@ trait LDN_Trait_Price_Calculator {
      * @return string
      */
     private function price_calculator_shape_icon_html($slug) {
-        $slug = sanitize_title((string) $slug);
+        // Ranking rows carry display names ("Emerald cut"); icons use the bare slug.
+        $slug = preg_replace('/-cut$/', '', sanitize_title((string) $slug));
         $icon_base = defined('LDN_PLUGIN_URL') ? LDN_PLUGIN_URL . 'assets/img/shapes/' : '';
         if ($icon_base === '' || $slug === '') {
             return '';

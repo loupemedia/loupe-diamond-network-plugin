@@ -789,6 +789,76 @@ final class LDN_Config {
         return (string) $structure['size_level_sitemap'];
     }
 
+    /**
+     * Jewellery-module XML sitemap path for a site.
+     *
+     * @param string $site_id
+     * @return string|null
+     */
+    public function jewellery_sitemap_path($site_id) {
+        $structure = $this->get_url_structure($site_id);
+        if (!is_array($structure) || empty($structure['jewellery_level_sitemap'])) {
+            return null;
+        }
+        return (string) $structure['jewellery_level_sitemap'];
+    }
+
+    /**
+     * Allowed country codes for the finished jewellery module (US-only in v1).
+     *
+     * @param string $site_id
+     * @return string[]
+     */
+    public function jewellery_rollout_countries($site_id) {
+        $site = $this->get_site($site_id);
+        if (!is_array($site)
+            || empty($site['jewellery_module']['rollout_countries'])
+            || !is_array($site['jewellery_module']['rollout_countries'])
+        ) {
+            return array();
+        }
+        $out = array();
+        foreach ($site['jewellery_module']['rollout_countries'] as $code) {
+            if (is_string($code) && trim($code) !== '') {
+                $out[] = strtolower(trim($code));
+            }
+        }
+        return array_values(array_unique($out));
+    }
+
+    /**
+     * Public CloudFront origin for hosted jewellery WebP photos, or ''.
+     *
+     * @param string $site_id
+     * @return string
+     */
+    public function jewellery_image_base_url($site_id) {
+        $site = $this->get_site($site_id);
+        if (!is_array($site) || empty($site['s3']['image_base_url']) || !is_string($site['s3']['image_base_url'])) {
+            return '';
+        }
+        return rtrim(trim($site['s3']['image_base_url']), '/');
+    }
+
+    /**
+     * Public retailer display names keyed by retailer code (from config/retailers.yaml).
+     *
+     * @return array<string, string>
+     */
+    public function retailer_display_names() {
+        $bundle = $this->get_bundle();
+        if (!isset($bundle['retailer_names']) || !is_array($bundle['retailer_names'])) {
+            return array();
+        }
+        $out = array();
+        foreach ($bundle['retailer_names'] as $code => $name) {
+            if (is_string($code) && is_string($name) && $code !== '' && $name !== '') {
+                $out[$code] = $name;
+            }
+        }
+        return $out;
+    }
+
     // =========================================================================
     // Content profile resolution (mirrors shared.config.profiles.resolve_content_profile)
     // =========================================================================

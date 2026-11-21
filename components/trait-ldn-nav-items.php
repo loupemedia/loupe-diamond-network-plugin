@@ -487,6 +487,19 @@ trait LDN_Trait_Nav_Items {
             case 'price_calculator':
                 return $this->nav_pattern_url($site_id, 'calculator_level', array('{country}' => $country));
 
+            case 'jewellery_hub':
+                return $this->nav_pattern_url($site_id, 'jewellery_level_1', array('{country}' => $country));
+
+            case 'jewellery_category':
+                $category = isset($target['category']) ? (string) $target['category'] : '';
+                return $category === ''
+                    ? ''
+                    : $this->nav_pattern_url(
+                        $site_id,
+                        'jewellery_level_2',
+                        array('{country}' => $country, '{category}' => $category)
+                    );
+
             case 'size_mega_hub':
                 return $this->nav_size_renderer()->build_size_mega_hub_url($site_id);
 
@@ -800,6 +813,7 @@ trait LDN_Trait_Nav_Items {
             'nav.prices_by_type' => _x('Natural and Lab', 'navigation', 'loupe-diamond-network'),
             'nav.price_tools' => _x('Tools', 'navigation', 'loupe-diamond-network'),
             'nav.price_calculator' => _x('Price Calculator', 'navigation', 'loupe-diamond-network'),
+            'nav.diamond_jewelry_prices' => _x('Diamond Jewelry Prices', 'navigation', 'loupe-diamond-network'),
             'nav.prices_lab_grown' => _x('Lab-Grown Prices', 'navigation', 'loupe-diamond-network'),
             'nav.sizes_by_shape' => _x('Sizes by Shape', 'navigation', 'loupe-diamond-network'),
             'nav.sizes_by_carat' => _x('Sizes by Carat', 'navigation', 'loupe-diamond-network'),

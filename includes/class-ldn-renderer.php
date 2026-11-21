@@ -62,9 +62,10 @@ final class LDN_Renderer {
 
 
     /**
-     * Plotly.js CDN (pinned). Never bundle (~4.5 MB) — Principle 10 / chart rules.
+     * Plotly.js CDN (pinned cartesian partial bundle — ~1.2 MB min / ~420 KB gzip
+     * vs ~4.4 MB min / ~1.3 MB gzip full bundle). Never bundle inline — Principle 10.
      */
-    const PLOTLY_CDN = 'https://cdn.plot.ly/plotly-2.35.2.min.js';
+    const PLOTLY_CDN = 'https://cdn.plot.ly/plotly-cartesian-2.35.2.min.js';
 
     /**
      * JSON flags for embedding payloads inside <script> safely (escapes </script>).

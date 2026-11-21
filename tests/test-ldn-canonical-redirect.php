@@ -39,6 +39,16 @@ function check($cond, $msg) {
 
 $target = array('LDN_Canonical_Redirect', 'canonical_request_uri');
 
+// --- Every HTML route module must be normalisable; XML/txt routes excluded -
+check(
+    LDN_Canonical_Redirect::ROUTES === array('price', 'size', 'calculator', 'legal', 'jewellery'),
+    'ROUTES includes price, size, calculator, legal and jewellery HTML routes'
+);
+check(
+    !in_array('sitemap', LDN_Canonical_Redirect::ROUTES, true),
+    'sitemap route stays excluded from trailing-slash redirects'
+);
+
 // --- Trailing slashes on (network default) -------------------------------
 check(
     $target('/diamond-prices/natural/1-carat/round') === '/diamond-prices/natural/1-carat/round/',

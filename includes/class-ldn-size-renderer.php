@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 
 final class LDN_Size_Renderer {
 
-    const PLOTLY_CDN = 'https://cdn.plot.ly/plotly-2.35.2.min.js';
+    const PLOTLY_CDN = 'https://cdn.plot.ly/plotly-cartesian-2.35.2.min.js';
 
     const JSON_SCRIPT_FLAGS = JSON_HEX_TAG | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
 

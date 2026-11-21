@@ -96,6 +96,9 @@ trait LDN_Trait_Sections {
         if (in_array($section_id, self::SUPPRESSED_SECTIONS, true)) {
             return '';
         }
+        if ($this->is_gated_shape_copy($section_id, $ctx)) {
+            return '';
+        }
 
         if ($section_id === 'price_graph') {
             return $this->chart_html(
@@ -233,6 +236,30 @@ trait LDN_Trait_Sections {
 
         // Unknown section id: skipped (forward-compatible with future archetypes).
         return '';
+    }
+
+    /**
+     * Whether a shape-page C1 copy section is switched off for this site.
+     *
+     * Every `_static` or editorial section on a shape page is gated by the
+     * `shape_editorial_copy` widget (absent = off). The FAQ keeps its own
+     * `faq` widget, so it is not counted here.
+     *
+     * @param string           $section_id
+     * @param LDN_Page_Context $ctx
+     * @return bool
+     */
+    private function is_gated_shape_copy($section_id, LDN_Page_Context $ctx) {
+        if ($ctx->page_level !== 'shape' || $section_id === 'faq_static') {
+            return false;
+        }
+        if (substr($section_id, -7) !== '_static'
+            && !in_array($section_id, self::EDITORIAL_STATIC_SECTIONS, true)
+        ) {
+            return false;
+        }
+        $artefacts = new LDN_Artefacts($this->config);
+        return !$artefacts->site_has_wp_widget($ctx->site_id, 'shape_editorial_copy', 'shape');
     }
 
     /**

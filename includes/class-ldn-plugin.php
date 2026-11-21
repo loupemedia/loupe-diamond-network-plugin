@@ -505,6 +505,18 @@ final class LDN_Plugin {
     }
 
     /**
+     * Jewellery-module dispatcher for the resolved site, or null when off-network.
+     *
+     * @return LDN_Jewellery_Dispatcher|null
+     */
+    public function jewellery_dispatcher() {
+        if (!class_exists('LDN_Jewellery_Module')) {
+            return null;
+        }
+        return LDN_Jewellery_Module::dispatcher();
+    }
+
+    /**
      * Clear memoised site_id and site-dependent services (after admin site change).
      *
      * @return void

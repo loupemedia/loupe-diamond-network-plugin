@@ -740,8 +740,13 @@ trait LDN_Trait_Content {
             }
         }
         if (is_numeric($low) && is_numeric($high) && (float) $high > 0) {
+            $outliers_excluded = $this->dig_first($summary, array(
+                array('distribution', 'price_range', 'outliers_excluded'),
+            )) === true;
             $cards[] = array(
-                'label' => __('Price range', 'loupe-diamond-network'),
+                'label' => $outliers_excluded
+                    ? __('Price range (outliers excluded)', 'loupe-diamond-network')
+                    : __('Price range', 'loupe-diamond-network'),
                 'value' => $symbol . number_format((float) $low, 0) . ' – ' . $symbol . number_format((float) $high, 0),
             );
         }
