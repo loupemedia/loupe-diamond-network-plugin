@@ -212,7 +212,12 @@ trait LDN_Trait_Nav_Markup {
             }
             $html .= '</ul>';
         }
-        $html .= '</div></nav></div></footer>';
+        $html .= '</div></nav></div>';
+        $html .= '<div class="ldn-shell-footer__legal">'
+            . '<p class="ldn-shell-footer__copyright">&copy; '
+            . esc_html(gmdate('Y') . ' ' . $this->shell_site_brand_name())
+            . '</p></div>';
+        $html .= '</footer>';
 
         return $html;
     }
@@ -459,10 +464,7 @@ trait LDN_Trait_Nav_Markup {
      */
     private function shell_brand_html($surface = 'header') {
         $home = function_exists('home_url') ? home_url('/') : '/';
-        $name = function_exists('get_bloginfo') ? (string) get_bloginfo('name') : $this->site_id;
-        if ($name === '') {
-            $name = $this->site_id;
-        }
+        $name = $this->shell_site_brand_name();
 
         if ($surface === 'header' && function_exists('has_custom_logo') && has_custom_logo()
             && function_exists('get_custom_logo')
@@ -483,6 +485,29 @@ trait LDN_Trait_Nav_Markup {
 
         return '<a class="ldn-shell-brand" href="' . esc_url($home) . '">'
             . esc_html($name) . '</a>';
+    }
+
+    /**
+     * Clean entity brand name from site config (`brand_name`), falling back to
+     * WordPress `bloginfo('name')` and then `site_id`.
+     *
+     * @return string
+     */
+    private function shell_site_brand_name() {
+        $site = $this->config->get_site($this->site_id);
+        if (is_array($site) && !empty($site['brand_name']) && is_string($site['brand_name'])) {
+            $brand = trim($site['brand_name']);
+            if ($brand !== '') {
+                return $brand;
+            }
+        }
+        if (function_exists('get_bloginfo')) {
+            $blog_name = trim((string) get_bloginfo('name'));
+            if ($blog_name !== '') {
+                return $blog_name;
+            }
+        }
+        return ucfirst($this->site_id);
     }
 
     /**

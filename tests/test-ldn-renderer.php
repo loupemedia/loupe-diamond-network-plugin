@@ -3627,6 +3627,160 @@ check(
     'hub C1 copy is not gated by the shape-page switch'
 );
 
+// --- 22. White table headers on purple bands + solid card surface ------------
+// Test intent: whenever a house `.ldn-data-table` sits on a Ringspo purple band
+// (`tint` or positional size purple), its `thead th` uses a white header with
+// dark ink instead of purple-on-purple, and `.ldn-table-card` keeps its solid
+// `#fff` surface (not `transparent`) so rows never separate into individual pills.
+// Would fail if: purple-band `thead th` kept `--ldn-table-header-bg` (`#706cc8`)
+// or `ringspo.css` set `.ldn-table-card:has(> .ldn-data-table)` to transparent
+// on `.ldn-section--tint`.
+$ringspo_css_fresh = file_get_contents(dirname(__DIR__) . '/assets/css/families/ringspo.css');
+check(
+    preg_match(
+        '/\.ldn-section--tint[\s\S]*?\.ldn-data-table\s+thead\s+th\s*\{[^}]*background-color:\s*#fff[^}]*color:\s*var\(--ringspo-ink\)/s',
+        $ringspo_css_fresh
+    ) === 1,
+    'Ringspo purple bands render .ldn-data-table thead th with a white background and dark ink'
+);
+check(
+    preg_match(
+        '/\.ldn-section--tint[^\{]*\.ldn-table-card:has\(>\s*\.ldn-data-table\)\s*,\s*\.ldn-table-card\s*>\s*\.ldn-data-table\)\s*\{\s*background-color:\s*transparent/s',
+        $ringspo_css_fresh
+    ) === 0,
+    'Ringspo purple bands keep a solid #fff .ldn-table-card surface instead of transparent'
+);
+
+// --- 23. Hero-band intros on shape and all-shapes pages ----------------------
+// Test intent: when `page_chrome.hero_band` is enabled (Ringspo), both `shape`
+// and `all-shapes` pages render their intro inside `<header class="ldn-hero-band">`
+// (`ldn-type-intro--hero-band`) between `ldn-freshness` and the chart/stat cards,
+// and suppress duplicate body `intro_dynamic` / `overview_intro_dynamic` sections.
+// Would fail if: `hub_intro_hero_html()` returned `""` for `shape` or `all-shapes`.
+if (!class_exists('LDN_Config_Shape_AllShapes_Hero_Intro')) {
+    class LDN_Config_Shape_AllShapes_Hero_Intro extends LDN_Config {
+        public function get_content_profile($site_id) {
+            return array(
+                'page_chrome' => array('hero_band' => true),
+                'country_in_content' => array(
+                    'body_copy' => true,
+                    'country_overrides' => array('us' => array('body_copy' => false)),
+                ),
+            );
+        }
+
+        public function get_page_layout($site_id, $page_level, $country_code = null) {
+            if ($page_level === 'all-shapes') {
+                return array(
+                    'hero_component' => null,
+                    'sections'       => array('overview_intro_dynamic'),
+                    'ad_slots'       => array(),
+                );
+            }
+            return array(
+                'hero_component' => 'distribution_chart',
+                'sections'       => array('intro_dynamic'),
+                'ad_slots'       => array(),
+            );
+        }
+    }
+}
+if (!class_exists('LDN_Fetcher_Shape_AllShapes_Hero_Intro')) {
+    class LDN_Fetcher_Shape_AllShapes_Hero_Intro extends LDN_Data_Fetcher {
+        public function fetch_artefact($artefact_id, $ctx) {
+            if ($artefact_id === 'summary_data_json' || $artefact_id === 'all_shapes_summary_json') {
+                return array(
+                    'analysis_date' => '2026-11-22',
+                    'distribution'  => array(
+                        'median_price' => 3660,
+                        'sample_size'  => 18934,
+                        'price_range'  => array('min' => 1240, 'max' => 8310),
+                    ),
+                    'aggregate'     => array('shape_count' => 10),
+                    'time_series'   => array('change_7_days' => 2.5),
+                );
+            }
+            if ($artefact_id === 'templated_copy_json') {
+                return array('sections' => array(
+                    'intro_text' => "Right now a 1 carat natural diamond runs \$3,186.\n\nExpect anywhere from \$730 to \$8,310.",
+                ));
+            }
+            if ($artefact_id === 'distribution_json') {
+                return array(
+                    'data'   => array(array('x' => array(2000, 4000), 'y' => array(10, 20), 'type' => 'bar')),
+                    'layout' => array(),
+                );
+            }
+            return null;
+        }
+    }
+}
+$hero_intro_renderer = new LDN_Renderer(
+    new LDN_Fetcher_Shape_AllShapes_Hero_Intro(),
+    new LDN_Config_Shape_AllShapes_Hero_Intro()
+);
+$shape_hero_html = $hero_intro_renderer->render(
+    new LDN_Page_Context('ringspo', 'shape', 'us', 'natural', '1', 'round')
+);
+$shape_fresh_pos = strpos($shape_hero_html, 'ldn-freshness');
+$shape_intro_pos = strpos($shape_hero_html, 'ldn-type-intro--hero-band');
+$shape_chart_pos = strpos($shape_hero_html, 'ldn-chart');
+$shape_stats_pos = strpos($shape_hero_html, 'ldn-hero-stats');
+check(
+    $shape_fresh_pos !== false && $shape_intro_pos !== false
+        && $shape_chart_pos !== false && $shape_stats_pos !== false
+        && $shape_fresh_pos < $shape_intro_pos
+        && $shape_intro_pos < $shape_chart_pos
+        && $shape_chart_pos < $shape_stats_pos,
+    'shape hero-band order is freshness -> intro -> chart -> hero stats'
+);
+check(
+    substr_count($shape_hero_html, '$3,660') >= 1
+        && strpos($shape_hero_html, 'ldn-intro-dynamic') === false,
+    'shape hero-band intro renders once in the hero and suppresses body intro_dynamic'
+);
+// Test intent: `chart_html()` emits a `<script>` tag before `<figure class="ldn-chart">`,
+// so `.ldn-hero-band .ldn-chart` must declare its own non-zero top margin (not rely on
+// adjacent-sibling `+`) to leave vertical breathing room below the hero intro text.
+// Would fail if: `.ldn-hero-band .ldn-chart` kept `margin: 0 0 ...` or relied on `+ .ldn-chart`.
+check(
+    preg_match(
+        '/\.ldn-chrome--ringspo-classic\s+\.ldn-hero-band\s+\.ldn-chart\s*\{[^}]*margin:\s*var\(--ldn-space-[45]/s',
+        $ringspo_css_fresh
+    ) === 1,
+    'Ringspo hero-band .ldn-chart sets a top margin directly (survives intervening <script> tag)'
+);
+
+$all_shapes_hero_html = $hero_intro_renderer->render(
+    new LDN_Page_Context('ringspo', 'all-shapes', 'us', 'natural', '1')
+);
+$all_fresh_pos = strpos($all_shapes_hero_html, 'ldn-freshness');
+$all_intro_pos = strpos($all_shapes_hero_html, 'ldn-type-intro--hero-band');
+$all_stats_pos = strpos($all_shapes_hero_html, 'ldn-hero-stats');
+check(
+    $all_fresh_pos !== false && $all_intro_pos !== false && $all_stats_pos !== false
+        && $all_fresh_pos < $all_intro_pos && $all_intro_pos < $all_stats_pos,
+    'all-shapes hero-band order is freshness -> intro -> hero stats'
+);
+check(
+    substr_count($all_shapes_hero_html, 'Right now a 1 carat natural diamond') === 1,
+    'all-shapes hero-band intro renders copy.json intro_text once and suppresses duplicate body overview_intro_dynamic'
+);
+
+// --- 24. format_prose_html uniform paragraph breaks --------------------------
+// Test intent: single newlines from YAML `>` folded block scalars (such as
+// `shape_analysis` in `ringspo.yaml`) must become separate `<p>` paragraphs,
+// never `<br />` inside one `<p>`, so every paragraph gap shares one margin.
+// Would fail if: `format_prose_html()` called `wpautop()` on single `\n` with
+// `$br = true`, emitting `<br />` with zero vertical gap.
+$folded_prose = $renderer->format_prose_html(
+    "The Round is the most expensive cut at this weight (\$3,660).\nShape is one of the bigger price gaps at this weight."
+);
+check(
+    strpos($folded_prose, '<br') === false && substr_count($folded_prose, '<p>') === 2,
+    'format_prose_html converts single-newline YAML folded breaks into separate <p> paragraphs without <br>'
+);
+
 // --- Report -----------------------------------------------------------------
 $tests = $GLOBALS['__tests'];
 $fails = $GLOBALS['__fails'];

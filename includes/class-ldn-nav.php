@@ -298,14 +298,18 @@ final class LDN_Nav {
         add_filter('wp_get_nav_menu_items', array($this, 'filter_menu_items'), 20, 3);
         add_filter('wp_nav_menu_objects', array($this, 'filter_menu_objects'), 20, 2);
         add_filter('generate_navigation_location', array($this, 'suppress_generatepress_nav'));
+        add_filter('generate_secondary_navigation_location', array($this, 'suppress_generatepress_nav'));
+        add_filter('generate_footer_widgets', array($this, 'suppress_generatepress_footer_widgets'));
         add_filter('body_class', array($this, 'filter_body_class'));
 
         if (function_exists('add_action')) {
+            add_action('wp', array($this, 'suppress_theme_chrome'), 50);
             add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
             add_action('wp_head', array($this, 'print_shell_tokens'), 1);
             add_action('wp_body_open', array($this, 'render_header'), 1);
             add_action('init', array($this, 'register_footer_location'));
-            add_action('generate_after_footer_widgets', array($this, 'render_footer_menu'), 10);
+            add_action('generate_after_footer_widgets', array($this, 'render_theme_footer_widgets_menu'), 10);
+            add_action('generate_after_footer', array($this, 'render_footer_menu'), 10);
             add_action('wp_footer', array($this, 'render_footer_menu'), 8);
         }
     }
@@ -415,6 +419,42 @@ final class LDN_Nav {
     }
 
     /**
+     * Zero out GeneratePress's footer widget sidebars when LDN owns the shell
+     * so stale footer widgets are neither queried nor emitted into the HTML.
+     *
+     * @param mixed $widgets
+     * @return mixed
+     */
+    public function suppress_generatepress_footer_widgets($widgets) {
+        return $this->owns_shell() ? 0 : $widgets;
+    }
+
+    /**
+     * Unhook GeneratePress and GP Premium header, footer and slideout builders
+     * in PHP when LDN owns the shell so raw HTML carries only the LDN shell
+     * (keeping nav-chrome.css `display: none` rules as a fallback).
+     *
+     * @return void
+     */
+    public function suppress_theme_chrome() {
+        if (!$this->owns_shell()) {
+            return;
+        }
+        if (function_exists('remove_all_actions')) {
+            remove_all_actions('generate_header');
+            remove_all_actions('generate_footer');
+            remove_all_actions('generate_inside_mobile_header');
+        }
+        if (function_exists('remove_action')) {
+            remove_action('generate_after_header', 'generate_menu_plus_mobile_header', 5);
+            remove_action('generate_after_header', 'generate_add_secondary_navigation_after_header', 7);
+            remove_action('generate_before_header', 'generate_add_secondary_navigation_before_header', 7);
+            remove_action('wp_footer', 'generate_slideout_navigation', 0);
+            remove_action('wp_footer', 'generate_slideout_body_overlay', 0);
+        }
+    }
+
+    /**
      * @param array $classes
      * @return array
      */
@@ -426,6 +466,21 @@ final class LDN_Nav {
             $classes[] = 'ldn-shell-owned';
         }
         return $classes;
+    }
+
+    /**
+     * GeneratePress fires `generate_after_footer_widgets` INSIDE `.site-footer`.
+     * Markets where LDN owns the shell hide `.site-footer` via CSS and unhook
+     * `generate_footer`, so they must skip this slot and render on
+     * `generate_after_footer` / `wp_footer` outside `.site-footer` instead.
+     *
+     * @return void
+     */
+    public function render_theme_footer_widgets_menu() {
+        if ($this->owns_shell()) {
+            return;
+        }
+        $this->render_footer_menu();
     }
 
     /**

@@ -1188,6 +1188,17 @@ check(strpos($surface[0], '.ldn-size-ideal-real') === false,
     'ideal-vs-real is band prose, not a white card on purple');
 check(strpos($surface[0], '.ldn-size-methodology') === false,
     'methodology is not in the white-surface list');
+// Test intent: `.ldn-section:not(.ldn-section--tint):not(.ldn-section--accent) h2`
+// must also exclude `.ldn-size-methodology-section--purple` (which carries
+// `.ldn-section` without `--tint`/`--accent`), otherwise its `(0, 4, 1)`
+// specificity beats `.ldn-size-methodology-section--purple h2` `(0, 2, 1)` and
+// paints the methodology purple-band h2 dark ink on purple.
+// Would fail if: `:not(.ldn-size-methodology-section--purple)` is missing from
+// the ink-coloured `.ldn-section h2` rule in `ringspo.css`.
+check(
+    strpos($ringspo_css, ':not(.ldn-size-methodology-section--purple) h2') !== false,
+    'Ringspo ink h2 rule excludes .ldn-size-methodology-section--purple so purple methodology h2 stays white'
+);
 check(strpos($merged, 'Other websites that publish diamond size charts') !== false,
     'ideal copy refers to published size charts');
 check(strpos($merged, 'Chart sites') === false, 'ideal copy no longer says chart sites');

@@ -183,9 +183,12 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 }
 
 /* `.ldn-price-page table` (back-compat, below) adds a 1rem margin that showed as
-   a white strip above the header inside the card. */
+   a white strip above the header inside the card. Repeat collapse/spacing here so
+   theme `.entry-content table` rules cannot open gaps between rows. */
 .ldn-table-card > .ldn-data-table {
 	margin: 0;
+	border-collapse: separate;
+	border-spacing: 0;
 }
 
 .ldn-data-table th,
@@ -215,11 +218,19 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 	border-top-right-radius: 12px;
 }
 
+/* Reset any theme-level cell corner radius so rows stay flush inside the card. */
+.ldn-data-table tbody tr:not(:last-child) > td,
+.ldn-data-table tbody tr:not(:last-child) > th {
+	border-radius: 0;
+}
+
 .ldn-data-table tbody tr:last-child > :first-child {
+	border-top-left-radius: 0;
 	border-bottom-left-radius: 12px;
 }
 
 .ldn-data-table tbody tr:last-child > :last-child {
+	border-top-right-radius: 0;
 	border-bottom-right-radius: 12px;
 }
 
@@ -314,6 +325,10 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 	margin-top: 0;
 }
 
+.ldn-most-traded-group {
+	min-width: 0;
+}
+
 .ldn-most-traded-group > h3 {
 	margin-top: 0;
 	margin-bottom: var(--ldn-space-3, 0.75rem);
@@ -338,6 +353,17 @@ body:has(.ldn-page-shell) .site-content > *:last-child {
 		border: 1px solid var(--ldn-table-border, #ddd);
 		border-radius: 4px;
 		background: #fff;
+	}
+
+	.ldn-table-card > .ldn-data-table--stacked tbody tr {
+		margin-bottom: 0;
+		border: 0;
+		border-bottom: 1px solid var(--ldn-table-border, #e5e7eb);
+		border-radius: 0;
+	}
+
+	.ldn-table-card > .ldn-data-table--stacked tbody tr:last-child {
+		border-bottom: 0;
 	}
 
 	.ldn-data-table--stacked tbody td,

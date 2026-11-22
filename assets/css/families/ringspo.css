@@ -78,9 +78,11 @@
 	color: rgba(255, 255, 255, 0.6);
 }
 
-/* Hero chart sits on a white card so the brand line stays readable. */
+/* Hero chart sits on a white card so the brand line stays readable. Top margin
+   is set directly on .ldn-chart (not via `+`) because chart_html() emits the
+   Plotly <script> tag between the hero intro and <figure class="ldn-chart">. */
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-chart {
-	margin: 0 0 var(--ldn-space-5, 1.5rem);
+	margin: var(--ldn-space-5, 1.5rem) 0;
 	padding: var(--ldn-space-4, 1rem);
 	background-color: #fff;
 	border-radius: var(--ringspo-card-radius);
@@ -135,6 +137,10 @@
 
 .ldn-chrome--ringspo-classic .ldn-hero-stat.ldn-stat--up .ldn-stat-value {
 	color: #1a7f5a;
+}
+
+.ldn-chrome--ringspo-classic .ldn-hero-band :is(.ldn-freshness, .ldn-type-intro--hero-band) + .ldn-hero-stats {
+	margin-top: var(--ldn-space-5, 1.5rem);
 }
 
 .ldn-chrome--ringspo-classic .ldn-hero-band .ldn-freshness {
@@ -310,26 +316,40 @@
    per-component override per band. */
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain),
+	.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple)
 	:is(h2, h3, h4, p, li, dt, dd, span, th, td, label, figcaption, a) {
 	color: inherit;
 }
 
-/* The header sits on a brand fill inside a white table card, so it keeps the
-   header foreground rather than inheriting the card's ink. */
-:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
-	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
-	.ldn-data-table thead th {
+/* Green accent bands keep the purple table header, so keep white text there.
+   Purple bands (below) switch the table header to white with dark ink so the
+   header never blends into the purple section background. */
+.ldn-chrome--ringspo-classic .ldn-section--accent .ldn-data-table thead th {
 	color: var(--ldn-table-header-fg, #fff);
 }
+
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain),
+	.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple)
+	.ldn-size-matrix thead .ldn-size-matrix__shape-col,
+:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain),
+	.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple)
+	.ldn-data-table thead th {
+	background-color: #fff;
+	color: var(--ringspo-ink);
+	border-bottom: 1px solid var(--ldn-table-border, #e5e7eb);
+}
+
 /* Components that own a white surface inside a coloured band. A new module that
    carries its own background is added here — there is no second list.
    Do not add .ldn-size-methodology / .ldn-data-methodology / .ldn-size-ideal-real
    / .ldn-size-proportions: those are band prose (white on purple/green), not a card. */
 :is(.ldn-chrome--ringspo-classic .ldn-section--tint,
 	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain),
+	.ldn-chrome--ringspo-classic .ldn-size-methodology-section--purple)
 	:is(table, .ldn-table-card, .ldn-chart, .ldn-chart-target:not(.ldn-chart-target--on-purple), .ldn-shape-card, .ldn-type-nav-card, .ldn-size-figure,
 		.ldn-size-price-card, .ldn-price-size-card,
 		.ldn-size-matrix-scroll, .ldn-size-checker__surface, .ldn-size-checker-panel, .ldn-size-checker-results,
@@ -342,11 +362,9 @@
 	text-decoration: none;
 }
 
-/* Data-table cells paint their own fills; a white card behind them leaks at the
-   rounded header corners. Must follow the surface rule (equal specificity). */
-:is(.ldn-chrome--ringspo-classic .ldn-section--tint,
-	.ldn-chrome--ringspo-classic .ldn-section--accent,
-	.ldn-chrome--ringspo-classic.ldn-size-page .ldn-section:nth-of-type(n + 3):nth-of-type(odd):not(.ldn-section--plain))
+/* Only green accent bands keep a purple header over a table card; purple bands
+   use a white header and keep a solid #fff .ldn-table-card so rows never split. */
+.ldn-chrome--ringspo-classic .ldn-section--accent
 	:is(.ldn-table-card:has(> .ldn-data-table), .ldn-table-card > .ldn-data-table) {
 	background-color: transparent;
 }
@@ -690,7 +708,7 @@
 /* Ink only on white/plain bands. Coloured bands inherit white via the
    :is(h2, p, …) rule above; a later ink colour here used to paint h2 grey
    on purple when specificity tied. */
-.ldn-chrome--ringspo-classic .ldn-section:not(.ldn-section--tint):not(.ldn-section--accent) h2 {
+.ldn-chrome--ringspo-classic .ldn-section:not(.ldn-section--tint):not(.ldn-section--accent):not(.ldn-size-methodology-section--purple) h2 {
 	color: var(--ringspo-ink);
 }
 

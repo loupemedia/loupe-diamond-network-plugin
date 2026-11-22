@@ -1175,12 +1175,12 @@
 
 .ldn-jwl-seg__btn {
 	font: inherit;
-	font-size: 0.82rem;
+	font-size: 0.75rem;
 	font-weight: 600;
 	border: 0;
 	background: transparent;
 	color: var(--ldn-secondary-text);
-	padding: 0.4rem 1rem;
+	padding: 0.3rem 0.75rem;
 	border-radius: 999px;
 	cursor: pointer;
 	text-decoration: none;
@@ -1231,7 +1231,7 @@
 .ldn-jwl-metals__row {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.45rem;
+	gap: 0.35rem;
 	align-items: center;
 	justify-content: flex-end;
 }
@@ -1258,7 +1258,8 @@
 
 .ldn-jwl-control__label strong {
 	color: var(--ldn-text);
-	font-size: 0.95rem;
+	font-size: 0.82rem;
+	font-weight: 600;
 }
 
 .ldn-jwl-dual {
@@ -1351,11 +1352,11 @@
 	left: calc(var(--ldn-jwl-thumb) / 2 + (100% - var(--ldn-jwl-thumb)) * var(--at));
 	transform: translateX(-50%);
 	font: inherit;
-	font-size: 0.72rem;
+	font-size: 0.65rem;
 	color: var(--ldn-secondary-text);
 	background: none;
 	border: 0;
-	padding: 0.1rem 0.15rem;
+	padding: 0.08rem 0.12rem;
 	cursor: pointer;
 	white-space: nowrap;
 }
@@ -1391,24 +1392,26 @@
 .ldn-jwl-metal {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.4rem;
+	gap: 0.3rem;
 	font: inherit;
-	font-size: 0.8rem;
+	font-size: 0.72rem;
 	font-weight: 600;
-	padding: 0.35rem 0.75rem 0.35rem 0.45rem;
+	padding: 0.22rem 0.55rem 0.22rem 0.38rem;
 	border-radius: 999px;
 	border: 0;
 	cursor: pointer;
 	background: var(--ldn-primary);
 	color: #fff;
+	line-height: 1.2;
 }
 
 .ldn-jwl-metal__swatch {
-	width: 1rem;
-	height: 1rem;
+	width: 0.82rem;
+	height: 0.82rem;
 	border-radius: 50%;
 	background: var(--sw, #ddd);
 	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+	flex-shrink: 0;
 }
 
 .ldn-jwl-metal__icon {
@@ -1619,6 +1622,56 @@
 	content: "-";
 }
 
+/* Quality-grid secondary breakdowns (metal / setting): same house table as the
+   lead block; do not reuse `.ldn-jwl-by-carat` table rules (plain left-aligned rows). */
+.ldn-jwl-table-accordion {
+	margin: 0 0 1.25rem;
+}
+
+.ldn-jwl-table-accordion summary {
+	font-family: var(--ldn-title-font, Georgia, serif);
+	font-weight: 400;
+	font-size: 1.4rem;
+	margin: 1.75rem 0 0.4rem;
+	color: var(--ldn-text);
+	cursor: pointer;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.75rem;
+	border-bottom: 0;
+}
+
+.ldn-jwl-table-accordion summary::-webkit-details-marker {
+	display: none;
+}
+
+.ldn-jwl-table-accordion summary::after {
+	content: "+";
+	flex: 0 0 auto;
+	font-family: var(--ldn-body-font, sans-serif);
+	font-size: 1.2rem;
+	font-weight: 400;
+	color: var(--ldn-secondary);
+}
+
+.ldn-jwl-table-accordion[open] summary::after {
+	content: "-";
+}
+
+.ldn-jwl-exp-tables .ldn-jwl-data-table td:first-child a {
+	color: var(--ldn-text);
+	font-weight: inherit;
+	text-decoration: none;
+}
+
+.ldn-jwl-exp-tables .ldn-jwl-data-table td:first-child a:hover,
+.ldn-jwl-exp-notes .ldn-jwl-data-table td:first-child a:hover {
+	text-decoration: underline;
+}
+
 .ldn-jwl-by-carat table {
 	width: 100%;
 	border-collapse: collapse;
@@ -1728,9 +1781,10 @@
 	top: 6px;
 	width: max-content;
 	max-width: calc(100% - 12px);
-	font-size: 0.66rem;
+	font-size: 0.58rem;
 	font-weight: 600;
-	padding: 2px 7px;
+	line-height: 1.25;
+	padding: 2px 6px;
 	border-radius: 999px;
 	background: #fff;
 	color: var(--ldn-secondary);
@@ -1750,7 +1804,8 @@
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	gap: 4px;
+	gap: 3px;
+	max-width: calc(100% - 12px);
 	pointer-events: none;
 }
 
@@ -1832,17 +1887,17 @@
 
 .ldn-jwl-card__row {
 	display: grid;
-	grid-template-columns: 3.4rem minmax(0, 1fr);
+	grid-template-columns: 3rem minmax(0, 1fr);
 	align-items: center;
-	margin-top: 0.45rem;
-	font-size: 0.7rem;
+	margin-top: 0.4rem;
+	font-size: 0.65rem;
 	color: var(--ldn-secondary-text);
 }
 
 .ldn-jwl-card__vals {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.3rem;
+	gap: 0.22rem;
 	align-items: center;
 }
 
@@ -1887,8 +1942,11 @@
 
 .ldn-jwl-wt {
 	font: inherit;
-	font-size: 0.7rem;
-	padding: 0.05rem 0.4rem;
+	font-size: 0.62rem;
+	font-weight: 600;
+	line-height: 1.2;
+	min-height: 0;
+	padding: 0.12rem 0.35rem;
 	border-radius: 4px;
 	border: 0;
 	background: color-mix(in srgb, var(--ldn-text) 6%, #fff);

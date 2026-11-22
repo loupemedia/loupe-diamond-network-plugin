@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.44.4] — 2026-11-22
+
+- **LDN shell footer visibility and GeneratePress HTML suppression.** `LDN_Nav` no longer renders `<footer class="ldn-shell-footer">` on `generate_after_footer_widgets` (which sits inside GeneratePress's hidden `.site-footer` wrapper), rendering it on `generate_after_footer` / `wp_footer` outside `.site-footer` with a clean `© {year} {Brand}` entity line. On `renderer: ldn` markets, `suppress_theme_chrome()` now unhooks GeneratePress's header, footer, footer-widgets and GP Premium secondary/mobile-header/slideout actions in PHP so zero duplicate theme chrome or widget copy is emitted into raw HTML.
+- **White table headers on Ringspo purple bands.** `.ldn-data-table thead th` (and `.ldn-size-matrix` shape header cells) inside purple bands now render with a `#fff` background, dark `--ringspo-ink` text and a `1px` bottom rule instead of purple-on-purple, while `.ldn-table-card` keeps a solid `#fff` surface and `tbody` cells reset `border-radius: 0` / `border-spacing: 0` so rows cannot split into separate white pills under theme CSS.
+- **Hero-band intro restored on Ringspo shape and all-shapes pages.** `hub_intro_hero_html()` now emits the daily summary/copy intro inside `<header class="ldn-hero-band">` (`ldn-type-intro--hero-band`) on both `shape` (`/1-carat/round/`) and `all-shapes` (`/1-carat/`) pages between the freshness line and the chart/stat cards, with duplicate body `intro_dynamic` / `overview_intro_dynamic` suppressed.
+- **Uniform paragraph spacing in `format_prose_html()`.** Single newlines from YAML `>` folded block scalars (such as `shape_analysis` in `ringspo.yaml`) now normalise to separate `<p>` paragraphs (`wpautop(..., false)`) instead of `<br />` line breaks inside one `<p>`.
+- **White `h2` on Ringspo size methodology purple band.** Excluded `.ldn-size-methodology-section--purple` from the `.ldn-section:not(.ldn-section--tint):not(.ldn-section--accent) h2` ink rule and included it in the coloured-band `color: inherit` group so "The drawbacks of ideal-proportion charts" renders white on purple instead of dark ink.
+
+## [0.44.3] — 2026-11-22
+
+- **Ringspo jewellery breakdown deep links.** Metal and setting rows in the quality-grid footer link to standalone facet URLs when jewellery IA defines a route (stud metal leaves, tennis metal, necklace metal-only, stud/tennis pendant setting leaves). Colour × clarity bands stay plain text; rows for the current page path stay unlinked.
+
+## [0.44.2] — 2026-11-22
+
+- **Ringspo quality-grid breakdown tables.** Metal and setting blocks no longer reuse the carat explorer accordion class (which forced a second, left-aligned table style). Secondary sections use `.ldn-jwl-table-accordion` with headings matched to `.ldn-jwl-exp-h2` and the same `.ldn-table-card` / `.ldn-data-table` chrome as the lead colour x clarity table and natural vs lab comparison.
+
+## [0.44.1] — 2026-11-22
+
+- **Ringspo jewellery explorer density.** Smaller metal filter chips, carat weight toggles on design cards, price-position pills and natural/lab segment controls; explorer card badges use short labels (`Premium price`) instead of repeating carat context already shown in the page title.
+
 ## [0.44.0] — 2026-11-20
 
 - **Finished jewellery module (PRD-020 CP 135).** Added `LDN_Jewellery_Module`, `LDN_Jewellery_Router`, `LDN_Jewellery_Dispatcher` and `LDN_Jewellery_Renderer` serving US natural and `/lab-grown/` jewellery pages on Ringspo (`/us/diamond-jewelry-prices/...`) and The Diamond Advisors (`/us/jewelry`, `/us/{category}/{subpath}` and `/us/lab-grown/...`) with zero collision against loose-diamond `flat_leaf` routes.

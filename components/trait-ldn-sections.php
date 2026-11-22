@@ -112,6 +112,9 @@ trait LDN_Trait_Sections {
             return $this->faq_html($this->merged_faq_pairs($ctx, $bag));
         }
         if ($section_id === 'intro_dynamic') {
+            if ($this->shape_intro_in_hero) {
+                return '';
+            }
             return $this->intro_html(
                 $ctx,
                 is_array($bag['summary']) ? $bag['summary'] : array(),
@@ -209,6 +212,9 @@ trait LDN_Trait_Sections {
                     return '';
                 }
                 if ($section_id === 'type_overview_dynamic' && $this->type_intro_in_hero) {
+                    return '';
+                }
+                if ($section_id === 'overview_intro_dynamic' && $this->all_shapes_intro_in_hero) {
                     return '';
                 }
                 $dynamic = $this->copy_dynamic_html($section_id, $ctx, $bag);

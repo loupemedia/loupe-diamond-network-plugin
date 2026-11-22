@@ -179,6 +179,22 @@ final class LDN_Renderer {
     private $market_intro_in_hero = false;
 
     /**
+     * Set when all-shapes intro renders inside the hero band so
+     * overview_intro_dynamic does not repeat the same copy in the body.
+     *
+     * @var bool
+     */
+    private $all_shapes_intro_in_hero = false;
+
+    /**
+     * Set when shape intro renders inside the hero band so
+     * intro_dynamic does not repeat the same copy in the body.
+     *
+     * @var bool
+     */
+    private $shape_intro_in_hero = false;
+
+    /**
      * @param LDN_Data_Fetcher $fetcher
      * @param LDN_Config       $config
      */
@@ -196,6 +212,8 @@ final class LDN_Renderer {
     public function render(LDN_Page_Context $ctx) {
         $this->type_intro_in_hero = false;
         $this->market_intro_in_hero = false;
+        $this->all_shapes_intro_in_hero = false;
+        $this->shape_intro_in_hero = false;
 
         $layout = $this->config->get_page_layout($ctx->site_id, $ctx->page_level, $ctx->country_code);
         $bag = $this->prefetch($ctx);

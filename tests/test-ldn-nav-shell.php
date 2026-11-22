@@ -319,6 +319,87 @@ $nav_jp = new LDN_Nav('ringspo', $config, $fetcher, $rollout);
 check(!$nav_jp->owns_shell(), 'Japan stays on the theme renderer');
 check($nav_jp->header_html() === '', 'Japan does not receive the US shell header');
 
+// --- GeneratePress PHP suppression + footer hook outside .site-footer --------
+// Test intent: when `owns_shell()` is true (Ringspo US), LDN unhooks GeneratePress's
+// header, footer, footer-widgets and GP Premium secondary/mobile-header actions in PHP
+// so hidden duplicate chrome/widgets are never emitted into raw HTML, AND skips
+// `generate_after_footer_widgets` (which sits inside `.site-footer`, hidden by CSS)
+// so `<footer class="ldn-shell-footer">` renders outside `.site-footer` with a clean
+// `© {year} Ringspo` line. Theme markets (Japan) keep all GeneratePress hooks intact.
+// Would fail if: `render_footer_menu()` ran on `generate_after_footer_widgets` for an
+// `owns_shell()` request (trapping the LDN footer inside hidden `.site-footer`), or
+// GeneratePress's `generate_header`/`generate_footer` actions stayed hooked on US.
+check(
+    strpos($footer, 'ldn-shell-footer__copyright') !== false
+        && strpos($footer, '&copy; ' . gmdate('Y') . ' Ringspo') !== false
+        && stripos($footer, 'GeneratePress') === false,
+    'shell footer includes a clean copyright entity line with no GeneratePress credit'
+);
+
+$saved_actions = isset($GLOBALS['ldn_preview_actions']) ? $GLOBALS['ldn_preview_actions'] : array();
+$saved_filters = isset($GLOBALS['ldn_preview_filters']) ? $GLOBALS['ldn_preview_filters'] : array();
+
+$GLOBALS['ldn_preview_actions'] = array();
+add_action('generate_header', function () { echo '<header class="site-header">GP header</header>'; });
+add_action('generate_footer', function () { echo '<div class="footer-widgets">Latest deals: 25% off</div>'; });
+add_action('generate_after_header', 'generate_menu_plus_mobile_header', 5);
+add_action('wp_footer', 'generate_slideout_navigation', 0);
+if (!function_exists('generate_menu_plus_mobile_header')) {
+    function generate_menu_plus_mobile_header() { echo '<nav id="mobile-header">GP mobile</nav>'; }
+}
+if (!function_exists('generate_slideout_navigation')) {
+    function generate_slideout_navigation() { echo '<nav id="generate-slideout-menu">GP slideout</nav>'; }
+}
+
+$GLOBALS['__ldn_nav_path'] = '/diamond-size/methodology/';
+$nav_gp_us = new LDN_Nav('ringspo', $config, $fetcher, $rollout);
+$nav_gp_us->register();
+do_action('wp');
+
+ob_start();
+do_action('generate_header');
+do_action('generate_after_header');
+echo '<div class="site-footer">';
+do_action('generate_footer');
+do_action('generate_after_footer_widgets');
+echo '</div>';
+do_action('generate_after_footer');
+do_action('wp_footer');
+$gp_us_dom = ob_get_clean();
+
+check(
+    strpos($gp_us_dom, 'GP header') === false
+        && strpos($gp_us_dom, 'Latest deals: 25% off') === false
+        && strpos($gp_us_dom, 'GP mobile') === false
+        && strpos($gp_us_dom, 'GP slideout') === false
+        && apply_filters('generate_footer_widgets', 3) === 0
+        && apply_filters('generate_secondary_navigation_location', 'above-header') === '',
+    'owns_shell() strips GeneratePress header, footer widgets, secondary nav and mobile/slideout HTML in PHP'
+);
+check(
+    strpos($gp_us_dom, '<div class="site-footer"></div>') !== false
+        && substr_count($gp_us_dom, '<footer class="ldn-shell-footer">') === 1
+        && strpos($gp_us_dom, '</div><footer class="ldn-shell-footer">') !== false,
+    'owns_shell() skips generate_after_footer_widgets inside .site-footer and renders <footer class="ldn-shell-footer"> once outside it'
+);
+
+// Verify a `renderer: theme` market (Japan) leaves GeneratePress hooks untouched.
+$GLOBALS['ldn_preview_actions'] = array();
+$GLOBALS['ldn_preview_filters'] = $saved_filters;
+add_action('generate_header', function () { echo '<header class="site-header">JP GP header</header>'; });
+add_action('generate_footer', function () { echo '<div class="footer-widgets">JP GP footer</div>'; });
+$GLOBALS['__ldn_nav_path'] = '/jp/daiyamondo-kakaku/';
+$nav_gp_jp = new LDN_Nav('ringspo', $config, $fetcher, $rollout);
+$nav_gp_jp->register();
+do_action('wp');
+check(
+    has_action('generate_header') && has_action('generate_footer'),
+    'theme-rendered markets (Japan) keep GeneratePress header and footer hooks intact'
+);
+
+$GLOBALS['ldn_preview_actions'] = $saved_actions;
+$GLOBALS['ldn_preview_filters'] = $saved_filters;
+
 $pass = $GLOBALS['__tests'] - $GLOBALS['__fails'];
 fwrite(STDOUT, "{$pass} of {$GLOBALS['__tests']} checks passed\n");
 exit($GLOBALS['__fails'] === 0 ? 0 : 1);

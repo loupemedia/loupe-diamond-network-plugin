@@ -64,6 +64,31 @@ final class LDN_Jewellery_Renderer {
         'illusion_miracle' => 'Illusion',
         'shared_prong'     => 'Shared Prong',
         'bar'              => 'Bar',
+        'east_west'        => 'East West',
+    );
+
+    /** URL path segments; keep in sync with ``shared/jewellery/ia.py`` ``METAL_SLUGS`` / ``SETTING_SLUGS``. */
+    const METAL_URL_SLUGS = array(
+        'yellow_gold' => 'yellow-gold',
+        'white_gold'  => 'white-gold',
+        'rose_gold'   => 'rose-gold',
+        'platinum'    => 'platinum',
+        'silver'      => 'silver',
+        'vermeil'     => 'vermeil',
+    );
+
+    const SETTING_URL_SLUGS = array(
+        'prong'            => 'prong',
+        'martini_3_prong'  => 'martini-3-prong',
+        'basket_4_prong'   => 'basket-4-prong',
+        'bezel'            => 'bezel',
+        'halo'             => 'halo',
+        'pave'             => 'pave',
+        'channel'          => 'channel',
+        'cluster'          => 'cluster',
+        'illusion_miracle' => 'illusion-miracle',
+        'floating'         => 'floating',
+        'east_west'        => 'east-west',
     );
 
     const CATEGORY_LABELS = array(
@@ -1199,7 +1224,7 @@ final class LDN_Jewellery_Renderer {
         }
 
         // Quality Grid Breakdown Tables (3x3 Color x Clarity lead + Metal / Setting secondary)
-        $out .= $this->quality_led_tables_html($quality_grid);
+        $out .= $this->quality_led_tables_html($ctx, $summary, $quality_grid);
 
         // Natural vs Lab-Grown comparison table & Methodology
         $out .= $this->quality_led_footer_html($ctx, $copy, $lab_comp, $nat_url, $lab_url);
@@ -1426,7 +1451,7 @@ final class LDN_Jewellery_Renderer {
         return $out;
     }
 
-    private function quality_led_tables_html(array $quality_grid) {
+    private function quality_led_tables_html(LDN_Page_Context $ctx, array $summary, array $quality_grid) {
         $lead_id = isset($quality_grid['lead_table']) && is_string($quality_grid['lead_table'])
             ? $quality_grid['lead_table']
             : '';
@@ -1471,7 +1496,7 @@ final class LDN_Jewellery_Renderer {
             if ($is_lead) {
                 $out .= '<h2 class="ldn-jwl-exp-h2">' . esc_html($heading) . '</h2>';
             } else {
-                $out .= '<details class="ldn-jwl-by-carat"><summary>' . esc_html($heading) . '</summary>';
+                $out .= '<details class="ldn-jwl-table-accordion"><summary>' . esc_html($heading) . '</summary>';
             }
 
             $out .= '<div class="ldn-table-card"><table class="ldn-data-table ldn-jwl-data-table">';
@@ -1487,7 +1512,15 @@ final class LDN_Jewellery_Renderer {
             } elseif ($tid === 'metal') {
                 $out .= '<thead><tr><th>Metal</th><th>Middle price</th><th>Typical range</th><th class="num">Designs</th></tr></thead><tbody>';
                 foreach ($rows as $r) {
-                    $out .= '<tr><td><strong>' . esc_html($this->metal_label((string) ($r['metal'] ?? ''))) . '</strong></td>'
+                    $metal = (string) ($r['metal'] ?? '');
+                    $label = $this->metal_label($metal);
+                    $cell = $this->quality_led_breakdown_label_cell(
+                        $ctx,
+                        $summary,
+                        $label,
+                        $this->jewellery_facet_path_for_metal($summary, $metal)
+                    );
+                    $out .= '<tr><td>' . $cell . '</td>'
                         . '<td>' . esc_html($this->usd((float) ($r['headline_price'] ?? 0))) . '</td>'
                         . '<td>' . esc_html($this->usd((float) ($r['range_low'] ?? 0)) . ' to ' . $this->usd((float) ($r['range_high'] ?? 0))) . '</td>'
                         . '<td class="num">' . (int) ($r['design_count'] ?? 0) . '</td></tr>';
@@ -1495,7 +1528,15 @@ final class LDN_Jewellery_Renderer {
             } else {
                 $out .= '<thead><tr><th>Setting</th><th>Middle price</th><th>Typical range</th><th class="num">Designs</th></tr></thead><tbody>';
                 foreach ($rows as $r) {
-                    $out .= '<tr><td><strong>' . esc_html($this->setting_label((string) ($r['setting'] ?? ''))) . '</strong></td>'
+                    $setting = (string) ($r['setting'] ?? '');
+                    $label = $this->setting_label($setting);
+                    $cell = $this->quality_led_breakdown_label_cell(
+                        $ctx,
+                        $summary,
+                        $label,
+                        $this->jewellery_facet_path_for_setting($summary, $setting)
+                    );
+                    $out .= '<tr><td>' . $cell . '</td>'
                         . '<td>' . esc_html($this->usd((float) ($r['headline_price'] ?? 0))) . '</td>'
                         . '<td>' . esc_html($this->usd((float) ($r['range_low'] ?? 0)) . ' to ' . $this->usd((float) ($r['range_high'] ?? 0))) . '</td>'
                         . '<td class="num">' . (int) ($r['design_count'] ?? 0) . '</td></tr>';
@@ -1518,11 +1559,11 @@ final class LDN_Jewellery_Renderer {
             $out .= '<h2 class="ldn-jwl-exp-h2">Natural vs lab-grown prices</h2>';
             $out .= '<div class="ldn-table-card"><table class="ldn-data-table ldn-jwl-data-table">';
             $out .= '<thead><tr><th>Diamond type</th><th>Middle price</th><th>Typical range</th><th class="num">Designs</th></tr></thead><tbody>';
-            $out .= '<tr><td><a href="' . esc_url($nat_url) . '">Natural diamonds</a></td>'
+            $out .= '<tr><td><strong><a href="' . esc_url($nat_url) . '">Natural diamonds</a></strong></td>'
                 . '<td>' . esc_html($this->usd((float) $nh['median_price'])) . '</td>'
                 . '<td>' . esc_html($this->usd((float) $nh['p25_price']) . ' to ' . $this->usd((float) $nh['p75_price'])) . '</td>'
                 . '<td class="num">' . (int) $nh['design_count'] . '</td></tr>';
-            $out .= '<tr><td><a href="' . esc_url($lab_url) . '">Lab-grown diamonds</a></td>'
+            $out .= '<tr><td><strong><a href="' . esc_url($lab_url) . '">Lab-grown diamonds</a></strong></td>'
                 . '<td>' . esc_html($this->usd((float) $lh['median_price'])) . '</td>'
                 . '<td>' . esc_html($this->usd((float) $lh['p25_price']) . ' to ' . $this->usd((float) $lh['p75_price'])) . '</td>'
                 . '<td class="num">' . (int) $lh['design_count'] . '</td></tr>';
@@ -2191,6 +2232,87 @@ final class LDN_Jewellery_Renderer {
             return 'necklaces';
         }
         return 'designs';
+    }
+
+    /**
+     * First-column label for a breakdown row; links when IA allows a standalone facet URL.
+     *
+     * Mirrors ``shared/jewellery/ia.py`` ``_route_spec_for_cell`` for metal and setting only.
+     * Does not emit a link for the current page path or when no route exists (e.g. color bands).
+     */
+    private function quality_led_breakdown_label_cell(
+        LDN_Page_Context $ctx,
+        array $summary,
+        $label,
+        $facet_path
+    ) {
+        $facet_path = trim((string) $facet_path, '/');
+        $current = trim((string) $ctx->jewelry_path, '/');
+        if ($facet_path === '' || $facet_path === $current) {
+            return '<strong>' . esc_html($label) . '</strong>';
+        }
+        $url = $this->build_jewellery_url($ctx->site_id, $ctx->country_code, $ctx->diamond_type, $facet_path);
+        if ($url === '') {
+            return '<strong>' . esc_html($label) . '</strong>';
+        }
+        return '<strong><a href="' . esc_url($url) . '">' . esc_html($label) . '</a></strong>';
+    }
+
+    private function jewellery_facet_path_for_metal(array $summary, $metal) {
+        $metal = (string) $metal;
+        if (!isset(self::METAL_URL_SLUGS[$metal])) {
+            return '';
+        }
+        $m_slug = self::METAL_URL_SLUGS[$metal];
+        $cat = isset($summary['jewelry_category']) ? (string) $summary['jewelry_category'] : '';
+        $cat_slug = isset(self::CATEGORY_SLUGS[$cat]) ? self::CATEGORY_SLUGS[$cat] : '';
+        if ($cat_slug === '') {
+            return '';
+        }
+        $style = isset($summary['jewelry_style']) ? (string) $summary['jewelry_style'] : '';
+        if ($style === 'ALL') {
+            $style = '';
+        }
+        if ($cat === 'earrings' && $style === 'stud') {
+            return $cat_slug . '/studs/' . $m_slug;
+        }
+        if ($cat === 'bracelet' && $style === 'tennis') {
+            return $cat_slug . '/tennis/' . $m_slug;
+        }
+        if ($cat === 'necklace' && $style === '') {
+            return $cat_slug . '/' . $m_slug;
+        }
+        return '';
+    }
+
+    private function jewellery_facet_path_for_setting(array $summary, $setting) {
+        $setting = (string) $setting;
+        if (!isset(self::SETTING_URL_SLUGS[$setting])) {
+            return '';
+        }
+        $s_slug = self::SETTING_URL_SLUGS[$setting];
+        $cat = isset($summary['jewelry_category']) ? (string) $summary['jewelry_category'] : '';
+        $cat_slug = isset(self::CATEGORY_SLUGS[$cat]) ? self::CATEGORY_SLUGS[$cat] : '';
+        if ($cat_slug === '') {
+            return '';
+        }
+        $style = isset($summary['jewelry_style']) ? (string) $summary['jewelry_style'] : '';
+        if ($style === 'ALL') {
+            $style = '';
+        }
+        $style_slug = ($style !== '' && isset(self::STYLE_SLUGS[$style])) ? self::STYLE_SLUGS[$style] : '';
+        if ($style_slug === '') {
+            return '';
+        }
+        $allows = array(
+            'earrings' => array('stud'),
+            'bracelet' => array('tennis'),
+            'necklace' => array('solitaire_pendant', 'tennis'),
+        );
+        if (!isset($allows[$cat]) || !in_array($style, $allows[$cat], true)) {
+            return '';
+        }
+        return $cat_slug . '/' . $style_slug . '/' . $s_slug;
     }
 
     private function metal_label($m) {

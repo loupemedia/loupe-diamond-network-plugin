@@ -222,7 +222,7 @@ trait LDN_Trait_Content {
      * @param string|null      $currency ISO code for price formatting.
      * @return string
      */
-    public function intro_html(LDN_Page_Context $ctx, array $summary, $currency = null) {
+    public function intro_html(LDN_Page_Context $ctx, array $summary, $currency = null, $in_hero_band = false) {
         // Headline price tracks the MEDIAN (p50) — the same figure the carat
         // ladder table shows — so the intro, hero stat and table always agree.
         // Falls back to current_price (trimmed avg) only when no median is present.
@@ -278,7 +278,9 @@ trait LDN_Trait_Content {
         ));
 
         $symbol = $this->currency_symbol($currency);
-        $country_name = $this->country_full_name($ctx);
+        $include_country = $this->country_in_content_flag($this->profile($ctx), 'body_copy', true, $ctx);
+        $country_name = $include_country ? $this->country_full_name($ctx) : '';
+        $in_country = $country_name !== '' ? ' in ' . $country_name : '';
         $color_word = $this->locale_color_word($ctx);
         $carat_label = $this->format_carat_label($ctx->carat);
         $shape_label = $ctx->shape !== null
@@ -300,23 +302,28 @@ trait LDN_Trait_Content {
         $price_text = $symbol . number_format((float) $current_price, 0);
         $diamond_word = $sample_size === 1 ? 'diamond' : 'diamonds';
         $sample_text = number_format($sample_size);
+        $match_clause = $ctx->shape !== null
+            ? 'that match this carat weight and shape in our database'
+            : 'tracked at this carat weight across all shapes in our database';
 
         if ($subject === 'diamond') {
             $paragraph = sprintf(
-                'The current price for a diamond in %s is %s, calculated from %s %s that match this carat weight and shape in our database',
-                esc_html($country_name),
+                'The current price for a diamond%s is %s, calculated from %s %s %s',
+                esc_html($in_country),
                 esc_html($price_text),
                 esc_html($sample_text),
-                esc_html($diamond_word)
+                esc_html($diamond_word),
+                esc_html($match_clause)
             );
         } else {
             $paragraph = sprintf(
-                'The current price for a %s diamond in %s is %s, calculated from %s %s that match this carat weight and shape in our database',
+                'The current price for a %s diamond%s is %s, calculated from %s %s %s',
                 esc_html($subject),
-                esc_html($country_name),
+                esc_html($in_country),
                 esc_html($price_text),
                 esc_html($sample_text),
-                esc_html($diamond_word)
+                esc_html($diamond_word),
+                esc_html($match_clause)
             );
         }
 
@@ -352,7 +359,11 @@ trait LDN_Trait_Content {
             $body .= "\n\n" . $range_paragraph;
         }
 
-        return '<section class="ldn-section ldn-intro-dynamic">'
+        $class = $in_hero_band
+            ? 'ldn-type-intro ldn-type-intro--hero-band'
+            : 'ldn-section ldn-intro-dynamic';
+
+        return '<section class="' . esc_attr($class) . '">'
             . wp_kses_post(wpautop($body))
             . '</section>';
     }
@@ -421,6 +432,47 @@ trait LDN_Trait_Content {
             return '<section class="ldn-type-intro ldn-type-intro--hero-band">'
                 . $this->format_prose_html(implode("\n\n", $parts))
                 . '</section>';
+        }
+
+        if ($ctx->page_level === 'all-shapes') {
+            $sections = $this->copy_sections(is_array($bag['copy']) ? $bag['copy'] : array());
+            $text = isset($sections['intro_text']) && is_scalar($sections['intro_text'])
+                ? trim((string) $sections['intro_text'])
+                : '';
+            if ($text !== '' && $this->ranking_unique_shape_count($bag) === 1) {
+                $parts = preg_split('/\n\s*\n/', $text, 2);
+                $text = is_array($parts) && isset($parts[0]) ? $parts[0] : $text;
+                $text = preg_replace('/\s+They run from\b.*$/s', '', $text);
+            }
+            if ($text !== '') {
+                $this->all_shapes_intro_in_hero = true;
+                return '<section class="ldn-type-intro ldn-type-intro--hero-band">'
+                    . $this->format_prose_html($text)
+                    . '</section>';
+            }
+            $fallback = $this->intro_html(
+                $ctx,
+                isset($bag['summary']) && is_array($bag['summary']) ? $bag['summary'] : array(),
+                $currency,
+                true
+            );
+            if ($fallback !== '') {
+                $this->all_shapes_intro_in_hero = true;
+            }
+            return $fallback;
+        }
+
+        if ($ctx->page_level === 'shape') {
+            $shape_intro = $this->intro_html(
+                $ctx,
+                isset($bag['summary']) && is_array($bag['summary']) ? $bag['summary'] : array(),
+                $currency,
+                true
+            );
+            if ($shape_intro !== '') {
+                $this->shape_intro_in_hero = true;
+            }
+            return $shape_intro;
         }
 
         return '';
@@ -1120,11 +1172,13 @@ trait LDN_Trait_Content {
             return '';
         }
         $text = str_replace(array("\r\n", "\r"), "\n", $text);
-        if (strpos($text, "\n\n") !== false) {
-            return wp_kses_post(wpautop($text));
-        }
         if (strpos($text, "\n") !== false) {
-            return wp_kses_post(wpautop($text));
+            // YAML `>` folded block scalars collapse a blank line to a single
+            // `\n`. Normalise every newline run to `\n\n` with `$br = false` so
+            // paragraph breaks render as `<p>` elements with uniform spacing
+            // instead of `<br />` line breaks inside one `<p>`.
+            $normalized = preg_replace('/\n+/', "\n\n", $text);
+            return wp_kses_post(wpautop($normalized, false));
         }
 
         $sentences = preg_split('/(?<=[.!?])\s+(?=[A-Z"\'(])/', $text, -1, PREG_SPLIT_NO_EMPTY);

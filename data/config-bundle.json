@@ -1,6 +1,6 @@
 {
-  "version": "3bd72634",
-  "generated_at": "2026-11-20T13:31:54.043778+00:00",
+  "version": "0dbbc60a",
+  "generated_at": "2026-11-22T07:06:15.162503+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -5675,11 +5675,21 @@
         ],
         "pool_id": "us_ringspo_v1"
       },
+      "loose_diamonds_module": {
+        "rollout_countries": [
+          "us"
+        ],
+        "pool_id": "us_ringspo_loose_v1",
+        "pools_by_country": {
+          "us": "us_ringspo_loose_v1"
+        }
+      },
       "s3": {
         "bucket": "ringspo",
         "graph_prefix": "{country}/{diamond_type}/{carat}-carat/{shape}/",
         "size_prefix": "size",
         "jewellery_prefix": "jewellery/{country}/{diamond_type}/{jewelry_path}/",
+        "diamonds_prefix": "diamonds/{country}/{diamond_type}/{diamond_path}/",
         "image_base_url": "https://d1egdb7lgpukq6.cloudfront.net"
       }
     },
