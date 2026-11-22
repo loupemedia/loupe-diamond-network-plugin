@@ -722,10 +722,107 @@ check(isset($comp['a']['faceup_delta_pct']), 'build_comparison_summary computes 
 
 $delta_html = $renderer->comparison_delta_html($comp);
 check(strpos($delta_html, 'ldn-size-comparison-delta') !== false, 'comparison_delta_html helper still builds delta copy');
+check(strpos($delta_html, '14.3% larger') !== false, 'build_comparison_summary uses smaller stone denominator when Stone A is larger (32 vs 28 -> 14.3%)');
 
-// Test intent: comparison pages show one result line (the callout), not a
-// second near-duplicate delta paragraph underneath.
-// Would fail if: comparison_body_html resumed appending comparison_delta_html.
+// Test intent: static comparison pages state the face-up verdict once in the
+// hero band (never repeating a second callout section underneath), and every
+// percentage and millimetre figure on the page agrees: '% larger' uses the
+// smaller stone denominator to at most 1 decimal place (3.6% for 32.07 vs
+// 30.96, even if S3 size-copy.json still holds a stale 3.5%), measurements use
+// length x width everywhere, and remaining sections keep alternating bands.
+// Would fail if: comparison_body_html rendered ldn-size-comparison-callout,
+// intro/head read stale plain_text or rounded bars to integer 4%, or stone
+// columns printed width x length (4.76 x 6.66) against 6.66 x 4.76 below.
+$round_emerald_comp = array(
+    'type' => 'comparison',
+    'a' => array(
+        'shape' => 'round', 'carat' => '1', 'length_mm' => 6.37, 'width_mm' => 6.41,
+        'faceup_area_mm2' => 32.07, 'source' => 'real', 'n' => 89690,
+        'ideal' => array('length_mm' => 6.5, 'width_mm' => 6.5, 'depth_mm' => 3.92, 'faceup_area_mm2' => 33.18),
+    ),
+    'b' => array(
+        'shape' => 'emerald', 'carat' => '1', 'length_mm' => 6.66, 'width_mm' => 4.76,
+        'faceup_area_mm2' => 30.96, 'source' => 'real', 'n' => 36266,
+        'ideal' => array('length_mm' => 6.68, 'width_mm' => 4.95, 'depth_mm' => 3.22, 'faceup_area_mm2' => 32.28),
+    ),
+    'deltas' => array('faceup_area_pct' => -3.5),
+    'bigger' => 'a',
+    'visuals' => array(
+        'scale_reference_a_svg' => '<svg id="scale-a"></svg>',
+        'scale_reference_b_svg' => '<svg id="scale-b"></svg>',
+        'overlay_svg' => '<svg id="overlay"></svg>',
+    ),
+);
+$stale_copy_fetcher = new class extends LDN_Data_Fetcher {
+    public function fetch_artefact($id, $ctx) {
+        if ($id === 'size_copy_json') {
+            return array(
+                'type' => 'comparison',
+                'plain_text' => 'A 1 carat Round faces up at about 32.07 mm² versus 30.96 mm² for a 1 carat Emerald - the 1 carat Round is roughly 3.5% larger face-up.',
+                'faq' => array(),
+            );
+        }
+        return null;
+    }
+};
+$stale_copy_renderer = new LDN_Size_Renderer($stale_copy_fetcher, $config);
+$ctx_re = new LDN_Page_Context(
+    'ringspo',
+    'size-comparison',
+    'us',
+    null,
+    null,
+    null,
+    'size',
+    'round-1-carat-vs-emerald-cut-1-carat'
+);
+$re_page = $stale_copy_renderer->render($ctx_re, $round_emerald_comp);
+$re_head = $stale_copy_renderer->render_head_content($ctx_re, $round_emerald_comp, true);
+$expected_re_lead = 'A 1 carat round diamond looks 3.6% larger face-up than a 1 carat emerald cut diamond, at 6.37 × 6.41 mm (32.07 mm²) versus 6.66 × 4.76 mm (30.96 mm²), based on measurements of 125,956 real diamonds.';
+check(strpos($re_page, $expected_re_lead) !== false, 'comparison hero band renders answer-first SEO/AEO sentence with mm, mm² and real sample count');
+check(strpos($re_page, '3.5%') === false, 'comparison page ignores stale 3.5% denominator bug in size-copy.json');
+check(strpos($re_head, $expected_re_lead) !== false && strpos($re_head, '3.5%') === false,
+    'comparison meta/schema description matches hero SEO/AEO sentence');
+check($stale_copy_renderer->page_title($ctx_re, $round_emerald_comp) === '1 Carat Round vs 1 Carat Emerald Cut Diamond Size',
+    'comparison <title> includes -cut shape label and Diamond Size suffix');
+check($stale_copy_renderer->headline($ctx_re, $round_emerald_comp) === '1 Carat Round vs 1 Carat Emerald',
+    'comparison H1 stays concise without Diamond Size suffix');
+check(strpos($re_head, 'og:title" content="1 Carat Round vs 1 Carat Emerald Cut Diamond Size"') !== false,
+    'comparison og:title uses SEO page_title');
+$computed_pair = $round_emerald_comp;
+$computed_pair['b']['source'] = 'computed';
+check(strpos($stale_copy_renderer->comparison_lead_text($computed_pair), ', based on ideal cut proportions.') !== false
+    && strpos($stale_copy_renderer->comparison_lead_text($computed_pair), 'real diamonds') === false,
+    'comparison lead switches sample tail when either side uses computed ideal proportions');
+$b_bigger_pair = array(
+    'type' => 'comparison',
+    'a' => $round_emerald_comp['b'],
+    'b' => $round_emerald_comp['a'],
+    'bigger' => 'b',
+);
+check($stale_copy_renderer->comparison_lead_text($b_bigger_pair) === $expected_re_lead,
+    'comparison lead always puts the larger stone first even when Stone B is bigger');
+check(strpos($re_page, 'ldn-faceup-callout') === false && strpos($re_page, 'ldn-size-comparison-callout') === false,
+    'static comparison page omits duplicate verdict callout section below hero');
+check(strpos($re_page, 'Difference: 1.11 mm² (3.6%)') !== false, 'Face-up overlay Difference bar agrees on 3.6% (not rounded to 4%)');
+check(strpos($re_page, '6.66 × 4.76 mm') !== false && strpos($re_page, '4.76 × 6.66 mm') === false,
+    'comparison stone column Measurements uses length x width order matching legend and table');
+check(strpos($re_page, '6.68 × 4.95 mm') !== false && strpos($re_page, '4.95 × 6.68 mm') === false,
+    'comparison stone column Chart ideal size uses length x width order');
+check(strpos($re_page, 'ldn-size-comparison-visual ldn-section--tint') !== false
+    && strpos($re_page, 'ldn-size-comparison-table ldn-section--plain') !== false
+    && strpos($re_page, 'ldn-size-comparison-links ldn-section--tint') !== false,
+    'comparison sections carry explicit alternating tint/plain band classes');
+
+$even_comp = array(
+    'type' => 'comparison',
+    'a' => array('shape' => 'oval', 'carat' => '1', 'length_mm' => 8.0, 'width_mm' => 5.5, 'faceup_area_mm2' => 33.0),
+    'b' => array('shape' => 'round', 'carat' => '1', 'length_mm' => 6.4, 'width_mm' => 6.4, 'faceup_area_mm2' => 30.0),
+);
+check(strpos($renderer->comparison_faceup_bars_html($even_comp), '(10%)') !== false
+    && strpos($renderer->comparison_callout_html($even_comp), '10% ') !== false,
+    'whole-number comparison percentages trim trailing .0');
+
 $comp_page = $renderer->render($ctx_cmp = new LDN_Page_Context(
     'ringspo',
     'size-comparison',
@@ -736,7 +833,7 @@ $comp_page = $renderer->render($ctx_cmp = new LDN_Page_Context(
     'size',
     'round-1-carat-vs-princess-1-carat'
 ), $comp);
-check(strpos($comp_page, 'ldn-faceup-callout') !== false, 'comparison page keeps the face-up callout');
+check(strpos($comp_page, 'ldn-faceup-callout') === false, 'comparison page omits the duplicate callout section');
 check(strpos($comp_page, 'ldn-size-comparison-delta') === false, 'comparison page omits the duplicate delta section');
 
 // Test intent: comparison side links use the shared explore-card grid (not a

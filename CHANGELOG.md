@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.44.6] — 2026-11-22
+
+- **Size comparison SEO/AEO hero copy, `<title>` and percentage/dimension agreement.** Static `/diamond-size/compare/{a}-vs-{b}/` pages now emit an answer-first SEO/AEO lead inside `<header class="ldn-hero-band">` and `<meta name="description">` (`"A 1 carat round diamond looks 3.6% larger face-up than a 1 carat emerald cut diamond, at 6.37 × 6.41 mm (32.07 mm²) versus 6.66 × 4.76 mm (30.96 mm²), based on measurements of 125,956 real diamonds."`), include `-cut` shape labels and `Diamond Size` in `<title>` (`1 Carat Round vs 1 Carat Emerald Cut Diamond Size`), and omit the duplicate `.ldn-size-comparison-callout` section below while preserving alternating white/purple bands (`ldn-section--tint` / `ldn-section--plain`). Face-up `% larger` and the `Face-up overlay` `Difference:` bar (`LDN_Size_Renderer` and `size-faceted-overlay.js`) both compute `abs(fa - fb) / min(fa, fb) * 100` to at most 1 decimal place (`3.6%` instead of `3.5%` vs `4%`), and stone column `Measurements` / `Chart ideal size` rows use `length × width` order matching the legend and `Side-by-side measurements` table.
+
+## [0.44.5] — 2026-11-22
+
+- **Ringspo jewellery explorer control density.** Explorer metal filter chips match natural/lab segment button sizing; design-card price badges (value, typical and premium) share one `.ldn-jwl-card__badge` shell and `0.64rem` pill typography; carat weight toggles on cards are slightly smaller.
+
 ## [0.44.4] — 2026-11-22
 
 - **LDN shell footer visibility and GeneratePress HTML suppression.** `LDN_Nav` no longer renders `<footer class="ldn-shell-footer">` on `generate_after_footer_widgets` (which sits inside GeneratePress's hidden `.site-footer` wrapper), rendering it on `generate_after_footer` / `wp_footer` outside `.site-footer` with a clean `© {year} {Brand}` entity line. On `renderer: ldn` markets, `suppress_theme_chrome()` now unhooks GeneratePress's header, footer, footer-widgets and GP Premium secondary/mobile-header/slideout actions in PHP so zero duplicate theme chrome or widget copy is emitted into raw HTML.

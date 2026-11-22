@@ -1,6 +1,6 @@
 {
-  "version": "0dbbc60a",
-  "generated_at": "2026-11-22T07:06:15.162503+00:00",
+  "version": "dc3ffa19",
+  "generated_at": "2026-11-22T09:46:56.810683+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -22240,7 +22240,16 @@
         "jewellery_lab_level_mens": "/{country}/diamond-jewelry-prices/{jewellery_type}/mens/{category}/{subpath}",
         "jewellery_level_sitemap": "/{country}/diamond-jewelry-prices/sitemap.xml",
         "jewellery_type_natural": "",
-        "jewellery_type_lab": "lab-grown"
+        "jewellery_type_lab": "lab-grown",
+        "diamonds_level_1": "/{country}/diamonds",
+        "diamonds_level_2": "/{country}/diamonds/{type}",
+        "diamonds_level_shape": "/{country}/diamonds/{type}/{shape}",
+        "diamonds_level_carat": "/{country}/diamonds/{type}/{carat}",
+        "diamonds_level_leaf": "/{country}/diamonds/{type}/{carat}/{shape}",
+        "diamonds_level_modifier": "/{country}/diamonds/{type}/{modifier}",
+        "diamonds_level_carat_modifier": "/{country}/diamonds/{type}/{carat}/{modifier}",
+        "diamonds_level_sitemap": "/{country}/diamonds/sitemap.xml",
+        "diamonds_cards_file": "diamond-cards.json"
       },
       "diamondchart": {
         "site_id": "diamondchart",
@@ -23242,7 +23251,8 @@
               "cross_site_comparison": {
                 "presentation": "disabled"
               },
-              "individual_listings": true,
+              "individual_listings": false,
+              "diamonds_cta_bridge": true,
               "price_calculator": {
                 "presentation": "full"
               },
@@ -23266,6 +23276,7 @@
               "price_calculator": {
                 "presentation": "hub"
               },
+              "diamonds_cta_bridge": true,
               "cross_site_comparison": {
                 "presentation": "disabled"
               },
@@ -23283,6 +23294,7 @@
             ],
             "wp_widgets": {
               "nat_lab_toggle": true,
+              "diamonds_cta_bridge": true,
               "cross_site_comparison": {
                 "presentation": "disabled"
               },
@@ -23300,6 +23312,7 @@
               "static_content_json"
             ],
             "wp_widgets": {
+              "diamonds_cta_bridge": true,
               "cross_site_comparison": {
                 "presentation": "disabled"
               },
@@ -23332,7 +23345,8 @@
                 "presentation": "distribution"
               },
               "size_table": true,
-              "shape_outline": true
+              "shape_outline": true,
+              "diamonds_cta_bridge": true
             }
           },
           "jewellery": {
@@ -23356,6 +23370,22 @@
                 "presentation": "metal_and_setting"
               },
               "jewellery_ads": false,
+              "data_methodology": {
+                "presentation": "full"
+              }
+            }
+          },
+          "diamonds": {
+            "enabled": true,
+            "countries": [
+              "us"
+            ],
+            "pipeline_artefacts": [
+              "diamond_cards_json",
+              "diamond_image_webp"
+            ],
+            "wp_widgets": {
+              "diamond_cards_explorer": true,
               "data_methodology": {
                 "presentation": "full"
               }
@@ -25639,6 +25669,11 @@
         "description": "Per-site product decision — artefact listed under the matching page level in site_content_entitlements.yaml.",
         "authoritative_source": "config/site_content_entitlements.yaml",
         "implemented": true
+      },
+      "consumer_advisory": {
+        "description": "Phase 8 consumer advisory go-live + site/country policy gate (accounts, shortlists, live watch alerts).",
+        "authoritative_source": "config/country_markets.yaml + config/site_content_entitlements.yaml via shared/config/country_markets.py::consumer_advisory_enabled",
+        "implemented": true
       }
     },
     "artefacts": {
@@ -26306,6 +26341,36 @@
           "jewellery_explorer_json",
           "jewellery_summary_json"
         ]
+      },
+      "diamond_cards_json": {
+        "schema_version": 1,
+        "page_level": "diamonds",
+        "producing_script": "I3_stone_card_artefacts",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "diamond-cards.json",
+        "description": "Server-rendered loose diamond shopping payload: route benchmark stats, Best Value / Largest Face-Up / Best Sparkle curated doors, deduplicated <= 48 explorer cards (1 per stone_key), SparkleScore pillars, CloudFront WebP URLs and affiliate links.",
+        "wp_widgets": [
+          "diamond_cards_explorer"
+        ],
+        "related_artefacts": [
+          "diamond_image_webp"
+        ]
+      },
+      "diamond_image_webp": {
+        "schema_version": 1,
+        "page_level": "diamonds",
+        "producing_script": "I3.5_stone_images",
+        "gate": "site_entitlement",
+        "status": "planned",
+        "filename": "diamonds/images/{hash}.webp",
+        "description": "480x480 normalised WebP copy of curated loose diamond photos on Ringspo CloudFront, with clean shape-silhouette SVG fallback when unavailable.",
+        "wp_widgets": [
+          "diamond_cards_explorer"
+        ],
+        "related_artefacts": [
+          "diamond_cards_json"
+        ]
       }
     },
     "wp_widgets": {
@@ -26424,7 +26489,7 @@
         ]
       },
       "individual_listings": {
-        "description": "Individual diamond inventory cards (Phase 8 consumer advisory — not at launch).",
+        "description": "Superseded on aggregate pricing pages by PRD-025 (/us/diamonds/... shopping tree + diamonds_cta_bridge) so pricing pages remain pure market-index + banner-ad inventory.",
         "reads_artefacts": [],
         "page_levels": [
           "shape"
@@ -26603,6 +26668,27 @@
         "reads_artefacts": [],
         "page_levels": [
           "jewellery"
+        ]
+      },
+      "diamonds_cta_bridge": {
+        "description": "1-click contextual CTA banner on Ringspo pricing and size pages linking to the matching /{country}/diamonds/... shopping slice while keeping pricing pages banner-pure.",
+        "reads_artefacts": [],
+        "page_levels": [
+          "shape",
+          "all-shapes",
+          "diamond-type",
+          "top-level",
+          "size"
+        ]
+      },
+      "diamond_cards_explorer": {
+        "description": "Server-rendered loose diamond curated doors (Best Value, Largest Face-Up, Best Sparkle) + filterable <= 48 stone card grid on /{country}/diamonds/... pages.",
+        "reads_artefacts": [
+          "diamond_cards_json",
+          "diamond_image_webp"
+        ],
+        "page_levels": [
+          "diamonds"
         ]
       }
     }

@@ -25,6 +25,10 @@
         });
     }
 
+    function formatPct(value) {
+        return String(Number(Math.abs(value).toFixed(1)));
+    }
+
     function stoneLabel(shape, carat, length, width) {
         var parts = [carat + ' ct', formatShape(shape)];
         if (length > 0 && width > 0) {
@@ -129,7 +133,7 @@
 
         var diff = Math.abs(faceupA - faceupB);
         var smaller = Math.min(faceupA, faceupB);
-        var pctDiff = smaller > 0 ? Math.round((diff / smaller) * 100) : 0;
+        var pctDiff = smaller > 0 ? formatPct((diff / smaller) * 100) : '0';
 
         return '<div class="ldn-faceup-bars">'
             + bar(labelA, faceupA, pctA, colorA, 'a')
@@ -156,10 +160,10 @@
         }
         if (faceupA >= faceupB) {
             biggerLabel = labelA;
-            pct = Math.round(((faceupA - faceupB) / faceupB) * 100);
+            pct = formatPct(((faceupA - faceupB) / faceupB) * 100);
         } else {
             biggerLabel = labelB;
-            pct = Math.round(((faceupB - faceupA) / faceupA) * 100);
+            pct = formatPct(((faceupB - faceupA) / faceupA) * 100);
         }
         return '<p class="ldn-faceup-callout"><strong>' + escapeHtml(biggerLabel)
             + '</strong> faces up about <strong>' + pct + '% larger</strong>.</p>';

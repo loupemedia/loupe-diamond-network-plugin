@@ -861,10 +861,12 @@
 				+ '<a href="' + url + '" target="_blank" rel="sponsored noopener" class="ldn-jwl-card__img">'
 				+ (v.image ? '<img src="' + esc(v.image) + '" alt="' + esc(v.title) + '" width="400" height="400" decoding="async" loading="lazy" />' : '<span class="ldn-jwl-card__noimg">No photo from retailer</span>')
 				+ '</a>'
+				+ '<div class="ldn-jwl-card__badge">'
 				+ (p === 'above_typical'
-					? '<div class="ldn-jwl-card__badge"><button type="button" class="ldn-jwl-pill ldn-jwl-pill--why" aria-expanded="false" aria-describedby="' + esc(whyId) + '">' + esc(positionPillText(k, cb)) + '</button>'
-						+ '<span class="ldn-jwl-pill__tip" id="' + esc(whyId) + '" role="tooltip">' + esc(PREMIUM_WHY) + '</span></div>'
+					? '<button type="button" class="ldn-jwl-pill ldn-jwl-pill--why" aria-expanded="false" aria-describedby="' + esc(whyId) + '">' + esc(positionPillText(k, cb)) + '</button>'
+						+ '<span class="ldn-jwl-pill__tip" id="' + esc(whyId) + '" role="tooltip">' + esc(PREMIUM_WHY) + '</span>'
 					: '<span class="ldn-jwl-pill' + (p === 'typical' ? ' ldn-jwl-pill--typical' : '') + '">' + esc(positionPillText(k, cb)) + '</span>')
+				+ '</div>'
 				+ '</div>'
 				+ '<div class="ldn-jwl-card__priceline"><span class="ldn-jwl-card__price">' + usd(d.prices[cb]) + '</span>'
 				+ '<span class="ldn-jwl-meter" title="' + esc(label(k, cb)) + '"><span class="ldn-jwl-meter__band" style="left:' + loPct.toFixed(1) + '%;width:' + Math.max(2, hiPct - loPct).toFixed(1) + '%"></span>'

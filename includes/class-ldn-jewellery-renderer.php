@@ -1402,16 +1402,16 @@ final class LDN_Jewellery_Renderer {
             $out .= '<span class="ldn-jwl-card__noimg">No photo from retailer</span>';
         }
         $out .= '</a>';
+        $why_id = 'why-' . preg_replace('/[^a-zA-Z0-9_\-]/', '-', $key);
+        $out .= '<div class="ldn-jwl-card__badge">';
         if ($pos === 'above_typical') {
-            $why_id = 'why-' . preg_replace('/[^a-zA-Z0-9_\-]/', '-', $key);
-            $out .= '<div class="ldn-jwl-card__badge">'
-                . '<button type="button" class="ldn-jwl-pill ldn-jwl-pill--why" aria-expanded="false" aria-describedby="' . esc_attr($why_id) . '">'
+            $out .= '<button type="button" class="ldn-jwl-pill ldn-jwl-pill--why" aria-expanded="false" aria-describedby="' . esc_attr($why_id) . '">'
                 . esc_html($pos_txt) . '</button>'
-                . '<span class="ldn-jwl-pill__tip" id="' . esc_attr($why_id) . '" role="tooltip">Often fewer, larger diamonds or a heavier setting</span>'
-                . '</div>';
+                . '<span class="ldn-jwl-pill__tip" id="' . esc_attr($why_id) . '" role="tooltip">Often fewer, larger diamonds or a heavier setting</span>';
         } else {
             $out .= '<span class="ldn-jwl-pill' . ($pos === 'typical' ? ' ldn-jwl-pill--typical' : '') . '">' . esc_html($pos_txt) . '</span>';
         }
+        $out .= '</div>';
         $out .= '</div>';
 
         $out .= '<div class="ldn-jwl-card__priceline"><span class="ldn-jwl-card__price">' . esc_html($this->usd($price)) . '</span>'
