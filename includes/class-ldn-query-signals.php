@@ -46,7 +46,7 @@ final class LDN_Query_Signals {
      * streams XML and exits before the theme loads, so it has no title or
      * pagination state to correct.
      */
-    const ROUTES = array('price', 'size', 'calculator', 'jewellery');
+    const ROUTES = array('price', 'size', 'calculator', 'jewellery', 'diamonds');
 
     /**
      * Hook the corrections.
@@ -144,6 +144,18 @@ final class LDN_Query_Signals {
                 $renderer = new LDN_Jewellery_Renderer($plugin->data_fetcher(), $plugin->config());
                 return self::with_site_name(
                     $renderer->page_title($ctx, is_array($summary) ? $summary : array())
+                );
+            }
+        }
+
+        $diamonds = method_exists($plugin, 'diamonds_dispatcher') ? $plugin->diamonds_dispatcher() : null;
+        if ($diamonds instanceof LDN_Diamonds_Dispatcher) {
+            $ctx = $diamonds->current_context();
+            if ($ctx instanceof LDN_Page_Context) {
+                $payload = $diamonds->primary_data();
+                $renderer = new LDN_Diamonds_Renderer($plugin->data_fetcher(), $plugin->config());
+                return self::with_site_name(
+                    $renderer->page_title($ctx, is_array($payload) ? $payload : array())
                 );
             }
         }

@@ -54,6 +54,46 @@
 	background: var(--ldn-background, #fff);
 }
 
+/* GeneratePress and other themes set global `button { padding; font-size }` that
+   outrank component classes. Re-declare on the class hook, same pattern as
+   `.ldn-grade-slider__stop` in shared.css. */
+.ldn-jewellery-page--explorer button.ldn-jwl-seg__btn {
+	font-family: inherit;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.2;
+	min-height: 0;
+	padding: 0.3rem 0.75rem;
+}
+
+.ldn-jewellery-page--explorer button.ldn-jwl-metal {
+	font-family: inherit;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.2;
+	min-height: 0;
+	padding: 0.3rem 0.65rem 0.3rem 0.45rem;
+}
+
+.ldn-jewellery-page--explorer button.ldn-jwl-wt {
+	font-family: inherit;
+	font-size: 0.58rem;
+	font-weight: 600;
+	line-height: 1.15;
+	min-height: 0;
+	padding: 0.1rem 0.32rem;
+}
+
+.ldn-jewellery-page--explorer button.ldn-jwl-pill,
+.ldn-jewellery-page--explorer button.ldn-jwl-pill--why {
+	font-family: inherit;
+	font-size: 0.64rem;
+	font-weight: 600;
+	line-height: 1.2;
+	min-height: 0;
+	padding: 2px 7px;
+}
+
 .ldn-price-page.ldn-jewellery-page--explorer {
 	max-width: none;
 	padding: 0;

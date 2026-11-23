@@ -73,6 +73,7 @@ final class LDN_S3_Key_Resolver {
         'jewellery_trend_json'          => 'jewellery-trend.json',
         'jewellery_copy_json'           => 'jewellery-copy.json',
         'jewellery_explorer_json'       => 'jewellery-explorer.json',
+        'diamond_cards_json'            => 'diamond-cards.json',
     );
 
     /**
@@ -153,6 +154,9 @@ final class LDN_S3_Key_Resolver {
         }
         if ($ctx->module === 'jewellery') {
             return $this->jewellery_folder_prefix($ctx);
+        }
+        if ($ctx->module === 'diamonds') {
+            return $this->diamonds_folder_prefix($ctx);
         }
 
         $country = $ctx->country_code;
@@ -289,6 +293,34 @@ final class LDN_S3_Key_Resolver {
             '{jewelry_path}' => trim($ctx->jewelry_path, '/'),
         );
         return rtrim(strtr((string) $site['s3']['jewellery_prefix'], $replacements), '/') . '/';
+    }
+
+    /**
+     * Loose-diamonds shopping module folder prefix via `s3.diamonds_prefix`
+     * (never falls back to `s3.graph_prefix`).
+     *
+     * @param LDN_Page_Context $ctx
+     * @return string|null
+     */
+    private function diamonds_folder_prefix(LDN_Page_Context $ctx) {
+        $site = $this->config->get_site($ctx->site_id);
+        if ($site === null || empty($site['s3']['diamonds_prefix'])) {
+            return null;
+        }
+        if ($ctx->country_code === ''
+            || $ctx->diamond_type === null
+            || $ctx->diamond_path === null
+            || $ctx->diamond_path === ''
+        ) {
+            return null;
+        }
+        $replacements = array(
+            '{country}'      => $ctx->country_code,
+            '{diamond_type}' => $ctx->diamond_type,
+            '{diamond_path}' => trim($ctx->diamond_path, '/'),
+            '{site_id}'      => $ctx->site_id,
+        );
+        return rtrim(strtr((string) $site['s3']['diamonds_prefix'], $replacements), '/') . '/';
     }
 
     // =========================================================================

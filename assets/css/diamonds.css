@@ -1,0 +1,177 @@
+/**
+ * Loose diamond shopping card pages (PRD-025 CP 166).
+ *
+ * Consumes content-profile tokens (`--ldn-*` and family chrome variables) with
+ * zero hardcoded brand hex literals and zero 1px tinted colour boxes.
+ *
+ * Mobile layout (`320px-400px` included):
+ *   - Hero summary stats flow into a 2-column `minmax(0, 1fr)` grid (`1-column`
+ *     below `350px`).
+ *   - Stone cards flow from 3 columns (desktop) -> 2 columns (tablet) -> 1
+ *     column (`minmax(0, 1fr)`) on phone (`<=640px`) with `min-width: 0` and
+ *     wrapping price/measurement strings.
+ */
+
+.ldn-page-shell:has(.ldn-diamonds-page) {
+	width: 100%;
+	margin-left: 0;
+	margin-right: 0;
+	min-height: 0;
+}
+
+.ldn-price-page.ldn-diamonds-page {
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: 0 1.25rem 3rem;
+}
+
+.ldn-diamonds-hero .ldn-diamonds-lede {
+	margin: 0.35rem 0 1.25rem;
+	max-width: 68ch;
+	font-size: 1rem;
+	line-height: 1.55;
+	color: inherit;
+}
+
+.ldn-diamonds-hero .ldn-hero-stats {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 0.75rem;
+	margin: 0;
+}
+
+.ldn-diamonds-hero .ldn-hero-stat {
+	min-width: 0;
+}
+
+.ldn-diamonds-section {
+	padding: 2rem 0;
+}
+
+.ldn-diamonds-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1.25rem;
+	margin: 1.25rem 0 0;
+}
+
+.ldn-stone-card {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	background: var(--ldn-surface, white);
+	color: var(--ldn-text, currentColor);
+	border-radius: var(--ringspo-card-radius, 12px);
+	box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+}
+
+.ldn-stone-card__media {
+	position: relative;
+	aspect-ratio: 1 / 1;
+	background: color-mix(in srgb, var(--ldn-text, black) 4%, white);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.ldn-stone-card__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.ldn-stone-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+	padding: 1rem 1.1rem 1.15rem;
+	min-width: 0;
+	flex: 1;
+}
+
+.ldn-stone-card__top {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 0.5rem;
+	min-width: 0;
+	flex-wrap: wrap;
+}
+
+.ldn-stone-card__retailer {
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ldn-text-muted, currentColor);
+}
+
+.ldn-stone-card__price {
+	font-family: var(--ldn-font-title, Georgia, serif);
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--ldn-text, currentColor);
+}
+
+.ldn-stone-card__title {
+	margin: 0;
+	font-size: 0.98rem;
+	font-weight: 700;
+	line-height: 1.35;
+}
+
+.ldn-stone-card__specs {
+	font-size: 0.82rem;
+	line-height: 1.45;
+	color: var(--ldn-text-muted, currentColor);
+}
+
+.ldn-stone-card__cta {
+	margin-top: auto;
+	padding-top: 0.65rem;
+}
+
+.ldn-stone-card__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding: 0.6rem 0.9rem;
+	border-radius: 8px;
+	background: var(--ldn-primary, black);
+	color: white;
+	font-size: 0.86rem;
+	font-weight: 600;
+	text-decoration: none;
+	box-sizing: border-box;
+}
+
+@media (max-width: 960px) {
+	.ldn-diamonds-hero .ldn-hero-stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.ldn-diamonds-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 640px) {
+	.ldn-price-page.ldn-diamonds-page {
+		padding: 0 0.9rem 2.25rem;
+	}
+
+	.ldn-diamonds-grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 1rem;
+	}
+}
+
+@media (max-width: 350px) {
+	.ldn-diamonds-hero .ldn-hero-stats {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

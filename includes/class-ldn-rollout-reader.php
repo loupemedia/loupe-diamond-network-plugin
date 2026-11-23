@@ -97,7 +97,7 @@ final class LDN_Rollout_Reader {
     /**
      * Known module identifiers. Used only for input normalisation/validation.
      */
-    const MODULES = array('price', 'size', 'standard_pages');
+    const MODULES = array('price', 'size', 'jewellery', 'diamonds', 'standard_pages');
 
     /**
      * This site's id (resolved upstream from the request domain).

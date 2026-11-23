@@ -171,6 +171,11 @@ final class LDN_Seo_Bridge {
             return true;
         }
 
+        $diamonds = method_exists($plugin, 'diamonds_dispatcher') ? $plugin->diamonds_dispatcher() : null;
+        if ($diamonds instanceof LDN_Diamonds_Dispatcher && $diamonds->current_context() instanceof LDN_Page_Context) {
+            return true;
+        }
+
         return false;
     }
 }

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.46.0] - 2026-11-23
+
+- **Jewellery publish switch.** Finished jewellery routes, the jewellery sitemap and the Ringspo "Diamond Jewelry Prices" menu item follow the hub `jewellery` flag only. US price being on no longer publishes them. Allowed markets stay `jewellery_module.rollout_countries`.
+- **Diamond selection publish switch.** `/{country}/diamonds/` routes follow the hub `diamonds` flag only. US price being on no longer publishes them. Allowed markets stay `loose_diamonds_module.rollout_countries`.
+
+## [0.45.0] - 2026-11-22
+
+- **Loose diamond shopping card route tree, S3 fetcher and `CollectionPage` JSON-LD (PRD-025 CP 166).** Added `LDN_Diamonds_Module`, `LDN_Diamonds_Router`, `LDN_Diamonds_Dispatcher` and `LDN_Diamonds_Renderer` serving config-driven `/{country}/diamonds/...` routes (`root`, `type`, `shape`, `carat`, `{carat}/{shape}` and approved modifiers), gated by `ops.page_url_registry` (`module='diamonds'`) and cached `diamond-cards.json` under `s3.diamonds_prefix` with zero SparkleScore/Facet Intelligence runtime calls and zero display ad slots or ad-tracking scripts.
+
+## [0.44.7] — 2026-11-22
+
+- **Ringspo jewellery explorer vs theme buttons.** Re-declare font size and padding on `.ldn-jwl-seg__btn`, `.ldn-jwl-metal`, `.ldn-jwl-wt` and `.ldn-jwl-pill` under `.ldn-jewellery-page--explorer` so GeneratePress global `button` rules cannot inflate filter chips and card badges after 0.44.5 density tweaks.
+
 ## [0.44.6] — 2026-11-22
 
 - **Size comparison SEO/AEO hero copy, `<title>` and percentage/dimension agreement.** Static `/diamond-size/compare/{a}-vs-{b}/` pages now emit an answer-first SEO/AEO lead inside `<header class="ldn-hero-band">` and `<meta name="description">` (`"A 1 carat round diamond looks 3.6% larger face-up than a 1 carat emerald cut diamond, at 6.37 × 6.41 mm (32.07 mm²) versus 6.66 × 4.76 mm (30.96 mm²), based on measurements of 125,956 real diamonds."`), include `-cut` shape labels and `Diamond Size` in `<title>` (`1 Carat Round vs 1 Carat Emerald Cut Diamond Size`), and omit the duplicate `.ldn-size-comparison-callout` section below while preserving alternating white/purple bands (`ldn-section--tint` / `ldn-section--plain`). Face-up `% larger` and the `Face-up overlay` `Difference:` bar (`LDN_Size_Renderer` and `size-faceted-overlay.js`) both compute `abs(fa - fb) / min(fa, fb) * 100` to at most 1 decimal place (`3.6%` instead of `3.5%` vs `4%`), and stone column `Measurements` / `Chart ideal size` rows use `length × width` order matching the legend and `Side-by-side measurements` table.

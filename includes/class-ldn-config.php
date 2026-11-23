@@ -841,6 +841,62 @@ final class LDN_Config {
     }
 
     /**
+     * Loose-diamonds XML sitemap path for a site (`/{country}/diamonds/sitemap.xml`).
+     *
+     * @param string $site_id
+     * @return string|null
+     */
+    public function diamonds_sitemap_path($site_id) {
+        $structure = $this->get_url_structure($site_id);
+        if (!is_array($structure) || empty($structure['diamonds_level_sitemap'])) {
+            return null;
+        }
+        return (string) $structure['diamonds_level_sitemap'];
+    }
+
+    /**
+     * Allowed country codes for the loose-diamonds shopping module (PRD-025).
+     *
+     * Requires `loose_diamonds_module.enabled` on the site config and reads the
+     * entitled country list from `entitlements.sites.{site_id}.pages.diamonds.countries`.
+     *
+     * @param string $site_id
+     * @return string[]
+     */
+    public function diamonds_rollout_countries($site_id) {
+        $site = $this->get_site($site_id);
+        if (!is_array($site)
+            || empty($site['loose_diamonds_module'])
+            || !is_array($site['loose_diamonds_module'])
+            || empty($site['loose_diamonds_module']['enabled'])
+        ) {
+            return array();
+        }
+        $ent = $this->get_entitlements();
+        $countries = isset($ent['sites'][$site_id]['pages']['diamonds']['countries'])
+            && is_array($ent['sites'][$site_id]['pages']['diamonds']['countries'])
+            ? $ent['sites'][$site_id]['pages']['diamonds']['countries']
+            : array();
+        $out = array();
+        foreach ($countries as $code) {
+            if (is_string($code) && trim($code) !== '') {
+                $out[] = strtolower(trim($code));
+            }
+        }
+        return array_values(array_unique($out));
+    }
+
+    /**
+     * Public CloudFront origin for hosted loose-diamond WebP photos, or ''.
+     *
+     * @param string $site_id
+     * @return string
+     */
+    public function diamonds_image_base_url($site_id) {
+        return $this->jewellery_image_base_url($site_id);
+    }
+
+    /**
      * Public retailer display names keyed by retailer code (from config/retailers.yaml).
      *
      * @return array<string, string>

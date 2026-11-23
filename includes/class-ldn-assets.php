@@ -35,6 +35,7 @@ final class LDN_Assets {
 		'ldn-type-carat-lookup',
 		'ldn-nat-lab-toggle',
 		'ldn-jewellery-page',
+		'ldn-diamonds-page',
 		'ldn-analytics',
 	);
 
@@ -76,12 +77,14 @@ final class LDN_Assets {
 		$excluded[] = 'ldn-type-carat-lookup';
 		$excluded[] = 'ldn-nat-lab-toggle';
 		$excluded[] = 'ldn-jewellery-page';
+		$excluded[] = 'ldn-diamonds-page';
 		$excluded[] = 'ldn-analytics';
 		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/price-calculator';
 		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/size-';
 		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/type-carat-lookup';
 		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/nat-lab-toggle';
 		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/jewellery-page';
+		$excluded[] = '/loupe-diamond-network(?:-plugin)?/assets/js/diamonds-page';
 		return $excluded;
 	}
 
@@ -109,6 +112,8 @@ final class LDN_Assets {
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/nat-lab-toggle.js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/jewellery-page.js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/jewellery-page.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/diamonds-page.js';
+		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/diamonds-page.js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network-plugin/assets/js/analytics.js';
 		$excluded[] = '/wp-content/plugins/loupe-diamond-network/assets/js/analytics.js';
 		return $excluded;
@@ -174,7 +179,7 @@ final class LDN_Assets {
 			$version
 		);
 
-		if ($ctx->module !== 'jewellery') {
+		if (!in_array($ctx->module, array('jewellery', 'diamonds'), true)) {
 			wp_enqueue_script(
 				'ldn-chart-init',
 				$base_url . 'assets/js/chart-init.js',
@@ -192,28 +197,31 @@ final class LDN_Assets {
 			);
 		}
 
-		wp_enqueue_script(
-			'ldn-ad-tracking',
-			$base_url . 'assets/js/ad-tracking.js',
-			array(),
-			$version,
-			true
-		);
+		// PRD-025 Seed-vs-Sell split: /diamonds/ carries zero display ads or ad tracking.
+		if ($ctx->module !== 'diamonds') {
+			wp_enqueue_script(
+				'ldn-ad-tracking',
+				$base_url . 'assets/js/ad-tracking.js',
+				array(),
+				$version,
+				true
+			);
 
-		$track_url = '';
-		if (class_exists('LDN_Plugin')) {
-			$ad_system = LDN_Plugin::instance()->ad_system();
-			if ($ad_system !== null) {
-				$track_url = $ad_system->tracker()->track_endpoint_url();
+			$track_url = '';
+			if (class_exists('LDN_Plugin')) {
+				$ad_system = LDN_Plugin::instance()->ad_system();
+				if ($ad_system !== null) {
+					$track_url = $ad_system->tracker()->track_endpoint_url();
+				}
 			}
+			wp_localize_script(
+				'ldn-ad-tracking',
+				'ldnAdTracking',
+				array(
+					'trackUrl' => $track_url,
+				)
+			);
 		}
-		wp_localize_script(
-			'ldn-ad-tracking',
-			'ldnAdTracking',
-			array(
-				'trackUrl' => $track_url,
-			)
-		);
 
 		if ($config->size_url_layout($ctx->site_id) === 'shape_first'
 			&& in_array($ctx->page_level, array('size-comparison', 'size-comparison-tool', 'size-shape-hub'), true)
@@ -404,6 +412,27 @@ final class LDN_Assets {
 						: array(),
 				)
 			);
+		}
+
+		if ($ctx->module === 'diamonds') {
+			if (is_readable($css_dir . 'diamonds.css')) {
+				wp_enqueue_style(
+					'ldn-diamonds',
+					$base_url . 'assets/css/diamonds.css',
+					$deps,
+					$version
+				);
+			}
+			$js_dir = (defined('LDN_PLUGIN_DIR') ? LDN_PLUGIN_DIR : '') . 'assets/js/';
+			if (is_readable($js_dir . 'diamonds-page.js')) {
+				wp_enqueue_script(
+					'ldn-diamonds-page',
+					$base_url . 'assets/js/diamonds-page.js',
+					array(),
+					$version,
+					true
+				);
+			}
 		}
 	}
 

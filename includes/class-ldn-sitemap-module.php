@@ -193,9 +193,7 @@ final class LDN_Sitemap_Module {
                 if (!in_array($country, $allowed, true)) {
                     continue;
                 }
-                if ($this->rollout->is_enabled($country, 'jewellery')
-                    || $this->rollout->is_enabled($country, 'price')
-                ) {
+                if ($this->rollout->is_enabled($country, 'jewellery')) {
                     $out[] = $country;
                 }
             }

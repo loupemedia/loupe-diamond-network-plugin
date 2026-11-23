@@ -6,7 +6,7 @@
  * `url_structures.yaml` (`jewellery_*` and `jewellery_lab_*`), gated on:
  *   1. `jewellery_summary_json` entitlement for this site (`site_content_entitlements.yaml`)
  *   2. `jewellery_module.rollout_countries` on the site config (`['us']` in v1)
- *   3. Rollout reader live status (`jewellery` or `price` enabled for that country)
+ *   3. Rollout reader: `jewellery` is on for that country (price being on does not publish jewellery)
  *
  * Priority 5 on `init` ensures dedicated jewellery prefixes (`/us/jewelry`,
  * `/us/earrings/...`, `/us/lab-grown/...`) register ahead of `LDN_Router`
@@ -127,9 +127,9 @@ final class LDN_Jewellery_Router {
     /**
      * Countries enabled for finished jewellery on this install.
      *
-     * Intersects `jewellery_module.rollout_countries` (US-only in v1) with the
-     * rollout reader's live countries so Phase 2 markets (`/uk/`, `/au/`, `/ca/`)
-     * never publish jewellery routes prematurely.
+     * Intersects `jewellery_module.rollout_countries` (US-only in v1) with
+     * countries whose hub `jewellery` flag is on. Price being on does not
+     * publish these routes.
      *
      * @return string[]
      */
@@ -150,9 +150,7 @@ final class LDN_Jewellery_Router {
             if (!in_array($code, $allowed, true)) {
                 continue;
             }
-            if ($this->rollout->is_enabled($code, 'jewellery')
-                || $this->rollout->is_enabled($code, 'price')
-            ) {
+            if ($this->rollout->is_enabled($code, 'jewellery')) {
                 $out[] = $code;
             }
         }

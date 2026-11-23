@@ -1,6 +1,6 @@
 {
-  "version": "dc3ffa19",
-  "generated_at": "2026-11-22T09:46:56.810683+00:00",
+  "version": "78c8256a",
+  "generated_at": "2026-11-23T11:02:26.341107+00:00",
   "sites": {
     "10caratdiamondring": {
       "site_id": "10caratdiamondring",
@@ -5676,10 +5676,13 @@
         "pool_id": "us_ringspo_v1"
       },
       "loose_diamonds_module": {
+        "enabled": true,
         "rollout_countries": [
           "us"
         ],
         "pool_id": "us_ringspo_loose_v1",
+        "curation_profile": "balanced",
+        "fi_tenant_id": "ringspo-us",
         "pools_by_country": {
           "us": "us_ringspo_loose_v1"
         }
@@ -10323,6 +10326,9 @@
                         "countries": [
                           "us"
                         ],
+                        "gate": {
+                          "module": "jewellery"
+                        },
                         "target": {
                           "kind": "generated",
                           "page_family": "jewellery_hub"
@@ -26347,7 +26353,7 @@
         "page_level": "diamonds",
         "producing_script": "I3_stone_card_artefacts",
         "gate": "site_entitlement",
-        "status": "planned",
+        "status": "active",
         "filename": "diamond-cards.json",
         "description": "Server-rendered loose diamond shopping payload: route benchmark stats, Best Value / Largest Face-Up / Best Sparkle curated doors, deduplicated <= 48 explorer cards (1 per stone_key), SparkleScore pillars, CloudFront WebP URLs and affiliate links.",
         "wp_widgets": [
@@ -26360,11 +26366,11 @@
       "diamond_image_webp": {
         "schema_version": 1,
         "page_level": "diamonds",
-        "producing_script": "I3.5_stone_images",
+        "producing_script": "I3.5_stone_card_images",
         "gate": "site_entitlement",
-        "status": "planned",
+        "status": "active",
         "filename": "diamonds/images/{hash}.webp",
-        "description": "480x480 normalised WebP copy of curated loose diamond photos on Ringspo CloudFront, with clean shape-silhouette SVG fallback when unavailable.",
+        "description": "600x600 normalised WebP copy of curated loose diamond photos on CloudFront, with clean shape-silhouette SVG fallback when unavailable.",
         "wp_widgets": [
           "diamond_cards_explorer"
         ],
@@ -27147,11 +27153,15 @@
     "rollout_modules": [
       "price",
       "size",
+      "jewellery",
+      "diamonds",
       "standard_pages"
     ],
     "requires_standard_pages": [
       "price",
-      "size"
+      "size",
+      "jewellery",
+      "diamonds"
     ],
     "precondition_module": "standard_pages",
     "legal_entity": {

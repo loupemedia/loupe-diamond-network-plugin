@@ -4,7 +4,7 @@
  *
  * Test intent: US natural and lab-grown jewellery paths resolve through LDN_Jewellery_Router
  * and LDN_Jewellery_Dispatcher without colliding with Diamond Advisors flat_leaf loose-diamond
- * routes, while non-US countries and unentitled sites compile zero jewellery rewrite rules.
+ * routes, while non-US countries, unentitled sites and a price-only rollout compile zero jewellery rewrite rules.
  * Would fail if: lab-grown rules registered after natural rules, category regex matched
  * loose-diamond slugs (/us/round-cut/, /us/1-carat/), or non-US countries matched in v1.
  *
@@ -46,14 +46,23 @@ if (!class_exists('LDN_Rollout_Reader')) {
     class LDN_Rollout_Reader {
         /** @var string[] */
         private $countries;
-        public function __construct(array $countries) {
+        /** @var string[]|null */
+        private $modules;
+        public function __construct(array $countries, ?array $modules = null) {
             $this->countries = $countries;
+            $this->modules = $modules;
         }
         public function enabled_countries($module = 'price') {
             return $this->countries;
         }
         public function is_enabled($country_code, $module = 'price') {
-            return in_array(strtolower((string) $country_code), $this->countries, true);
+            if (!in_array(strtolower((string) $country_code), $this->countries, true)) {
+                return false;
+            }
+            if ($this->modules === null) {
+                return true;
+            }
+            return in_array((string) $module, $this->modules, true);
         }
     }
 }
@@ -118,6 +127,24 @@ $rs_rules = $rs_jwl_router->build_rewrite_rules();
 $rs_dispatcher = new LDN_Jewellery_Dispatcher('ringspo', $config, new LDN_Data_Fetcher());
 
 check(!empty($rs_rules), 'ringspo compiles jewellery rewrite rules');
+
+$price_only = new LDN_Jewellery_Router(
+    'ringspo',
+    new LDN_Rollout_Reader(array('us'), array('price')),
+    $config,
+    $artefacts
+);
+check(
+    $price_only->build_rewrite_rules() === array(),
+    'price on without the jewellery tick compiles zero jewellery rules'
+);
+$jewellery_on = new LDN_Jewellery_Router(
+    'ringspo',
+    new LDN_Rollout_Reader(array('us'), array('jewellery')),
+    $config,
+    $artefacts
+);
+check(!empty($jewellery_on->build_rewrite_rules()), 'jewellery tick compiles ringspo rules');
 
 $rs_hub_vars = match_rewrite($rs_rules, '/us/diamond-jewelry-prices/');
 $rs_hub_ctx = is_array($rs_hub_vars) ? $rs_dispatcher->build_context($rs_hub_vars) : null;

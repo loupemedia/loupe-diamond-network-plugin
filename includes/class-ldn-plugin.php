@@ -517,6 +517,18 @@ final class LDN_Plugin {
     }
 
     /**
+     * Loose-diamonds shopping module dispatcher for the resolved site, or null when off-network.
+     *
+     * @return LDN_Diamonds_Dispatcher|null
+     */
+    public function diamonds_dispatcher() {
+        if (!class_exists('LDN_Diamonds_Module')) {
+            return null;
+        }
+        return LDN_Diamonds_Module::dispatcher();
+    }
+
+    /**
      * Clear memoised site_id and site-dependent services (after admin site change).
      *
      * @return void

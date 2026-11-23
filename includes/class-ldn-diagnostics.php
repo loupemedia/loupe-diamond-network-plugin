@@ -92,6 +92,8 @@ final class LDN_Diagnostics {
             case 'size-comparison-tool':
             case 'size-methodology':
                 return $size_core;
+            case 'diamonds':
+                return array('diamond_cards_json');
             default:
                 return $common;
         }
@@ -109,6 +111,9 @@ final class LDN_Diagnostics {
         }
         if (isset(LDN_Size_Dispatcher::PRIMARY_ARTEFACT[$page_level])) {
             return LDN_Size_Dispatcher::PRIMARY_ARTEFACT[$page_level];
+        }
+        if ($page_level === 'diamonds' && class_exists('LDN_Diamonds_Dispatcher')) {
+            return LDN_Diamonds_Dispatcher::PRIMARY_ARTEFACT;
         }
         return null;
     }

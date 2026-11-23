@@ -34,6 +34,8 @@ final class LDN_Page_Registry {
 
     const MODULE_JEWELLERY = 'jewellery';
 
+    const MODULE_DIAMONDS = 'diamonds';
+
     /** @var string[] Modules included in the price sitemap child. */
     const PRICE_SITEMAP_MODULES = array(self::MODULE_PRICING, self::MODULE_CALCULATOR);
 
@@ -42,6 +44,9 @@ final class LDN_Page_Registry {
 
     /** @var string[] Modules included in the jewellery sitemap child. */
     const JEWELLERY_SITEMAP_MODULES = array(self::MODULE_JEWELLERY);
+
+    /** @var string[] Modules included in the loose-diamonds sitemap child. */
+    const DIAMONDS_SITEMAP_MODULES = array(self::MODULE_DIAMONDS);
 
     /**
      * Whether a registry hierarchy_level belongs in the price sitemap.
@@ -223,5 +228,63 @@ final class LDN_Page_Registry {
         }
         pg_free_result($result);
         return $rows;
+    }
+
+    /**
+     * Check whether a canonical URL path is registered and indexable for `(site_id, module)`
+     * in `ops.page_url_registry` (transient-cached per site + module).
+     *
+     * Returns `true` when registered, `false` when absent, or `null` when no Postgres
+     * connection is configured on this runtime (e.g. local S3-only preview harness).
+     *
+     * @param string $site_id
+     * @param string $url_path
+     * @param string $module
+     * @return bool|null
+     */
+    public function is_registered_module_path($site_id, $url_path, $module = self::MODULE_DIAMONDS) {
+        $norm = '/' . trim((string) $url_path, '/');
+        if ($norm === '//') {
+            $norm = '/';
+        }
+
+        $cache_key = self::TRANSIENT_PREFIX . 'paths_' . md5((string) $site_id . '|' . (string) $module);
+        $cached = get_transient($cache_key);
+        if (is_array($cached)) {
+            return isset($cached[$norm]);
+        }
+
+        if (!class_exists('LDN_Db')) {
+            return null;
+        }
+        $conn = LDN_Db::connection();
+        if ($conn === null) {
+            return null;
+        }
+
+        $sql = "
+            SELECT url_path
+            FROM ops.page_url_registry
+            WHERE site_id = \$1
+              AND module = \$2
+              AND is_indexable = TRUE
+        ";
+        $result = @pg_query_params($conn, $sql, array((string) $site_id, (string) $module));
+        if ($result === false) {
+            LDN_Plugin::debug_log('Page_Registry', 'path lookup failed - ' . pg_last_error($conn));
+            return null;
+        }
+
+        $map = array();
+        while ($row = pg_fetch_assoc($result)) {
+            if (!is_array($row) || empty($row['url_path'])) {
+                continue;
+            }
+            $p = '/' . trim((string) $row['url_path'], '/');
+            $map[$p] = true;
+        }
+        pg_free_result($result);
+        set_transient($cache_key, $map, self::TRANSIENT_TTL);
+        return isset($map[$norm]);
     }
 }

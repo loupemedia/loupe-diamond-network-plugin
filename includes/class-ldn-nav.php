@@ -66,7 +66,7 @@ final class LDN_Nav {
      * A navigation-specific vocabulary would let the hub be off while the menu
      * believed it was on.
      */
-    const GATE_MODULES = array('price', 'size', 'standard_pages');
+    const GATE_MODULES = array('price', 'size', 'jewellery', 'diamonds', 'standard_pages');
 
     /**
      * Synthetic item IDs start high so they cannot collide with real post IDs in
@@ -248,6 +248,20 @@ final class LDN_Nav {
              * the one size rolled out to. Same gate trait-ldn-navigation.php uses for
              * its explore links, so the menu and the on-page links agree.
              */
+            if ($module === 'diamonds' && $live && method_exists($this->config, 'diamonds_rollout_countries')) {
+                $allowed = $this->config->diamonds_rollout_countries($this->site_id);
+                if ($allowed !== array() && !in_array(strtolower((string) $country), $allowed, true)) {
+                    $live = false;
+                }
+            }
+
+            if ($module === 'jewellery' && $live && method_exists($this->config, 'jewellery_rollout_countries')) {
+                $allowed = $this->config->jewellery_rollout_countries($this->site_id);
+                if ($allowed !== array() && !in_array(strtolower((string) $country), $allowed, true)) {
+                    $live = false;
+                }
+            }
+
             if ($module === 'size' && $live) {
                 $rollout_country = $this->config->size_rollout_country($this->site_id);
                 if ($rollout_country !== null && $rollout_country !== ''

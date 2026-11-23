@@ -1050,6 +1050,12 @@ trait LDN_Trait_Nav_Items {
         if ($module === 'price') {
             return !empty($structure['level_1']);
         }
+        if ($module === 'jewellery') {
+            return !empty($structure['jewellery_level_1']);
+        }
+        if ($module === 'diamonds') {
+            return !empty($structure['diamonds_level_1']);
+        }
         if ($module === 'standard_pages') {
             // Legal chrome is not a URL-structure family. The hub ON/OFF is
             // the gate; this check only asks whether the site could publish it.
